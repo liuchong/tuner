@@ -5,7 +5,8 @@ edition = "2024"
 description = "跨平台调音器+节拍器共享核心（UniFFI 导出）"
 
 [lib]
-crate-type = ["cdylib", "rlib"]
+# cdylib：Android (.so)；staticlib：iOS (.a)；rlib：Rust 侧引用
+crate-type = ["cdylib", "staticlib", "rlib"]
 
 # cli 特性仅供 src/bin/uniffi-bindgen.rs 使用（生成绑定用）；
 # cdylib 不引用 cli 代码，链接时不会包含

@@ -53,4 +53,17 @@ XML
 # Play Store 512 图标
 rsvg-convert -w 512 -h 512 "$DESIGN/icon-full.svg" -o "$DESIGN/playstore-icon.png"
 
+# iOS AppIcon（1024 全出血方形）
+IOS_ASSET="$ROOT/ios/Tuner/Assets.xcassets/AppIcon.appiconset"
+mkdir -p "$IOS_ASSET"
+rsvg-convert -w 1024 -h 1024 "$DESIGN/icon-ios.svg" -o "$IOS_ASSET/AppIcon-1024.png"
+cat > "$IOS_ASSET/Contents.json" <<'JSON'
+{
+  "images" : [
+    { "filename" : "AppIcon-1024.png", "idiom" : "universal", "platform" : "ios", "size" : "1024x1024" }
+  ],
+  "info" : { "author" : "xcode", "version" : 1 }
+}
+JSON
+
 echo "图标资源已生成"
