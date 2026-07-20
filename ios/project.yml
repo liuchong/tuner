@@ -1,0 +1,49 @@
+name: Tuner
+options:
+  bundleIdPrefix: com.liuchong.tuner
+  deploymentTarget:
+    iOS: "17.0"
+targets:
+  Tuner:
+    type: application
+    platform: iOS
+    sources:
+      - Tuner
+      - TunerCore/Sources/TunerCore/tuner_core.swift
+    dependencies:
+      - framework: TunerCore/tuner_core.xcframework
+        embed: false
+    info:
+      path: Tuner/Info.plist
+      properties:
+        UILaunchScreen: {}
+        NSMicrophoneUsageDescription: "调音需要访问麦克风以检测音高"
+        UIBackgroundModes:
+          - audio
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.liuchong.tuner
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: DXBQ96GC5Q
+        SWIFT_VERSION: "6.0"
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
+        MARKETING_VERSION: "0.1.0"
+        # UniFFI FFI 模块（生成的 modulemap）
+        OTHER_SWIFT_FLAGS: -Xcc -fmodule-map-file=$(SRCROOT)/TunerCore/Sources/TunerCore/tuner_coreFFI.modulemap
+  TunerTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - TunerTests
+    dependencies:
+      - target: Tuner
+    settings:
+      base:
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Tuner.app/Tuner
+        OTHER_SWIFT_FLAGS: -Xcc -fmodule-map-file=$(SRCROOT)/TunerCore/Sources/TunerCore/tuner_coreFFI.modulemap

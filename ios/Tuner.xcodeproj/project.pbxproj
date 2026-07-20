@@ -1,0 +1,620 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0203C88E326B9F0D9C64D063 /* TickSounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F42CC6A6BABE1A595FC87A6 /* TickSounds.swift */; };
+		0A614A9180846A484DE6DA6B /* MetronomeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EF360B5810D185F59E9516 /* MetronomeViewModelTests.swift */; };
+		0B66942CCF62B1D5B713F3AE /* TunerViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86C6402B0CFE0A23F82A3D2B /* TunerViewModelTests.swift */; };
+		0ED8D333D375E4F9E05F0FDB /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B67029BF45674DE441D2552C /* SettingsView.swift */; };
+		138108E2B250DDD6A4456C33 /* StatusChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9E335ACC4755F93A02E7AF /* StatusChip.swift */; };
+		2237FC010024AF0E1038C399 /* TunerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A2EF8E9AF6C4D166022D99 /* TunerViewModel.swift */; };
+		233F888933D78DCF23F9AA03 /* TunerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7649DED303EC43E58FEC51D1 /* TunerApp.swift */; };
+		2A453C02CF276ED8DB937E78 /* AudioCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0C192CA91D1CFC263F818C8 /* AudioCapture.swift */; };
+		33568B1A15813B17834E7D50 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 318DD67385653335E26AE412 /* Haptics.swift */; };
+		3838F706ACD7546E0D81D224 /* MetronomePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C813093B1E0F93D3E4337EF9 /* MetronomePlayer.swift */; };
+		467B64BAE840B6BEE20E929C /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20EE2ACD28DF49C08EC58815 /* SettingsStore.swift */; };
+		47944205925036A6FC52EFE2 /* TunerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6684B2AFF71DABC61E97E6D /* TunerView.swift */; };
+		6D155235918CBCDCE3DA45E0 /* tuner_core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004B4DE8BE119AE667375088 /* tuner_core.swift */; };
+		71553725A7F16B62DF70C406 /* MetronomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = D08126269CCD414BA27BB247 /* MetronomeScreen.swift */; };
+		72F914FE18E8E6B51A8246C2 /* InstrumentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 183AE1761E63450CDFD68FAA /* InstrumentViewModel.swift */; };
+		89C93AE5E70E16E44769A1FB /* MetronomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D57767F2CC337FED304EA33B /* MetronomeViewModel.swift */; };
+		8EA959BDA5A041984CFF531B /* EngineBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22A0846B246A1683024C0DDA /* EngineBridge.swift */; };
+		950A31B51021D2F750029059 /* tuner_core.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8B70F90C196386FA0037D391 /* tuner_core.xcframework */; };
+		A132DBCB95FDF537783076CF /* InstrumentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E30505ACCC5FE3491F6CD05 /* InstrumentView.swift */; };
+		C3DB2884983C257A447616CB /* SpectrumBand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E43EEE7E63E106A2DC8DE3 /* SpectrumBand.swift */; };
+		C97A2419B08861122C6BB9BE /* AuroraBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27DD25D8AC4BFCB3D54B6D8E /* AuroraBackground.swift */; };
+		CEA5F2C49B4F8206A2A78232 /* SelectorPanels.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8ADCAC63B58F38B59F41AA8 /* SelectorPanels.swift */; };
+		DC9DD0CC314BE54737608192 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97EC35051D44F87E0B052EB6 /* Assets.xcassets */; };
+		E1B6428C16465DA9A7AA3C5D /* MetronomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA081240CE9605822E25E62 /* MetronomeView.swift */; };
+		EBCA028DF85B2DA97F0D3DDD /* HaloDial.swift in Sources */ = {isa = PBXBuildFile; fileRef = 391DC171A35DFD819E7360CF /* HaloDial.swift */; };
+		FD249D8AD3FBD05E7F67BEFD /* Lumen.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA36D7420C88DCEA80FED7F /* Lumen.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		456EA97F367685948A361590 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 206B861CF0CD8D48309338DC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 164B8DD1DA5477ED2944F943;
+			remoteInfo = Tuner;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		004B4DE8BE119AE667375088 /* tuner_core.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tuner_core.swift; sourceTree = "<group>"; };
+		11EF360B5810D185F59E9516 /* MetronomeViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeViewModelTests.swift; sourceTree = "<group>"; };
+		183AE1761E63450CDFD68FAA /* InstrumentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentViewModel.swift; sourceTree = "<group>"; };
+		20EE2ACD28DF49C08EC58815 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		217E1755507D496A90E39CB4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		22A0846B246A1683024C0DDA /* EngineBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineBridge.swift; sourceTree = "<group>"; };
+		27DD25D8AC4BFCB3D54B6D8E /* AuroraBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraBackground.swift; sourceTree = "<group>"; };
+		318DD67385653335E26AE412 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
+		391DC171A35DFD819E7360CF /* HaloDial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HaloDial.swift; sourceTree = "<group>"; };
+		49A2EF8E9AF6C4D166022D99 /* TunerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerViewModel.swift; sourceTree = "<group>"; };
+		4E30505ACCC5FE3491F6CD05 /* InstrumentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentView.swift; sourceTree = "<group>"; };
+		4F42CC6A6BABE1A595FC87A6 /* TickSounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TickSounds.swift; sourceTree = "<group>"; };
+		6BA081240CE9605822E25E62 /* MetronomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeView.swift; sourceTree = "<group>"; };
+		70E43EEE7E63E106A2DC8DE3 /* SpectrumBand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumBand.swift; sourceTree = "<group>"; };
+		7649DED303EC43E58FEC51D1 /* TunerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerApp.swift; sourceTree = "<group>"; };
+		86C6402B0CFE0A23F82A3D2B /* TunerViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerViewModelTests.swift; sourceTree = "<group>"; };
+		8B70F90C196386FA0037D391 /* tuner_core.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = tuner_core.xcframework; path = TunerCore/tuner_core.xcframework; sourceTree = "<group>"; };
+		97EC35051D44F87E0B052EB6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B6684B2AFF71DABC61E97E6D /* TunerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerView.swift; sourceTree = "<group>"; };
+		B67029BF45674DE441D2552C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		BB9E335ACC4755F93A02E7AF /* StatusChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusChip.swift; sourceTree = "<group>"; };
+		C0C192CA91D1CFC263F818C8 /* AudioCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCapture.swift; sourceTree = "<group>"; };
+		C813093B1E0F93D3E4337EF9 /* MetronomePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomePlayer.swift; sourceTree = "<group>"; };
+		CBCEC996968A56A035B27F7D /* TunerTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TunerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEA36D7420C88DCEA80FED7F /* Lumen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lumen.swift; sourceTree = "<group>"; };
+		D08126269CCD414BA27BB247 /* MetronomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeScreen.swift; sourceTree = "<group>"; };
+		D57767F2CC337FED304EA33B /* MetronomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeViewModel.swift; sourceTree = "<group>"; };
+		E8ADCAC63B58F38B59F41AA8 /* SelectorPanels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectorPanels.swift; sourceTree = "<group>"; };
+		FD414E3FDE1B48E6636CC07D /* Tuner.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Tuner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A0551F80F9934ECE1B2CC941 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				950A31B51021D2F750029059 /* tuner_core.xcframework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0B69D1ED079AFC90D9CBD7DD /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				20EE2ACD28DF49C08EC58815 /* SettingsStore.swift */,
+				B67029BF45674DE441D2552C /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		1683628D209D52FB7A825CE5 /* TunerCore */ = {
+			isa = PBXGroup;
+			children = (
+				004B4DE8BE119AE667375088 /* tuner_core.swift */,
+			);
+			name = TunerCore;
+			path = TunerCore/Sources/TunerCore;
+			sourceTree = "<group>";
+		};
+		28476EB87C3D9A5A173C1932 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				7649DED303EC43E58FEC51D1 /* TunerApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		3601859247CF76A52E30E95A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FD414E3FDE1B48E6636CC07D /* Tuner.app */,
+				CBCEC996968A56A035B27F7D /* TunerTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5B448B23711CFBA2E2B5F75D /* Bridge */ = {
+			isa = PBXGroup;
+			children = (
+				22A0846B246A1683024C0DDA /* EngineBridge.swift */,
+				4F42CC6A6BABE1A595FC87A6 /* TickSounds.swift */,
+			);
+			path = Bridge;
+			sourceTree = "<group>";
+		};
+		5E21A3E0FCAED9605AF18AA9 = {
+			isa = PBXGroup;
+			children = (
+				5E915968260877E3C7B552D6 /* Tuner */,
+				1683628D209D52FB7A825CE5 /* TunerCore */,
+				E9BDACA8535C545A87431536 /* TunerTests */,
+				BF8B1174A176C30E31775568 /* Frameworks */,
+				3601859247CF76A52E30E95A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5E915968260877E3C7B552D6 /* Tuner */ = {
+			isa = PBXGroup;
+			children = (
+				97EC35051D44F87E0B052EB6 /* Assets.xcassets */,
+				217E1755507D496A90E39CB4 /* Info.plist */,
+				28476EB87C3D9A5A173C1932 /* App */,
+				DE02A5669F8FD24BA39844EC /* Audio */,
+				5B448B23711CFBA2E2B5F75D /* Bridge */,
+				6E92CC82A1D17F803646D91D /* Common */,
+				73D5C8AE748B216E390DD004 /* Instrument */,
+				E23E40CCD8E4C3737A2CEF6E /* Metronome */,
+				0B69D1ED079AFC90D9CBD7DD /* Settings */,
+				F3CE64B576E68F7558379AE6 /* Theme */,
+				72ABC109E77A6434AE233E96 /* Tuner */,
+			);
+			path = Tuner;
+			sourceTree = "<group>";
+		};
+		6E92CC82A1D17F803646D91D /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				27DD25D8AC4BFCB3D54B6D8E /* AuroraBackground.swift */,
+				318DD67385653335E26AE412 /* Haptics.swift */,
+				BB9E335ACC4755F93A02E7AF /* StatusChip.swift */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		72ABC109E77A6434AE233E96 /* Tuner */ = {
+			isa = PBXGroup;
+			children = (
+				391DC171A35DFD819E7360CF /* HaloDial.swift */,
+				E8ADCAC63B58F38B59F41AA8 /* SelectorPanels.swift */,
+				70E43EEE7E63E106A2DC8DE3 /* SpectrumBand.swift */,
+				B6684B2AFF71DABC61E97E6D /* TunerView.swift */,
+				49A2EF8E9AF6C4D166022D99 /* TunerViewModel.swift */,
+			);
+			path = Tuner;
+			sourceTree = "<group>";
+		};
+		73D5C8AE748B216E390DD004 /* Instrument */ = {
+			isa = PBXGroup;
+			children = (
+				4E30505ACCC5FE3491F6CD05 /* InstrumentView.swift */,
+				183AE1761E63450CDFD68FAA /* InstrumentViewModel.swift */,
+			);
+			path = Instrument;
+			sourceTree = "<group>";
+		};
+		BF8B1174A176C30E31775568 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				8B70F90C196386FA0037D391 /* tuner_core.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DE02A5669F8FD24BA39844EC /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				C0C192CA91D1CFC263F818C8 /* AudioCapture.swift */,
+				C813093B1E0F93D3E4337EF9 /* MetronomePlayer.swift */,
+			);
+			path = Audio;
+			sourceTree = "<group>";
+		};
+		E23E40CCD8E4C3737A2CEF6E /* Metronome */ = {
+			isa = PBXGroup;
+			children = (
+				D08126269CCD414BA27BB247 /* MetronomeScreen.swift */,
+				6BA081240CE9605822E25E62 /* MetronomeView.swift */,
+				D57767F2CC337FED304EA33B /* MetronomeViewModel.swift */,
+			);
+			path = Metronome;
+			sourceTree = "<group>";
+		};
+		E9BDACA8535C545A87431536 /* TunerTests */ = {
+			isa = PBXGroup;
+			children = (
+				11EF360B5810D185F59E9516 /* MetronomeViewModelTests.swift */,
+				86C6402B0CFE0A23F82A3D2B /* TunerViewModelTests.swift */,
+			);
+			path = TunerTests;
+			sourceTree = "<group>";
+		};
+		F3CE64B576E68F7558379AE6 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				CEA36D7420C88DCEA80FED7F /* Lumen.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		164B8DD1DA5477ED2944F943 /* Tuner */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1E14D891503F7DD98744A1BE /* Build configuration list for PBXNativeTarget "Tuner" */;
+			buildPhases = (
+				F8F928AC0CB6F5F5C3552B27 /* Sources */,
+				4C198FD8C5371D5CD3504D1F /* Resources */,
+				A0551F80F9934ECE1B2CC941 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Tuner;
+			packageProductDependencies = (
+			);
+			productName = Tuner;
+			productReference = FD414E3FDE1B48E6636CC07D /* Tuner.app */;
+			productType = "com.apple.product-type.application";
+		};
+		74E6ADC4296B86469DBD69A9 /* TunerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9DB945F6CD3D72F2604E9342 /* Build configuration list for PBXNativeTarget "TunerTests" */;
+			buildPhases = (
+				4966B65833ECA54D1E35E729 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C545F03AA61946F40FD01F56 /* PBXTargetDependency */,
+			);
+			name = TunerTests;
+			packageProductDependencies = (
+			);
+			productName = TunerTests;
+			productReference = CBCEC996968A56A035B27F7D /* TunerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		206B861CF0CD8D48309338DC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					164B8DD1DA5477ED2944F943 = {
+						DevelopmentTeam = DXBQ96GC5Q;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = FF471A9999CC521BEAACF738 /* Build configuration list for PBXProject "Tuner" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 5E21A3E0FCAED9605AF18AA9;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 3601859247CF76A52E30E95A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				164B8DD1DA5477ED2944F943 /* Tuner */,
+				74E6ADC4296B86469DBD69A9 /* TunerTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4C198FD8C5371D5CD3504D1F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DC9DD0CC314BE54737608192 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4966B65833ECA54D1E35E729 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0A614A9180846A484DE6DA6B /* MetronomeViewModelTests.swift in Sources */,
+				0B66942CCF62B1D5B713F3AE /* TunerViewModelTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F8F928AC0CB6F5F5C3552B27 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2A453C02CF276ED8DB937E78 /* AudioCapture.swift in Sources */,
+				C97A2419B08861122C6BB9BE /* AuroraBackground.swift in Sources */,
+				8EA959BDA5A041984CFF531B /* EngineBridge.swift in Sources */,
+				EBCA028DF85B2DA97F0D3DDD /* HaloDial.swift in Sources */,
+				33568B1A15813B17834E7D50 /* Haptics.swift in Sources */,
+				A132DBCB95FDF537783076CF /* InstrumentView.swift in Sources */,
+				72F914FE18E8E6B51A8246C2 /* InstrumentViewModel.swift in Sources */,
+				FD249D8AD3FBD05E7F67BEFD /* Lumen.swift in Sources */,
+				3838F706ACD7546E0D81D224 /* MetronomePlayer.swift in Sources */,
+				71553725A7F16B62DF70C406 /* MetronomeScreen.swift in Sources */,
+				E1B6428C16465DA9A7AA3C5D /* MetronomeView.swift in Sources */,
+				89C93AE5E70E16E44769A1FB /* MetronomeViewModel.swift in Sources */,
+				CEA5F2C49B4F8206A2A78232 /* SelectorPanels.swift in Sources */,
+				467B64BAE840B6BEE20E929C /* SettingsStore.swift in Sources */,
+				0ED8D333D375E4F9E05F0FDB /* SettingsView.swift in Sources */,
+				C3DB2884983C257A447616CB /* SpectrumBand.swift in Sources */,
+				138108E2B250DDD6A4456C33 /* StatusChip.swift in Sources */,
+				0203C88E326B9F0D9C64D063 /* TickSounds.swift in Sources */,
+				233F888933D78DCF23F9AA03 /* TunerApp.swift in Sources */,
+				47944205925036A6FC52EFE2 /* TunerView.swift in Sources */,
+				2237FC010024AF0E1038C399 /* TunerViewModel.swift in Sources */,
+				6D155235918CBCDCE3DA45E0 /* tuner_core.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C545F03AA61946F40FD01F56 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 164B8DD1DA5477ED2944F943 /* Tuner */;
+			targetProxy = 456EA97F367685948A361590 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		2B89DFFB1894D3EF9D7DE5A6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				OTHER_SWIFT_FLAGS = "-Xcc -fmodule-map-file=$(SRCROOT)/TunerCore/Sources/TunerCore/tuner_coreFFI.modulemap";
+				PRODUCT_BUNDLE_IDENTIFIER = com.liuchong.tuner.TunerTests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tuner.app/Tuner";
+			};
+			name = Release;
+		};
+		309EC8276C9537203D5AF12B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		96A49370F180F17778E010C8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		9701B084141E4A07DB5239BE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = DXBQ96GC5Q;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"TunerCore\"",
+				);
+				INFOPLIST_FILE = Tuner/Info.plist;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				OTHER_SWIFT_FLAGS = "-Xcc -fmodule-map-file=$(SRCROOT)/TunerCore/Sources/TunerCore/tuner_coreFFI.modulemap";
+				PRODUCT_BUNDLE_IDENTIFIER = com.liuchong.tuner;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		DC21856005C059F8A1C79792 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = DXBQ96GC5Q;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"TunerCore\"",
+				);
+				INFOPLIST_FILE = Tuner/Info.plist;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				OTHER_SWIFT_FLAGS = "-Xcc -fmodule-map-file=$(SRCROOT)/TunerCore/Sources/TunerCore/tuner_coreFFI.modulemap";
+				PRODUCT_BUNDLE_IDENTIFIER = com.liuchong.tuner;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F9F53BE6592793A52D875E49 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				OTHER_SWIFT_FLAGS = "-Xcc -fmodule-map-file=$(SRCROOT)/TunerCore/Sources/TunerCore/tuner_coreFFI.modulemap";
+				PRODUCT_BUNDLE_IDENTIFIER = com.liuchong.tuner.TunerTests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tuner.app/Tuner";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1E14D891503F7DD98744A1BE /* Build configuration list for PBXNativeTarget "Tuner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DC21856005C059F8A1C79792 /* Debug */,
+				9701B084141E4A07DB5239BE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9DB945F6CD3D72F2604E9342 /* Build configuration list for PBXNativeTarget "TunerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F9F53BE6592793A52D875E49 /* Debug */,
+				2B89DFFB1894D3EF9D7DE5A6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FF471A9999CC521BEAACF738 /* Build configuration list for PBXProject "Tuner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				309EC8276C9537203D5AF12B /* Debug */,
+				96A49370F180F17778E010C8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 206B861CF0CD8D48309338DC /* Project object */;
+}

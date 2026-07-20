@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#26325C"/>
+      <stop offset="1" stop-color="#0F1526"/>
+    </linearGradient>
+  </defs>
+  <!-- iOS：全出血方形底，系统裁圆角，不留透明 -->
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <g transform="translate(130,130) scale(7.09)">
+    <g fill="none" stroke-width="9" stroke-linecap="round">
+      <path d="M 24.7 54.0 A 30 30 0 0 1 36.5 40.2" stroke="#FF6B6B"/>
+      <path d="M 44.0 36.7 A 30 30 0 0 1 64.0 36.7" stroke="#3DDC97"/>
+      <path d="M 71.5 40.2 A 30 30 0 0 1 83.3 54.0" stroke="#FFC24B"/>
+    </g>
+    <line x1="54" y1="68" x2="54" y2="38" stroke="#F8FAFC" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="54" cy="68" r="7.5" fill="#F8FAFC"/>
+  </g>
+</svg>
