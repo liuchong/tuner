@@ -1,0 +1,17 @@
+[package]
+name = "tuner-core"
+version = "0.1.0"
+edition = "2024"
+description = "跨平台调音器+节拍器共享核心（UniFFI 导出）"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+# cli 特性仅供 src/bin/uniffi-bindgen.rs 使用（生成绑定用）；
+# cdylib 不引用 cli 代码，链接时不会包含
+[dependencies]
+uniffi = { version = "0.29", features = ["cli"] }
+
+[[bin]]
+name = "uniffi-bindgen"
+path = "src/bin/uniffi-bindgen.rs"
