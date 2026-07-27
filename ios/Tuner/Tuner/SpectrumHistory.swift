@@ -57,6 +57,12 @@ final class SpectrumHistoryBuffer: ObservableObject {
         }
     }
 
+    /// 只清空峰值保持；实时频谱、瀑布图和暂停状态均保留。
+    func resetPeakHold() {
+        peakSpectrum = Array(repeating: -80, count: binCount)
+        revision &+= 1
+    }
+
     private func writeInterpolatedRow(at destinationOffset: Int) {
         guard waterfallBinCount > 1, binCount > 1 else {
             waterfallData[destinationOffset] = currentSpectrum[0]

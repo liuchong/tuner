@@ -22,22 +22,38 @@ struct ProfessionalSpectrumView: View {
                                 .foregroundStyle(palette.inkSecondary)
                         }
                         Spacer()
-                        Button {
-                            history.isPaused.toggle()
-                        } label: {
-                            Text(history.isPaused ? "▶ 继续" : "Ⅱ 暂停")
-                                .font(Lumen.caption)
-                                .foregroundStyle(
-                                    history.isPaused ? palette.accent : palette.inkSecondary
-                                )
-                                .padding(.horizontal, 14)
-                                .frame(height: 34)
-                                .background(
-                                    history.isPaused
-                                        ? palette.accent.opacity(0.16)
-                                        : palette.bgSurface,
-                                    in: Capsule()
-                                )
+                        HStack(spacing: 8) {
+                            Button {
+                                history.resetPeakHold()
+                            } label: {
+                                Text("重置峰值")
+                                    .font(Lumen.caption)
+                                    .foregroundStyle(palette.inkSecondary)
+                                    .padding(.horizontal, 12)
+                                    .frame(height: 34)
+                                    .background(palette.bgSurface, in: Capsule())
+                                    .fixedSize()
+                            }
+                            Button {
+                                history.isPaused.toggle()
+                            } label: {
+                                Text(history.isPaused ? "▶ 继续" : "Ⅱ 暂停")
+                                    .font(Lumen.caption)
+                                    .foregroundStyle(
+                                        history.isPaused
+                                            ? palette.accent
+                                            : palette.inkSecondary
+                                    )
+                                    .padding(.horizontal, 12)
+                                    .frame(height: 34)
+                                    .background(
+                                        history.isPaused
+                                            ? palette.accent.opacity(0.16)
+                                            : palette.bgSurface,
+                                        in: Capsule()
+                                    )
+                                    .fixedSize()
+                            }
                         }
                     }
 

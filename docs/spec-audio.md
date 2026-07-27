@@ -13,9 +13,12 @@
 
 - 实现：`AudioTrack` STREAM_MUSIC，MODE_STREAM，专用写线程。
 - 节奏源：core `Metronome.render(out, frames)` 在写线程内调用，tick 采样在缓冲内精确混入（采样级对齐，可闻抖动 < 1ms）。
-- 音色（2026-07-20 修订）：三种音色（机械 click / 电子 beep / 铃声 bell）的 PCM 采样
-  由 App 启动时程序化合成（core-binding `TickSounds`，44100Hz 单声道 float，~100ms；
-  重拍默认铃声、弱拍默认机械 click），音色选择变更时经 `set_click_samples` 注入。
+- 音色（2026-07-28 修订）：十二种音色按常用程度排列为机械节拍、木块、电子滴声、拍板、
+  边鼓、小鼓、牛铃、踩镲、拍手、沙锤、低鼓、铃声。PCM 采样由 App 启动时程序化合成
+  （`TickSounds`，44100Hz 单声道 float，按音色使用短促冲击、谐振或噪声包络；重拍默认
+  铃声、弱拍默认机械节拍），音色选择变更时经 `set_click_samples` 注入。每种波形必须
+  非空、只包含有限数值且峰值不超过 0.95；Android 与 iOS 使用相同的频率、时长、包络和
+  增益参数。
   理由：原方案为 res/raw 内置资源，改为程序化合成——无二进制资源、参数（频率/包络）可调；
   属资源数据，非业务逻辑。
 - 缓冲：AudioTrack `bufferSizeInFrames` 分片写入（写线程保持 ≥2 个缓冲余量防欠载），

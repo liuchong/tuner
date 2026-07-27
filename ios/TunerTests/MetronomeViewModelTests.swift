@@ -42,12 +42,23 @@ final class FakeMetronomeEngine: MetronomeEngine {
 
 @MainActor
 final class MetronomeViewModelTests: XCTestCase {
+    private let defaultsSuite = "com.liuchong.tuner.tests.metronome"
     private var engine: FakeMetronomeEngine!
+    private var defaults: UserDefaults!
     private var now: UInt64 = 0
 
     override func setUp() {
+        super.setUp()
         engine = FakeMetronomeEngine()
+        defaults = UserDefaults(suiteName: defaultsSuite)
+        defaults.removePersistentDomain(forName: defaultsSuite)
         now = 0
+    }
+
+    override func tearDown() {
+        defaults.removePersistentDomain(forName: defaultsSuite)
+        defaults = nil
+        super.tearDown()
     }
 
     private func makeVm() -> MetronomeViewModel {
@@ -59,7 +70,8 @@ final class MetronomeViewModelTests: XCTestCase {
                 .click: Array(repeating: 0.1, count: 50),
                 .beep: Array(repeating: 0.1, count: 80),
             ],
-            clock: { [weak self] in self?.now ?? 0 }
+            clock: { [weak self] in self?.now ?? 0 },
+            defaults: defaults
         )
     }
 
@@ -121,5 +133,27 @@ final class MetronomeViewModelTests: XCTestCase {
         XCTAssertEqual(engine.normalSoundLen, 80)
         vm.accentSound = .click
         XCTAssertEqual(engine.accentSoundLen, 50)
+        vm.normalSound = .woodBlock
+        XCTAssertEqual(engine.normalSoundLen, 3969)
+    }
+
+    func testExistingPersistedSoundIdentifiersRemainCompatible() {
+        defaults.set("beep", forKey: "metro_accent_sound")
+        defaults.set("bell", forKey: "metro_normal_sound")
+
+        let vm = makeVm()
+
+        XCTAssertEqual(vm.accentSound, .beep)
+        XCTAssertEqual(vm.normalSound, .bell)
+    }
+
+    func testUnknownPersistedSoundsFallBackToDefaults() {
+        defaults.set("unknown-accent", forKey: "metro_accent_sound")
+        defaults.set("unknown-normal", forKey: "metro_normal_sound")
+
+        let vm = makeVm()
+
+        XCTAssertEqual(vm.accentSound, .bell)
+        XCTAssertEqual(vm.normalSound, .click)
     }
 }

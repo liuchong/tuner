@@ -24,17 +24,42 @@ extension TickAccent {
 final class MetronomeViewModel: ObservableObject {
     static let bpmMin = 30.0
     static let bpmMax = 250.0
+    private var isRestoring = false
 
     @Published var bpm: Double = 120.0 {
-        didSet { apply { $0.setBpm(bpm: bpm) }; save() }
+        didSet {
+            guard !isRestoring else { return }
+            apply { $0.setBpm(bpm: bpm) }
+            save()
+        }
     }
-    @Published var beatsPerBar: Int = 4 { didSet { save() } }
-    @Published var beatUnit: Int = 4 { didSet { save() } }
+    @Published var beatsPerBar: Int = 4 {
+        didSet { if !isRestoring { save() } }
+    }
+    @Published var beatUnit: Int = 4 {
+        didSet { if !isRestoring { save() } }
+    }
     @Published var accents: [TickAccent] = MetronomeViewModel.defaultAccents(4) {
-        didSet { apply { $0.setAccents(accents: accents) }; save() }
+        didSet {
+            guard !isRestoring else { return }
+            apply { $0.setAccents(accents: accents) }
+            save()
+        }
     }
-    @Published var accentSound: TickSoundKind = .bell { didSet { applySounds(); save() } }
-    @Published var normalSound: TickSoundKind = .click { didSet { applySounds(); save() } }
+    @Published var accentSound: TickSoundKind = .bell {
+        didSet {
+            guard !isRestoring else { return }
+            applySounds()
+            save()
+        }
+    }
+    @Published var normalSound: TickSoundKind = .click {
+        didSet {
+            guard !isRestoring else { return }
+            applySounds()
+            save()
+        }
+    }
     @Published private(set) var playing = false
     @Published private(set) var currentBeat = -1
     @Published private(set) var flashSeq: Int = 0
@@ -43,6 +68,7 @@ final class MetronomeViewModel: ObservableObject {
     private let player: MetronomePlayer
     private let sounds: [TickSoundKind: [Float]]
     private let clock: () -> UInt64
+    private let defaults: UserDefaults
     private var engine: MetronomeEngine?
     private var cancellables = Set<AnyCancellable>()
 
@@ -50,13 +76,19 @@ final class MetronomeViewModel: ObservableObject {
         factory: MetronomeEngineFactory = UniffiFactories.metronome,
         player: MetronomePlayer = MetronomePlayer(),
         sounds: [TickSoundKind: [Float]] = TickSounds.buildAll(),
-        clock: @escaping () -> UInt64 = { UInt64(ProcessInfo.processInfo.systemUptime * 1000) }
+        clock: @escaping () -> UInt64 = {
+            UInt64(ProcessInfo.processInfo.systemUptime * 1000)
+        },
+        defaults: UserDefaults = .standard
     ) {
         self.factory = factory
         self.player = player
         self.sounds = sounds
         self.clock = clock
+        self.defaults = defaults
+        isRestoring = true
         restore()
+        isRestoring = false
         engine = factory.create(config: currentConfig())
         applySounds()
 
@@ -160,7 +192,7 @@ final class MetronomeViewModel: ObservableObject {
     // MARK: 持久化（UserDefaults）
 
     private func save() {
-        let d = UserDefaults.standard
+        let d = defaults
         d.set(bpm, forKey: "metro_bpm")
         d.set(beatsPerBar, forKey: "metro_beats")
         d.set(beatUnit, forKey: "metro_unit")
@@ -170,7 +202,7 @@ final class MetronomeViewModel: ObservableObject {
     }
 
     private func restore() {
-        let d = UserDefaults.standard
+        let d = defaults
         bpm = (d.object(forKey: "metro_bpm") as? Double ?? 120.0).clamped(to: Self.bpmMin...Self.bpmMax)
         beatsPerBar = d.object(forKey: "metro_beats") as? Int ?? 4
         beatUnit = d.object(forKey: "metro_unit") as? Int ?? 4

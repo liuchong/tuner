@@ -68,6 +68,12 @@ class SpectrumHistory(
 
     fun peakSpectrum(): List<Float> = peak.toList()
 
+    /** 只清空峰值保持；实时频谱、瀑布图和暂停状态均保留。 */
+    fun resetPeakHold() {
+        peak.fill(DB_FLOOR)
+        publish()
+    }
+
     fun rowsNewestFirst(): List<List<Float>> = List(rowCount) { age ->
         val row = (nextRow - 1 - age + maxRows) % maxRows
         val offset = row * waterfallBinCount
