@@ -36,7 +36,7 @@ class SettingsRepositoryTest {
         assertEquals(SolfegeSystem.NUMBERED, s.solfege)
         assertEquals(0, s.key.tonicPc.toInt())
         assertEquals(ModeKind.MAJOR, s.key.mode)
-        assertEquals(-50f, s.noiseGateDbfs, 1e-6f)
+        assertEquals(-45f, s.noiseGateDbfs, 1e-6f)
         assertEquals(ThemeMode.SYSTEM, s.theme)
         assertEquals(true, s.hapticsEnabled)
     }

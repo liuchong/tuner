@@ -21,6 +21,7 @@ import uniffi.tuner_core.Instrument
 import uniffi.tuner_core.InstrumentKind
 import uniffi.tuner_core.KeyMode
 import uniffi.tuner_core.SolfegeSystem
+import uniffi.tuner_core.SignalState
 import uniffi.tuner_core.StringSpec
 import uniffi.tuner_core.TunerEvent
 import uniffi.tuner_core.Tuning
@@ -92,14 +93,12 @@ class InstrumentViewModelTest {
 
     private lateinit var stream: FakeStream
     private lateinit var savedState: SavedStateHandle
-    private var now = 0L
 
     @Before
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
         stream = FakeStream()
         savedState = SavedStateHandle()
-        now = 0L
     }
 
     @After
@@ -111,7 +110,6 @@ class InstrumentViewModelTest {
         core = FakeCoreApi(),
         stream = stream,
         savedState = savedState,
-        clock = { now },
     )
 
     @Test
@@ -161,18 +159,22 @@ class InstrumentViewModelTest {
     }
 
     @Test
-    fun `800ms 无信号清除高亮与偏差`() {
+    fun `保持与清空服从 core 的统一信号状态`() {
         val vm = makeVm()
         vm.startCapture()
         stream.emitEvent(event(110.2))
         assertTrue(vm.uiState.value.centsToTarget != null)
 
-        now = 799L
-        vm.onTick()
+        stream.emitEvent(
+            event(110.2),
+            signalState = SignalState.HOLDING,
+            displayStrength = 0.35f,
+            isHeld = true,
+        )
         assertTrue(vm.uiState.value.centsToTarget != null)
+        assertEquals(0.35f, vm.uiState.value.displayStrength, 1e-6f)
 
-        now = 801L
-        vm.onTick()
+        stream.emitEvent(null, signalState = SignalState.QUIET)
         assertNull(vm.uiState.value.centsToTarget)
         assertTrue(vm.uiState.value.strings.none { it.active || it.inTune })
     }

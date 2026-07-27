@@ -11,6 +11,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -49,6 +50,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
@@ -56,6 +58,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -88,13 +91,6 @@ fun InstrumentScreen(
     AudioPermissionGate(onGranted = viewModel::startCapture) {
         val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-        LaunchedEffect(Unit) {
-            while (true) {
-                viewModel.onTick()
-                delay(100)
-            }
-        }
-
         AuroraBackground(tuneCents = state.centsToTarget) {
         Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
             // 乐器选择卡片行（design-system §6.6：图标+名称，选中 accent 10% 底+描边）
@@ -121,7 +117,9 @@ fun InstrumentScreen(
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                            modifier = Modifier
+                                .height(48.dp)
+                                .padding(horizontal = 14.dp),
                         ) {
                             Icon(
                                 Icons.Filled.MusicNote,
@@ -134,6 +132,8 @@ fun InstrumentScreen(
                                 inst.displayName,
                                 style = TunerTypography.label,
                                 color = if (selected) colors.accent else colors.inkPrimary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
                             )
                         }
                     }
@@ -157,7 +157,9 @@ fun InstrumentScreen(
                 )
             }
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .alpha(0.35f + 0.65f * state.displayStrength),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -218,31 +220,50 @@ fun InstrumentScreen(
 /** 弦乐器区（定弦选择 + 模式切换 + 琴弦按钮行）。 */
 @Composable
 private fun StringInstrumentSection(state: InstrumentUiState, vm: InstrumentViewModel) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        SimpleDropdown(
-            label = "定弦",
-            value = state.tuningName,
-            options = state.tunings.map { it.id to it.displayName },
-            onSelect = vm::selectTuning,
-            modifier = Modifier.weight(1f),
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        SingleChoiceSegmentedButtonRow {
-            SelectionMode.entries.forEachIndexed { i, mode ->
-                SegmentedButton(
-                    selected = state.mode == mode,
-                    onClick = { vm.selectMode(mode) },
-                    shape = SegmentedButtonDefaults.itemShape(
-                        index = i,
-                        count = SelectionMode.entries.size,
-                    ),
-                ) {
-                    Text(if (mode == SelectionMode.AUTO) "自动" else "手动")
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val compact = maxWidth < 380.dp
+        val controls: @Composable () -> Unit = {
+            SimpleDropdown(
+                label = "定弦",
+                value = state.tuningName,
+                options = state.tunings.map { it.id to it.displayName },
+                onSelect = vm::selectTuning,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        val modes: @Composable () -> Unit = {
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.height(48.dp)) {
+                SelectionMode.entries.forEachIndexed { i, mode ->
+                    SegmentedButton(
+                        selected = state.mode == mode,
+                        onClick = { vm.selectMode(mode) },
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = i,
+                            count = SelectionMode.entries.size,
+                        ),
+                        modifier = Modifier.height(48.dp),
+                    ) {
+                        Text(
+                            if (mode == SelectionMode.AUTO) "自动" else "手动",
+                            maxLines = 1,
+                        )
+                    }
                 }
+            }
+        }
+        if (compact) {
+            Column {
+                controls()
+                Spacer(modifier = Modifier.height(8.dp))
+                modes()
+            }
+        } else {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Box(modifier = Modifier.weight(1f)) { controls() }
+                modes()
             }
         }
     }
@@ -345,33 +366,49 @@ private fun StringButton(item: StringItemUi, onClick: () -> Unit) {
 /** 管乐器区（调性/筒音唱名选择 + 指法音阶列表）。 */
 @Composable
 private fun WindInstrumentSection(state: InstrumentUiState, vm: InstrumentViewModel) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        SimpleDropdown(
-            label = if (state.tongyinOptions.isEmpty()) "型号" else "调性",
-            value = state.chartGroup,
-            options = state.chartGroups.map { it to it },
-            onSelect = { vm.selectChart(it, state.tongyin) },
-            modifier = Modifier.weight(1f),
-        )
-        if (state.tongyinOptions.isNotEmpty()) {
-            Spacer(modifier = Modifier.width(12.dp))
-            SingleChoiceSegmentedButtonRow {
-                state.tongyinOptions.forEachIndexed { i, ty ->
-                    SegmentedButton(
-                        selected = state.tongyin == ty,
-                        onClick = { vm.selectChart(state.chartGroup, ty) },
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = i,
-                            count = state.tongyinOptions.size,
-                        ),
-                    ) {
-                        Text("作$ty")
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val compact = maxWidth < 380.dp
+        val selector: @Composable () -> Unit = {
+            SimpleDropdown(
+                label = if (state.tongyinOptions.isEmpty()) "型号" else "调性",
+                value = state.chartGroup,
+                options = state.chartGroups.map { it to it },
+                onSelect = { vm.selectChart(it, state.tongyin) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        val tongyin: @Composable () -> Unit = {
+            if (state.tongyinOptions.isNotEmpty()) {
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.height(48.dp)) {
+                    state.tongyinOptions.forEachIndexed { i, ty ->
+                        SegmentedButton(
+                            selected = state.tongyin == ty,
+                            onClick = { vm.selectChart(state.chartGroup, ty) },
+                            shape = SegmentedButtonDefaults.itemShape(
+                                index = i,
+                                count = state.tongyinOptions.size,
+                            ),
+                            modifier = Modifier.height(48.dp),
+                        ) {
+                            Text("作$ty", maxLines = 1)
+                        }
                     }
                 }
+            }
+        }
+        if (compact && state.tongyinOptions.isNotEmpty()) {
+            Column {
+                selector()
+                Spacer(modifier = Modifier.height(8.dp))
+                tongyin()
+            }
+        } else {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Box(modifier = Modifier.weight(1f)) { selector() }
+                tongyin()
             }
         }
     }
@@ -412,22 +449,43 @@ private fun SimpleDropdown(
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val colors = LocalLumenColors.current
     Box(modifier = modifier) {
         ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
-            OutlinedTextField(
-                value = value,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text(label) },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            Surface(
                 modifier = Modifier
                     .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                    .fillMaxWidth(),
-            )
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = colors.bgSurface,
+                border = androidx.compose.foundation.BorderStroke(1.dp, colors.lineSubtle),
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        "$label · ",
+                        style = TunerTypography.caption,
+                        color = colors.inkSecondary,
+                        maxLines = 1,
+                    )
+                    Text(
+                        value,
+                        modifier = Modifier.weight(1f),
+                        style = TunerTypography.label,
+                        color = colors.inkPrimary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                }
+            }
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 options.forEach { (id, name) ->
                     DropdownMenuItem(
-                        text = { Text(name) },
+                        text = { Text(name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                         onClick = {
                             onSelect(id)
                             expanded = false

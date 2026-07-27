@@ -202,23 +202,7 @@ impl Spectrum {
                 && db >= self.bins[i + 2].0;
             if is_peak {
                 let info = self.make_partial(k, db, f0, a4);
-                // 按幅值降序插入
-                if count < MAX_PARTIALS {
-                    let mut j = count;
-                    while j > 0 && partials[j - 1].magnitude_db < info.magnitude_db {
-                        partials[j] = partials[j - 1];
-                        j -= 1;
-                    }
-                    partials[j] = info;
-                    count += 1;
-                } else if partials[MAX_PARTIALS - 1].magnitude_db < info.magnitude_db {
-                    let mut j = MAX_PARTIALS - 1;
-                    while j > 0 && partials[j - 1].magnitude_db < info.magnitude_db {
-                        partials[j] = partials[j - 1];
-                        j -= 1;
-                    }
-                    partials[j] = info;
-                }
+                insert_partial_unique(partials, &mut count, info);
             }
         }
         count
@@ -267,6 +251,50 @@ impl Spectrum {
             midi,
             cents_off,
         }
+    }
+}
+
+/// 将实际峰按幅值降序插入固定数组，并合并映射到同一频率的重复候选。
+///
+/// 使用固定容量搬移，不在分析热路径分配内存。
+fn insert_partial_unique(
+    partials: &mut [PartialInfo; MAX_PARTIALS],
+    count: &mut usize,
+    info: PartialInfo,
+) {
+    let mut duplicate_index = None;
+    for (index, existing) in partials.iter().enumerate().take(*count) {
+        if (existing.freq_hz - info.freq_hz).abs() < 0.01 {
+            duplicate_index = Some(index);
+            break;
+        }
+    }
+
+    if let Some(index) = duplicate_index {
+        if partials[index].magnitude_db >= info.magnitude_db {
+            return;
+        }
+        for cursor in index..count.saturating_sub(1) {
+            partials[cursor] = partials[cursor + 1];
+        }
+        *count = count.saturating_sub(1);
+    }
+
+    if *count < MAX_PARTIALS {
+        let mut cursor = *count;
+        while cursor > 0 && partials[cursor - 1].magnitude_db < info.magnitude_db {
+            partials[cursor] = partials[cursor - 1];
+            cursor -= 1;
+        }
+        partials[cursor] = info;
+        *count += 1;
+    } else if partials[MAX_PARTIALS - 1].magnitude_db < info.magnitude_db {
+        let mut cursor = MAX_PARTIALS - 1;
+        while cursor > 0 && partials[cursor - 1].magnitude_db < info.magnitude_db {
+            partials[cursor] = partials[cursor - 1];
+            cursor -= 1;
+        }
+        partials[cursor] = info;
     }
 }
 
@@ -475,6 +503,38 @@ mod tests {
         for (k, want) in [(1u8, 1u8), (2, 2), (3, 3), (4, 4)] {
             assert!(idxs.contains(&want), "缺少 {k} 次泛音标注: {idxs:?}");
         }
+    }
+
+    #[test]
+    fn duplicate_partial_frequency_keeps_only_the_stronger_peak() {
+        let empty = PartialInfo {
+            freq_hz: 0.0,
+            magnitude_db: DB_FLOOR,
+            harmonic_index: 0,
+            midi: 0,
+            cents_off: 0.0,
+        };
+        let stronger = PartialInfo {
+            freq_hz: 96.899_414,
+            magnitude_db: -20.0,
+            harmonic_index: 0,
+            midi: 43,
+            cents_off: 0.0,
+        };
+        let weaker_duplicate = PartialInfo {
+            magnitude_db: -32.0,
+            harmonic_index: 1,
+            ..stronger
+        };
+        let mut partials = [empty; MAX_PARTIALS];
+        let mut count = 0;
+
+        insert_partial_unique(&mut partials, &mut count, stronger);
+        insert_partial_unique(&mut partials, &mut count, weaker_duplicate);
+
+        assert_eq!(count, 1);
+        assert_eq!(partials[0].freq_hz, stronger.freq_hz);
+        assert_eq!(partials[0].magnitude_db, stronger.magnitude_db);
     }
 
     #[test]

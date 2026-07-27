@@ -761,6 +761,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // For large crates we prevent `MethodTooLargeException` (see #2340)
 // N.B. the name of the extension is very misleading, since it is 
 // rather `InterfaceTooLargeException`, caused by too many methods 
@@ -807,6 +809,8 @@ fun uniffi_tuner_core_checksum_method_metronome_tap(
 fun uniffi_tuner_core_checksum_method_tunerengine_analyze(
 ): Short
 fun uniffi_tuner_core_checksum_method_tunerengine_feed(
+): Short
+fun uniffi_tuner_core_checksum_method_tunerengine_list_reference_tones(
 ): Short
 fun uniffi_tuner_core_checksum_method_tunerengine_set_a4(
 ): Short
@@ -902,6 +906,8 @@ fun uniffi_tuner_core_fn_constructor_tunerengine_new(`config`: RustBuffer.ByValu
 fun uniffi_tuner_core_fn_method_tunerengine_analyze(`ptr`: Pointer,`pcm`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 fun uniffi_tuner_core_fn_method_tunerengine_feed(`ptr`: Pointer,`pcm`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): RustBuffer.ByValue
+fun uniffi_tuner_core_fn_method_tunerengine_list_reference_tones(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 fun uniffi_tuner_core_fn_method_tunerengine_set_a4(`ptr`: Pointer,`hz`: Double,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
@@ -1093,6 +1099,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_tuner_core_checksum_method_tunerengine_feed() != 52897.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tuner_core_checksum_method_tunerengine_list_reference_tones() != 32147.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_tuner_core_checksum_method_tunerengine_set_a4() != 46919.toShort()) {
@@ -2003,6 +2012,11 @@ public interface TunerEngineInterface {
     fun `feed`(`pcm`: List<kotlin.Float>): TunerEvent?
     
     /**
+     * 列出当前 A4 与平均律在 80–1500Hz 内的全部固定音高。
+     */
+    fun `listReferenceTones`(): List<ReferenceTone>
+    
+    /**
      * 设置 A4 校准（收敛到 415–466Hz）。
      */
     fun `setA4`(`hz`: kotlin.Double)
@@ -2152,6 +2166,21 @@ open class TunerEngine: Disposable, AutoCloseable, TunerEngineInterface
 
     
     /**
+     * 列出当前 A4 与平均律在 80–1500Hz 内的全部固定音高。
+     */override fun `listReferenceTones`(): List<ReferenceTone> {
+            return FfiConverterSequenceTypeReferenceTone.lift(
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tuner_core_fn_method_tunerengine_list_reference_tones(
+        it, _status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
      * 设置 A4 校准（收敛到 415–466Hz）。
      */override fun `setA4`(`hz`: kotlin.Double)
         = 
@@ -2263,7 +2292,23 @@ data class AnalysisFrame (
     /**
      * 和弦名（如 "Cmaj"），无则为 None。
      */
-    var `chord`: kotlin.String?
+    var `chord`: kotlin.String?, 
+    /**
+     * 输入信号状态。
+     */
+    var `signalState`: SignalState, 
+    /**
+     * 当前分析窗口的 RMS 电平（dBFS）。
+     */
+    var `inputLevelDbfs`: kotlin.Float, 
+    /**
+     * 读数显示强度（0~1）。
+     */
+    var `displayStrength`: kotlin.Float, 
+    /**
+     * 当前读数是否来自断音保持。
+     */
+    var `isHeld`: kotlin.Boolean
 ) {
     
     companion object
@@ -2279,6 +2324,10 @@ public object FfiConverterTypeAnalysisFrame: FfiConverterRustBuffer<AnalysisFram
             FfiConverterSequenceFloat.read(buf),
             FfiConverterSequenceTypePartial.read(buf),
             FfiConverterOptionalString.read(buf),
+            FfiConverterTypeSignalState.read(buf),
+            FfiConverterFloat.read(buf),
+            FfiConverterFloat.read(buf),
+            FfiConverterBoolean.read(buf),
         )
     }
 
@@ -2286,7 +2335,11 @@ public object FfiConverterTypeAnalysisFrame: FfiConverterRustBuffer<AnalysisFram
             FfiConverterOptionalTypeTunerEvent.allocationSize(value.`tuner`) +
             FfiConverterSequenceFloat.allocationSize(value.`spectrumDb`) +
             FfiConverterSequenceTypePartial.allocationSize(value.`partials`) +
-            FfiConverterOptionalString.allocationSize(value.`chord`)
+            FfiConverterOptionalString.allocationSize(value.`chord`) +
+            FfiConverterTypeSignalState.allocationSize(value.`signalState`) +
+            FfiConverterFloat.allocationSize(value.`inputLevelDbfs`) +
+            FfiConverterFloat.allocationSize(value.`displayStrength`) +
+            FfiConverterBoolean.allocationSize(value.`isHeld`)
     )
 
     override fun write(value: AnalysisFrame, buf: ByteBuffer) {
@@ -2294,6 +2347,10 @@ public object FfiConverterTypeAnalysisFrame: FfiConverterRustBuffer<AnalysisFram
             FfiConverterSequenceFloat.write(value.`spectrumDb`, buf)
             FfiConverterSequenceTypePartial.write(value.`partials`, buf)
             FfiConverterOptionalString.write(value.`chord`, buf)
+            FfiConverterTypeSignalState.write(value.`signalState`, buf)
+            FfiConverterFloat.write(value.`inputLevelDbfs`, buf)
+            FfiConverterFloat.write(value.`displayStrength`, buf)
+            FfiConverterBoolean.write(value.`isHeld`, buf)
     }
 }
 
@@ -2623,6 +2680,68 @@ public object FfiConverterTypePartial: FfiConverterRustBuffer<Partial> {
 
 
 /**
+ * 当前平均律中的一个可播放固定音高。
+ */
+data class ReferenceTone (
+    /**
+     * 相对 A4 的平均律步数。
+     */
+    var `stepFromA4`: kotlin.Int, 
+    /**
+     * 固定频率（Hz）。
+     */
+    var `frequencyHz`: kotlin.Double, 
+    /**
+     * 平均律等分数。
+     */
+    var `temperament`: kotlin.UByte, 
+    /**
+     * 最近的 12 平均律音名。
+     */
+    var `noteName`: kotlin.String, 
+    /**
+     * 相对该音名的音分差。
+     */
+    var `centsFromNote`: kotlin.Double
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeReferenceTone: FfiConverterRustBuffer<ReferenceTone> {
+    override fun read(buf: ByteBuffer): ReferenceTone {
+        return ReferenceTone(
+            FfiConverterInt.read(buf),
+            FfiConverterDouble.read(buf),
+            FfiConverterUByte.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterDouble.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ReferenceTone) = (
+            FfiConverterInt.allocationSize(value.`stepFromA4`) +
+            FfiConverterDouble.allocationSize(value.`frequencyHz`) +
+            FfiConverterUByte.allocationSize(value.`temperament`) +
+            FfiConverterString.allocationSize(value.`noteName`) +
+            FfiConverterDouble.allocationSize(value.`centsFromNote`)
+    )
+
+    override fun write(value: ReferenceTone, buf: ByteBuffer) {
+            FfiConverterInt.write(value.`stepFromA4`, buf)
+            FfiConverterDouble.write(value.`frequencyHz`, buf)
+            FfiConverterUByte.write(value.`temperament`, buf)
+            FfiConverterString.write(value.`noteName`, buf)
+            FfiConverterDouble.write(value.`centsFromNote`, buf)
+    }
+}
+
+
+
+/**
  * 一次 render 的输出。
  */
 data class RenderFrame (
@@ -2782,11 +2901,15 @@ data class TunerConfig (
      */
     var `sampleRate`: kotlin.Double, 
     /**
+     * 相邻分析帧之间推进的采样数（默认 1024）。
+     */
+    var `frameHopSamples`: kotlin.UInt, 
+    /**
      * A4 校准（415–466Hz）。
      */
     var `a4Hz`: kotlin.Double, 
     /**
-     * 噪声门限（dBFS，默认 -50）。
+     * 噪声门限（dBFS，默认 -45）。
      */
     var `noiseGateDbfs`: kotlin.Float, 
     /**
@@ -2813,6 +2936,7 @@ public object FfiConverterTypeTunerConfig: FfiConverterRustBuffer<TunerConfig> {
     override fun read(buf: ByteBuffer): TunerConfig {
         return TunerConfig(
             FfiConverterDouble.read(buf),
+            FfiConverterUInt.read(buf),
             FfiConverterDouble.read(buf),
             FfiConverterFloat.read(buf),
             FfiConverterTypeSolfegeSystem.read(buf),
@@ -2823,6 +2947,7 @@ public object FfiConverterTypeTunerConfig: FfiConverterRustBuffer<TunerConfig> {
 
     override fun allocationSize(value: TunerConfig) = (
             FfiConverterDouble.allocationSize(value.`sampleRate`) +
+            FfiConverterUInt.allocationSize(value.`frameHopSamples`) +
             FfiConverterDouble.allocationSize(value.`a4Hz`) +
             FfiConverterFloat.allocationSize(value.`noiseGateDbfs`) +
             FfiConverterTypeSolfegeSystem.allocationSize(value.`solfege`) +
@@ -2832,6 +2957,7 @@ public object FfiConverterTypeTunerConfig: FfiConverterRustBuffer<TunerConfig> {
 
     override fun write(value: TunerConfig, buf: ByteBuffer) {
             FfiConverterDouble.write(value.`sampleRate`, buf)
+            FfiConverterUInt.write(value.`frameHopSamples`, buf)
             FfiConverterDouble.write(value.`a4Hz`, buf)
             FfiConverterFloat.write(value.`noiseGateDbfs`, buf)
             FfiConverterTypeSolfegeSystem.write(value.`solfege`, buf)
@@ -3070,6 +3196,53 @@ public object FfiConverterTypeModeKind: FfiConverterRustBuffer<ModeKind> {
     override fun allocationSize(value: ModeKind) = 4UL
 
     override fun write(value: ModeKind, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+/**
+ * 输入信号状态。
+ */
+
+enum class SignalState {
+    
+    /**
+     * 无可信信号。
+     */
+    QUIET,
+    /**
+     * 已有一帧可信音高，等待第二帧确认。
+     */
+    ACQUIRING,
+    /**
+     * 正在持续追踪可信音高。
+     */
+    TRACKING,
+    /**
+     * 信号消失后保留最后读数。
+     */
+    HOLDING;
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeSignalState: FfiConverterRustBuffer<SignalState> {
+    override fun read(buf: ByteBuffer) = try {
+        SignalState.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: SignalState) = 4UL
+
+    override fun write(value: SignalState, buf: ByteBuffer) {
         buf.putInt(value.ordinal + 1)
     }
 }
@@ -3398,6 +3571,34 @@ public object FfiConverterSequenceTypePartial: FfiConverterRustBuffer<List<Parti
         buf.putInt(value.size)
         value.iterator().forEach {
             FfiConverterTypePartial.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeReferenceTone: FfiConverterRustBuffer<List<ReferenceTone>> {
+    override fun read(buf: ByteBuffer): List<ReferenceTone> {
+        val len = buf.getInt()
+        return List<ReferenceTone>(len) {
+            FfiConverterTypeReferenceTone.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<ReferenceTone>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeReferenceTone.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<ReferenceTone>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeReferenceTone.write(it, buf)
         }
     }
 }

@@ -28,6 +28,10 @@ private class FakeEngine : PitchEngine {
         spectrumDb = emptyList(),
         partials = emptyList(),
         chord = null,
+        signalState = uniffi.tuner_core.SignalState.QUIET,
+        inputLevelDbfs = -120f,
+        displayStrength = 0f,
+        isHeld = false,
     )
     override fun setA4(hz: Double) {
         recordedA4 = hz
@@ -103,6 +107,7 @@ class CaptureHubCoreTest {
 
         val config = TunerConfig(
             sampleRate = 44100.0,
+            frameHopSamples = 1024u,
             a4Hz = 442.0,
             noiseGateDbfs = -45f,
             solfege = SolfegeSystem.CHINESE,

@@ -337,6 +337,11 @@ RustBuffer uniffi_tuner_core_fn_method_tunerengine_analyze(void*_Nonnull ptr, Ru
 RustBuffer uniffi_tuner_core_fn_method_tunerengine_feed(void*_Nonnull ptr, RustBuffer pcm, RustCallStatus *_Nonnull out_status
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_TUNER_CORE_FN_METHOD_TUNERENGINE_LIST_REFERENCE_TONES
+#define UNIFFI_FFIDEF_UNIFFI_TUNER_CORE_FN_METHOD_TUNERENGINE_LIST_REFERENCE_TONES
+RustBuffer uniffi_tuner_core_fn_method_tunerengine_list_reference_tones(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNER_CORE_FN_METHOD_TUNERENGINE_SET_A4
 #define UNIFFI_FFIDEF_UNIFFI_TUNER_CORE_FN_METHOD_TUNERENGINE_SET_A4
 void uniffi_tuner_core_fn_method_tunerengine_set_a4(void*_Nonnull ptr, double hz, RustCallStatus *_Nonnull out_status
@@ -756,6 +761,12 @@ uint16_t uniffi_tuner_core_checksum_method_tunerengine_analyze(void
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNER_CORE_CHECKSUM_METHOD_TUNERENGINE_FEED
 #define UNIFFI_FFIDEF_UNIFFI_TUNER_CORE_CHECKSUM_METHOD_TUNERENGINE_FEED
 uint16_t uniffi_tuner_core_checksum_method_tunerengine_feed(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_TUNER_CORE_CHECKSUM_METHOD_TUNERENGINE_LIST_REFERENCE_TONES
+#define UNIFFI_FFIDEF_UNIFFI_TUNER_CORE_CHECKSUM_METHOD_TUNERENGINE_LIST_REFERENCE_TONES
+uint16_t uniffi_tuner_core_checksum_method_tunerengine_list_reference_tones(void
     
 );
 #endif

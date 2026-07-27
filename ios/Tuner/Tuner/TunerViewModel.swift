@@ -25,32 +25,38 @@ final class TunerViewModel: ObservableObject {
     @Published private(set) var spectrumDb: [Float] = []
     @Published private(set) var partials: [Partial] = []
     @Published private(set) var chord: String?
+    @Published private(set) var displaySpectrumDb: [Float] = []
+    @Published private(set) var displayPartials: [Partial] = []
+    @Published private(set) var displayChord: String?
+    @Published private(set) var signalState: SignalState = .quiet
+    @Published private(set) var inputLevelDbfs: Float = -120
+    @Published private(set) var displayStrength: Float = 0
+    @Published private(set) var isHeld = false
 
     private let events: AnyPublisher<AnalysisFrame, Never>
-    private let clock: () -> UInt64
-    private let timeoutMs: UInt64
-    private var lastEventAtMs: UInt64?
     private var cancellables = Set<AnyCancellable>()
     private var acquired = false
 
-    init(
-        events: AnyPublisher<AnalysisFrame, Never>? = nil,
-        clock: @escaping () -> UInt64 = { UInt64(ProcessInfo.processInfo.systemUptime * 1000) },
-        timeoutMs: UInt64 = 800
-    ) {
+    init(events: AnyPublisher<AnalysisFrame, Never>? = nil) {
         self.events = events ?? CaptureHub.shared.events.eraseToAnyPublisher()
-        self.clock = clock
-        self.timeoutMs = timeoutMs
 
         self.events
             .receive(on: DispatchQueue.main)
             .sink { [weak self] frame in
-                guard let self, let ev = frame.tuner else { return }
-                self.lastEventAtMs = self.clock()
-                self.signal = .active(Self.map(ev))
+                guard let self else { return }
+                self.signal = frame.tuner.map { .active(Self.map($0)) } ?? .listening
                 self.spectrumDb = frame.spectrumDb
                 self.partials = frame.partials
                 self.chord = frame.chord
+                if frame.signalState == .tracking {
+                    self.displaySpectrumDb = frame.spectrumDb
+                    self.displayPartials = frame.partials
+                    self.displayChord = frame.chord
+                }
+                self.signalState = frame.signalState
+                self.inputLevelDbfs = frame.inputLevelDbfs
+                self.displayStrength = frame.displayStrength
+                self.isHeld = frame.isHeld
             }
             .store(in: &cancellables)
     }
@@ -59,19 +65,6 @@ final class TunerViewModel: ObservableObject {
         if acquired { return }
         CaptureHub.shared.acquire()
         acquired = true
-    }
-
-    /// 由 UI 定时器（~10Hz）调用：超时回「请发声」。
-    func onTick() {
-        guard let last = lastEventAtMs else { return }
-        if clock() - last > timeoutMs {
-            if case .active = signal {
-                signal = .listening
-                spectrumDb = []
-                partials = []
-                chord = nil
-            }
-        }
     }
 
     func releaseCapture() {

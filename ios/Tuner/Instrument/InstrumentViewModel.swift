@@ -47,25 +47,30 @@ final class InstrumentViewModel: ObservableObject {
     // 共享
     @Published private(set) var centsToTarget: Float?
     @Published private(set) var targetNoteName: String?
+    @Published private(set) var signalState: SignalState = .quiet
+    @Published private(set) var displayStrength: Float = 0
+    @Published private(set) var isHeld = false
 
     private let events: AnyPublisher<AnalysisFrame, Never>
-    private let clock: () -> UInt64
-    private var lastEventAtMs: UInt64?
     private var acquired = false
     private var cancellables = Set<AnyCancellable>()
 
-    init(
-        events: AnyPublisher<AnalysisFrame, Never>? = nil,
-        clock: @escaping () -> UInt64 = { UInt64(ProcessInfo.processInfo.systemUptime * 1000) }
-    ) {
+    init(events: AnyPublisher<AnalysisFrame, Never>? = nil) {
         self.events = events ?? CaptureHub.shared.events.eraseToAnyPublisher()
-        self.clock = clock
         instruments = CorePresets.instruments()
         if let first = instruments.first { selectInstrument(first.id) }
         self.events
             .receive(on: DispatchQueue.main)
             .sink { [weak self] frame in
-                if let ev = frame.tuner { self?.onEvent(ev) }
+                guard let self else { return }
+                self.signalState = frame.signalState
+                self.displayStrength = frame.displayStrength
+                self.isHeld = frame.isHeld
+                if let ev = frame.tuner {
+                    self.onEvent(ev)
+                } else {
+                    self.clearReading()
+                }
             }
             .store(in: &cancellables)
     }
@@ -157,7 +162,6 @@ final class InstrumentViewModel: ObservableObject {
     }
 
     private func onEvent(_ ev: TunerEvent) {
-        lastEventAtMs = clock()
         let freq = ev.freqHz
         switch kind {
         case .string:
@@ -191,14 +195,11 @@ final class InstrumentViewModel: ObservableObject {
         }
     }
 
-    func onTick() {
-        guard let last = lastEventAtMs else { return }
-        if clock() - last > 800 && centsToTarget != nil {
-            centsToTarget = nil
-            targetNoteName = nil
-            strings = strings.map { var s = $0; s.active = false; s.inTune = false; return s }
-            notes = notes.map { var n = $0; n.active = false; return n }
-        }
+    private func clearReading() {
+        centsToTarget = nil
+        targetNoteName = nil
+        strings = strings.map { var s = $0; s.active = false; s.inTune = false; return s }
+        notes = notes.map { var n = $0; n.active = false; return n }
     }
 }
 

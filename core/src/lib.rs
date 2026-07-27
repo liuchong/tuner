@@ -7,6 +7,8 @@ pub mod fingering;
 pub mod metronome;
 pub mod note;
 pub mod pitch;
+pub mod reference;
+pub mod signal;
 pub mod smooth;
 pub mod solfege;
 pub mod spectrum;

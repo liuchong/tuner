@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uniffi.tuner_core.InstrumentKind
+import uniffi.tuner_core.SignalState
 import uniffi.tuner_core.TunerEvent
 import kotlin.math.abs
 
@@ -60,6 +61,10 @@ data class InstrumentUiState(
     // 共享：相对目标的音分偏差（null = 无信号）
     val centsToTarget: Float? = null,
     val targetNoteName: String? = null,
+    /** 与主调音页相同的 core 信号状态与显示强度。 */
+    val signalState: SignalState = SignalState.QUIET,
+    val displayStrength: Float = 0f,
+    val isHeld: Boolean = false,
 )
 
 /**
@@ -70,8 +75,6 @@ class InstrumentViewModel(
     private val core: TunerCoreApi,
     private val stream: TunerEventStream,
     private val savedState: SavedStateHandle,
-    private val clock: () -> Long = { System.currentTimeMillis() },
-    private val signalTimeoutMs: Long = 800L,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(InstrumentUiState())
@@ -79,13 +82,36 @@ class InstrumentViewModel(
 
     private var acquired = false
 
-    @Volatile
-    private var lastEventAtMs: Long = Long.MIN_VALUE
-
     init {
         viewModelScope.launch {
             stream.events.collect { frame ->
-                frame?.tuner?.let { onEvent(it) }
+                frame?.let { analysis ->
+                    val event = analysis.tuner
+                    if (event != null) {
+                        onEvent(event)
+                        _uiState.update {
+                            it.copy(
+                                signalState = analysis.signalState,
+                                displayStrength = analysis.displayStrength,
+                                isHeld = analysis.isHeld,
+                            )
+                        }
+                    } else {
+                        _uiState.update {
+                            it.copy(
+                                centsToTarget = null,
+                                targetNoteName = null,
+                                strings = it.strings.map { item ->
+                                    item.copy(active = false, inTune = false)
+                                },
+                                notes = it.notes.map { item -> item.copy(active = false) },
+                                signalState = analysis.signalState,
+                                displayStrength = analysis.displayStrength,
+                                isHeld = analysis.isHeld,
+                            )
+                        }
+                    }
+                }
             }
         }
         // 初始乐器：持久化值或第一个
@@ -227,7 +253,6 @@ class InstrumentViewModel(
 
     /** 事件处理：计算各目标 cents、最近目标高亮、准音标记。 */
     private fun onEvent(ev: TunerEvent) {
-        lastEventAtMs = clock()
         val freq = ev.freqHz
         _uiState.update { state ->
             when (state.kind) {
@@ -265,22 +290,6 @@ class InstrumentViewModel(
                         targetNoteName = state.notes[nearest].noteName,
                     )
                 }
-            }
-        }
-    }
-
-    /** 800ms 无信号 → 清除高亮与偏差。 */
-    fun onTick() {
-        val last = lastEventAtMs
-        if (last == Long.MIN_VALUE) return
-        if (clock() - last > signalTimeoutMs && _uiState.value.centsToTarget != null) {
-            _uiState.update {
-                it.copy(
-                    centsToTarget = null,
-                    targetNoteName = null,
-                    strings = it.strings.map { s -> s.copy(active = false, inTune = false) },
-                    notes = it.notes.map { n -> n.copy(active = false) },
-                )
             }
         }
     }

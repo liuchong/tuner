@@ -48,7 +48,7 @@ final class SettingsStore: ObservableObject {
         solfegeSystem = SolfegeSystem.from(index: d.object(forKey: "solfegeSystem") as? Int ?? 2)
         keyTonicPc = d.object(forKey: "keyTonicPc") as? Int ?? 0
         keyMode = ModeKind.from(index: d.object(forKey: "keyMode") as? Int ?? 5)
-        noiseGateDbfs = d.object(forKey: "noiseGateDbfs") as? Double ?? -50.0
+        noiseGateDbfs = d.object(forKey: "noiseGateDbfs") as? Double ?? -45.0
         themeMode = ThemeMode(rawValue: d.string(forKey: "themeMode") ?? "") ?? .system
         hapticsEnabled = d.object(forKey: "hapticsEnabled") as? Bool ?? true
         proMode = d.object(forKey: "proMode") as? Bool ?? false
@@ -79,6 +79,7 @@ final class SettingsStore: ObservableObject {
     func toTunerConfig() -> TunerConfig {
         TunerConfig(
             sampleRate: CaptureHub.shared.config.sampleRate,
+            frameHopSamples: CaptureHub.shared.config.frameHopSamples,
             a4Hz: a4Hz,
             noiseGateDbfs: Float(noiseGateDbfs),
             solfege: solfegeSystem,

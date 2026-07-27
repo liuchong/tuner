@@ -6,6 +6,7 @@ import uniffi.tuner_core.Instrument
 import uniffi.tuner_core.KeyMode
 import uniffi.tuner_core.MetronomeConfig
 import uniffi.tuner_core.ModeKind
+import uniffi.tuner_core.ReferenceTone
 import uniffi.tuner_core.SolfegeSystem
 import uniffi.tuner_core.TunerConfig
 import uniffi.tuner_core.TunerEngine
@@ -81,16 +82,27 @@ object TunerCore : TunerCoreApi {
         }
     }
 
-    /** 默认调音器配置（C 大调、简谱、A4=440、-50dBFS、12-TET）。 */
+    /** 默认调音器配置（C 大调、简谱、A4=440、-45dBFS、12-TET）。 */
     fun defaultConfig(sampleRate: Double = 44100.0): TunerConfig =
         TunerConfig(
             sampleRate = sampleRate,
+            frameHopSamples = 1024u,
             a4Hz = 440.0,
-            noiseGateDbfs = -50.0f,
+            noiseGateDbfs = -45.0f,
             solfege = SolfegeSystem.NUMBERED,
             key = KeyMode(tonicPc = 0u, mode = ModeKind.MAJOR),
             temperament = 12u,
         )
+
+    /** 根据当前 A4 与律制从 Rust core 获取 80–1500Hz 固定音高表。 */
+    fun referenceTones(config: TunerConfig): List<ReferenceTone> {
+        val engine = TunerEngine(config)
+        return try {
+            engine.listReferenceTones()
+        } finally {
+            engine.close()
+        }
+    }
 
     override fun instruments(): List<Instrument> = listInstruments()
 

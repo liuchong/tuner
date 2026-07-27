@@ -84,7 +84,7 @@ class SettingsViewModelTest {
         val c = sink.configs[0]
         assertEquals(440.0, c.a4Hz, 1e-9)
         assertEquals(SolfegeSystem.NUMBERED, c.solfege)
-        assertEquals(-50f, c.noiseGateDbfs, 1e-6f)
+        assertEquals(-45f, c.noiseGateDbfs, 1e-6f)
     }
 
     @Test
