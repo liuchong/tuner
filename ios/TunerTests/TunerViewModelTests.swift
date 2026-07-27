@@ -4,15 +4,13 @@ import XCTest
 
 final class TunerViewModelTests: XCTestCase {
     private var subject: PassthroughSubject<AnalysisFrame, Never>!
-    private var now: UInt64 = 0
 
     override func setUp() {
         subject = PassthroughSubject<AnalysisFrame, Never>()
-        now = 0
     }
 
-    private func makeVm(timeoutMs: UInt64 = 800) -> TunerViewModel {
-        TunerViewModel(events: subject.eraseToAnyPublisher(), clock: { [weak self] in self?.now ?? 0 }, timeoutMs: timeoutMs)
+    private func makeVm() -> TunerViewModel {
+        TunerViewModel(events: subject.eraseToAnyPublisher())
     }
 
     private func a4Event() -> TunerEvent {
@@ -23,10 +21,19 @@ final class TunerViewModelTests: XCTestCase {
         )
     }
 
-    private func frame(_ ev: TunerEvent?) -> AnalysisFrame {
+    private func frame(
+        _ ev: TunerEvent?,
+        state: SignalState? = nil,
+        strength: Float? = nil,
+        held: Bool = false
+    ) -> AnalysisFrame {
         AnalysisFrame(
             tuner: ev, spectrumDb: Array(repeating: -40, count: 64),
-            partials: [], chord: nil
+            partials: [], chord: nil,
+            signalState: state ?? (ev == nil ? .quiet : .tracking),
+            inputLevelDbfs: ev == nil ? -120 : -24,
+            displayStrength: strength ?? (ev == nil ? 0 : 1),
+            isHeld: held
         )
     }
 
@@ -49,25 +56,31 @@ final class TunerViewModelTests: XCTestCase {
         XCTAssertEqual(r.midi, 69)
         XCTAssertEqual(r.solfege, "6")
         XCTAssertEqual(vm.spectrumDb.count, 64)
+        XCTAssertEqual(vm.displaySpectrumDb.count, 64)
     }
 
-    func testTimeoutBackToListening() {
+    func testHoldingAndQuietFollowCoreStateWithoutLocalTimeout() {
         let vm = makeVm()
         subject.send(frame(a4Event()))
         pump()
         guard case .active = vm.signal else { return XCTFail() }
 
-        now = 799
-        vm.onTick()
-        guard case .active = vm.signal else { return XCTFail("799ms 不应超时") }
+        subject.send(frame(a4Event(), state: .holding, strength: 0.4, held: true))
+        pump()
+        guard case .active = vm.signal else { return XCTFail("保持帧应继续显示") }
+        XCTAssertEqual(vm.displayStrength, 0.4, accuracy: 1e-6)
+        XCTAssertTrue(vm.isHeld)
+        XCTAssertEqual(vm.displaySpectrumDb, Array(repeating: -40, count: 64))
 
-        now = 801
-        vm.onTick()
+        subject.send(frame(nil, state: .quiet))
+        pump()
         guard case .listening = vm.signal else {
-            XCTFail("801ms 应回到 Listening")
+            XCTFail("Quiet 帧应回到 Listening")
             return
         }
-        XCTAssertTrue(vm.spectrumDb.isEmpty)
+        XCTAssertEqual(vm.spectrumDb.count, 64)
+        XCTAssertEqual(vm.displaySpectrumDb, Array(repeating: -40, count: 64))
+        XCTAssertEqual(vm.displayStrength, 0)
     }
 
     func testNullEventDoesNotChange() {

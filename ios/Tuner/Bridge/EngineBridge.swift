@@ -6,6 +6,7 @@ import Foundation
 protocol PitchEngine {
     func feed(pcm: [Float]) -> TunerEvent?
     func analyze(pcm: [Float]) -> AnalysisFrame
+    func listReferenceTones() -> [ReferenceTone]
     func setA4(hz: Double)
     func setSolfege(system: SolfegeSystem, key: KeyMode)
     func setNoiseGate(dbfs: Float)
@@ -39,6 +40,7 @@ final class UniffiPitchEngine: PitchEngine {
     init(config: TunerConfig) { inner = TunerEngine(config: config) }
     func feed(pcm: [Float]) -> TunerEvent? { inner.feed(pcm: pcm) }
     func analyze(pcm: [Float]) -> AnalysisFrame { inner.analyze(pcm: pcm) }
+    func listReferenceTones() -> [ReferenceTone] { inner.listReferenceTones() }
     func setA4(hz: Double) { inner.setA4(hz: hz) }
     func setSolfege(system: SolfegeSystem, key: KeyMode) { inner.setSolfege(system: system, key: key) }
     func setNoiseGate(dbfs: Float) { inner.setNoiseGate(dbfs: dbfs) }
@@ -82,14 +84,18 @@ enum CorePresets {
     static func centsBetween(freq: Double, target: Double) -> Double? {
         Tuner.centsBetween(freqHz: freq, targetHz: target)
     }
+    static func referenceTones(config: TunerConfig) -> [ReferenceTone] {
+        UniffiPitchEngine(config: config).listReferenceTones()
+    }
 }
 
-/// 默认调音器配置（C 大调、简谱、A4=440、-50dBFS、12-TET）。
+/// 默认调音器配置（C 大调、简谱、A4=440、-45dBFS、12-TET）。
 func defaultTunerConfig(sampleRate: Double = 44100.0) -> TunerConfig {
     TunerConfig(
         sampleRate: sampleRate,
+        frameHopSamples: 1_024,
         a4Hz: 440.0,
-        noiseGateDbfs: -50.0,
+        noiseGateDbfs: -45.0,
         solfege: .numbered,
         key: KeyMode(tonicPc: 0, mode: .major),
         temperament: 12

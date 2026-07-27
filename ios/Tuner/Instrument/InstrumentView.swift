@@ -21,10 +21,11 @@ struct InstrumentView: View {
                                         .font(.system(size: 12))
                                     Text(inst.displayName)
                                         .font(Lumen.label)
+                                        .lineLimit(1)
                                 }
                                 .foregroundStyle(selected ? palette.accent : palette.inkPrimary)
                                 .padding(.horizontal, 14)
-                                .padding(.vertical, 10)
+                                .frame(height: 48)
                                 .background(
                                     selected ? palette.accent.opacity(0.10) : palette.bgSurface,
                                     in: RoundedRectangle(cornerRadius: 16)
@@ -52,6 +53,7 @@ struct InstrumentView: View {
                     clarity: 1
                 )
                 .frame(height: 240)
+                .opacity(vm.centsToTarget == nil ? 1 : 0.35 + Double(vm.displayStrength) * 0.65)
 
                 Spacer().frame(maxHeight: .infinity)
 
@@ -67,37 +69,22 @@ struct InstrumentView: View {
                 animatedCents = newValue ?? 0
             }
         }
-        .task {
-            while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 100_000_000)
-                vm.onTick()
-            }
-        }
     }
 
     @ViewBuilder
     private var controlSection: some View {
         if vm.kind == .string {
             VStack(spacing: Lumen.Spacing.sm) {
-                HStack {
-                    Menu {
-                        ForEach(vm.tunings, id: \.id) { t in
-                            Button(t.displayName) { vm.selectTuning(t.id) }
-                        }
-                    } label: {
-                        HStack {
-                            Text(vm.tuningName)
-                                .font(Lumen.label)
-                            Image(systemName: "chevron.down")
-                                .font(.caption2)
-                        }
-                        .foregroundStyle(palette.inkPrimary)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 10)
-                        .background(palette.bgSurface, in: RoundedRectangle(cornerRadius: 12))
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: Lumen.Spacing.sm) {
+                        tuningMenu
+                        Spacer(minLength: Lumen.Spacing.sm)
+                        modePicker
                     }
-                    Spacer()
-                    modePicker
+                    VStack(alignment: .leading, spacing: Lumen.Spacing.sm) {
+                        tuningMenu
+                        modePicker
+                    }
                 }
                 // 弦按钮横排
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -110,37 +97,16 @@ struct InstrumentView: View {
             }
         } else {
             VStack(spacing: Lumen.Spacing.sm) {
-                HStack {
-                    Menu {
-                        ForEach(vm.chartGroups, id: \.self) { g in
-                            Button(g) { vm.selectChart(group: g, tongyin: vm.tongyin) }
-                        }
-                    } label: {
-                        HStack {
-                            Text(vm.chartGroup)
-                                .font(Lumen.label)
-                            Image(systemName: "chevron.down")
-                                .font(.caption2)
-                        }
-                        .foregroundStyle(palette.inkPrimary)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 10)
-                        .background(palette.bgSurface, in: RoundedRectangle(cornerRadius: 12))
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: Lumen.Spacing.sm) {
+                        chartMenu
+                        Spacer(minLength: Lumen.Spacing.sm)
+                        tongyinPicker
                     }
-                    Spacer()
-                    if !vm.tongyinOptions.isEmpty {
-                        HStack(spacing: Lumen.Spacing.xs) {
-                            ForEach(vm.tongyinOptions, id: \.self) { ty in
-                                let selected = ty == vm.tongyin
-                                Button { vm.selectChart(group: vm.chartGroup, tongyin: ty) } label: {
-                                    Text("作\(ty)")
-                                        .font(Lumen.label)
-                                        .foregroundStyle(selected ? palette.bgCanvas : palette.inkPrimary)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 8)
-                                        .background(selected ? palette.accent : palette.bgSurface, in: Capsule())
-                                }
-                            }
+                    VStack(alignment: .leading, spacing: Lumen.Spacing.sm) {
+                        chartMenu
+                        if !vm.tongyinOptions.isEmpty {
+                            tongyinPicker
                         }
                     }
                 }
@@ -180,15 +146,54 @@ struct InstrumentView: View {
                 Button { vm.selectMode(m) } label: {
                     Text(m == .auto ? "自动" : "手动")
                         .font(Lumen.label)
+                        .lineLimit(1)
                         .foregroundStyle(selected ? palette.bgCanvas : palette.inkPrimary)
                         .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
+                        .frame(height: 48)
                         .background(selected ? palette.accent : palette.bgSurface)
                 }
             }
         }
         .clipShape(Capsule())
         .overlay(Capsule().stroke(palette.lineSubtle, lineWidth: 1))
+    }
+
+    private var tuningMenu: some View {
+        Menu {
+            ForEach(vm.tunings, id: \.id) { tuning in
+                Button(tuning.displayName) { vm.selectTuning(tuning.id) }
+            }
+        } label: {
+            RoundedControlLabel(title: vm.tuningName)
+        }
+    }
+
+    private var chartMenu: some View {
+        Menu {
+            ForEach(vm.chartGroups, id: \.self) { group in
+                Button(group) { vm.selectChart(group: group, tongyin: vm.tongyin) }
+            }
+        } label: {
+            RoundedControlLabel(title: vm.chartGroup)
+        }
+    }
+
+    private var tongyinPicker: some View {
+        HStack(spacing: Lumen.Spacing.xs) {
+            ForEach(vm.tongyinOptions, id: \.self) { option in
+                let selected = option == vm.tongyin
+                Button { vm.selectChart(group: vm.chartGroup, tongyin: option) } label: {
+                    Text("作\(option)")
+                        .font(Lumen.label)
+                        .lineLimit(1)
+                        .foregroundStyle(selected ? palette.bgCanvas : palette.inkPrimary)
+                        .padding(.horizontal, 12)
+                        .frame(height: 48)
+                        .background(selected ? palette.accent : palette.bgSurface, in: Capsule())
+                        .overlay(Capsule().stroke(selected ? palette.accent : palette.lineSubtle))
+                }
+            }
+        }
     }
 
     @ViewBuilder
@@ -218,6 +223,27 @@ struct InstrumentView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.bottom, Lumen.Spacing.sm)
+    }
+}
+
+private struct RoundedControlLabel: View {
+    @Environment(\.lumen) private var palette
+    let title: String
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Text(title)
+                .font(Lumen.label)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            Image(systemName: "chevron.down")
+                .font(.caption2)
+        }
+        .foregroundStyle(palette.inkPrimary)
+        .padding(.horizontal, 16)
+        .frame(height: 48)
+        .background(palette.bgSurface, in: Capsule())
+        .overlay(Capsule().stroke(palette.lineSubtle, lineWidth: 1))
     }
 }
 

@@ -12,7 +12,7 @@ pub const OCTAVE_MARGIN: f32 = 0.05;
 /// clarity 门限（低于此值视为无效）。
 pub const CLARITY_MIN: f32 = 0.6;
 /// 默认噪声门限（dBFS）。
-pub const NOISE_GATE_DEFAULT_DBFS: f32 = -50.0;
+pub const NOISE_GATE_DEFAULT_DBFS: f32 = -45.0;
 
 /// YIN 检测器。单线程使用，内部无可变性共享。
 pub struct Yin {

@@ -848,6 +848,11 @@ public protocol TunerEngineProtocol: AnyObject, Sendable {
     func feed(pcm: [Float])  -> TunerEvent?
     
     /**
+     * 列出当前 A4 与平均律在 80–1500Hz 内的全部固定音高。
+     */
+    func listReferenceTones()  -> [ReferenceTone]
+    
+    /**
      * 设置 A4 校准（收敛到 415–466Hz）。
      */
     func setA4(hz: Double) 
@@ -952,6 +957,16 @@ open func feed(pcm: [Float]) -> TunerEvent?  {
     return try!  FfiConverterOptionTypeTunerEvent.lift(try! rustCall() {
     uniffi_tuner_core_fn_method_tunerengine_feed(self.uniffiClonePointer(),
         FfiConverterSequenceFloat.lower(pcm),$0
+    )
+})
+}
+    
+    /**
+     * 列出当前 A4 与平均律在 80–1500Hz 内的全部固定音高。
+     */
+open func listReferenceTones() -> [ReferenceTone]  {
+    return try!  FfiConverterSequenceTypeReferenceTone.lift(try! rustCall() {
+    uniffi_tuner_core_fn_method_tunerengine_list_reference_tones(self.uniffiClonePointer(),$0
     )
 })
 }
@@ -1073,6 +1088,22 @@ public struct AnalysisFrame {
      * 和弦名（如 "Cmaj"），无则为 None。
      */
     public var chord: String?
+    /**
+     * 输入信号状态。
+     */
+    public var signalState: SignalState
+    /**
+     * 当前分析窗口的 RMS 电平（dBFS）。
+     */
+    public var inputLevelDbfs: Float
+    /**
+     * 读数显示强度（0~1）。
+     */
+    public var displayStrength: Float
+    /**
+     * 当前读数是否来自断音保持。
+     */
+    public var isHeld: Bool
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
@@ -1088,11 +1119,27 @@ public struct AnalysisFrame {
          */partials: [Partial], 
         /**
          * 和弦名（如 "Cmaj"），无则为 None。
-         */chord: String?) {
+         */chord: String?, 
+        /**
+         * 输入信号状态。
+         */signalState: SignalState, 
+        /**
+         * 当前分析窗口的 RMS 电平（dBFS）。
+         */inputLevelDbfs: Float, 
+        /**
+         * 读数显示强度（0~1）。
+         */displayStrength: Float, 
+        /**
+         * 当前读数是否来自断音保持。
+         */isHeld: Bool) {
         self.tuner = tuner
         self.spectrumDb = spectrumDb
         self.partials = partials
         self.chord = chord
+        self.signalState = signalState
+        self.inputLevelDbfs = inputLevelDbfs
+        self.displayStrength = displayStrength
+        self.isHeld = isHeld
     }
 }
 
@@ -1115,6 +1162,18 @@ extension AnalysisFrame: Equatable, Hashable {
         if lhs.chord != rhs.chord {
             return false
         }
+        if lhs.signalState != rhs.signalState {
+            return false
+        }
+        if lhs.inputLevelDbfs != rhs.inputLevelDbfs {
+            return false
+        }
+        if lhs.displayStrength != rhs.displayStrength {
+            return false
+        }
+        if lhs.isHeld != rhs.isHeld {
+            return false
+        }
         return true
     }
 
@@ -1123,6 +1182,10 @@ extension AnalysisFrame: Equatable, Hashable {
         hasher.combine(spectrumDb)
         hasher.combine(partials)
         hasher.combine(chord)
+        hasher.combine(signalState)
+        hasher.combine(inputLevelDbfs)
+        hasher.combine(displayStrength)
+        hasher.combine(isHeld)
     }
 }
 
@@ -1138,7 +1201,11 @@ public struct FfiConverterTypeAnalysisFrame: FfiConverterRustBuffer {
                 tuner: FfiConverterOptionTypeTunerEvent.read(from: &buf), 
                 spectrumDb: FfiConverterSequenceFloat.read(from: &buf), 
                 partials: FfiConverterSequenceTypePartial.read(from: &buf), 
-                chord: FfiConverterOptionString.read(from: &buf)
+                chord: FfiConverterOptionString.read(from: &buf), 
+                signalState: FfiConverterTypeSignalState.read(from: &buf), 
+                inputLevelDbfs: FfiConverterFloat.read(from: &buf), 
+                displayStrength: FfiConverterFloat.read(from: &buf), 
+                isHeld: FfiConverterBool.read(from: &buf)
         )
     }
 
@@ -1147,6 +1214,10 @@ public struct FfiConverterTypeAnalysisFrame: FfiConverterRustBuffer {
         FfiConverterSequenceFloat.write(value.spectrumDb, into: &buf)
         FfiConverterSequenceTypePartial.write(value.partials, into: &buf)
         FfiConverterOptionString.write(value.chord, into: &buf)
+        FfiConverterTypeSignalState.write(value.signalState, into: &buf)
+        FfiConverterFloat.write(value.inputLevelDbfs, into: &buf)
+        FfiConverterFloat.write(value.displayStrength, into: &buf)
+        FfiConverterBool.write(value.isHeld, into: &buf)
     }
 }
 
@@ -1831,6 +1902,133 @@ public func FfiConverterTypePartial_lower(_ value: Partial) -> RustBuffer {
 
 
 /**
+ * 当前平均律中的一个可播放固定音高。
+ */
+public struct ReferenceTone {
+    /**
+     * 相对 A4 的平均律步数。
+     */
+    public var stepFromA4: Int32
+    /**
+     * 固定频率（Hz）。
+     */
+    public var frequencyHz: Double
+    /**
+     * 平均律等分数。
+     */
+    public var temperament: UInt8
+    /**
+     * 最近的 12 平均律音名。
+     */
+    public var noteName: String
+    /**
+     * 相对该音名的音分差。
+     */
+    public var centsFromNote: Double
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * 相对 A4 的平均律步数。
+         */stepFromA4: Int32, 
+        /**
+         * 固定频率（Hz）。
+         */frequencyHz: Double, 
+        /**
+         * 平均律等分数。
+         */temperament: UInt8, 
+        /**
+         * 最近的 12 平均律音名。
+         */noteName: String, 
+        /**
+         * 相对该音名的音分差。
+         */centsFromNote: Double) {
+        self.stepFromA4 = stepFromA4
+        self.frequencyHz = frequencyHz
+        self.temperament = temperament
+        self.noteName = noteName
+        self.centsFromNote = centsFromNote
+    }
+}
+
+#if compiler(>=6)
+extension ReferenceTone: Sendable {}
+#endif
+
+
+extension ReferenceTone: Equatable, Hashable {
+    public static func ==(lhs: ReferenceTone, rhs: ReferenceTone) -> Bool {
+        if lhs.stepFromA4 != rhs.stepFromA4 {
+            return false
+        }
+        if lhs.frequencyHz != rhs.frequencyHz {
+            return false
+        }
+        if lhs.temperament != rhs.temperament {
+            return false
+        }
+        if lhs.noteName != rhs.noteName {
+            return false
+        }
+        if lhs.centsFromNote != rhs.centsFromNote {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(stepFromA4)
+        hasher.combine(frequencyHz)
+        hasher.combine(temperament)
+        hasher.combine(noteName)
+        hasher.combine(centsFromNote)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeReferenceTone: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> ReferenceTone {
+        return
+            try ReferenceTone(
+                stepFromA4: FfiConverterInt32.read(from: &buf), 
+                frequencyHz: FfiConverterDouble.read(from: &buf), 
+                temperament: FfiConverterUInt8.read(from: &buf), 
+                noteName: FfiConverterString.read(from: &buf), 
+                centsFromNote: FfiConverterDouble.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: ReferenceTone, into buf: inout [UInt8]) {
+        FfiConverterInt32.write(value.stepFromA4, into: &buf)
+        FfiConverterDouble.write(value.frequencyHz, into: &buf)
+        FfiConverterUInt8.write(value.temperament, into: &buf)
+        FfiConverterString.write(value.noteName, into: &buf)
+        FfiConverterDouble.write(value.centsFromNote, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeReferenceTone_lift(_ buf: RustBuffer) throws -> ReferenceTone {
+    return try FfiConverterTypeReferenceTone.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeReferenceTone_lower(_ value: ReferenceTone) -> RustBuffer {
+    return FfiConverterTypeReferenceTone.lower(value)
+}
+
+
+/**
  * 一次 render 的输出。
  */
 public struct RenderFrame {
@@ -2150,11 +2348,15 @@ public struct TunerConfig {
      */
     public var sampleRate: Double
     /**
+     * 相邻分析帧之间推进的采样数（默认 1024）。
+     */
+    public var frameHopSamples: UInt32
+    /**
      * A4 校准（415–466Hz）。
      */
     public var a4Hz: Double
     /**
-     * 噪声门限（dBFS，默认 -50）。
+     * 噪声门限（dBFS，默认 -45）。
      */
     public var noiseGateDbfs: Float
     /**
@@ -2177,10 +2379,13 @@ public struct TunerConfig {
          * 采样率（Hz）。
          */sampleRate: Double, 
         /**
+         * 相邻分析帧之间推进的采样数（默认 1024）。
+         */frameHopSamples: UInt32, 
+        /**
          * A4 校准（415–466Hz）。
          */a4Hz: Double, 
         /**
-         * 噪声门限（dBFS，默认 -50）。
+         * 噪声门限（dBFS，默认 -45）。
          */noiseGateDbfs: Float, 
         /**
          * 唱名体系。
@@ -2192,6 +2397,7 @@ public struct TunerConfig {
          * N 平均律（12/19/24/31，默认 12；v4 新增）。
          */temperament: UInt8) {
         self.sampleRate = sampleRate
+        self.frameHopSamples = frameHopSamples
         self.a4Hz = a4Hz
         self.noiseGateDbfs = noiseGateDbfs
         self.solfege = solfege
@@ -2208,6 +2414,9 @@ extension TunerConfig: Sendable {}
 extension TunerConfig: Equatable, Hashable {
     public static func ==(lhs: TunerConfig, rhs: TunerConfig) -> Bool {
         if lhs.sampleRate != rhs.sampleRate {
+            return false
+        }
+        if lhs.frameHopSamples != rhs.frameHopSamples {
             return false
         }
         if lhs.a4Hz != rhs.a4Hz {
@@ -2230,6 +2439,7 @@ extension TunerConfig: Equatable, Hashable {
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(sampleRate)
+        hasher.combine(frameHopSamples)
         hasher.combine(a4Hz)
         hasher.combine(noiseGateDbfs)
         hasher.combine(solfege)
@@ -2248,6 +2458,7 @@ public struct FfiConverterTypeTunerConfig: FfiConverterRustBuffer {
         return
             try TunerConfig(
                 sampleRate: FfiConverterDouble.read(from: &buf), 
+                frameHopSamples: FfiConverterUInt32.read(from: &buf), 
                 a4Hz: FfiConverterDouble.read(from: &buf), 
                 noiseGateDbfs: FfiConverterFloat.read(from: &buf), 
                 solfege: FfiConverterTypeSolfegeSystem.read(from: &buf), 
@@ -2258,6 +2469,7 @@ public struct FfiConverterTypeTunerConfig: FfiConverterRustBuffer {
 
     public static func write(_ value: TunerConfig, into buf: inout [UInt8]) {
         FfiConverterDouble.write(value.sampleRate, into: &buf)
+        FfiConverterUInt32.write(value.frameHopSamples, into: &buf)
         FfiConverterDouble.write(value.a4Hz, into: &buf)
         FfiConverterFloat.write(value.noiseGateDbfs, into: &buf)
         FfiConverterTypeSolfegeSystem.write(value.solfege, into: &buf)
@@ -2774,6 +2986,105 @@ extension ModeKind: Equatable, Hashable {}
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 /**
+ * 输入信号状态。
+ */
+
+public enum SignalState {
+    
+    /**
+     * 无可信信号。
+     */
+    case quiet
+    /**
+     * 已有一帧可信音高，等待第二帧确认。
+     */
+    case acquiring
+    /**
+     * 正在持续追踪可信音高。
+     */
+    case tracking
+    /**
+     * 信号消失后保留最后读数。
+     */
+    case holding
+}
+
+
+#if compiler(>=6)
+extension SignalState: Sendable {}
+#endif
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeSignalState: FfiConverterRustBuffer {
+    typealias SwiftType = SignalState
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SignalState {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .quiet
+        
+        case 2: return .acquiring
+        
+        case 3: return .tracking
+        
+        case 4: return .holding
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: SignalState, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .quiet:
+            writeInt(&buf, Int32(1))
+        
+        
+        case .acquiring:
+            writeInt(&buf, Int32(2))
+        
+        
+        case .tracking:
+            writeInt(&buf, Int32(3))
+        
+        
+        case .holding:
+            writeInt(&buf, Int32(4))
+        
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeSignalState_lift(_ buf: RustBuffer) throws -> SignalState {
+    return try FfiConverterTypeSignalState.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeSignalState_lower(_ value: SignalState) -> RustBuffer {
+    return FfiConverterTypeSignalState.lower(value)
+}
+
+
+extension SignalState: Equatable, Hashable {}
+
+
+
+
+
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+/**
  * 唱名体系。
  */
 
@@ -3159,6 +3470,31 @@ fileprivate struct FfiConverterSequenceTypePartial: FfiConverterRustBuffer {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterSequenceTypeReferenceTone: FfiConverterRustBuffer {
+    typealias SwiftType = [ReferenceTone]
+
+    public static func write(_ value: [ReferenceTone], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeReferenceTone.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [ReferenceTone] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [ReferenceTone]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeReferenceTone.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterSequenceTypeStringSpec: FfiConverterRustBuffer {
     typealias SwiftType = [StringSpec]
 
@@ -3369,6 +3705,9 @@ private let initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_tuner_core_checksum_method_tunerengine_feed() != 52897) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_tuner_core_checksum_method_tunerengine_list_reference_tones() != 32147) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_tuner_core_checksum_method_tunerengine_set_a4() != 46919) {

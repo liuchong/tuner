@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uniffi.tuner_core.Partial
+import uniffi.tuner_core.SignalState
 import uniffi.tuner_core.TunerEvent
 
 /** 一条音高读数（从 TunerEvent 映射，UI 直接消费）。 */
@@ -43,6 +44,20 @@ data class TunerUiState(
     val partials: List<Partial> = emptyList(),
     /** 和弦名（无则 null）。 */
     val chord: String? = null,
+    /** 主调音页锁存的最近一次确认频谱。 */
+    val displaySpectrumDb: FloatArray = FloatArray(0),
+    /** 主调音页锁存的最近一次确认峰值。 */
+    val displayPartials: List<Partial> = emptyList(),
+    /** 主调音页锁存的最近一次确认和弦。 */
+    val displayChord: String? = null,
+    /** Rust core 的统一信号状态。 */
+    val signalState: SignalState = SignalState.QUIET,
+    /** 当前输入 RMS 电平。 */
+    val inputLevelDbfs: Float = -120f,
+    /** 保持期显示强度。 */
+    val displayStrength: Float = 0f,
+    /** 当前读数是否为断音保持。 */
+    val isHeld: Boolean = false,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -50,7 +65,14 @@ data class TunerUiState(
         return signal == other.signal &&
             spectrumDb.contentEquals(other.spectrumDb) &&
             partials == other.partials &&
-            chord == other.chord
+            chord == other.chord &&
+            displaySpectrumDb.contentEquals(other.displaySpectrumDb) &&
+            displayPartials == other.displayPartials &&
+            displayChord == other.displayChord &&
+            signalState == other.signalState &&
+            inputLevelDbfs == other.inputLevelDbfs &&
+            displayStrength == other.displayStrength &&
+            isHeld == other.isHeld
     }
 
     override fun hashCode(): Int {
@@ -58,6 +80,13 @@ data class TunerUiState(
         r = 31 * r + spectrumDb.contentHashCode()
         r = 31 * r + partials.hashCode()
         r = 31 * r + (chord?.hashCode() ?: 0)
+        r = 31 * r + displaySpectrumDb.contentHashCode()
+        r = 31 * r + displayPartials.hashCode()
+        r = 31 * r + (displayChord?.hashCode() ?: 0)
+        r = 31 * r + signalState.hashCode()
+        r = 31 * r + inputLevelDbfs.hashCode()
+        r = 31 * r + displayStrength.hashCode()
+        r = 31 * r + isHeld.hashCode()
         return r
     }
 }
@@ -65,13 +94,11 @@ data class TunerUiState(
 /**
  * 通用调音面板 ViewModel。不含 Android 依赖（除 ViewModel 基类），可 JVM 单测。
  *
- * 业务计算（音高/唱名/平滑）全部在 Rust core；本类只做事件→状态映射与超时判断。
+ * 业务计算（音高/唱名/平滑）全部在 Rust core；本类只做事件→展示状态映射。
  * 采集由共享 TunerEventStream 提供（acquire/release 启停）。
  */
 class TunerViewModel(
     private val stream: TunerEventStream,
-    private val clock: () -> Long = { System.currentTimeMillis() },
-    private val signalTimeoutMs: Long = 800L,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TunerUiState())
@@ -79,20 +106,30 @@ class TunerViewModel(
 
     private var acquired = false
 
-    @Volatile
-    private var lastEventAtMs: Long = Long.MIN_VALUE
-
     init {
         viewModelScope.launch {
             stream.events.collect { frame ->
-                val ev = frame?.tuner ?: return@collect
-                lastEventAtMs = clock()
+                frame ?: return@collect
                 _uiState.update {
+                    val confirmed = frame.signalState == SignalState.TRACKING
                     it.copy(
-                        signal = TunerSignal.Active(ev.toReading()),
+                        signal = frame.tuner?.let { ev ->
+                            TunerSignal.Active(ev.toReading())
+                        } ?: TunerSignal.Listening,
                         spectrumDb = frame.spectrumDb.toFloatArray(),
                         partials = frame.partials,
                         chord = frame.chord,
+                        displaySpectrumDb = if (confirmed) {
+                            frame.spectrumDb.toFloatArray()
+                        } else {
+                            it.displaySpectrumDb
+                        },
+                        displayPartials = if (confirmed) frame.partials else it.displayPartials,
+                        displayChord = if (confirmed) frame.chord else it.displayChord,
+                        signalState = frame.signalState,
+                        inputLevelDbfs = frame.inputLevelDbfs,
+                        displayStrength = frame.displayStrength,
+                        isHeld = frame.isHeld,
                     )
                 }
             }
@@ -104,24 +141,6 @@ class TunerViewModel(
         if (acquired) return
         stream.acquire()
         acquired = true
-    }
-
-    /** 由 UI 侧定时器（~100ms）调用：超过 800ms 无有效事件 → 回到「请发声」。 */
-    fun onTick() {
-        val last = lastEventAtMs
-        if (last == Long.MIN_VALUE) return
-        if (clock() - last > signalTimeoutMs &&
-            _uiState.value.signal is TunerSignal.Active
-        ) {
-            _uiState.update {
-                it.copy(
-                    signal = TunerSignal.Listening,
-                    spectrumDb = FloatArray(0),
-                    partials = emptyList(),
-                    chord = null,
-                )
-            }
-        }
     }
 
     /** 提前释放采集（手动/测试）；`onCleared` 自动调用。幂等。 */

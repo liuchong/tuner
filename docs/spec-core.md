@@ -9,6 +9,8 @@
 - 唱名换算：4 种唱名体系 × 调式（§5）
 - 乐器预设：弦乐器定弦表、管乐器调性+指法表（数据见 spec-instruments.md）
 - 音高平滑：中值滤波 + EMA + 音符滞回
+- 输入状态机：门限滞回、连续帧确认、断音保持与显示强度
+- 固定音高：按当前平均律生成 80–1500Hz 的可试听音级表
 - 节拍器引擎：采样级定时的 tick 事件流 + PCM 混音
 
 非职责（原生层负责）：UI、音频采集/播放设备、权限、保活。
@@ -25,6 +27,8 @@ src/
   tuning.rs     弦乐器定弦预设数据
   fingering.rs  管乐器调性 + 筒音唱名 → 音阶目标
   smooth.rs     平滑滤波器
+  signal.rs     输入门限滞回、连续帧确认、断音保持状态机
+  reference.rs  当前平均律的固定音高表
   metronome.rs  节拍引擎
   spectrum.rs   FFT 频谱 + 泛音/和弦分析（§4a，v4 新增）
 ```
@@ -44,7 +48,7 @@ src/
   3 倍周期极小值同样有效。纠正后的周期再进入抛物线插值与谐波精化。
 - 参数：窗口 2048 采样（hop 由原生层决定，建议 1024），阈值 0.15，采样率从配置读。
 - 输入：单声道 f32 [-1,1]；输出 `Option<(freq_hz, clarity)>`，clarity = 1 - CMNDF 最小值。
-- 无效输入（RMS 低于门限 -50dBFS、clarity < 0.6）→ None。
+- 无效输入（RMS 低于配置门限，默认 -45dBFS；或 clarity < 0.6）→ None。
 - 精度指标：80–1500Hz，合成信号（基频+3 泛音，SNR 20dB）误差 ≤ ±0.5 cent。
 - 实时安全：`feed` 路径零分配、零锁、零 panic（构造时预分配全部缓冲；精化只用栈上定长数组）。
 
@@ -59,7 +63,9 @@ src/
 
 `TunerEngine::analyze(pcm)` 在 feed 的音高检测基础上额外返回（均预分配、零分配热路径）：
 - **频谱**：Hann 窗 + 实数 FFT（旋转因子构造时预计算），输出对数频率轴 60–2400Hz 共 64 bin 幅值（dBFS，-80~0 映射）。
-- **泛音列 partials**：频谱显著峰（局部极大且超噪声底 12dB），定容 ≤8 个；每峰：频率/幅值/harmonic_index（基频整数倍 ±30c 容差则 2,3,4…，否则 0=独立音）/独立音的最近 12-TET 音名与 cents。
+- **泛音列 partials**：频谱显著峰（局部极大且超噪声底 12dB），定容 ≤8 个；映射到
+  同一实际频率（差值 <0.01Hz）的候选只保留幅值更强者。每峰：频率/幅值/harmonic_index
+  （基频整数倍 ±30c 容差则 2,3,4…，否则 0=独立音）/独立音的最近 12-TET 音名与 cents。
 - **和弦**：独立音级 + 基频 ≥3 个音级时，与模板（maj/min/5/7/maj7/m7/sus4/add9）匹配，输出和弦名（如 "Cmaj"），匹配不到为 None。
   补充规则（2026-07-20 实现期发现）：真实三和弦存在共同次谐波（如 C+E+G 的听感基频 C3/C2），
   YIN 可能检出该「幻影基频」使 C/G 被标为泛音而无法匹配。因此：当泛音列中不存在
@@ -75,6 +81,36 @@ src/
 - TunerEvent 新增字段：`temperament`（当前 N）、`temperament_step`（最近步序 k）、`temperament_cents`（= 1200·log2(f/f_step)，范围 [-600/N, +600/N)）。
 - 音名与 cents_off 主读数语义不变（12-TET）；律制读数走新字段。set_temperament 即时生效。
 - 测试：19-TET 下 A4 上方第 7 步频率 ↔ 读数一致；cents 边界正确。
+
+## 4c. 输入门限与读数保持
+
+调音读数不得直接以单帧检测成功/失败决定出现或消失。`TunerCore` 在音高检测后使用以下
+状态机，主调音页和乐器调音页只消费同一份状态，不得各自实现超时：
+
+1. `Quiet`：输入电平低于开启门限，或尚未形成可信读数。无可显示音高。
+2. `Acquiring`：输入达到开启门限且得到可信音高，但连续有效帧不足 2 帧。无可显示音高。
+3. `Tracking`：连续 2 帧达到开启门限且音高有效后进入；每个有效帧更新读数。
+4. `Holding`：输入低于关闭门限或检测不到可信音高时，以显示强度 1 持续保留最后一个
+   有效读数，不按时间清除。重新超过开启门限并得到可信音高后，第一帧只作为候选且继续
+   显示旧读数；第二个连续有效帧到达才回到 `Tracking` 并替换读数。候选中断或只有大声
+   无效噪声时清除候选，但不清除已确认读数。
+
+门限开启值为 `TunerConfig.noise_gate_dbfs`（默认 -45dBFS，可设置 -60~-30dBFS），
+`Tracking` 的关闭值固定比开启值低 3dB；进入 `Holding` 后必须重新超过开启值才能形成
+候选。响度达到门限但音高无效的噪声不得推动指针。默认 hop 为 1024。
+`AnalysisFrame` 必须回传输入电平、状态、是否保持和显示强度，原生界面据此渲染，不另设
+清空计时器。
+
+## 4d. 固定音高表
+
+`list_reference_tones()` 根据引擎当前的 A4 校准与平均律生成一个有序音级表：
+
+- 频率公式：`frequency_hz = a4_hz · 2^(step_from_a4 / temperament)`。
+- 只返回闭区间 80–1500Hz 内的全部音级，按频率递增。
+- 支持当前已有的 12/19/24/31 平均律；切换 A4 或律制后再次查询必须即时反映新值。
+- 每项包含 `step_from_a4`、`frequency_hz`、`temperament`、最近的 12 平均律音名以及
+  相对该音名的音分差，便于非 12 平均律仍有可读标签。
+- core 只提供频率和标签，不访问扬声器，也不生成平台音频对象。
 
 ## 5. 唱名体系与调式
 
@@ -147,6 +183,8 @@ src/
 - solfege：四种体系 × 至少宫/羽/大调/小调 × 含偏音用例。
 - tuning/fingering：预设表完整性（弦数、频率随 A4 换算正确）。
 - metronome：tick 位置、tempo 变更、tap tempo、accent pattern。
+- signal：门限上下边界、2 帧确认、3dB 滞回、无限保持、保持期两帧替换、强噪声无效音高。
+- reference：12/19/24/31 平均律 80–1500Hz 边界、排序、A4 校准和标签音分。
 
 ## 附录 A — UniFFI API 合同（udl 签名，唯一对外接口）
 
@@ -212,12 +250,16 @@ dictionary KeyMode {
 
 dictionary TunerConfig {
     f64 sample_rate;
+    u32 frame_hop_samples;    // 默认 1024
     f64 a4_hz;              // 415-466
-    f32 noise_gate_dbfs;    // 默认 -50
+    f32 noise_gate_dbfs;    // 默认 -45
     SolfegeSystem solfege;
     KeyMode key;
     u8 temperament;         // N 平均律，12/19/24/31，默认 12（v4 新增）
 };
+
+[Enum]
+interface SignalState { Quiet, Acquiring, Tracking, Holding };
 
 dictionary TunerEvent {
     f64 freq_hz;
@@ -241,10 +283,22 @@ dictionary Partial {
 };
 
 dictionary AnalysisFrame {
-    TunerEvent? tuner;          // 同 feed 语义
+    TunerEvent? tuner;          // Tracking/Holding 时为当前或最后有效读数
     sequence<f32> spectrum_db;  // 64 bin，对数轴 60-2400Hz，dBFS -80~0
     sequence<Partial> partials; // ≤8
     string? chord;              // 如 "Cmaj"，无则为 null
+    SignalState signal_state;
+    f32 input_level_dbfs;
+    f32 display_strength;       // 0~1；Tracking/Holding 为 1
+    boolean is_held;
+};
+
+dictionary ReferenceTone {
+    i32 step_from_a4;
+    f64 frequency_hz;
+    u8 temperament;
+    string note_name;          // 最近 12-TET 音名
+    f64 cents_from_note;
 };
 
 interface TunerEngine {
@@ -255,6 +309,7 @@ interface TunerEngine {
     void set_solfege(SolfegeSystem system, KeyMode key);
     void set_noise_gate(f32 dbfs);
     void set_temperament(u8 divisions);    // v4 新增
+    sequence<ReferenceTone> list_reference_tones();
 };
 
 [Enum]

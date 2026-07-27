@@ -13,19 +13,21 @@ struct TunerApp: App {
     }
 }
 
-/// 底部 4 tab（design-system §6.8）
+/// 底部 5 tab（design-system §6.8）
 struct RootTabView: View {
     @State private var selected = 0
     var body: some View {
         TabView(selection: $selected) {
-            TunerView()
+            TunerView { selected = 2 }
                 .tabItem { Label("调音", systemImage: "tuningfork") }.tag(0)
             InstrumentView()
                 .tabItem { Label("乐器", systemImage: "pianokeys") }.tag(1)
+            ProfessionalSpectrumView()
+                .tabItem { Label("频谱", systemImage: "waveform.path.ecg") }.tag(2)
             MetronomeView()
-                .tabItem { Label("节拍器", systemImage: "metronome") }.tag(2)
+                .tabItem { Label("节拍器", systemImage: "metronome") }.tag(3)
             SettingsView()
-                .tabItem { Label("设置", systemImage: "gearshape") }.tag(3)
+                .tabItem { Label("设置", systemImage: "gearshape") }.tag(4)
         }
         .tint(Lumen.accent)
     }

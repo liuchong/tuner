@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		011619824D7FC41AA2340AA0 /* CaptureFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85EF62B822C88289213EBA0F /* CaptureFormatTests.swift */; };
 		0203C88E326B9F0D9C64D063 /* TickSounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F42CC6A6BABE1A595FC87A6 /* TickSounds.swift */; };
 		0A614A9180846A484DE6DA6B /* MetronomeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11EF360B5810D185F59E9516 /* MetronomeViewModelTests.swift */; };
 		0B66942CCF62B1D5B713F3AE /* TunerViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86C6402B0CFE0A23F82A3D2B /* TunerViewModelTests.swift */; };
@@ -14,11 +15,16 @@
 		138108E2B250DDD6A4456C33 /* StatusChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9E335ACC4755F93A02E7AF /* StatusChip.swift */; };
 		2237FC010024AF0E1038C399 /* TunerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A2EF8E9AF6C4D166022D99 /* TunerViewModel.swift */; };
 		233F888933D78DCF23F9AA03 /* TunerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7649DED303EC43E58FEC51D1 /* TunerApp.swift */; };
+		27C47C37EC5913550E272442 /* AudioFrameRingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D656D93B048CA0F82265EDE /* AudioFrameRingTests.swift */; };
 		2A453C02CF276ED8DB937E78 /* AudioCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0C192CA91D1CFC263F818C8 /* AudioCapture.swift */; };
 		33568B1A15813B17834E7D50 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 318DD67385653335E26AE412 /* Haptics.swift */; };
 		3838F706ACD7546E0D81D224 /* MetronomePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C813093B1E0F93D3E4337EF9 /* MetronomePlayer.swift */; };
+		3F13470F5A560024FD433F20 /* SpectrumHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31D9141036A63EE76DA1D18 /* SpectrumHistory.swift */; };
 		467B64BAE840B6BEE20E929C /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20EE2ACD28DF49C08EC58815 /* SettingsStore.swift */; };
 		47944205925036A6FC52EFE2 /* TunerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6684B2AFF71DABC61E97E6D /* TunerView.swift */; };
+		53498C00B57890C3BAF83D54 /* ProfessionalSpectrumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79C716DA4E163D40D5C251B3 /* ProfessionalSpectrumView.swift */; };
+		5E56E4BD918C9FB218668A1E /* TuningForkViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F83E32A591655AF1374B3F3D /* TuningForkViewModelTests.swift */; };
+		6A12CFACEA46839E586C1476 /* TuningForkViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49FCF7A8502D447B850D0297 /* TuningForkViewModel.swift */; };
 		6D155235918CBCDCE3DA45E0 /* tuner_core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004B4DE8BE119AE667375088 /* tuner_core.swift */; };
 		71553725A7F16B62DF70C406 /* MetronomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = D08126269CCD414BA27BB247 /* MetronomeScreen.swift */; };
 		72F914FE18E8E6B51A8246C2 /* InstrumentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 183AE1761E63450CDFD68FAA /* InstrumentViewModel.swift */; };
@@ -26,13 +32,19 @@
 		8EA959BDA5A041984CFF531B /* EngineBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22A0846B246A1683024C0DDA /* EngineBridge.swift */; };
 		950A31B51021D2F750029059 /* tuner_core.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8B70F90C196386FA0037D391 /* tuner_core.xcframework */; };
 		A132DBCB95FDF537783076CF /* InstrumentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E30505ACCC5FE3491F6CD05 /* InstrumentView.swift */; };
+		B5C644735F1A14E78DD79652 /* SpectrumHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3EC97EB37C247D8F3255FE /* SpectrumHistoryTests.swift */; };
+		B72B5B465702CD8D89E7529E /* SpectrumPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B638FB06ED3016F413E4B6F /* SpectrumPresentationTests.swift */; };
 		C3DB2884983C257A447616CB /* SpectrumBand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E43EEE7E63E106A2DC8DE3 /* SpectrumBand.swift */; };
 		C97A2419B08861122C6BB9BE /* AuroraBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27DD25D8AC4BFCB3D54B6D8E /* AuroraBackground.swift */; };
 		CEA5F2C49B4F8206A2A78232 /* SelectorPanels.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8ADCAC63B58F38B59F41AA8 /* SelectorPanels.swift */; };
 		DC9DD0CC314BE54737608192 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97EC35051D44F87E0B052EB6 /* Assets.xcassets */; };
+		DF8665FF4580145374AD2DCB /* CaptureLifecycleGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9EEF1480F060C9A979C20C8 /* CaptureLifecycleGateTests.swift */; };
 		E1B6428C16465DA9A7AA3C5D /* MetronomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA081240CE9605822E25E62 /* MetronomeView.swift */; };
+		E4EFB029B48A7CE41C5C7E8B /* SpectrumPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 710DD206C2CD0251AB6400D5 /* SpectrumPresentation.swift */; };
 		EBCA028DF85B2DA97F0D3DDD /* HaloDial.swift in Sources */ = {isa = PBXBuildFile; fileRef = 391DC171A35DFD819E7360CF /* HaloDial.swift */; };
+		F3C1196209570BCFC4DD8AD9 /* TunerAtomics.c in Sources */ = {isa = PBXBuildFile; fileRef = 998250A2C5218234559F7CCF /* TunerAtomics.c */; };
 		FD249D8AD3FBD05E7F67BEFD /* Lumen.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA36D7420C88DCEA80FED7F /* Lumen.swift */; };
+		FF9A12FEEDF5D171060BFCB7 /* ReferenceTonePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B70334AC462A0FBDD014953 /* ReferenceTonePlayer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,21 +61,32 @@
 		004B4DE8BE119AE667375088 /* tuner_core.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tuner_core.swift; sourceTree = "<group>"; };
 		11EF360B5810D185F59E9516 /* MetronomeViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeViewModelTests.swift; sourceTree = "<group>"; };
 		183AE1761E63450CDFD68FAA /* InstrumentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentViewModel.swift; sourceTree = "<group>"; };
+		1B70334AC462A0FBDD014953 /* ReferenceTonePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferenceTonePlayer.swift; sourceTree = "<group>"; };
 		20EE2ACD28DF49C08EC58815 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
 		217E1755507D496A90E39CB4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		22A0846B246A1683024C0DDA /* EngineBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineBridge.swift; sourceTree = "<group>"; };
 		27DD25D8AC4BFCB3D54B6D8E /* AuroraBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraBackground.swift; sourceTree = "<group>"; };
 		318DD67385653335E26AE412 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
 		391DC171A35DFD819E7360CF /* HaloDial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HaloDial.swift; sourceTree = "<group>"; };
+		410BF3A390E2CD4FBA1D1E75 /* Tuner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tuner-Bridging-Header.h"; sourceTree = "<group>"; };
 		49A2EF8E9AF6C4D166022D99 /* TunerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerViewModel.swift; sourceTree = "<group>"; };
+		49FCF7A8502D447B850D0297 /* TuningForkViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TuningForkViewModel.swift; sourceTree = "<group>"; };
+		4D656D93B048CA0F82265EDE /* AudioFrameRingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFrameRingTests.swift; sourceTree = "<group>"; };
 		4E30505ACCC5FE3491F6CD05 /* InstrumentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentView.swift; sourceTree = "<group>"; };
 		4F42CC6A6BABE1A595FC87A6 /* TickSounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TickSounds.swift; sourceTree = "<group>"; };
+		6B638FB06ED3016F413E4B6F /* SpectrumPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumPresentationTests.swift; sourceTree = "<group>"; };
 		6BA081240CE9605822E25E62 /* MetronomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeView.swift; sourceTree = "<group>"; };
 		70E43EEE7E63E106A2DC8DE3 /* SpectrumBand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumBand.swift; sourceTree = "<group>"; };
+		710DD206C2CD0251AB6400D5 /* SpectrumPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumPresentation.swift; sourceTree = "<group>"; };
 		7649DED303EC43E58FEC51D1 /* TunerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerApp.swift; sourceTree = "<group>"; };
+		79C716DA4E163D40D5C251B3 /* ProfessionalSpectrumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfessionalSpectrumView.swift; sourceTree = "<group>"; };
+		85EF62B822C88289213EBA0F /* CaptureFormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureFormatTests.swift; sourceTree = "<group>"; };
 		86C6402B0CFE0A23F82A3D2B /* TunerViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerViewModelTests.swift; sourceTree = "<group>"; };
 		8B70F90C196386FA0037D391 /* tuner_core.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = tuner_core.xcframework; path = TunerCore/tuner_core.xcframework; sourceTree = "<group>"; };
+		92E1C080294208AB0C1F3B41 /* TunerAtomics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TunerAtomics.h; sourceTree = "<group>"; };
 		97EC35051D44F87E0B052EB6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		998250A2C5218234559F7CCF /* TunerAtomics.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = TunerAtomics.c; sourceTree = "<group>"; };
+		9E3EC97EB37C247D8F3255FE /* SpectrumHistoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumHistoryTests.swift; sourceTree = "<group>"; };
 		B6684B2AFF71DABC61E97E6D /* TunerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerView.swift; sourceTree = "<group>"; };
 		B67029BF45674DE441D2552C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		BB9E335ACC4755F93A02E7AF /* StatusChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusChip.swift; sourceTree = "<group>"; };
@@ -72,8 +95,11 @@
 		CBCEC996968A56A035B27F7D /* TunerTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TunerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEA36D7420C88DCEA80FED7F /* Lumen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lumen.swift; sourceTree = "<group>"; };
 		D08126269CCD414BA27BB247 /* MetronomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeScreen.swift; sourceTree = "<group>"; };
+		D31D9141036A63EE76DA1D18 /* SpectrumHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumHistory.swift; sourceTree = "<group>"; };
 		D57767F2CC337FED304EA33B /* MetronomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeViewModel.swift; sourceTree = "<group>"; };
 		E8ADCAC63B58F38B59F41AA8 /* SelectorPanels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectorPanels.swift; sourceTree = "<group>"; };
+		E9EEF1480F060C9A979C20C8 /* CaptureLifecycleGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureLifecycleGateTests.swift; sourceTree = "<group>"; };
+		F83E32A591655AF1374B3F3D /* TuningForkViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TuningForkViewModelTests.swift; sourceTree = "<group>"; };
 		FD414E3FDE1B48E6636CC07D /* Tuner.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Tuner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -129,6 +155,9 @@
 			children = (
 				22A0846B246A1683024C0DDA /* EngineBridge.swift */,
 				4F42CC6A6BABE1A595FC87A6 /* TickSounds.swift */,
+				410BF3A390E2CD4FBA1D1E75 /* Tuner-Bridging-Header.h */,
+				998250A2C5218234559F7CCF /* TunerAtomics.c */,
+				92E1C080294208AB0C1F3B41 /* TunerAtomics.h */,
 			);
 			path = Bridge;
 			sourceTree = "<group>";
@@ -176,10 +205,14 @@
 			isa = PBXGroup;
 			children = (
 				391DC171A35DFD819E7360CF /* HaloDial.swift */,
+				79C716DA4E163D40D5C251B3 /* ProfessionalSpectrumView.swift */,
 				E8ADCAC63B58F38B59F41AA8 /* SelectorPanels.swift */,
 				70E43EEE7E63E106A2DC8DE3 /* SpectrumBand.swift */,
+				D31D9141036A63EE76DA1D18 /* SpectrumHistory.swift */,
+				710DD206C2CD0251AB6400D5 /* SpectrumPresentation.swift */,
 				B6684B2AFF71DABC61E97E6D /* TunerView.swift */,
 				49A2EF8E9AF6C4D166022D99 /* TunerViewModel.swift */,
+				49FCF7A8502D447B850D0297 /* TuningForkViewModel.swift */,
 			);
 			path = Tuner;
 			sourceTree = "<group>";
@@ -206,6 +239,7 @@
 			children = (
 				C0C192CA91D1CFC263F818C8 /* AudioCapture.swift */,
 				C813093B1E0F93D3E4337EF9 /* MetronomePlayer.swift */,
+				1B70334AC462A0FBDD014953 /* ReferenceTonePlayer.swift */,
 			);
 			path = Audio;
 			sourceTree = "<group>";
@@ -223,8 +257,14 @@
 		E9BDACA8535C545A87431536 /* TunerTests */ = {
 			isa = PBXGroup;
 			children = (
+				4D656D93B048CA0F82265EDE /* AudioFrameRingTests.swift */,
+				85EF62B822C88289213EBA0F /* CaptureFormatTests.swift */,
+				E9EEF1480F060C9A979C20C8 /* CaptureLifecycleGateTests.swift */,
 				11EF360B5810D185F59E9516 /* MetronomeViewModelTests.swift */,
+				9E3EC97EB37C247D8F3255FE /* SpectrumHistoryTests.swift */,
+				6B638FB06ED3016F413E4B6F /* SpectrumPresentationTests.swift */,
 				86C6402B0CFE0A23F82A3D2B /* TunerViewModelTests.swift */,
+				F83E32A591655AF1374B3F3D /* TuningForkViewModelTests.swift */,
 			);
 			path = TunerTests;
 			sourceTree = "<group>";
@@ -328,8 +368,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				27C47C37EC5913550E272442 /* AudioFrameRingTests.swift in Sources */,
+				011619824D7FC41AA2340AA0 /* CaptureFormatTests.swift in Sources */,
+				DF8665FF4580145374AD2DCB /* CaptureLifecycleGateTests.swift in Sources */,
 				0A614A9180846A484DE6DA6B /* MetronomeViewModelTests.swift in Sources */,
+				B5C644735F1A14E78DD79652 /* SpectrumHistoryTests.swift in Sources */,
+				B72B5B465702CD8D89E7529E /* SpectrumPresentationTests.swift in Sources */,
 				0B66942CCF62B1D5B713F3AE /* TunerViewModelTests.swift in Sources */,
+				5E56E4BD918C9FB218668A1E /* TuningForkViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -349,15 +395,21 @@
 				71553725A7F16B62DF70C406 /* MetronomeScreen.swift in Sources */,
 				E1B6428C16465DA9A7AA3C5D /* MetronomeView.swift in Sources */,
 				89C93AE5E70E16E44769A1FB /* MetronomeViewModel.swift in Sources */,
+				53498C00B57890C3BAF83D54 /* ProfessionalSpectrumView.swift in Sources */,
+				FF9A12FEEDF5D171060BFCB7 /* ReferenceTonePlayer.swift in Sources */,
 				CEA5F2C49B4F8206A2A78232 /* SelectorPanels.swift in Sources */,
 				467B64BAE840B6BEE20E929C /* SettingsStore.swift in Sources */,
 				0ED8D333D375E4F9E05F0FDB /* SettingsView.swift in Sources */,
 				C3DB2884983C257A447616CB /* SpectrumBand.swift in Sources */,
+				3F13470F5A560024FD433F20 /* SpectrumHistory.swift in Sources */,
+				E4EFB029B48A7CE41C5C7E8B /* SpectrumPresentation.swift in Sources */,
 				138108E2B250DDD6A4456C33 /* StatusChip.swift in Sources */,
 				0203C88E326B9F0D9C64D063 /* TickSounds.swift in Sources */,
 				233F888933D78DCF23F9AA03 /* TunerApp.swift in Sources */,
+				F3C1196209570BCFC4DD8AD9 /* TunerAtomics.c in Sources */,
 				47944205925036A6FC52EFE2 /* TunerView.swift in Sources */,
 				2237FC010024AF0E1038C399 /* TunerViewModel.swift in Sources */,
+				6A12CFACEA46839E586C1476 /* TuningForkViewModel.swift in Sources */,
 				6D155235918CBCDCE3DA45E0 /* tuner_core.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -533,6 +585,7 @@
 				OTHER_SWIFT_FLAGS = "-Xcc -fmodule-map-file=$(SRCROOT)/TunerCore/Sources/TunerCore/tuner_coreFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = com.liuchong.tuner;
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "Tuner/Bridge/Tuner-Bridging-Header.h";
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -560,6 +613,7 @@
 				OTHER_SWIFT_FLAGS = "-Xcc -fmodule-map-file=$(SRCROOT)/TunerCore/Sources/TunerCore/tuner_coreFFI.modulemap";
 				PRODUCT_BUNDLE_IDENTIFIER = com.liuchong.tuner;
 				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "Tuner/Bridge/Tuner-Bridging-Header.h";
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

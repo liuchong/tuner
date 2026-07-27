@@ -6,7 +6,11 @@
 
 use std::sync::{Arc, Mutex};
 
-use crate::{fingering, metronome, note, pitch, smooth, solfege, spectrum, tuning};
+use crate::{
+    fingering, metronome, note, pitch, reference, signal, smooth, solfege, spectrum, tuning,
+};
+
+pub use crate::signal::SignalState;
 
 // ============================ 枚举 ============================
 
@@ -161,9 +165,11 @@ pub struct KeyMode {
 pub struct TunerConfig {
     /// 采样率（Hz）。
     pub sample_rate: f64,
+    /// 相邻分析帧之间推进的采样数（默认 1024）。
+    pub frame_hop_samples: u32,
     /// A4 校准（415–466Hz）。
     pub a4_hz: f64,
-    /// 噪声门限（dBFS，默认 -50）。
+    /// 噪声门限（dBFS，默认 -45）。
     pub noise_gate_dbfs: f32,
     /// 唱名体系。
     pub solfege: SolfegeSystem,
@@ -222,6 +228,29 @@ pub struct AnalysisFrame {
     pub partials: Vec<Partial>,
     /// 和弦名（如 "Cmaj"），无则为 None。
     pub chord: Option<String>,
+    /// 输入信号状态。
+    pub signal_state: SignalState,
+    /// 当前分析窗口的 RMS 电平（dBFS）。
+    pub input_level_dbfs: f32,
+    /// 读数显示强度（0~1）。
+    pub display_strength: f32,
+    /// 当前读数是否来自断音保持。
+    pub is_held: bool,
+}
+
+/// 当前平均律中的一个可播放固定音高。
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct ReferenceTone {
+    /// 相对 A4 的平均律步数。
+    pub step_from_a4: i32,
+    /// 固定频率（Hz）。
+    pub frequency_hz: f64,
+    /// 平均律等分数。
+    pub temperament: u8,
+    /// 最近的 12 平均律音名。
+    pub note_name: String,
+    /// 相对该音名的音分差。
+    pub cents_from_note: f64,
 }
 
 /// 一次 tick 事件。
@@ -404,6 +433,7 @@ struct TunerCore {
     yin: pitch::Yin,
     smoother: smooth::PitchSmoother,
     spectrum: spectrum::Spectrum,
+    signal: signal::SignalTracker,
     a4: f64,
     solfege: SolfegeSystem,
     key: KeyMode,
@@ -411,13 +441,25 @@ struct TunerCore {
 }
 
 impl TunerCore {
-    fn analyze_frame(&mut self, pcm: &[f32]) -> Option<TunerEvent> {
-        let (freq, clarity) = self.yin.feed(pcm)?;
+    fn analyze_frame(&mut self, pcm: &[f32]) -> (Option<TunerEvent>, signal::SignalOutput, f32) {
+        let input_level_dbfs = signal::input_level_dbfs(pcm);
+        let detected = self.yin.feed(pcm).and_then(|(freq, clarity)| {
+            let a4 = self.a4;
+            self.smoother
+                .feed(Some(freq), |f| note::analyze(f as f64, a4).map(|i| i.midi))
+                .map(|out| signal::PitchSample {
+                    freq_hz: out.freq_hz,
+                    clarity,
+                })
+        });
+        let signal = self.signal.process(detected, input_level_dbfs);
+        let Some(pitch) = signal.pitch else {
+            return (None, signal, input_level_dbfs);
+        };
         let a4 = self.a4;
-        let out = self
-            .smoother
-            .feed(Some(freq), |f| note::analyze(f as f64, a4).map(|i| i.midi))?;
-        let info = note::analyze(out.freq_hz as f64, a4)?;
+        let Some(info) = note::analyze(pitch.freq_hz as f64, a4) else {
+            return (None, signal, input_level_dbfs);
+        };
         let mut sf_buf = [0u8; 16];
         let sf = solfege::solfege_of(
             self.solfege,
@@ -427,24 +469,25 @@ impl TunerCore {
             &mut sf_buf,
         );
         let (t_step, t_cents) =
-            note::temperament_step_cents(out.freq_hz as f64, a4, self.temperament)
+            note::temperament_step_cents(pitch.freq_hz as f64, a4, self.temperament)
                 .unwrap_or((0, 0.0));
-        Some(TunerEvent {
-            freq_hz: out.freq_hz as f64,
+        let event = TunerEvent {
+            freq_hz: pitch.freq_hz as f64,
             note_name: info.name().to_string(),
             midi: info.midi,
             cents_off: info.cents_off,
-            clarity,
+            clarity: pitch.clarity,
             solfege: sf.to_string(),
             temperament: self.temperament,
             temperament_step: t_step,
             temperament_cents: t_cents,
-        })
+        };
+        (Some(event), signal, input_level_dbfs)
     }
 
     /// 完整分析：feed 事件 + 频谱 + 泛音 + 和弦（UniFFI 边界允许分配）。
     fn analyze_full(&mut self, pcm: &[f32]) -> AnalysisFrame {
-        let tuner = self.analyze_frame(pcm);
+        let (tuner, signal, input_level_dbfs) = self.analyze_frame(pcm);
         let spectrum_db = self.spectrum.feed(pcm).to_vec();
         let f0 = tuner.as_ref().map(|t| t.freq_hz);
         let mut raw_partials = [spectrum::PartialInfo {
@@ -502,6 +545,10 @@ impl TunerCore {
             spectrum_db,
             partials,
             chord: spectrum::match_chord(pcs).map(|s| s.to_string()),
+            signal_state: signal.state,
+            input_level_dbfs,
+            display_strength: signal.display_strength,
+            is_held: signal.is_held,
         }
     }
 }
@@ -519,12 +566,17 @@ impl TunerEngine {
     pub fn new(config: TunerConfig) -> Arc<Self> {
         let a4 = config.a4_hz.clamp(note::A4_MIN, note::A4_MAX);
         let mut yin = pitch::Yin::new(config.sample_rate as f32);
-        yin.set_noise_gate(config.noise_gate_dbfs);
+        yin.set_noise_gate(config.noise_gate_dbfs - signal::GATE_HYSTERESIS_DB);
         Arc::new(Self {
             core: Mutex::new(TunerCore {
                 yin,
                 smoother: smooth::PitchSmoother::new(),
                 spectrum: spectrum::Spectrum::new(config.sample_rate as f32),
+                signal: signal::SignalTracker::new(
+                    config.sample_rate,
+                    config.frame_hop_samples,
+                    config.noise_gate_dbfs,
+                ),
                 a4,
                 solfege: config.solfege,
                 key: config.key,
@@ -536,7 +588,7 @@ impl TunerEngine {
     /// 输入一帧单声道 PCM（f32 [-1,1]，长度 ≥ 2048），返回音高事件；无效输入返回 None。
     pub fn feed(&self, pcm: Vec<f32>) -> Option<TunerEvent> {
         let mut core = self.core.lock().unwrap_or_else(|e| e.into_inner());
-        core.analyze_frame(&pcm)
+        core.analyze_frame(&pcm).0
     }
 
     /// 完整分析帧：feed 事件 + 频谱 + 泛音 + 和弦（v4 新增，UniFFI 边界允许分配）。
@@ -561,7 +613,8 @@ impl TunerEngine {
     /// 设置噪声门限（dBFS）。
     pub fn set_noise_gate(&self, dbfs: f32) {
         let mut core = self.core.lock().unwrap_or_else(|e| e.into_inner());
-        core.yin.set_noise_gate(dbfs);
+        core.yin.set_noise_gate(dbfs - signal::GATE_HYSTERESIS_DB);
+        core.signal.set_noise_gate(dbfs);
     }
 
     /// 设置律制（N ∈ {12,19,24,31}；非法值忽略）。
@@ -570,6 +623,21 @@ impl TunerEngine {
             let mut core = self.core.lock().unwrap_or_else(|e| e.into_inner());
             core.temperament = divisions;
         }
+    }
+
+    /// 列出当前 A4 与平均律在 80–1500Hz 内的全部固定音高。
+    pub fn list_reference_tones(&self) -> Vec<ReferenceTone> {
+        let core = self.core.lock().unwrap_or_else(|e| e.into_inner());
+        reference::list(core.a4, core.temperament)
+            .into_iter()
+            .map(|tone| ReferenceTone {
+                step_from_a4: tone.step_from_a4,
+                frequency_hz: tone.frequency_hz,
+                temperament: tone.temperament,
+                note_name: tone.note_name,
+                cents_from_note: tone.cents_from_note,
+            })
+            .collect()
     }
 }
 
@@ -690,6 +758,7 @@ mod tests {
     fn default_config() -> TunerConfig {
         TunerConfig {
             sample_rate: 44100.0,
+            frame_hop_samples: 1024,
             a4_hz: 440.0,
             noise_gate_dbfs: -50.0,
             solfege: SolfegeSystem::Numbered,
@@ -853,8 +922,15 @@ mod tests {
         assert!(ev.cents_off.abs() < 1.0);
         assert!(ev.clarity > 0.6);
         assert_eq!(ev.solfege, "6"); // C 大调简谱中 A = la = 6
-        // 静音 → None
-        assert!(engine.feed(vec![0.0f32; 2048]).is_none());
+        // 静音后无限保持最后读数，直到下一次达到阈值的新音高替换。
+        assert!(engine.feed(vec![0.0f32; 2048]).is_some());
+        let mut after_hold = Some(ev);
+        for _ in 0..60 {
+            after_hold = engine.feed(vec![0.0f32; 2048]);
+        }
+        let held = after_hold.expect("静音不应清空最后一次有效读数");
+        assert_eq!(held.midi, 69);
+        assert_eq!(held.note_name, "A4");
     }
 
     #[test]

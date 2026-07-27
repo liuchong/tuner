@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Piano
+import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Icon
@@ -25,13 +26,15 @@ import androidx.navigation.compose.rememberNavController
 import com.liuchong.tuner.ui.instrument.InstrumentScreen
 import com.liuchong.tuner.ui.metronome.MetronomeScreen
 import com.liuchong.tuner.ui.settings.SettingsScreen
+import com.liuchong.tuner.ui.spectrum.ProfessionalSpectrumScreen
 import com.liuchong.tuner.ui.theme.LocalLumenColors
 import com.liuchong.tuner.ui.tuner.TunerScreen
 
-/** 底部 tab 定义（spec-ui：调音 / 乐器 / 节拍器 / 设置）。 */
+/** 底部 tab 定义（spec-ui：调音 / 乐器 / 频谱 / 节拍器 / 设置）。 */
 enum class AppTab(val route: String, val label: String, val icon: ImageVector) {
     TUNER("tuner", "调音", Icons.Filled.MusicNote),
     INSTRUMENT("instrument", "乐器", Icons.Filled.Piano),
+    SPECTRUM("spectrum", "频谱", Icons.Filled.GraphicEq),
     METRONOME("metronome", "节拍器", Icons.Filled.Timer),
     SETTINGS("settings", "设置", Icons.Filled.Settings),
 }
@@ -80,8 +83,15 @@ fun AppNav() {
             startDestination = AppTab.TUNER.route,
             modifier = Modifier.padding(innerPadding),
         ) {
-            composable(AppTab.TUNER.route) { TunerScreen() }
+            composable(AppTab.TUNER.route) {
+                TunerScreen(onOpenSpectrum = {
+                    navController.navigate(AppTab.SPECTRUM.route) {
+                        launchSingleTop = true
+                    }
+                })
+            }
             composable(AppTab.INSTRUMENT.route) { InstrumentScreen() }
+            composable(AppTab.SPECTRUM.route) { ProfessionalSpectrumScreen() }
             composable(AppTab.METRONOME.route) { MetronomeScreen() }
             composable(AppTab.SETTINGS.route) { SettingsScreen() }
         }

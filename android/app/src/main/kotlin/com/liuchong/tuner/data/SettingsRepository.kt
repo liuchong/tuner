@@ -29,7 +29,7 @@ data class AppSettings(
     val a4Hz: Double = 440.0,
     val solfege: SolfegeSystem = SolfegeSystem.NUMBERED,
     val key: KeyMode = KeyMode(tonicPc = 0u, mode = ModeKind.MAJOR),
-    val noiseGateDbfs: Float = -50f,
+    val noiseGateDbfs: Float = -45f,
     val theme: ThemeMode = ThemeMode.SYSTEM,
     val hapticsEnabled: Boolean = true,
     /** 专业版模式（PRO 角标，与通用面板同源）。 */
@@ -41,6 +41,7 @@ data class AppSettings(
     fun toTunerConfig(sampleRate: Double = 44100.0): TunerConfig =
         TunerConfig(
             sampleRate = sampleRate,
+            frameHopSamples = 1024u,
             a4Hz = a4Hz,
             noiseGateDbfs = noiseGateDbfs,
             solfege = solfege,
@@ -132,7 +133,7 @@ class DataStoreSettingsRepository(
                     ?.let { runCatching { ModeKind.valueOf(it) }.getOrNull() }
                     ?: ModeKind.MAJOR,
             ),
-            noiseGateDbfs = (p[Keys.GATE] ?: -50f).coerceIn(
+            noiseGateDbfs = (p[Keys.GATE] ?: -45f).coerceIn(
                 SettingsRepository.GATE_MIN, SettingsRepository.GATE_MAX,
             ),
             theme = p[Keys.THEME]

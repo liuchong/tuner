@@ -20,9 +20,11 @@
 
 **🎯 通用调音器**
 - ±0.5 音分精度（YIN + 谐波模型最小二乘精化，抗八度误判）
+- 默认 -45dBFS 可调门限、两帧确认、3dB 滞回与持续锁存，弱噪声不驱动指针
 - 「极光」表盘：分区弧 / 进度光弧 / 光针残影，准音瞬间多模态反馈
 - 唱名显示：固定 Do / 首调 Do / 简谱数字 / 宫商角徵羽，支持 12 主音 × 7 调式即时切换
-- 实时 FFT 频谱 + 泛音列标注（H1–H8）+ 和弦识别
+- 实时 FFT 频谱 + 实际峰值 Hz 标注 + 双曲线/连续瀑布专业频谱页 + 和弦识别
+- 内置固定音高音叉：按当前 A4 与 12 / 19 / 24 / 31 平均律试听 80–1500Hz 音级，收起后可继续校准
 - PRO 模式：12 / 19 / 24 / 31 平均律
 
 **🎸 乐器面板**
@@ -50,14 +52,19 @@
 ## 🔨 构建
 
 ```bash
-# Rust core 测试（72 个单测）
+# Rust core 测试
 cd core && cargo test
 
 # 生成 Android 端 .so + Kotlin 绑定（需 Android NDK 与 cargo-ndk）
 scripts/build-core-android.sh
 
-# Android 构建与测试（29 个 JVM 单测）
+# Android 构建与 JVM 单元测试
 cd android && ./gradlew assembleDebug testDebugUnitTest
+
+# iOS 绑定、工程与模拟器测试
+scripts/build-core-ios.sh
+cd ios && xcodegen generate
+xcodebuild -scheme Tuner -destination 'platform=iOS Simulator,name=<模拟器名称>' test
 ```
 
 ## 📚 文档

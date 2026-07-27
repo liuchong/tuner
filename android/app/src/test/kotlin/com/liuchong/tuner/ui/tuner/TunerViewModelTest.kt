@@ -15,6 +15,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import uniffi.tuner_core.AnalysisFrame
+import uniffi.tuner_core.SignalState
 import uniffi.tuner_core.TunerConfig
 import uniffi.tuner_core.TunerEvent
 
@@ -44,16 +45,23 @@ class FakeStream(config: TunerConfig = TunerCore.defaultConfig()) : TunerEventSt
     }
 
     /** 便捷：注入只有音高事件的帧。 */
-    fun emitEvent(ev: TunerEvent?) {
+    fun emitEvent(
+        ev: TunerEvent?,
+        signalState: SignalState = if (ev == null) SignalState.QUIET else SignalState.TRACKING,
+        displayStrength: Float = if (ev == null) 0f else 1f,
+        isHeld: Boolean = false,
+    ) {
         emit(
-            ev?.let {
-                AnalysisFrame(
-                    tuner = it,
-                    spectrumDb = FloatArray(64).toList(),
-                    partials = emptyList(),
-                    chord = null,
-                )
-            },
+            AnalysisFrame(
+                tuner = ev,
+                spectrumDb = FloatArray(64).toList(),
+                partials = emptyList(),
+                chord = null,
+                signalState = signalState,
+                inputLevelDbfs = if (ev == null) -120f else -24f,
+                displayStrength = displayStrength,
+                isHeld = isHeld,
+            ),
         )
     }
 }
@@ -86,7 +94,7 @@ class TunerViewModelTest {
     @Test
     fun `授权后接入采集，事件映射为 Active 状态`() {
         val stream = FakeStream()
-        val vm = TunerViewModel(stream = stream, clock = { 0L })
+        val vm = TunerViewModel(stream = stream)
 
         assertEquals(0, stream.acquireCount)
         vm.startCapture()
@@ -104,28 +112,33 @@ class TunerViewModelTest {
     }
 
     @Test
-    fun `800ms 无信号回到 Listening（请发声）`() {
+    fun `保持与清空完全服从 core 状态，不使用本地超时`() {
         val stream = FakeStream()
-        var now = 0L
-        val vm = TunerViewModel(stream = stream, clock = { now })
+        val vm = TunerViewModel(stream = stream)
 
         vm.startCapture()
         stream.emitEvent(a4Event())
         assertTrue(vm.uiState.value.signal is TunerSignal.Active)
 
-        now = 799L
-        vm.onTick()
+        stream.emitEvent(
+            a4Event(),
+            signalState = SignalState.HOLDING,
+            displayStrength = 0.4f,
+            isHeld = true,
+        )
         assertTrue(vm.uiState.value.signal is TunerSignal.Active)
+        assertEquals(0.4f, vm.uiState.value.displayStrength, 1e-6f)
+        assertTrue(vm.uiState.value.isHeld)
 
-        now = 801L
-        vm.onTick()
+        stream.emitEvent(null, signalState = SignalState.QUIET)
         assertEquals(TunerSignal.Listening, vm.uiState.value.signal)
+        assertEquals(0f, vm.uiState.value.displayStrength, 1e-6f)
     }
 
     @Test
     fun `无效帧（null 事件）不改变状态`() {
         val stream = FakeStream()
-        val vm = TunerViewModel(stream = stream, clock = { 0L })
+        val vm = TunerViewModel(stream = stream)
 
         vm.startCapture()
         stream.emitEvent(null)
@@ -135,7 +148,7 @@ class TunerViewModelTest {
     @Test
     fun `分析帧映射频谱泛音和弦状态`() {
         val stream = FakeStream()
-        val vm = TunerViewModel(stream = stream, clock = { 0L })
+        val vm = TunerViewModel(stream = stream)
         vm.startCapture()
         val partial = uniffi.tuner_core.Partial(
             freqHz = 880.0,
@@ -151,6 +164,10 @@ class TunerViewModelTest {
                 spectrumDb = spectrum,
                 partials = listOf(partial),
                 chord = "Amaj",
+                signalState = SignalState.TRACKING,
+                inputLevelDbfs = -18f,
+                displayStrength = 1f,
+                isHeld = false,
             ),
         )
         val s = vm.uiState.value
@@ -160,29 +177,39 @@ class TunerViewModelTest {
         assertEquals(1, s.partials.size)
         assertEquals(2, s.partials[0].harmonicIndex.toInt())
         assertEquals("Amaj", s.chord)
-        // 超时后清空
-        var now = 0L
-        val vm2 = TunerViewModel(stream = stream, clock = { now })
-        vm2.startCapture()
+        assertEquals(-40f, s.displaySpectrumDb[0], 1e-6f)
+        assertEquals(1, s.displayPartials.size)
+        assertEquals("Amaj", s.displayChord)
+        assertEquals(-18f, s.inputLevelDbfs, 1e-6f)
+
+        // Holding 帧继续更新专业页原始频谱，但主调音频谱锁存上一次确认帧。
+        val holdingSpectrum = FloatArray(64) { -75f }.toList()
         stream.emit(
             AnalysisFrame(
                 tuner = a4Event(),
-                spectrumDb = spectrum,
-                partials = listOf(partial),
-                chord = "Amaj",
+                spectrumDb = holdingSpectrum,
+                partials = emptyList(),
+                chord = null,
+                signalState = SignalState.HOLDING,
+                inputLevelDbfs = -75f,
+                displayStrength = 1f,
+                isHeld = true,
             ),
         )
-        now = 900L
-        vm2.onTick() // 900 > 800ms → 超时清空
-        assertEquals(0, vm2.uiState.value.spectrumDb.size)
-        assertTrue(vm2.uiState.value.partials.isEmpty())
-        assertEquals(null, vm2.uiState.value.chord)
+        assertTrue(vm.uiState.value.signal is TunerSignal.Active)
+        assertEquals(64, vm.uiState.value.spectrumDb.size)
+        assertTrue(vm.uiState.value.partials.isEmpty())
+        assertEquals(null, vm.uiState.value.chord)
+        assertEquals(-75f, vm.uiState.value.spectrumDb[0], 1e-6f)
+        assertEquals(-40f, vm.uiState.value.displaySpectrumDb[0], 1e-6f)
+        assertEquals(1, vm.uiState.value.displayPartials.size)
+        assertEquals("Amaj", vm.uiState.value.displayChord)
     }
 
     @Test
     fun `onCleared 释放采集`() {
         val stream = FakeStream()
-        val vm = TunerViewModel(stream = stream, clock = { 0L })
+        val vm = TunerViewModel(stream = stream)
 
         vm.startCapture()
         assertEquals(1, stream.acquireCount)
