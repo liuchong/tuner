@@ -106,23 +106,47 @@ fun ProfessionalSpectrumScreen(
                             color = colors.inkSecondary,
                         )
                     }
-                    Surface(
-                        onClick = {
-                            historyViewModel.isPaused = !paused
-                        },
-                        shape = RoundedCornerShape(50),
-                        color = if (paused) {
-                            colors.accent.copy(alpha = 0.16f)
-                        } else {
-                            colors.bgSurface
-                        },
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Text(
-                            if (paused) "▶ 继续" else "Ⅱ 暂停",
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
-                            style = TunerTypography.caption,
-                            color = if (paused) colors.accent else colors.inkSecondary,
-                        )
+                        Surface(
+                            onClick = historyViewModel::resetPeakHold,
+                            shape = RoundedCornerShape(50),
+                            color = colors.bgSurface,
+                        ) {
+                            Text(
+                                "重置峰值",
+                                modifier = Modifier.padding(
+                                    horizontal = 12.dp,
+                                    vertical = 9.dp,
+                                ),
+                                style = TunerTypography.caption,
+                                color = colors.inkSecondary,
+                                maxLines = 1,
+                            )
+                        }
+                        Surface(
+                            onClick = {
+                                historyViewModel.isPaused = !paused
+                            },
+                            shape = RoundedCornerShape(50),
+                            color = if (paused) {
+                                colors.accent.copy(alpha = 0.16f)
+                            } else {
+                                colors.bgSurface
+                            },
+                        ) {
+                            Text(
+                                if (paused) "▶ 继续" else "Ⅱ 暂停",
+                                modifier = Modifier.padding(
+                                    horizontal = 12.dp,
+                                    vertical = 9.dp,
+                                ),
+                                style = TunerTypography.caption,
+                                color = if (paused) colors.accent else colors.inkSecondary,
+                                maxLines = 1,
+                            )
+                        }
                     }
                 }
             }

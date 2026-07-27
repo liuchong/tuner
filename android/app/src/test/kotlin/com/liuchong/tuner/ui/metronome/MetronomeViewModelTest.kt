@@ -191,6 +191,8 @@ class MetronomeViewModelTest {
         assertEquals(80, engine.normalSoundLen)
         vm.setAccentSound(TickSoundKind.CLICK)
         assertEquals(50, engine.accentSoundLen)
+        vm.setNormalSound(TickSoundKind.WOOD_BLOCK)
+        assertEquals(3969, engine.normalSoundLen)
     }
 
     @Test
@@ -227,5 +229,18 @@ class MetronomeViewModelTest {
         assertEquals(3, s.beatsPerBar)
         assertEquals(listOf(TickAccent.ACCENT, TickAccent.MUTED, TickAccent.NORMAL), s.accents)
         assertEquals(TickSoundKind.BEEP, s.accentSound)
+    }
+
+    @Test
+    fun `未知音色保存值安全回退默认值`() {
+        val saved = SavedStateHandle().apply {
+            set("accentSound", "UNKNOWN_ACCENT")
+            set("normalSound", "UNKNOWN_NORMAL")
+        }
+
+        val state = makeVm(savedState = saved).uiState.value
+
+        assertEquals(TickSoundKind.BELL, state.accentSound)
+        assertEquals(TickSoundKind.CLICK, state.normalSound)
     }
 }

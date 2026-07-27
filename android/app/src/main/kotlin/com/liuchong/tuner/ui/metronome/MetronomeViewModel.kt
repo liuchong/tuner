@@ -89,11 +89,14 @@ class MetronomeViewModel(
             beatsPerBar = beats,
             beatUnit = savedState.get<Int>(KEY_UNIT) ?: 4,
             accents = accents,
-            accentSound = savedState.get<String>(KEY_ACCENT_SOUND)
-                ?.let { TickSoundKind.valueOf(it) } ?: TickSoundKind.BELL,
-            normalSound = savedState.get<String>(KEY_NORMAL_SOUND)
-                ?.let { TickSoundKind.valueOf(it) } ?: TickSoundKind.CLICK,
+            accentSound = restoreSound(KEY_ACCENT_SOUND, TickSoundKind.BELL),
+            normalSound = restoreSound(KEY_NORMAL_SOUND, TickSoundKind.CLICK),
         )
+    }
+
+    private fun restoreSound(key: String, fallback: TickSoundKind): TickSoundKind {
+        val savedName = savedState.get<String>(key) ?: return fallback
+        return TickSoundKind.entries.firstOrNull { it.name == savedName } ?: fallback
     }
 
     private fun currentConfig() = _uiState.value.let {

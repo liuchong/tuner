@@ -78,6 +78,32 @@ class SpectrumHistoryTest {
     }
 
     @Test
+    fun `重置只清空峰值保持并保留实时瀑布和暂停状态`() {
+        val history = SpectrumHistory(
+            binCount = 4,
+            waterfallBinCount = 4,
+            maxRows = 8,
+            frameStride = 1,
+        )
+        history.accept(listOf(-20f, -30f, -40f, -50f))
+        val live = history.currentSpectrum()
+        val rows = history.rowsNewestFirst()
+        history.isPaused = true
+
+        history.resetPeakHold()
+
+        assertEquals(listOf(-80f, -80f, -80f, -80f), history.peakSpectrum())
+        assertEquals(live, history.currentSpectrum())
+        assertEquals(rows, history.rowsNewestFirst())
+        assertTrue(history.isPaused)
+        assertTrue(history.state.value.isPaused)
+
+        history.isPaused = false
+        history.accept(listOf(-60f, -50f, -40f, -30f))
+        assertEquals(listOf(-60f, -50f, -40f, -30f), history.peakSpectrum())
+    }
+
+    @Test
     fun `重复频率仍生成唯一列表行标识`() {
         val duplicate = Partial(
             freqHz = 96.8994140625,
