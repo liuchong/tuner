@@ -98,7 +98,7 @@ GuitarTuna（卡通吵闹、广告喧宾夺主）、Fender Tune（平淡无反�
 1. **外圈数字环**：−50、−25、0、+25、+50（caption，`ink/faint`），沿弧排布。
 2. **刻度带 + 彩色分区弧**：140° 弧（±50c）；10c 主刻度/2c 细分；分区弧红(±50→15)/琥珀(±15→5)/绿(±5)，线宽 6dp 圆头。
 3. **进度光弧**：从弧左端（−50c）到当前指针位置的渐变弧（语义色发光，端部亮尾部透）——直观表达「离准音还有多远的路」。
-4. **光针 + 残影**：锥形指针随偏差变色；最近 3 帧残影（30/15/7% α）。
+4. **单光针**：锥形指针随偏差变色；任何时刻只绘制当前目标的一根实针，禁止历史帧残影。
 5. **准音光池**：中心 ±5c 下方 `glow/in`；准音时 ×1.6 + 光涌。
 6. 置信度低 → 指针 α 40%；首次可信读数出现前不显示指针，出现后断音保持最近位置。
 
@@ -207,7 +207,7 @@ GuitarTuna（卡通吵闹、广告喧宾夺主）、Fender Tune（平淡无反�
 
 | 场景 | 参数 |
 |---|---|
-| 指针跟随 | 弹簧 stiffness 800 / damping 0.72（iOS `.spring(response:0.18, dampingFraction:0.72)`） |
+| 指针跟随 | Android：弹簧 stiffness 800 / damping 0.72；iOS：50ms `easeOut`、无回弹，连续更新时直接改写唯一目标 |
 | 极光变色/漂移 | 颜色 300ms 交叉渐变；位移弹簧 stiffness 60 / damping 0.9；呼吸 6s ±3% α |
 | 准音光涌 | glow α 1.0→1.6→1.0，280ms FastOutSlowIn |
 | 音名脉冲 | scale 1.0→1.06→1.0，300ms |
@@ -231,7 +231,7 @@ GuitarTuna（卡通吵闹、广告喧宾夺主）、Fender Tune（平淡无反�
 | 色彩 | `TunerColors` | Asset Catalog 同名 |
 | 字体 | `TunerTypography` | `Font.system(...).monospacedDigit()` |
 | 极光 | Canvas 径向渐变 + `rememberInfiniteTransition` | `RadialGradient` + `TimelineView` |
-| 指针弹簧 | `spring(0.72f, 800f)` | `.spring(response:0.18, dampingFraction:0.72)` |
+| 指针跟随 | `spring(0.72f, 800f)` | `.easeOut(duration: 0.05)` |
 | BottomSheet | `ModalBottomSheet` | `.sheet` |
 | 触觉 | `performHapticFeedback` | `UIImpactFeedbackGenerator` |
 

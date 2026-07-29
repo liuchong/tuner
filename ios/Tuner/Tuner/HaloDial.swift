@@ -1,7 +1,21 @@
 import SwiftUI
 
+enum NeedlePresentation {
+    static let rangeCents: Float = 50
+    static let followDuration: TimeInterval = 0.05
+
+    static func clampedCents(_ cents: Float) -> Float {
+        min(max(cents, -rangeCents), rangeCents)
+    }
+
+    static func renderedCents(for cents: Float?) -> [Float] {
+        guard let cents else { return [] }
+        return [clampedCents(cents)]
+    }
+}
+
 /// Halo 表盘（design-system §6.1）：外圈数字环 + 刻度带 + 彩色分区弧 +
-/// 进度光弧 + 锥形光针 + 3 帧残影 + 准音光池；圆心不放任何文字。
+/// 进度光弧 + 单根锥形光针 + 准音光池；圆心不放任何文字。
 ///
 /// 几何不变量（构图纪律）：指针扫掠区域（弧顶 → pivot 圆点）必须完整落在
 /// 本组件矩形内；读数块位于表盘区域 bottom + 16dp 之下，任何偏转角
@@ -10,20 +24,20 @@ struct HaloDial: View {
     @Environment(\.lumen) private var palette
     @Environment(\.isLumenDark) private var isDark
 
-    /// 当前偏差（调用方做弹簧动画）；nil = 无信号。
+    /// 当前偏差（调用方做快速无回弹动画）；nil = 无信号。
     var cents: Float?
     var clarity: Float = 1.0
 
-    private let rangeCents: Float = 50
+    private let rangeCents = NeedlePresentation.rangeCents
     private let inTuneCents: Float = 5
     private let nearCents: Float = 15
 
-    @State private var trail: [Float] = []
     @State private var glowBoost: CGFloat = 1.0
     @State private var fade: CGFloat = 1.0
 
-    private func angle(of c: Float) -> Angle {
-        Angle(degrees: Double(270 + (c / rangeCents) * 70))
+    nonisolated private func angle(of c: Float) -> Angle {
+        let clamped = NeedlePresentation.clampedCents(c)
+        return Angle(degrees: Double(270 + (clamped / NeedlePresentation.rangeCents) * 70))
     }
 
     private var activeColor: Color {
@@ -155,21 +169,13 @@ struct HaloDial: View {
                 )
             }
 
-            // 残影（最近 3 帧 30/15/7%）
-            for (i, tc) in trail.enumerated() {
-                let ta: CGFloat = [0.30, 0.15, 0.07][min(i, 2)]
+            // 单光针：只绘制当前目标，nil 时不绘制。
+            for currentCents in NeedlePresentation.renderedCents(for: cents) {
                 drawNeedle(ctx: ctx, center: center, radius: radius,
-                           angle: angle(of: tc), color: activeColor, alpha: ta * alpha)
+                           angle: angle(of: currentCents), color: activeColor, alpha: alpha)
             }
-
-            // 光针
-            drawNeedle(ctx: ctx, center: center, radius: radius,
-                       angle: angle(of: cents ?? 0), color: activeColor, alpha: alpha)
         }
         .onChange(of: cents) { _, newValue in
-            if let v = newValue {
-                trail = ([v] + trail).prefix(3).map { $0 }
-            }
             withAnimation(.linear(duration: 0.4)) {
                 fade = newValue == nil ? 0.4 : 1.0
             }
