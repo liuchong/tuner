@@ -248,8 +248,8 @@ struct TunerView: View {
             if phase != .active { forkVm.stopForBackground() }
         }
         .onChange(of: reading?.centsOff) { _, newValue in
-            withAnimation(.spring(response: 0.18, dampingFraction: 0.72)) {
-                animatedCents = Float(newValue ?? 0)
+            withAnimation(.easeOut(duration: NeedlePresentation.followDuration)) {
+                animatedCents = NeedlePresentation.clampedCents(Float(newValue ?? 0))
             }
         }
         .onChange(of: inTune) { _, newValue in

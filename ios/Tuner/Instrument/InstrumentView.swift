@@ -65,8 +65,8 @@ struct InstrumentView: View {
         .onAppear { vm.startCapture() }
         .onDisappear { vm.releaseCapture() }
         .onChange(of: vm.centsToTarget) { _, newValue in
-            withAnimation(.spring(response: 0.18, dampingFraction: 0.72)) {
-                animatedCents = newValue ?? 0
+            withAnimation(.easeOut(duration: NeedlePresentation.followDuration)) {
+                animatedCents = NeedlePresentation.clampedCents(newValue ?? 0)
             }
         }
     }

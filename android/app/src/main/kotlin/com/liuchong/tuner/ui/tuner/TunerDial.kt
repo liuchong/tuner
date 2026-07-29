@@ -8,10 +8,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -43,9 +40,6 @@ private const val NEAR_CENTS = 15f
 private const val ARC_SPAN = 140f
 private const val ARC_START = 270f - ARC_SPAN / 2f
 
-/** 运动残影帧数与 alpha（30%/15%/7%）。 */
-private val TRAIL_ALPHAS = floatArrayOf(0.30f, 0.15f, 0.07f)
-
 /** 数字环标注。 */
 private val DIAL_LABELS = listOf("−50", "−25", "0", "+25", "+50")
 
@@ -53,13 +47,16 @@ private val DIAL_LABELS = listOf("−50", "−25", "0", "+25", "+50")
 private fun centsToAngle(cents: Float): Float =
     270f + cents.coerceIn(-RANGE_CENTS, RANGE_CENTS) / RANGE_CENTS * (ARC_SPAN / 2f)
 
+internal fun needleRenderCents(cents: Float?): List<Float> =
+    cents?.let { listOf(it.coerceIn(-RANGE_CENTS, RANGE_CENTS)) } ?: emptyList()
+
 /**
  * Halo 表盘（design-system v3.0 §6.1）：同心三层——数字环 / 刻度带+分区弧 /
- * 进度光弧；圆心留空（仅极淡内环）；光针+残影；准音光池光涌；置信度联动。
+ * 进度光弧；圆心留空（仅极淡内环）；单光针；准音光池光涌；置信度联动。
  *
  * 构图纪律：表盘内不放任何文字读数（读数区在表盘正下方，见 §6.2）。
  *
- * @param cents 当前偏差（调用方做弹簧动画）；null = 无信号（400ms 回中灰显）
+ * @param cents 当前偏差（调用方做弹簧动画）；null = 无信号且不绘制指针
  * @param clarity 检测置信度（低时指针 alpha 40%）
  * @param accessibilityText 屏幕阅读器文案
  */
@@ -81,12 +78,6 @@ fun TunerDial(
             glowBoost.animateTo(1.6f, tween(140, easing = FastOutSlowInEasing))
             glowBoost.animateTo(1.0f, tween(140, easing = FastOutSlowInEasing))
         }
-    }
-
-    // 运动残影：保存最近 3 帧角度
-    var trail by remember { mutableStateOf(listOf<Float>()) }
-    LaunchedEffect(cents) {
-        if (cents != null) trail = (listOf(cents) + trail).take(TRAIL_ALPHAS.size + 1).drop(1)
     }
 
     // 无信号淡出（400ms 线性）
@@ -245,14 +236,10 @@ fun TunerDial(
             )
         }
 
-        // ---- 运动残影（最近 3 帧，30%/15%/7% alpha）----
-        trail.forEachIndexed { i, trailCents ->
-            val a = TRAIL_ALPHAS.getOrElse(i) { 0f }
-            drawNeedle(centsToAngle(trailCents), center, radius, activeColor, a * alpha, dp)
+        // ---- 单根当前光针（锥形 + pivot 圆点）；无信号时不绘制 ----
+        needleRenderCents(cents).forEach { currentCents ->
+            drawNeedle(centsToAngle(currentCents), center, radius, activeColor, alpha, dp)
         }
-
-        // ---- 光针（锥形 + pivot 圆点）----
-        drawNeedle(centsToAngle(cents ?: 0f), center, radius, activeColor, alpha, dp)
     }
 }
 

@@ -92,4 +92,18 @@ final class TunerViewModelTests: XCTestCase {
             return
         }
     }
+
+    func testNeedlePresentationAlwaysUsesOnlyCurrentTarget() {
+        XCTAssertEqual(NeedlePresentation.renderedCents(for: -32), [-32])
+        XCTAssertEqual(NeedlePresentation.renderedCents(for: 28), [28])
+        XCTAssertEqual(NeedlePresentation.renderedCents(for: 7), [7])
+        XCTAssertEqual(NeedlePresentation.renderedCents(for: nil), [])
+    }
+
+    func testNeedlePresentationClampsRangeAndUsesFastNonSpringDuration() {
+        XCTAssertEqual(NeedlePresentation.renderedCents(for: -80), [-50])
+        XCTAssertEqual(NeedlePresentation.renderedCents(for: 80), [50])
+        XCTAssertEqual(NeedlePresentation.followDuration, 0.05, accuracy: 1e-9)
+        XCTAssertLessThanOrEqual(NeedlePresentation.followDuration, 0.05)
+    }
 }

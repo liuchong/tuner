@@ -221,3 +221,20 @@ class TunerViewModelTest {
         assertEquals(1, stream.releaseCount)
     }
 }
+
+class TunerDialPresentationTest {
+
+    @Test
+    fun `快速连续更新始终只呈现当前一根指针`() {
+        assertEquals(listOf(-32f), needleRenderCents(-32f))
+        assertEquals(listOf(28f), needleRenderCents(28f))
+        assertEquals(listOf(7f), needleRenderCents(7f))
+        assertTrue(needleRenderCents(null).isEmpty())
+    }
+
+    @Test
+    fun `指针目标限制在表盘范围内`() {
+        assertEquals(listOf(-50f), needleRenderCents(-80f))
+        assertEquals(listOf(50f), needleRenderCents(80f))
+    }
+}
