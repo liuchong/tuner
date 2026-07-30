@@ -1,4 +1,4 @@
-# Tuner 设计系统 —「Aurora / 极光」v4.1
+# 吐呐 / TUNAR 设计系统 —「Aurora / 极光」v4.1
 
 > 跨平台设计圣经。Android（Compose）与后续 iOS/macOS（SwiftUI）共用同一套设计 token 与组件规格。
 > 修改 UI 前必读；实现与本文档不一致视为缺陷（见 .agents/rules/docs-sync.md）。

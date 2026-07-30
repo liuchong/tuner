@@ -17,6 +17,7 @@ targets:
       path: Tuner/Info.plist
       properties:
         UILaunchScreen: {}
+        CFBundleDisplayName: TUNAR
         NSMicrophoneUsageDescription: "调音需要访问麦克风以检测音高"
         UIBackgroundModes:
           - audio

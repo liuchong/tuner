@@ -1,6 +1,11 @@
-# Tuner — 项目规则（AGENTS.md）
+# 吐呐 / TUNAR — 项目规则（AGENTS.md）
 
-跨平台调音器 + 节拍器。**Rust 共享核心 + 多端原生 UI**：Android（Kotlin/Compose，首发）、iOS/macOS（SwiftUI，二期）。
+产品品牌为中文「吐呐」、英文 `TUNAR`。跨平台调音器 + 节拍器，采用 **Rust 共享核心 +
+多端原生 UI**：Android（Kotlin/Compose）与 iOS（SwiftUI），macOS 规划中。
+
+品牌名只影响用户可见文案。为保证已安装版本原位升级与设置数据兼容，仓库目录、Rust crate、
+Java package、iOS target/scheme、Bundle ID 和持久化键继续使用既有 `tuner` / `Tuner`
+技术标识，除非另有经确认的迁移方案。
 
 ## 仓库结构
 
@@ -10,8 +15,9 @@ android/         Android App（Kotlin + Jetpack Compose）
   app/           UI 与音频桥接
   core-binding/  UniFFI Kotlin 绑定 + 各 ABI .so
   design/        图标源文件（SVG），用 scripts/generate-icons.sh 重新生成 mipmap 资源
-ios/ macos/      二期（占位）
-docs/            规格文档（spec-*.md）与 design-system.md（「Lumen/微光」设计系统，跨平台 UI 圣经），代码以此为准
+ios/             iOS SwiftUI App + UniFFI Swift 绑定
+macos/           macOS SwiftUI App（规划中）
+docs/            中英双语规格与「Aurora/极光」设计系统，代码以此为准
 .agents/rules/   分场景开发规则
 scripts/         构建脚本（build-core-android.sh 等）
 ```
