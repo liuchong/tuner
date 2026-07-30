@@ -1,0 +1,3 @@
+"CFBundleDisplayName" = "TUNAR";
+"CFBundleName" = "TUNAR";
+"NSMicrophoneUsageDescription" = "TUNAR uses the microphone to detect pitch for tuning and sound analysis.";

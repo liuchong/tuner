@@ -24,6 +24,7 @@
 		467B64BAE840B6BEE20E929C /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20EE2ACD28DF49C08EC58815 /* SettingsStore.swift */; };
 		47944205925036A6FC52EFE2 /* TunerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6684B2AFF71DABC61E97E6D /* TunerView.swift */; };
 		53498C00B57890C3BAF83D54 /* ProfessionalSpectrumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79C716DA4E163D40D5C251B3 /* ProfessionalSpectrumView.swift */; };
+		57B24ACAB54E6F95047C64C8 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = FC703E2CF060D821AB93DCC6 /* InfoPlist.strings */; };
 		5E56E4BD918C9FB218668A1E /* TuningForkViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F83E32A591655AF1374B3F3D /* TuningForkViewModelTests.swift */; };
 		6A12CFACEA46839E586C1476 /* TuningForkViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49FCF7A8502D447B850D0297 /* TuningForkViewModel.swift */; };
 		6D155235918CBCDCE3DA45E0 /* tuner_core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004B4DE8BE119AE667375088 /* tuner_core.swift */; };
@@ -76,6 +77,8 @@
 		4E30505ACCC5FE3491F6CD05 /* InstrumentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentView.swift; sourceTree = "<group>"; };
 		4F42CC6A6BABE1A595FC87A6 /* TickSounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TickSounds.swift; sourceTree = "<group>"; };
 		553F755E8B39618F8A2F3976 /* TickSoundsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TickSoundsTests.swift; sourceTree = "<group>"; };
+		5962E86250D0BD598E805DFA /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		61C25111D4F21CCB54EA622E /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		6B638FB06ED3016F413E4B6F /* SpectrumPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumPresentationTests.swift; sourceTree = "<group>"; };
 		6BA081240CE9605822E25E62 /* MetronomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeView.swift; sourceTree = "<group>"; };
 		70E43EEE7E63E106A2DC8DE3 /* SpectrumBand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumBand.swift; sourceTree = "<group>"; };
@@ -184,6 +187,7 @@
 				DE02A5669F8FD24BA39844EC /* Audio */,
 				5B448B23711CFBA2E2B5F75D /* Bridge */,
 				6E92CC82A1D17F803646D91D /* Common */,
+				FC703E2CF060D821AB93DCC6 /* InfoPlist.strings */,
 				73D5C8AE748B216E390DD004 /* Instrument */,
 				E23E40CCD8E4C3737A2CEF6E /* Metronome */,
 				0B69D1ED079AFC90D9CBD7DD /* Settings */,
@@ -341,6 +345,7 @@
 			knownRegions = (
 				Base,
 				en,
+				"zh-Hans",
 			);
 			mainGroup = 5E21A3E0FCAED9605AF18AA9;
 			minimizedProjectReferenceProxies = 1;
@@ -361,6 +366,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DC9DD0CC314BE54737608192 /* Assets.xcassets in Resources */,
+				57B24ACAB54E6F95047C64C8 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -427,6 +433,18 @@
 			targetProxy = 456EA97F367685948A361590 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		FC703E2CF060D821AB93DCC6 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5962E86250D0BD598E805DFA /* en */,
+				61C25111D4F21CCB54EA622E /* zh-Hans */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		2B89DFFB1894D3EF9D7DE5A6 /* Release */ = {
