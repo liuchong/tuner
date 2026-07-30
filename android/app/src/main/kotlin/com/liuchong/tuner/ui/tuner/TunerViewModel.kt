@@ -40,6 +40,16 @@ data class TunerUiState(
     val signal: TunerSignal = TunerSignal.Listening,
     /** 64 bin 对数频谱（dBFS -80~0；无信号为空）。 */
     val spectrumDb: FloatArray = FloatArray(0),
+    /** 128 bin 全频段对数频谱。 */
+    val wideSpectrumDb: FloatArray = FloatArray(0),
+    /** 全频段频谱的实际频率上限。 */
+    val wideSpectrumMaxHz: Double = 20_000.0,
+    /** 当前分析窗口的最小值/最大值波形包络。 */
+    val waveformMin: FloatArray = FloatArray(0),
+    val waveformMax: FloatArray = FloatArray(0),
+    /** 当前分析帧的采样位置与实际采样率。 */
+    val samplePosition: ULong = 0uL,
+    val sampleRateHz: Double = 48_000.0,
     /** 泛音列（按幅值降序）。 */
     val partials: List<Partial> = emptyList(),
     /** 和弦名（无则 null）。 */
@@ -64,6 +74,12 @@ data class TunerUiState(
         if (other !is TunerUiState) return false
         return signal == other.signal &&
             spectrumDb.contentEquals(other.spectrumDb) &&
+            wideSpectrumDb.contentEquals(other.wideSpectrumDb) &&
+            wideSpectrumMaxHz == other.wideSpectrumMaxHz &&
+            waveformMin.contentEquals(other.waveformMin) &&
+            waveformMax.contentEquals(other.waveformMax) &&
+            samplePosition == other.samplePosition &&
+            sampleRateHz == other.sampleRateHz &&
             partials == other.partials &&
             chord == other.chord &&
             displaySpectrumDb.contentEquals(other.displaySpectrumDb) &&
@@ -78,6 +94,12 @@ data class TunerUiState(
     override fun hashCode(): Int {
         var r = signal.hashCode()
         r = 31 * r + spectrumDb.contentHashCode()
+        r = 31 * r + wideSpectrumDb.contentHashCode()
+        r = 31 * r + wideSpectrumMaxHz.hashCode()
+        r = 31 * r + waveformMin.contentHashCode()
+        r = 31 * r + waveformMax.contentHashCode()
+        r = 31 * r + samplePosition.hashCode()
+        r = 31 * r + sampleRateHz.hashCode()
         r = 31 * r + partials.hashCode()
         r = 31 * r + (chord?.hashCode() ?: 0)
         r = 31 * r + displaySpectrumDb.contentHashCode()
@@ -117,6 +139,12 @@ class TunerViewModel(
                             TunerSignal.Active(ev.toReading())
                         } ?: TunerSignal.Listening,
                         spectrumDb = frame.spectrumDb.toFloatArray(),
+                        wideSpectrumDb = frame.wideSpectrumDb.toFloatArray(),
+                        wideSpectrumMaxHz = frame.wideSpectrumMaxHz,
+                        waveformMin = frame.waveformMin.toFloatArray(),
+                        waveformMax = frame.waveformMax.toFloatArray(),
+                        samplePosition = frame.samplePosition,
+                        sampleRateHz = frame.sampleRateHz,
                         partials = frame.partials,
                         chord = frame.chord,
                         displaySpectrumDb = if (confirmed) {

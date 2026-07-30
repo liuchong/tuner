@@ -2286,6 +2286,30 @@ data class AnalysisFrame (
      */
     var `spectrumDb`: List<kotlin.Float>, 
     /**
+     * 128 bin 对数轴 20Hz–wide_spectrum_max_hz 幅值（dBFS -80~0）。
+     */
+    var `wideSpectrumDb`: List<kotlin.Float>, 
+    /**
+     * 全频段实际频率上限（min(20kHz, sample_rate/2)）。
+     */
+    var `wideSpectrumMaxHz`: kotlin.Double, 
+    /**
+     * 当前分析窗口 256 列最小值包络。
+     */
+    var `waveformMin`: List<kotlin.Float>, 
+    /**
+     * 当前分析窗口 256 列最大值包络。
+     */
+    var `waveformMax`: List<kotlin.Float>, 
+    /**
+     * 当前帧末端相对引擎启动时的采样位置。
+     */
+    var `samplePosition`: kotlin.ULong, 
+    /**
+     * 实际分析采样率。
+     */
+    var `sampleRateHz`: kotlin.Double, 
+    /**
      * 泛音列（≤8，按幅值降序）。
      */
     var `partials`: List<Partial>, 
@@ -2322,6 +2346,12 @@ public object FfiConverterTypeAnalysisFrame: FfiConverterRustBuffer<AnalysisFram
         return AnalysisFrame(
             FfiConverterOptionalTypeTunerEvent.read(buf),
             FfiConverterSequenceFloat.read(buf),
+            FfiConverterSequenceFloat.read(buf),
+            FfiConverterDouble.read(buf),
+            FfiConverterSequenceFloat.read(buf),
+            FfiConverterSequenceFloat.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterDouble.read(buf),
             FfiConverterSequenceTypePartial.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterTypeSignalState.read(buf),
@@ -2334,6 +2364,12 @@ public object FfiConverterTypeAnalysisFrame: FfiConverterRustBuffer<AnalysisFram
     override fun allocationSize(value: AnalysisFrame) = (
             FfiConverterOptionalTypeTunerEvent.allocationSize(value.`tuner`) +
             FfiConverterSequenceFloat.allocationSize(value.`spectrumDb`) +
+            FfiConverterSequenceFloat.allocationSize(value.`wideSpectrumDb`) +
+            FfiConverterDouble.allocationSize(value.`wideSpectrumMaxHz`) +
+            FfiConverterSequenceFloat.allocationSize(value.`waveformMin`) +
+            FfiConverterSequenceFloat.allocationSize(value.`waveformMax`) +
+            FfiConverterULong.allocationSize(value.`samplePosition`) +
+            FfiConverterDouble.allocationSize(value.`sampleRateHz`) +
             FfiConverterSequenceTypePartial.allocationSize(value.`partials`) +
             FfiConverterOptionalString.allocationSize(value.`chord`) +
             FfiConverterTypeSignalState.allocationSize(value.`signalState`) +
@@ -2345,6 +2381,12 @@ public object FfiConverterTypeAnalysisFrame: FfiConverterRustBuffer<AnalysisFram
     override fun write(value: AnalysisFrame, buf: ByteBuffer) {
             FfiConverterOptionalTypeTunerEvent.write(value.`tuner`, buf)
             FfiConverterSequenceFloat.write(value.`spectrumDb`, buf)
+            FfiConverterSequenceFloat.write(value.`wideSpectrumDb`, buf)
+            FfiConverterDouble.write(value.`wideSpectrumMaxHz`, buf)
+            FfiConverterSequenceFloat.write(value.`waveformMin`, buf)
+            FfiConverterSequenceFloat.write(value.`waveformMax`, buf)
+            FfiConverterULong.write(value.`samplePosition`, buf)
+            FfiConverterDouble.write(value.`sampleRateHz`, buf)
             FfiConverterSequenceTypePartial.write(value.`partials`, buf)
             FfiConverterOptionalString.write(value.`chord`, buf)
             FfiConverterTypeSignalState.write(value.`signalState`, buf)

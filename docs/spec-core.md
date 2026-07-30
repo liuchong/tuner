@@ -75,6 +75,17 @@ src/
   不足以凑满 ≥3 音级，不会误判）。
 - 性能：analyze 单帧耗时 < 3× feed；测试：合成基频+泛音信号的 H2/H3 标注正确；双音/三音合成的和弦识别正确。
 
+2026-07-30 专业声音视图扩展：
+
+- 同一次 2048 点 FFT 同时生成两套展示数据，禁止为全频段视图再执行一次 FFT：
+  既有 `spectrum_db` 为 64 桶、60–2400Hz；`wide_spectrum_db` 为 128 桶、
+  20Hz 到 `min(20000Hz, sample_rate/2)`。
+- `waveform_min` / `waveform_max` 各 256 点：把当前分析窗口等宽分桶，每桶输出有限样本的
+  最小值与最大值；非有限样本按 0 处理。包络只用于时域展示，不参与音高判断。
+- `sample_position` 以配置的分析 hop 递增，表示当前帧末端相对本引擎启动时的采样位置；
+  `sample_rate_hz` 随帧返回。平台用二者建立单调时间轴，不读取系统时钟。
+- 全频段上限随实际采样率裁剪并由 `wide_spectrum_max_hz` 明示；所有输出必须为有限值。
+
 ## 4b. 律制（Temperament，v4 新增）
 
 - N 平均律，N ∈ {12, 19, 24, 31}，默认 12；步序以 A4 为参考：`f_step = a4·2^(k/N)`。
@@ -285,6 +296,12 @@ dictionary Partial {
 dictionary AnalysisFrame {
     TunerEvent? tuner;          // Tracking/Holding 时为当前或最后有效读数
     sequence<f32> spectrum_db;  // 64 bin，对数轴 60-2400Hz，dBFS -80~0
+    sequence<f32> wide_spectrum_db; // 128 bin，对数轴 20Hz-wide_spectrum_max_hz
+    f64 wide_spectrum_max_hz;   // min(20000, sample_rate/2)
+    sequence<f32> waveform_min; // 256 列当前窗口最小值包络
+    sequence<f32> waveform_max; // 256 列当前窗口最大值包络
+    u64 sample_position;        // 当前帧末端的单调采样位置
+    f64 sample_rate_hz;         // 实际分析采样率
     sequence<Partial> partials; // ≤8
     string? chord;              // 如 "Cmaj"，无则为 null
     SignalState signal_state;

@@ -224,6 +224,18 @@ pub struct AnalysisFrame {
     pub tuner: Option<TunerEvent>,
     /// 64 bin 对数轴 60–2400Hz 幅值（dBFS -80~0）。
     pub spectrum_db: Vec<f32>,
+    /// 128 bin 对数轴 20Hz–wide_spectrum_max_hz 幅值（dBFS -80~0）。
+    pub wide_spectrum_db: Vec<f32>,
+    /// 全频段实际频率上限（min(20kHz, sample_rate/2)）。
+    pub wide_spectrum_max_hz: f64,
+    /// 当前分析窗口 256 列最小值包络。
+    pub waveform_min: Vec<f32>,
+    /// 当前分析窗口 256 列最大值包络。
+    pub waveform_max: Vec<f32>,
+    /// 当前帧末端相对引擎启动时的采样位置。
+    pub sample_position: u64,
+    /// 实际分析采样率。
+    pub sample_rate_hz: f64,
     /// 泛音列（≤8，按幅值降序）。
     pub partials: Vec<Partial>,
     /// 和弦名（如 "Cmaj"），无则为 None。
@@ -438,6 +450,9 @@ struct TunerCore {
     solfege: SolfegeSystem,
     key: KeyMode,
     temperament: u8,
+    sample_rate_hz: f64,
+    frame_hop_samples: u64,
+    sample_position: u64,
 }
 
 impl TunerCore {
@@ -489,6 +504,10 @@ impl TunerCore {
     fn analyze_full(&mut self, pcm: &[f32]) -> AnalysisFrame {
         let (tuner, signal, input_level_dbfs) = self.analyze_frame(pcm);
         let spectrum_db = self.spectrum.feed(pcm).to_vec();
+        let wide_spectrum_db = self.spectrum.wide_spectrum().to_vec();
+        let wide_spectrum_max_hz = self.spectrum.wide_max_hz() as f64;
+        let (waveform_min, waveform_max) = waveform_envelope(pcm);
+        self.sample_position = self.sample_position.saturating_add(self.frame_hop_samples);
         let f0 = tuner.as_ref().map(|t| t.freq_hz);
         let mut raw_partials = [spectrum::PartialInfo {
             freq_hz: 0.0,
@@ -543,6 +562,12 @@ impl TunerCore {
         AnalysisFrame {
             tuner,
             spectrum_db,
+            wide_spectrum_db,
+            wide_spectrum_max_hz,
+            waveform_min,
+            waveform_max,
+            sample_position: self.sample_position,
+            sample_rate_hz: self.sample_rate_hz,
             partials,
             chord: spectrum::match_chord(pcs).map(|s| s.to_string()),
             signal_state: signal.state,
@@ -581,6 +606,9 @@ impl TunerEngine {
                 solfege: config.solfege,
                 key: config.key,
                 temperament: note::temperament_or_default(config.temperament),
+                sample_rate_hz: config.sample_rate,
+                frame_hop_samples: u64::from(config.frame_hop_samples),
+                sample_position: 0,
             }),
         })
     }
@@ -639,6 +667,38 @@ impl TunerEngine {
             })
             .collect()
     }
+}
+
+const WAVEFORM_COLUMNS: usize = 256;
+
+/// 将当前分析窗口压缩为定宽最小/最大包络。UniFFI 分析边界允许返回向量。
+fn waveform_envelope(pcm: &[f32]) -> (Vec<f32>, Vec<f32>) {
+    let mut mins = vec![0.0; WAVEFORM_COLUMNS];
+    let mut maxs = vec![0.0; WAVEFORM_COLUMNS];
+    if pcm.is_empty() {
+        return (mins, maxs);
+    }
+    for column in 0..WAVEFORM_COLUMNS {
+        let start = column * pcm.len() / WAVEFORM_COLUMNS;
+        let end = (column + 1) * pcm.len() / WAVEFORM_COLUMNS;
+        if start >= end {
+            continue;
+        }
+        let mut min_value = 1.0f32;
+        let mut max_value = -1.0f32;
+        for &raw in &pcm[start..end] {
+            let sample = if raw.is_finite() {
+                raw.clamp(-1.0, 1.0)
+            } else {
+                0.0
+            };
+            min_value = min_value.min(sample);
+            max_value = max_value.max(sample);
+        }
+        mins[column] = min_value;
+        maxs[column] = max_value;
+    }
+    (mins, maxs)
 }
 
 // ============================ Metronome ============================
@@ -1029,6 +1089,80 @@ mod tests {
         assert!(idxs.contains(&2), "缺 H2: {idxs:?}");
         assert!(idxs.contains(&3), "缺 H3: {idxs:?}");
         assert!(idxs.contains(&4), "缺 H4: {idxs:?}");
+    }
+
+    #[test]
+    fn analyze_returns_wide_spectrum_waveform_and_monotonic_position() {
+        let mut config = default_config();
+        config.frame_hop_samples = 800;
+        let engine = TunerEngine::new(config);
+        let pcm = synth(&[(440.0, 0.45), (10_000.0, 0.35)], 2048);
+
+        let first = engine.analyze(pcm.clone());
+        let second = engine.analyze(pcm);
+
+        assert_eq!(first.spectrum_db.len(), 64);
+        assert_eq!(first.wide_spectrum_db.len(), 128);
+        assert_eq!(first.waveform_min.len(), 256);
+        assert_eq!(first.waveform_max.len(), 256);
+        assert_eq!(first.sample_rate_hz, 44_100.0);
+        assert_eq!(first.wide_spectrum_max_hz, 20_000.0);
+        assert_eq!(first.sample_position, 800);
+        assert_eq!(second.sample_position, 1_600);
+        assert!(
+            first
+                .waveform_min
+                .iter()
+                .chain(first.waveform_max.iter())
+                .all(|value| value.is_finite())
+        );
+        assert!(
+            first
+                .waveform_min
+                .iter()
+                .zip(first.waveform_max.iter())
+                .all(|(min, max)| min <= max)
+        );
+
+        let ratio = first.wide_spectrum_max_hz / 20.0;
+        let expected_bin = ((10_000.0_f64 / 20.0).ln() / ratio.ln() * 128.0)
+            .floor()
+            .clamp(0.0, 127.0) as usize;
+        let peak_db = first.wide_spectrum_db[expected_bin];
+        let neighborhood_floor = first.wide_spectrum_db
+            [expected_bin.saturating_sub(3)..=(expected_bin + 3).min(127)]
+            .iter()
+            .copied()
+            .filter(|value| *value < peak_db)
+            .fold(spectrum::DB_FLOOR, f32::max);
+        assert!(
+            peak_db > -20.0 && peak_db > neighborhood_floor,
+            "10kHz 应形成可辨峰: bin={expected_bin}, db={peak_db}, neighbor={neighborhood_floor}"
+        );
+    }
+
+    #[test]
+    fn analyze_clamps_wide_spectrum_to_nyquist_and_sanitizes_waveform() {
+        let mut config = default_config();
+        config.sample_rate = 32_000.0;
+        config.frame_hop_samples = 800;
+        let engine = TunerEngine::new(config);
+        let mut pcm = vec![0.0f32; 2048];
+        pcm[0] = f32::NAN;
+        pcm[1] = f32::INFINITY;
+        pcm[2] = f32::NEG_INFINITY;
+
+        let frame = engine.analyze(pcm);
+
+        assert_eq!(frame.wide_spectrum_max_hz, 16_000.0);
+        assert!(frame.wide_spectrum_db.iter().all(|value| value.is_finite()));
+        assert!(
+            frame
+                .waveform_min
+                .iter()
+                .chain(frame.waveform_max.iter())
+                .all(|value| value.is_finite())
+        );
     }
 
     #[test]

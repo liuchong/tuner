@@ -29,6 +29,12 @@ final class TunerViewModelTests: XCTestCase {
     ) -> AnalysisFrame {
         AnalysisFrame(
             tuner: ev, spectrumDb: Array(repeating: -40, count: 64),
+            wideSpectrumDb: Array(repeating: -55, count: 128),
+            wideSpectrumMaxHz: 20_000,
+            waveformMin: Array(repeating: -0.25, count: 256),
+            waveformMax: Array(repeating: 0.5, count: 256),
+            samplePosition: 12_288,
+            sampleRateHz: 48_000,
             partials: [], chord: nil,
             signalState: state ?? (ev == nil ? .quiet : .tracking),
             inputLevelDbfs: ev == nil ? -120 : -24,
@@ -57,6 +63,13 @@ final class TunerViewModelTests: XCTestCase {
         XCTAssertEqual(r.solfege, "6")
         XCTAssertEqual(vm.spectrumDb.count, 64)
         XCTAssertEqual(vm.displaySpectrumDb.count, 64)
+        XCTAssertEqual(vm.wideSpectrumDb.count, 128)
+        XCTAssertEqual(vm.wideSpectrumDb.first, -55)
+        XCTAssertEqual(vm.wideSpectrumMaxHz, 20_000)
+        XCTAssertEqual(vm.waveformMin.first, -0.25)
+        XCTAssertEqual(vm.waveformMax.first, 0.5)
+        XCTAssertEqual(vm.samplePosition, 12_288)
+        XCTAssertEqual(vm.sampleRateHz, 48_000)
     }
 
     func testHoldingAndQuietFollowCoreStateWithoutLocalTimeout() {

@@ -3,10 +3,12 @@ package com.liuchong.tuner.ui.spectrum
 import com.liuchong.tuner.ui.tuner.TunerReading
 import java.util.Locale
 import kotlin.math.ln
+import kotlin.math.max
 import uniffi.tuner_core.Partial
 
 internal const val PROFESSIONAL_SPECTRUM_MIN_HZ = 60.0
 internal const val PROFESSIONAL_SPECTRUM_MAX_HZ = 2_400.0
+internal const val PROFESSIONAL_WIDE_SPECTRUM_MIN_HZ = 20.0
 internal const val PROFESSIONAL_SPECTRUM_FLOOR_DB = -80f
 
 internal data class SpectrumAxisTick(
@@ -17,6 +19,11 @@ internal data class SpectrumAxisTick(
 internal data class SpectrumTracePoint(
     val x: Float,
     val y: Float,
+)
+
+internal data class PitchDisplayBounds(
+    val minimum: Double,
+    val maximum: Double,
 )
 
 internal enum class SpectrumHeatBand {
@@ -46,8 +53,37 @@ internal fun professionalFrequencyTicks(): List<SpectrumAxisTick> =
         1_000.0 to "1k",
         2_400.0 to "2.4k Hz",
     ).map { (frequency, label) ->
-        SpectrumAxisTick(frequencyFraction(frequency).toFloat(), label)
+        SpectrumAxisTick(
+            frequencyFraction(
+                frequency,
+                PROFESSIONAL_SPECTRUM_MIN_HZ,
+                PROFESSIONAL_SPECTRUM_MAX_HZ,
+            ).toFloat(),
+            label,
+        )
     }
+
+internal fun professionalWideFrequencyTicks(maxHz: Double): List<SpectrumAxisTick> {
+    val validMax = maxHz.takeIf {
+        it.isFinite() && it > PROFESSIONAL_WIDE_SPECTRUM_MIN_HZ
+    } ?: PROFESSIONAL_WIDE_SPECTRUM_MIN_HZ * 2.0
+    val frequencies = buildList {
+        add(PROFESSIONAL_WIDE_SPECTRUM_MIN_HZ)
+        listOf(100.0, 500.0, 1_000.0, 5_000.0)
+            .filterTo(this) { it < validMax }
+        if (last() != validMax) add(validMax)
+    }
+    return frequencies.mapIndexed { index, frequency ->
+        SpectrumAxisTick(
+            frequencyFraction(
+                frequency,
+                PROFESSIONAL_WIDE_SPECTRUM_MIN_HZ,
+                validMax,
+            ).toFloat(),
+            frequencyLabel(frequency, suffix = index == frequencies.lastIndex),
+        )
+    }
+}
 
 internal fun professionalDbTicks(): List<SpectrumAxisTick> =
     listOf(
@@ -97,6 +133,19 @@ internal fun spectrumTracePoints(
     }
 }
 
+internal fun pitchDisplayBounds(midiValues: List<Float>): PitchDisplayBounds {
+    val finite = midiValues.filter(Float::isFinite)
+    if (finite.isEmpty()) return PitchDisplayBounds(minimum = 63.0, maximum = 75.0)
+    val rawMin = finite.min().toDouble()
+    val rawMax = finite.max().toDouble()
+    val center = (rawMin + rawMax) / 2.0
+    val span = max(12.0, rawMax - rawMin + 4.0)
+    return PitchDisplayBounds(
+        minimum = center - span / 2.0,
+        maximum = center + span / 2.0,
+    )
+}
+
 internal fun professionalSpectrumMetrics(
     reading: TunerReading?,
     inputLevelDbfs: Float,
@@ -116,14 +165,28 @@ internal fun professionalSpectrumMetrics(
     )
 }
 
-internal fun frequencyFraction(frequencyHz: Double): Double =
+internal fun frequencyFraction(
+    frequencyHz: Double,
+    minHz: Double = PROFESSIONAL_SPECTRUM_MIN_HZ,
+    maxHz: Double = PROFESSIONAL_SPECTRUM_MAX_HZ,
+): Double =
     (ln(
         frequencyHz.coerceIn(
-            PROFESSIONAL_SPECTRUM_MIN_HZ,
-            PROFESSIONAL_SPECTRUM_MAX_HZ,
-        ) / PROFESSIONAL_SPECTRUM_MIN_HZ,
-    ) / ln(PROFESSIONAL_SPECTRUM_MAX_HZ / PROFESSIONAL_SPECTRUM_MIN_HZ))
+            minHz,
+            maxHz,
+        ) / minHz,
+    ) / ln(maxHz / minHz))
         .coerceIn(0.0, 1.0)
+
+private fun frequencyLabel(frequency: Double, suffix: Boolean): String {
+    val base = if (frequency >= 1_000.0) {
+        val kilo = frequency / 1_000.0
+        if (kilo % 1.0 == 0.0) "${kilo.toInt()}k" else format("%.1fk", kilo)
+    } else {
+        frequency.toInt().toString()
+    }
+    return if (suffix) "$base Hz" else base
+}
 
 private fun format(pattern: String, vararg arguments: Any): String =
     String.format(Locale.US, pattern, *arguments)

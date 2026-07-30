@@ -36,6 +36,7 @@ private class FakeReferenceToneOutput : ReferenceToneOutput {
 private class FakeReferenceToneAudioFocus : ReferenceToneAudioFocus {
     var requested = 0
     var abandoned = 0
+    val abandonedSignal = CountDownLatch(1)
     private var onLoss: (() -> Unit)? = null
 
     override fun request(onLoss: () -> Unit): Boolean {
@@ -46,6 +47,7 @@ private class FakeReferenceToneAudioFocus : ReferenceToneAudioFocus {
 
     override fun abandon() {
         abandoned++
+        abandonedSignal.countDown()
     }
 
     fun loseFocus() {
@@ -112,6 +114,7 @@ class ReferenceTonePlayerTest {
 
         focus.loseFocus()
         assertTrue(output.released.await(1, TimeUnit.SECONDS))
+        assertTrue(focus.abandonedSignal.await(1, TimeUnit.SECONDS))
         assertTrue(focus.abandoned > 0)
 
         player.close()

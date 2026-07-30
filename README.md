@@ -28,7 +28,8 @@
 - Adjustable noise gate, two-frame confirmation, hysteresis, and persistent last reading.
 - Aurora dial with a single responsive needle and no historical ghost needles.
 - Fixed Do, movable Do, numbered notation, and Chinese gongche-style scale naming.
-- Real FFT spectrum, measured peak labels in Hz, waterfall history, and chord detection.
+- Integrated professional analysis with musical/full-range FFT, 12-second pitch trace,
+  live waveform envelope, measured peak labels, waterfall history, and chord detection.
 - Reference-tone generator for 12, 19, 24, and 31 equal divisions of the octave.
 - Pro temperament mode with configurable A4 calibration.
 

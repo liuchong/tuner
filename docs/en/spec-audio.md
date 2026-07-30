@@ -60,6 +60,9 @@ causes a quiet start failure and session release, followed by retry on the next 
   frame dropping.
 - UI updates may conflate events above 30 fps.
 - Sample rate is always negotiated and passed to core; it is never assumed.
+- Professional spectrum, pitch trace, and waveform consume the same capture window and
+  one core `analyze` result. No view opens a second microphone, performs a second FFT,
+  or allocates display history inside the audio callback.
 
 ## 5. Change log
 
