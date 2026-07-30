@@ -31,6 +31,34 @@ class SpectrumPresentationTest {
     }
 
     @Test
+    fun `全频模式刻度按实际奈奎斯特上限生成且保持对数间距`() {
+        val ticks = professionalWideFrequencyTicks(20_000.0)
+
+        assertEquals(
+            listOf("20", "100", "500", "1k", "5k", "20k Hz"),
+            ticks.map { it.label },
+        )
+        assertEquals(0f, ticks.first().fraction, 1e-6f)
+        assertEquals(1f, ticks.last().fraction, 1e-6f)
+        assertTrue(ticks.zipWithNext().all { (left, right) -> left.fraction < right.fraction })
+        assertEquals(
+            0.5,
+            frequencyFraction(200.0, minHz = 20.0, maxHz = 2_000.0),
+            1e-9,
+        )
+    }
+
+    @Test
+    fun `音高轨迹纵轴覆盖完整历史跨度并至少保留一个八度`() {
+        val wide = pitchDisplayBounds(listOf(48f, 72f))
+        assertEquals(46.0, wide.minimum, 1e-9)
+        assertEquals(74.0, wide.maximum, 1e-9)
+
+        val narrow = pitchDisplayBounds(listOf(69f, 70f))
+        assertEquals(12.0, narrow.maximum - narrow.minimum, 1e-9)
+    }
+
+    @Test
     fun `热力颜色等级从背景连续覆盖到红色强信号`() {
         assertEquals(SpectrumHeatBand.BACKGROUND, spectrumHeatBand(-80f))
         assertEquals(SpectrumHeatBand.INDIGO, spectrumHeatBand(-68f))

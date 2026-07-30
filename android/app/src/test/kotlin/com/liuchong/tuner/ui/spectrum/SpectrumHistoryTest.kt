@@ -119,4 +119,84 @@ class SpectrumHistoryTest {
         assertNotEquals(rows[0].id, rows[1].id)
         assertTrue(rows.all { it.partial.freqHz == duplicate.freqHz })
     }
+
+    @Test
+    fun `专业分析同时冻结全频波形与音高轨迹并在恢复后断开连线`() {
+        val history = SpectrumHistory(
+            binCount = 4,
+            wideBinCount = 6,
+            waveformColumns = 3,
+            waterfallBinCount = 4,
+            maxRows = 8,
+            frameStride = 1,
+        )
+        history.acceptAnalysis(
+            spectrumDb = listOf(-40f, -30f, -20f, -10f),
+            wideSpectrumDb = listOf(-70f, -60f, -50f, -40f, -30f, -20f),
+            waveformMin = listOf(-0.5f, -0.25f, -0.1f),
+            waveformMax = listOf(0.5f, 0.25f, 0.1f),
+            samplePosition = 1_024u,
+            sampleRateHz = 44_100.0,
+            trackingMidi = 69f,
+        )
+        val beforePause = history.state.value
+
+        history.isPaused = true
+        history.acceptAnalysis(
+            spectrumDb = List(4) { -5f },
+            wideSpectrumDb = List(6) { -5f },
+            waveformMin = List(3) { -1f },
+            waveformMax = List(3) { 1f },
+            samplePosition = 2_048u,
+            sampleRateHz = 44_100.0,
+            trackingMidi = 70f,
+        )
+
+        val frozen = history.state.value
+        assertTrue(frozen.currentWideSpectrum.contentEquals(beforePause.currentWideSpectrum))
+        assertTrue(frozen.waveformMin.contentEquals(beforePause.waveformMin))
+        assertEquals(beforePause.pitchTrace, frozen.pitchTrace)
+
+        history.isPaused = false
+        history.acceptAnalysis(
+            spectrumDb = List(4) { -25f },
+            wideSpectrumDb = List(6) { -25f },
+            waveformMin = List(3) { -0.2f },
+            waveformMax = List(3) { 0.2f },
+            samplePosition = 3_072u,
+            sampleRateHz = 44_100.0,
+            trackingMidi = 71f,
+        )
+
+        val trace = history.state.value.pitchTrace
+        assertEquals(2, trace.size)
+        assertNotEquals(trace[0].segment, trace[1].segment)
+    }
+
+    @Test
+    fun `保持和静音只切断音高轨迹不伪造新点`() {
+        val history = SpectrumHistory(binCount = 2, wideBinCount = 2, waveformColumns = 2)
+        fun accept(position: Long, midi: Float?) {
+            history.acceptAnalysis(
+                spectrumDb = listOf(-40f, -30f),
+                wideSpectrumDb = listOf(-50f, -20f),
+                waveformMin = listOf(-0.2f, -0.1f),
+                waveformMax = listOf(0.2f, 0.1f),
+                samplePosition = position.toULong(),
+                sampleRateHz = 1_000.0,
+                trackingMidi = midi,
+            )
+        }
+
+        accept(1_000, 69f)
+        accept(2_000, null)
+        accept(3_000, null)
+        accept(4_000, 71f)
+
+        val trace = history.state.value.pitchTrace
+        assertEquals(2, trace.size)
+        assertEquals(1.0, trace[0].timeSeconds, 1e-6)
+        assertEquals(4.0, trace[1].timeSeconds, 1e-6)
+        assertNotEquals(trace[0].segment, trace[1].segment)
+    }
 }

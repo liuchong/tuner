@@ -26,6 +26,12 @@ private class FakeEngine : PitchEngine {
     override fun analyze(pcm: List<Float>) = uniffi.tuner_core.AnalysisFrame(
         tuner = null,
         spectrumDb = emptyList(),
+        wideSpectrumDb = emptyList(),
+        wideSpectrumMaxHz = 20_000.0,
+        waveformMin = emptyList(),
+        waveformMax = emptyList(),
+        samplePosition = 0uL,
+        sampleRateHz = 48_000.0,
         partials = emptyList(),
         chord = null,
         signalState = uniffi.tuner_core.SignalState.QUIET,

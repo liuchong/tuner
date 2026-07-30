@@ -55,6 +55,12 @@ class FakeStream(config: TunerConfig = TunerCore.defaultConfig()) : TunerEventSt
             AnalysisFrame(
                 tuner = ev,
                 spectrumDb = FloatArray(64).toList(),
+                wideSpectrumDb = FloatArray(128).toList(),
+                wideSpectrumMaxHz = 20_000.0,
+                waveformMin = FloatArray(256).toList(),
+                waveformMax = FloatArray(256).toList(),
+                samplePosition = 1_024uL,
+                sampleRateHz = 48_000.0,
                 partials = emptyList(),
                 chord = null,
                 signalState = signalState,
@@ -158,10 +164,19 @@ class TunerViewModelTest {
             centsOff = 0.0,
         )
         val spectrum = FloatArray(64) { -40f }.toList()
+        val wideSpectrum = FloatArray(128) { -55f }.toList()
+        val waveformMin = FloatArray(256) { -0.25f }.toList()
+        val waveformMax = FloatArray(256) { 0.5f }.toList()
         stream.emit(
             AnalysisFrame(
                 tuner = a4Event(),
                 spectrumDb = spectrum,
+                wideSpectrumDb = wideSpectrum,
+                wideSpectrumMaxHz = 20_000.0,
+                waveformMin = waveformMin,
+                waveformMax = waveformMax,
+                samplePosition = 12_288uL,
+                sampleRateHz = 48_000.0,
                 partials = listOf(partial),
                 chord = "Amaj",
                 signalState = SignalState.TRACKING,
@@ -181,6 +196,13 @@ class TunerViewModelTest {
         assertEquals(1, s.displayPartials.size)
         assertEquals("Amaj", s.displayChord)
         assertEquals(-18f, s.inputLevelDbfs, 1e-6f)
+        assertEquals(128, s.wideSpectrumDb.size)
+        assertEquals(-55f, s.wideSpectrumDb[0], 1e-6f)
+        assertEquals(20_000.0, s.wideSpectrumMaxHz, 1e-9)
+        assertEquals(-0.25f, s.waveformMin[0], 1e-6f)
+        assertEquals(0.5f, s.waveformMax[0], 1e-6f)
+        assertEquals(12_288uL, s.samplePosition)
+        assertEquals(48_000.0, s.sampleRateHz, 1e-9)
 
         // Holding 帧继续更新专业页原始频谱，但主调音频谱锁存上一次确认帧。
         val holdingSpectrum = FloatArray(64) { -75f }.toList()
@@ -188,6 +210,12 @@ class TunerViewModelTest {
             AnalysisFrame(
                 tuner = a4Event(),
                 spectrumDb = holdingSpectrum,
+                wideSpectrumDb = FloatArray(128) { -78f }.toList(),
+                wideSpectrumMaxHz = 20_000.0,
+                waveformMin = FloatArray(256).toList(),
+                waveformMax = FloatArray(256).toList(),
+                samplePosition = 13_312uL,
+                sampleRateHz = 48_000.0,
                 partials = emptyList(),
                 chord = null,
                 signalState = SignalState.HOLDING,

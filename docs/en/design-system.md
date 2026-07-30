@@ -134,6 +134,11 @@ Hz. Dismissing the sheet does not stop sound, destroy capture, or re-layout the 
 
 ### 4.9 Professional spectrum
 
+Below the card title, a compact 30 dp/pt, 10-radius segmented control switches
+Spectrum / Pitch Trace / Waveform. The selected segment uses 16% accent fill. A matching
+range control appears only for Spectrum. Do not imitate piano-roll bands, gray note
+stripes, or a separate bottom tool bar.
+
 The current main plot uses logarithmic 60–2400 Hz and -80–0 dBFS. Grid labels are
 60/100/200/500/1k/2.4k Hz and 0/-20/-40/-60/-80 dBFS. Live and peak-hold curves use
 accent colors, not tuning semantic colors. Peak hold rises only when a stronger value
@@ -149,6 +154,12 @@ right. Its palette is canvas → indigo `#3949AB` → purple `#8E5AC7` → cyan 
 → yellow `#FFC857` → red `#E53935`. It displays 96 columns × 256 rows: 64 measured
 bins are visually interpolated to 96 columns and one row is appended every two
 analysis frames. Interpolation is not additional measurement.
+
+Pitch Trace uses solid accent points and 2 dp connecting lines only for real tracking
+frames; gaps remain empty. A thin in-tune guide may use `tune/in`, but the background
+does not use large gray keyboard bands. Waveform uses a 28% accent envelope, a 1.5 dp
+outline, and a subtle zero line. All three views share the same 280 dp/pt bounding box
+and switch with a 150 ms cross-fade.
 
 ## 5. Motion, haptics, and accessibility
 

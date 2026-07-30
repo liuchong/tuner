@@ -53,6 +53,8 @@
 - core 侧 `feed`/`render` 零分配（见 spec-core §3/§7）。
 - UI 更新频率节流：TunerEvent ≥ 30fps 时 UI 按帧合并（conflate）。
 - 调音读数的 2 帧确认、门限滞回和无限保持由 core 完成；平台不得使用墙上时钟二次清空。
+- 专业声音视图沿用同一采集窗口和同一次 core `analyze`；全频段频谱、乐音频谱与波形包络
+  随同一个 `AnalysisFrame` 返回。禁止为任一视图新增麦克风、第二次 FFT 或音频回调内历史分配。
 
 ## 4. 变更
 

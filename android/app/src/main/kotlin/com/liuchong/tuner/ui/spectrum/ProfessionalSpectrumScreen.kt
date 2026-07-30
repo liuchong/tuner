@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -52,8 +53,22 @@ import com.liuchong.tuner.ui.tuner.TunerViewModel
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.ln
+import kotlin.math.min
 import kotlin.math.pow
+import kotlin.math.roundToInt
 import uniffi.tuner_core.Partial
+import uniffi.tuner_core.SignalState
+
+private enum class ProfessionalViewMode {
+    SPECTRUM,
+    PITCH,
+    WAVEFORM,
+}
+
+private enum class SpectrumRange {
+    MUSICAL,
+    WIDE,
+}
 
 /** 独立专业频谱分析页面，共享 CaptureHub，不创建第二路麦克风。 */
 @Composable
@@ -69,9 +84,24 @@ fun ProfessionalSpectrumScreen(
         val reading = (state.signal as? TunerSignal.Active)?.reading
         val historyState by historyViewModel.state.collectAsStateWithLifecycle()
         val paused = historyState.isPaused
+        var viewMode by remember { mutableStateOf(ProfessionalViewMode.SPECTRUM) }
+        var spectrumRange by remember { mutableStateOf(SpectrumRange.MUSICAL) }
 
-        LaunchedEffect(state.spectrumDb) {
-            historyViewModel.accept(state.spectrumDb.asList())
+        LaunchedEffect(state.samplePosition) {
+            historyViewModel.acceptAnalysis(
+                spectrumDb = state.spectrumDb.asList(),
+                wideSpectrumDb = state.wideSpectrumDb.asList(),
+                waveformMin = state.waveformMin.asList(),
+                waveformMax = state.waveformMax.asList(),
+                samplePosition = state.samplePosition,
+                sampleRateHz = state.sampleRateHz,
+                trackingMidi = reading
+                    ?.takeIf {
+                        state.signalState == SignalState.TRACKING && !state.isHeld
+                    }
+                    ?.midi
+                    ?.toFloat(),
+            )
         }
         val peakRows = professionalSpectrumRows(state.partials)
         val metrics = professionalSpectrumMetrics(
@@ -101,7 +131,7 @@ fun ProfessionalSpectrumScreen(
                             color = colors.inkPrimary,
                         )
                         Text(
-                            "横轴频率 · 实时频谱 / 峰值保持",
+                            "实时频谱 · 音高轨迹 · 波形",
                             style = TunerTypography.caption,
                             color = colors.inkSecondary,
                         )
@@ -174,27 +204,130 @@ fun ProfessionalSpectrumScreen(
                                 color = if (paused) colors.inkSecondary else colors.accent,
                             )
                             Text(
-                                "纵轴 dBFS",
+                                when (viewMode) {
+                                    ProfessionalViewMode.SPECTRUM -> "纵轴 dBFS"
+                                    ProfessionalViewMode.PITCH -> "纵轴 MIDI 音高"
+                                    ProfessionalViewMode.WAVEFORM -> "纵轴振幅"
+                                },
                                 style = TunerTypography.caption,
                                 color = colors.inkFaint,
                             )
                         }
-                        Row {
-                            DbAxis(
-                                modifier = Modifier
-                                    .width(58.dp)
-                                    .height(280.dp),
-                            )
-                            SpectrumLineChart(
-                                live = historyState.currentSpectrum,
-                                peak = historyState.peakSpectrum,
-                                partials = state.partials,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(280.dp),
+                        Spacer(Modifier.height(8.dp))
+                        CompactSelector(
+                            choices = listOf(
+                                ProfessionalViewMode.SPECTRUM to "频谱",
+                                ProfessionalViewMode.PITCH to "音高轨迹",
+                                ProfessionalViewMode.WAVEFORM to "波形",
+                            ),
+                            selected = viewMode,
+                            onSelected = { viewMode = it },
+                        )
+                        if (viewMode == ProfessionalViewMode.SPECTRUM) {
+                            Spacer(Modifier.height(6.dp))
+                            CompactSelector(
+                                choices = listOf(
+                                    SpectrumRange.MUSICAL to "乐音",
+                                    SpectrumRange.WIDE to "全频",
+                                ),
+                                selected = spectrumRange,
+                                onSelected = { spectrumRange = it },
                             )
                         }
-                        FrequencyAxis(Modifier.padding(start = 58.dp))
+                        Spacer(Modifier.height(8.dp))
+                        when (viewMode) {
+                            ProfessionalViewMode.SPECTRUM -> {
+                                val wide = spectrumRange == SpectrumRange.WIDE
+                                val minHz = if (wide) {
+                                    PROFESSIONAL_WIDE_SPECTRUM_MIN_HZ
+                                } else {
+                                    PROFESSIONAL_SPECTRUM_MIN_HZ
+                                }
+                                val maxHz = if (wide) {
+                                    state.wideSpectrumMaxHz
+                                } else {
+                                    PROFESSIONAL_SPECTRUM_MAX_HZ
+                                }
+                                val ticks = if (wide) {
+                                    professionalWideFrequencyTicks(maxHz)
+                                } else {
+                                    professionalFrequencyTicks()
+                                }
+                                Row {
+                                    DbAxis(
+                                        modifier = Modifier
+                                            .width(58.dp)
+                                            .height(280.dp),
+                                    )
+                                    SpectrumLineChart(
+                                        live = if (wide) {
+                                            historyState.currentWideSpectrum
+                                        } else {
+                                            historyState.currentSpectrum
+                                        },
+                                        peak = if (wide) {
+                                            historyState.peakWideSpectrum
+                                        } else {
+                                            historyState.peakSpectrum
+                                        },
+                                        partials = state.partials,
+                                        minHz = minHz,
+                                        maxHz = maxHz,
+                                        ticks = ticks,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(280.dp),
+                                    )
+                                }
+                                FrequencyAxis(
+                                    ticks = ticks,
+                                    modifier = Modifier.padding(start = 58.dp),
+                                )
+                            }
+
+                            ProfessionalViewMode.PITCH -> {
+                                val bounds = pitchDisplayBounds(
+                                    historyState.pitchTrace.map { it.midi },
+                                )
+                                Row {
+                                    PitchAxis(
+                                        bounds = bounds,
+                                        modifier = Modifier
+                                            .width(58.dp)
+                                            .height(280.dp),
+                                    )
+                                    PitchTraceChart(
+                                        trace = historyState.pitchTrace,
+                                        bounds = bounds,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(280.dp),
+                                    )
+                                }
+                                TraceTimeAxis(Modifier.padding(start = 58.dp))
+                            }
+
+                            ProfessionalViewMode.WAVEFORM -> {
+                                Row {
+                                    AmplitudeAxis(
+                                        modifier = Modifier
+                                            .width(58.dp)
+                                            .height(280.dp),
+                                    )
+                                    WaveformChart(
+                                        minimum = historyState.waveformMin,
+                                        maximum = historyState.waveformMax,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(280.dp),
+                                    )
+                                }
+                                WaveformTimeAxis(
+                                    sampleRateHz = state.sampleRateHz,
+                                    modifier = Modifier.padding(start = 58.dp),
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -241,7 +374,7 @@ fun ProfessionalSpectrumScreen(
                                 )
                             }
                             FrequencyAxis(
-                                Modifier.padding(start = 44.dp, end = 48.dp),
+                                modifier = Modifier.padding(start = 44.dp, end = 48.dp),
                             )
                             Row(
                                 modifier = Modifier
@@ -303,6 +436,9 @@ private fun SpectrumLineChart(
     live: FloatArray,
     peak: FloatArray,
     partials: List<Partial>,
+    minHz: Double,
+    maxHz: Double,
+    ticks: List<SpectrumAxisTick>,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalLumenColors.current
@@ -332,7 +468,7 @@ private fun SpectrumLineChart(
                 val y = size.height * tick.fraction
                 drawLine(colors.lineSubtle, Offset(0f, y), Offset(size.width, y), 1f)
             }
-            professionalFrequencyTicks().forEach { tick ->
+            ticks.forEach { tick ->
                 val x = size.width * tick.fraction
                 drawLine(colors.lineSubtle, Offset(x, 0f), Offset(x, size.height), 1f)
             }
@@ -364,7 +500,8 @@ private fun SpectrumLineChart(
                 )
             }
             partials.forEach { partial ->
-                val x = frequencyFraction(partial.freqHz).toFloat() * size.width
+                if (partial.freqHz !in minHz..maxHz) return@forEach
+                val x = frequencyFraction(partial.freqHz, minHz, maxHz).toFloat() * size.width
                 val y = size.height * (
                     1f - (
                         (partial.magnitudeDb - PROFESSIONAL_SPECTRUM_FLOOR_DB) /
@@ -381,8 +518,8 @@ private fun SpectrumLineChart(
 
         if (cursorFraction >= 0f && live.isNotEmpty()) {
             val index = (cursorFraction * (live.size - 1)).toInt().coerceIn(live.indices)
-            val frequency = PROFESSIONAL_SPECTRUM_MIN_HZ *
-                (PROFESSIONAL_SPECTRUM_MAX_HZ / PROFESSIONAL_SPECTRUM_MIN_HZ)
+            val frequency = minHz *
+                (maxHz / minHz)
                     .pow(cursorFraction.toDouble())
             val nearest = partials.minByOrNull { abs(ln(it.freqHz / frequency)) }
             val note = nearest
@@ -404,6 +541,134 @@ private fun SpectrumLineChart(
                 color = colors.accent,
             )
         }
+    }
+}
+
+@Composable
+private fun <T> CompactSelector(
+    choices: List<Pair<T, String>>,
+    selected: T,
+    onSelected: (T) -> Unit,
+) {
+    val colors = LocalLumenColors.current
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        choices.forEach { (value, label) ->
+            Surface(
+                onClick = { onSelected(value) },
+                modifier = Modifier
+                    .weight(1f)
+                    .height(30.dp),
+                shape = RoundedCornerShape(10.dp),
+                color = if (selected == value) {
+                    colors.accent.copy(alpha = 0.16f)
+                } else {
+                    colors.bgCanvas.copy(alpha = 0.65f)
+                },
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        label,
+                        style = TunerTypography.caption,
+                        color = if (selected == value) colors.accent else colors.inkSecondary,
+                        maxLines = 1,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PitchTraceChart(
+    trace: List<PitchTracePoint>,
+    bounds: PitchDisplayBounds,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalLumenColors.current
+    Canvas(modifier.background(colors.bgCanvas)) {
+        repeat(5) { index ->
+            val y = size.height * index / 4f
+            drawLine(colors.lineSubtle, Offset(0f, y), Offset(size.width, y), 1f)
+        }
+        repeat(5) { index ->
+            val x = size.width * index / 4f
+            drawLine(colors.lineSubtle, Offset(x, 0f), Offset(x, size.height), 1f)
+        }
+        if (trace.isEmpty()) return@Canvas
+        val latest = trace.last().timeSeconds
+        val earliest = latest - 12.0
+        trace.zipWithNext().forEach { (left, right) ->
+            if (left.segment != right.segment) return@forEach
+            val x1 = ((left.timeSeconds - earliest) / 12.0).toFloat() * size.width
+            val x2 = ((right.timeSeconds - earliest) / 12.0).toFloat() * size.width
+            val y1 = (1.0 - (left.midi - bounds.minimum) / (bounds.maximum - bounds.minimum))
+                .toFloat() * size.height
+            val y2 = (1.0 - (right.midi - bounds.minimum) / (bounds.maximum - bounds.minimum))
+                .toFloat() * size.height
+            drawLine(
+                color = colors.accent,
+                start = Offset(x1, y1),
+                end = Offset(x2, y2),
+                strokeWidth = 2.dp.toPx(),
+            )
+        }
+        trace.lastOrNull()?.let { point ->
+            val x = ((point.timeSeconds - earliest) / 12.0).toFloat() * size.width
+            val y = (1.0 - (point.midi - bounds.minimum) / (bounds.maximum - bounds.minimum))
+                .toFloat() * size.height
+            drawCircle(colors.atmoAccent, 4.dp.toPx(), Offset(x, y))
+        }
+    }
+}
+
+@Composable
+private fun WaveformChart(
+    minimum: FloatArray,
+    maximum: FloatArray,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalLumenColors.current
+    Canvas(modifier.background(colors.bgCanvas)) {
+        repeat(5) { index ->
+            val y = size.height * index / 4f
+            drawLine(colors.lineSubtle, Offset(0f, y), Offset(size.width, y), 1f)
+        }
+        repeat(5) { index ->
+            val x = size.width * index / 4f
+            drawLine(colors.lineSubtle, Offset(x, 0f), Offset(x, size.height), 1f)
+        }
+        val count = min(minimum.size, maximum.size)
+        if (count < 2) return@Canvas
+        val envelope = Path()
+        for (index in 0 until count) {
+            val x = size.width * index / (count - 1f)
+            val y = size.height * (0.5f - maximum[index].coerceIn(-1f, 1f) * 0.45f)
+            if (index == 0) envelope.moveTo(x, y) else envelope.lineTo(x, y)
+        }
+        for (index in count - 1 downTo 0) {
+            val x = size.width * index / (count - 1f)
+            val y = size.height * (0.5f - minimum[index].coerceIn(-1f, 1f) * 0.45f)
+            envelope.lineTo(x, y)
+        }
+        envelope.close()
+        drawPath(
+            envelope,
+            brush = Brush.verticalGradient(
+                listOf(
+                    colors.atmoAccent.copy(alpha = 0.7f),
+                    colors.accent.copy(alpha = 0.18f),
+                ),
+            ),
+        )
+        drawLine(
+            colors.accent.copy(alpha = 0.8f),
+            Offset(0f, size.height / 2f),
+            Offset(size.width, size.height / 2f),
+            1f,
+        )
     }
 }
 
@@ -448,10 +713,89 @@ private fun WaterfallChart(
 }
 
 @Composable
-private fun FrequencyAxis(modifier: Modifier = Modifier) {
+private fun FrequencyAxis(
+    ticks: List<SpectrumAxisTick> = professionalFrequencyTicks(),
+    modifier: Modifier = Modifier,
+) {
     val colors = LocalLumenColors.current
     AxisLabels(
-        ticks = professionalFrequencyTicks(),
+        ticks = ticks,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(22.dp),
+        color = colors.inkFaint,
+        horizontal = true,
+    )
+}
+
+@Composable
+private fun PitchAxis(
+    bounds: PitchDisplayBounds,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalLumenColors.current
+    val center = ((bounds.minimum + bounds.maximum) / 2.0).roundToInt()
+    AxisLabels(
+        ticks = listOf(
+            SpectrumAxisTick(0f, "${bounds.maximum.roundToInt()}"),
+            SpectrumAxisTick(0.5f, "$center"),
+            SpectrumAxisTick(1f, "${bounds.minimum.roundToInt()}"),
+        ),
+        modifier = modifier,
+        color = colors.inkFaint,
+        horizontal = false,
+    )
+}
+
+@Composable
+private fun AmplitudeAxis(modifier: Modifier = Modifier) {
+    val colors = LocalLumenColors.current
+    AxisLabels(
+        ticks = listOf(
+            SpectrumAxisTick(0.05f, "+1"),
+            SpectrumAxisTick(0.5f, "0"),
+            SpectrumAxisTick(0.95f, "-1"),
+        ),
+        modifier = modifier,
+        color = colors.inkFaint,
+        horizontal = false,
+    )
+}
+
+@Composable
+private fun TraceTimeAxis(modifier: Modifier = Modifier) {
+    val colors = LocalLumenColors.current
+    AxisLabels(
+        ticks = listOf(
+            SpectrumAxisTick(0f, "-12秒"),
+            SpectrumAxisTick(0.5f, "-6秒"),
+            SpectrumAxisTick(1f, "现在"),
+        ),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(22.dp),
+        color = colors.inkFaint,
+        horizontal = true,
+    )
+}
+
+@Composable
+private fun WaveformTimeAxis(
+    sampleRateHz: Double,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalLumenColors.current
+    val durationMs = if (sampleRateHz.isFinite() && sampleRateHz > 0.0) {
+        2_048.0 / sampleRateHz * 1_000.0
+    } else {
+        0.0
+    }
+    AxisLabels(
+        ticks = listOf(
+            SpectrumAxisTick(0f, String.format(Locale.US, "-%.0f ms", durationMs)),
+            SpectrumAxisTick(0.5f, String.format(Locale.US, "-%.0f ms", durationMs / 2.0)),
+            SpectrumAxisTick(1f, "现在"),
+        ),
         modifier = modifier
             .fillMaxWidth()
             .height(22.dp),

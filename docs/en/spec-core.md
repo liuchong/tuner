@@ -63,6 +63,20 @@ generate theoretical partials absent from this list.
 Chord recognition requires energy in at least three pitch classes and returns a stable
 short symbol such as `Cmaj` or `Am7`, otherwise no chord.
 
+The professional views extend the same analysis pass without a second FFT:
+
+- `spectrum_db`: existing 64 bins over 60–2400 Hz for musical detail.
+- `wide_spectrum_db`: 128 logarithmic bins from 20 Hz to
+  `min(20000 Hz, sample_rate/2)`.
+- `waveform_min` and `waveform_max`: 256 equal-width buckets over the current PCM
+  window, containing the finite minimum and maximum. Non-finite samples become zero.
+- `sample_position`: advances by the configured analysis hop and marks the current
+  frame end since engine creation.
+- `sample_rate_hz` and `wide_spectrum_max_hz` make both axes explicit without native
+  layers assuming a device rate.
+
+Waveform envelopes and display histories do not participate in pitch detection.
+
 ### 4.2 Equal temperaments
 
 Supported divisions are 12, 19, 24, and 31. A4 is the reference step. For frequency
@@ -223,6 +237,12 @@ dictionary Partial {
 dictionary AnalysisFrame {
   TunerEvent? tuner;
   sequence<f32> spectrum_db;
+  sequence<f32> wide_spectrum_db;
+  f64 wide_spectrum_max_hz;
+  sequence<f32> waveform_min;
+  sequence<f32> waveform_max;
+  u64 sample_position;
+  f64 sample_rate_hz;
   sequence<Partial> partials;
   string? chord;
   SignalState signal_state;

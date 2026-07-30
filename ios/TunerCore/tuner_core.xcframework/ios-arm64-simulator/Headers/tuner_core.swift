@@ -1081,6 +1081,30 @@ public struct AnalysisFrame {
      */
     public var spectrumDb: [Float]
     /**
+     * 128 bin 对数轴 20Hz–wide_spectrum_max_hz 幅值（dBFS -80~0）。
+     */
+    public var wideSpectrumDb: [Float]
+    /**
+     * 全频段实际频率上限（min(20kHz, sample_rate/2)）。
+     */
+    public var wideSpectrumMaxHz: Double
+    /**
+     * 当前分析窗口 256 列最小值包络。
+     */
+    public var waveformMin: [Float]
+    /**
+     * 当前分析窗口 256 列最大值包络。
+     */
+    public var waveformMax: [Float]
+    /**
+     * 当前帧末端相对引擎启动时的采样位置。
+     */
+    public var samplePosition: UInt64
+    /**
+     * 实际分析采样率。
+     */
+    public var sampleRateHz: Double
+    /**
      * 泛音列（≤8，按幅值降序）。
      */
     public var partials: [Partial]
@@ -1115,6 +1139,24 @@ public struct AnalysisFrame {
          * 64 bin 对数轴 60–2400Hz 幅值（dBFS -80~0）。
          */spectrumDb: [Float], 
         /**
+         * 128 bin 对数轴 20Hz–wide_spectrum_max_hz 幅值（dBFS -80~0）。
+         */wideSpectrumDb: [Float], 
+        /**
+         * 全频段实际频率上限（min(20kHz, sample_rate/2)）。
+         */wideSpectrumMaxHz: Double, 
+        /**
+         * 当前分析窗口 256 列最小值包络。
+         */waveformMin: [Float], 
+        /**
+         * 当前分析窗口 256 列最大值包络。
+         */waveformMax: [Float], 
+        /**
+         * 当前帧末端相对引擎启动时的采样位置。
+         */samplePosition: UInt64, 
+        /**
+         * 实际分析采样率。
+         */sampleRateHz: Double, 
+        /**
          * 泛音列（≤8，按幅值降序）。
          */partials: [Partial], 
         /**
@@ -1134,6 +1176,12 @@ public struct AnalysisFrame {
          */isHeld: Bool) {
         self.tuner = tuner
         self.spectrumDb = spectrumDb
+        self.wideSpectrumDb = wideSpectrumDb
+        self.wideSpectrumMaxHz = wideSpectrumMaxHz
+        self.waveformMin = waveformMin
+        self.waveformMax = waveformMax
+        self.samplePosition = samplePosition
+        self.sampleRateHz = sampleRateHz
         self.partials = partials
         self.chord = chord
         self.signalState = signalState
@@ -1154,6 +1202,24 @@ extension AnalysisFrame: Equatable, Hashable {
             return false
         }
         if lhs.spectrumDb != rhs.spectrumDb {
+            return false
+        }
+        if lhs.wideSpectrumDb != rhs.wideSpectrumDb {
+            return false
+        }
+        if lhs.wideSpectrumMaxHz != rhs.wideSpectrumMaxHz {
+            return false
+        }
+        if lhs.waveformMin != rhs.waveformMin {
+            return false
+        }
+        if lhs.waveformMax != rhs.waveformMax {
+            return false
+        }
+        if lhs.samplePosition != rhs.samplePosition {
+            return false
+        }
+        if lhs.sampleRateHz != rhs.sampleRateHz {
             return false
         }
         if lhs.partials != rhs.partials {
@@ -1180,6 +1246,12 @@ extension AnalysisFrame: Equatable, Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(tuner)
         hasher.combine(spectrumDb)
+        hasher.combine(wideSpectrumDb)
+        hasher.combine(wideSpectrumMaxHz)
+        hasher.combine(waveformMin)
+        hasher.combine(waveformMax)
+        hasher.combine(samplePosition)
+        hasher.combine(sampleRateHz)
         hasher.combine(partials)
         hasher.combine(chord)
         hasher.combine(signalState)
@@ -1200,6 +1272,12 @@ public struct FfiConverterTypeAnalysisFrame: FfiConverterRustBuffer {
             try AnalysisFrame(
                 tuner: FfiConverterOptionTypeTunerEvent.read(from: &buf), 
                 spectrumDb: FfiConverterSequenceFloat.read(from: &buf), 
+                wideSpectrumDb: FfiConverterSequenceFloat.read(from: &buf), 
+                wideSpectrumMaxHz: FfiConverterDouble.read(from: &buf), 
+                waveformMin: FfiConverterSequenceFloat.read(from: &buf), 
+                waveformMax: FfiConverterSequenceFloat.read(from: &buf), 
+                samplePosition: FfiConverterUInt64.read(from: &buf), 
+                sampleRateHz: FfiConverterDouble.read(from: &buf), 
                 partials: FfiConverterSequenceTypePartial.read(from: &buf), 
                 chord: FfiConverterOptionString.read(from: &buf), 
                 signalState: FfiConverterTypeSignalState.read(from: &buf), 
@@ -1212,6 +1290,12 @@ public struct FfiConverterTypeAnalysisFrame: FfiConverterRustBuffer {
     public static func write(_ value: AnalysisFrame, into buf: inout [UInt8]) {
         FfiConverterOptionTypeTunerEvent.write(value.tuner, into: &buf)
         FfiConverterSequenceFloat.write(value.spectrumDb, into: &buf)
+        FfiConverterSequenceFloat.write(value.wideSpectrumDb, into: &buf)
+        FfiConverterDouble.write(value.wideSpectrumMaxHz, into: &buf)
+        FfiConverterSequenceFloat.write(value.waveformMin, into: &buf)
+        FfiConverterSequenceFloat.write(value.waveformMax, into: &buf)
+        FfiConverterUInt64.write(value.samplePosition, into: &buf)
+        FfiConverterDouble.write(value.sampleRateHz, into: &buf)
         FfiConverterSequenceTypePartial.write(value.partials, into: &buf)
         FfiConverterOptionString.write(value.chord, into: &buf)
         FfiConverterTypeSignalState.write(value.signalState, into: &buf)

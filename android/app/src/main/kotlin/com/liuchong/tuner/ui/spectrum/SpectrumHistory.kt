@@ -15,6 +15,11 @@ import uniffi.tuner_core.Partial
 data class SpectrumHistoryState(
     val currentSpectrum: FloatArray = FloatArray(0),
     val peakSpectrum: FloatArray = FloatArray(0),
+    val currentWideSpectrum: FloatArray = FloatArray(0),
+    val peakWideSpectrum: FloatArray = FloatArray(0),
+    val waveformMin: FloatArray = FloatArray(0),
+    val waveformMax: FloatArray = FloatArray(0),
+    val pitchTrace: List<PitchTracePoint> = emptyList(),
     val waterfall: FloatArray = FloatArray(0),
     val waterfallBinCount: Int = 0,
     val maxRows: Int = 0,
@@ -23,8 +28,16 @@ data class SpectrumHistoryState(
     val isPaused: Boolean = false,
 )
 
+data class PitchTracePoint(
+    val timeSeconds: Double,
+    val midi: Float,
+    val segment: Int,
+)
+
 class SpectrumHistory(
     private val binCount: Int = 64,
+    private val wideBinCount: Int = 128,
+    private val waveformColumns: Int = 256,
     private val waterfallBinCount: Int = 96,
     private val maxRows: Int = 256,
     private val frameStride: Int = 2,
@@ -32,36 +45,101 @@ class SpectrumHistory(
     private val waterfall = FloatArray(waterfallBinCount * maxRows)
     private val live = FloatArray(binCount) { DB_FLOOR }
     private val peak = FloatArray(binCount) { DB_FLOOR }
+    private val wideLive = FloatArray(wideBinCount) { DB_FLOOR }
+    private val widePeak = FloatArray(wideBinCount) { DB_FLOOR }
+    private val waveformLow = FloatArray(waveformColumns)
+    private val waveformHigh = FloatArray(waveformColumns)
+    private val trace = ArrayDeque<PitchTracePoint>()
     private var nextRow = 0
     private var rowCount = 0
     private var frameCount = 0
+    private var traceSegment = 0
+    private var needsTraceBreak = false
 
     private val _state = MutableStateFlow(SpectrumHistoryState())
     val state: StateFlow<SpectrumHistoryState> = _state.asStateFlow()
 
     var isPaused: Boolean = false
         set(value) {
+            if (field && !value) needsTraceBreak = true
             field = value
             publish()
         }
 
     fun accept(spectrumDb: List<Float>) {
         if (isPaused || spectrumDb.size != binCount) return
+        acceptSpectrum(spectrumDb)
+        advanceWaterfall()
+        publish(waterfallChanged = frameCount % frameStride == 0)
+    }
+
+    fun acceptAnalysis(
+        spectrumDb: List<Float>,
+        wideSpectrumDb: List<Float>,
+        waveformMin: List<Float>,
+        waveformMax: List<Float>,
+        samplePosition: ULong,
+        sampleRateHz: Double,
+        trackingMidi: Float?,
+    ) {
+        if (
+            isPaused ||
+            spectrumDb.size != binCount ||
+            wideSpectrumDb.size != wideBinCount ||
+            waveformMin.size != waveformColumns ||
+            waveformMax.size != waveformColumns
+        ) {
+            return
+        }
+        acceptSpectrum(spectrumDb)
+        for (index in 0 until wideBinCount) {
+            val value = wideSpectrumDb[index].coerceIn(DB_FLOOR, 0f)
+            wideLive[index] = value
+            widePeak[index] = maxOf(value, widePeak[index])
+        }
+        for (index in 0 until waveformColumns) {
+            waveformLow[index] = waveformMin[index].takeIf(Float::isFinite) ?: 0f
+            waveformHigh[index] = waveformMax[index].takeIf(Float::isFinite) ?: 0f
+        }
+        acceptPitch(samplePosition, sampleRateHz, trackingMidi)
+        advanceWaterfall()
+        publish(waterfallChanged = frameCount % frameStride == 0)
+    }
+
+    private fun acceptSpectrum(spectrumDb: List<Float>) {
         for (index in 0 until binCount) {
             val value = spectrumDb[index].coerceIn(DB_FLOOR, 0f)
             live[index] = value
             peak[index] = maxOf(value, peak[index])
         }
+    }
+
+    private fun advanceWaterfall() {
         frameCount++
-        var waterfallChanged = false
         if (frameCount % frameStride == 0) {
             val offset = nextRow * waterfallBinCount
             writeInterpolatedRow(offset)
             nextRow = (nextRow + 1) % maxRows
             rowCount = minOf(rowCount + 1, maxRows)
-            waterfallChanged = true
         }
-        publish(waterfallChanged)
+    }
+
+    private fun acceptPitch(samplePosition: ULong, sampleRateHz: Double, trackingMidi: Float?) {
+        val validRate = sampleRateHz.takeIf { it.isFinite() && it > 0.0 } ?: return
+        if (trackingMidi == null || !trackingMidi.isFinite()) {
+            needsTraceBreak = true
+            return
+        }
+        if (needsTraceBreak) {
+            traceSegment++
+            needsTraceBreak = false
+        }
+        val timeSeconds = samplePosition.toDouble() / validRate
+        trace.addLast(PitchTracePoint(timeSeconds, trackingMidi, traceSegment))
+        val cutoff = timeSeconds - TRACE_SECONDS
+        while (trace.firstOrNull()?.timeSeconds?.let { it < cutoff } == true) {
+            trace.removeFirst()
+        }
     }
 
     fun currentSpectrum(): List<Float> = live.toList()
@@ -71,6 +149,7 @@ class SpectrumHistory(
     /** 只清空峰值保持；实时频谱、瀑布图和暂停状态均保留。 */
     fun resetPeakHold() {
         peak.fill(DB_FLOOR)
+        widePeak.fill(DB_FLOOR)
         publish()
     }
 
@@ -102,6 +181,11 @@ class SpectrumHistory(
         _state.value = SpectrumHistoryState(
             currentSpectrum = live.copyOf(),
             peakSpectrum = peak.copyOf(),
+            currentWideSpectrum = wideLive.copyOf(),
+            peakWideSpectrum = widePeak.copyOf(),
+            waveformMin = waveformLow.copyOf(),
+            waveformMax = waveformHigh.copyOf(),
+            pitchTrace = trace.toList(),
             waterfall = if (waterfallChanged) waterfall.copyOf() else previous.waterfall,
             waterfallBinCount = waterfallBinCount,
             maxRows = maxRows,
@@ -113,6 +197,7 @@ class SpectrumHistory(
 
     private companion object {
         const val DB_FLOOR = -80f
+        const val TRACE_SECONDS = 12.0
     }
 }
 

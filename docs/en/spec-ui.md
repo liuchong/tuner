@@ -64,6 +64,12 @@ single-needle presentation. Native timers may not clear the target or needle.
 
 - Enter through the Spectrum tab or the compact strip. Both routes share navigation
   state and the same `CaptureHub`.
+- A compact segmented control switches the existing main plot slot between Spectrum,
+  Pitch Trace, and Waveform. The views are not stacked, do not reduce the waterfall,
+  and never restart capture or erase other display histories.
+- Spectrum offers Musical 60–2400 Hz (64 measured bins) and Full 20 Hz–frame maximum
+  (128 measured bins). Both come from one core FFT. On phone widths, Full labels are
+  limited to 20/100/500/1k/5k/maximum; this does not reduce the 128 measured bins.
 - The current main plot is logarithmic 60–2400 Hz by -80–0 dBFS, shows all 64 measured
   bins, grid, input level, live curve, non-decaying peak hold, and a draggable cursor
   reporting Hz/dB/note.
@@ -82,6 +88,16 @@ single-needle presentation. Native timers may not clear the target or needle.
 - The waterfall shares the frequency axis, places newest row at top, retains 256 rows,
   appends every two frames, and visually interpolates 64 measured bins to 96 columns.
   It shows Now/-3/-6/-9/-12 s, matching frequency ticks, and a -80–0 dBFS color legend.
+- Pitch Trace retains about 12 seconds. Its x-axis is time and y-axis uses numeric MIDI
+  pitch labels. Only non-held `Tracking` frames append a point positioned by
+  `sample_position/sample_rate_hz`. Quiet, Acquiring, Holding, and the first frame after
+  resume insert a gap; lines connect only adjacent real tracking points.
+- Waveform shows the current 256-column min/max envelope with a zero line, -1/0/+1
+  amplitude labels, and millisecond ticks. It is a live window, not a recording.
+- Pause freezes all three main views, peak hold, pitch trace, and waterfall. Resume
+  begins a disconnected trace segment.
+- Non-goals: no recording, audio files, playback, timeline scrubbing, or export. No
+  disabled placeholder controls or public half-implemented API are exposed.
 
 ## 4. Metronome
 

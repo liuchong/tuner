@@ -23,6 +23,12 @@ final class TunerViewModel: ObservableObject {
 
     @Published private(set) var signal: Signal = .listening
     @Published private(set) var spectrumDb: [Float] = []
+    @Published private(set) var wideSpectrumDb: [Float] = []
+    @Published private(set) var wideSpectrumMaxHz: Double = 20_000
+    @Published private(set) var waveformMin: [Float] = []
+    @Published private(set) var waveformMax: [Float] = []
+    @Published private(set) var samplePosition: UInt64 = 0
+    @Published private(set) var sampleRateHz: Double = 48_000
     @Published private(set) var partials: [Partial] = []
     @Published private(set) var chord: String?
     @Published private(set) var displaySpectrumDb: [Float] = []
@@ -46,6 +52,12 @@ final class TunerViewModel: ObservableObject {
                 guard let self else { return }
                 self.signal = frame.tuner.map { .active(Self.map($0)) } ?? .listening
                 self.spectrumDb = frame.spectrumDb
+                self.wideSpectrumDb = frame.wideSpectrumDb
+                self.wideSpectrumMaxHz = frame.wideSpectrumMaxHz
+                self.waveformMin = frame.waveformMin
+                self.waveformMax = frame.waveformMax
+                self.samplePosition = frame.samplePosition
+                self.sampleRateHz = frame.sampleRateHz
                 self.partials = frame.partials
                 self.chord = frame.chord
                 if frame.signalState == .tracking {

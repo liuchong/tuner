@@ -23,6 +23,32 @@ final class SpectrumPresentationTests: XCTestCase {
         )
     }
 
+    func testWideFrequencyTicksUseActualNyquistLimitAndLogSpacing() {
+        let ticks = professionalWideFrequencyTicks(maxHz: 20_000)
+
+        XCTAssertEqual(
+            ticks.map(\.label),
+            ["20", "100", "500", "1k", "5k", "20k Hz"]
+        )
+        XCTAssertEqual(ticks.first!.fraction, 0, accuracy: 0.000_001)
+        XCTAssertEqual(ticks.last!.fraction, 1, accuracy: 0.000_001)
+        XCTAssertTrue(zip(ticks, ticks.dropFirst()).allSatisfy { $0.fraction < $1.fraction })
+        XCTAssertEqual(
+            frequencyFraction(200, minHz: 20, maxHz: 2_000),
+            0.5,
+            accuracy: 0.000_000_001
+        )
+    }
+
+    func testPitchDisplayBoundsCoverHistoryAndKeepAtLeastOneOctave() {
+        let wide = pitchDisplayBounds([48, 72])
+        XCTAssertEqual(wide.minimum, 46, accuracy: 0.000_001)
+        XCTAssertEqual(wide.maximum, 74, accuracy: 0.000_001)
+
+        let narrow = pitchDisplayBounds([69, 70])
+        XCTAssertEqual(narrow.maximum - narrow.minimum, 12, accuracy: 0.000_001)
+    }
+
     func testHeatBandsCoverBackgroundThroughRedStrongSignal() {
         XCTAssertEqual(spectrumHeatBand(-80), .background)
         XCTAssertEqual(spectrumHeatBand(-68), .indigo)

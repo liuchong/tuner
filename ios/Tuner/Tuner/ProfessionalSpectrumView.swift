@@ -17,7 +17,7 @@ struct ProfessionalSpectrumView: View {
                             Text("专业频谱分析仪")
                                 .font(.title2.weight(.semibold))
                                 .foregroundStyle(palette.inkPrimary)
-                            Text("横轴频率 · 实时频谱 / 峰值保持")
+                            Text("实时频谱 · 音高轨迹 · 波形")
                                 .font(Lumen.caption)
                                 .foregroundStyle(palette.inkSecondary)
                         }
@@ -57,9 +57,16 @@ struct ProfessionalSpectrumView: View {
                         }
                     }
 
-                    SpectrumCard(
-                        live: history.currentSpectrum,
-                        peak: history.peakSpectrum,
+                    AnalysisCard(
+                        musicalLive: history.currentSpectrum,
+                        musicalPeak: history.peakSpectrum,
+                        wideLive: history.currentWideSpectrum,
+                        widePeak: history.peakWideSpectrum,
+                        wideMaxHz: vm.wideSpectrumMaxHz,
+                        waveformMin: history.waveformMin,
+                        waveformMax: history.waveformMax,
+                        pitchTrace: history.pitchTrace,
+                        sampleRateHz: vm.sampleRateHz,
                         partials: vm.partials,
                         inputLevelDbfs: vm.inputLevelDbfs,
                         isPaused: history.isPaused
@@ -119,8 +126,20 @@ struct ProfessionalSpectrumView: View {
         }
         .onAppear { requestPermissionAndStart() }
         .onDisappear { vm.releaseCapture() }
-        .onChange(of: vm.spectrumDb) { _, spectrum in
-            history.accept(spectrum)
+        .onChange(of: vm.samplePosition) { _, _ in
+            let trackingMidi: Float? =
+                vm.signalState == .tracking && !vm.isHeld
+                ? currentReading.map { Float($0.midi) }
+                : nil
+            history.acceptAnalysis(
+                spectrumDb: vm.spectrumDb,
+                wideSpectrumDb: vm.wideSpectrumDb,
+                waveformMin: vm.waveformMin,
+                waveformMax: vm.waveformMax,
+                samplePosition: vm.samplePosition,
+                sampleRateHz: vm.sampleRateHz,
+                trackingMidi: trackingMidi
+            )
         }
         .alert("需要麦克风权限", isPresented: $permissionDenied) {
             Button("去设置") {
@@ -164,13 +183,48 @@ struct ProfessionalSpectrumView: View {
     }
 }
 
-private struct SpectrumCard: View {
+private enum ProfessionalViewMode: CaseIterable {
+    case spectrum
+    case pitch
+    case waveform
+
+    var label: String {
+        switch self {
+        case .spectrum: "频谱"
+        case .pitch: "音高轨迹"
+        case .waveform: "波形"
+        }
+    }
+}
+
+private enum SpectrumRange: CaseIterable {
+    case musical
+    case wide
+
+    var label: String {
+        switch self {
+        case .musical: "乐音"
+        case .wide: "全频"
+        }
+    }
+}
+
+private struct AnalysisCard: View {
     @Environment(\.lumen) private var palette
-    let live: [Float]
-    let peak: [Float]
+    let musicalLive: [Float]
+    let musicalPeak: [Float]
+    let wideLive: [Float]
+    let widePeak: [Float]
+    let wideMaxHz: Double
+    let waveformMin: [Float]
+    let waveformMax: [Float]
+    let pitchTrace: [SpectrumHistoryBuffer.PitchTracePoint]
+    let sampleRateHz: Double
     let partials: [Partial]
     let inputLevelDbfs: Float
     let isPaused: Bool
+    @State private var mode = ProfessionalViewMode.spectrum
+    @State private var range = SpectrumRange.musical
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -184,23 +238,98 @@ private struct SpectrumCard: View {
                 )
                 .foregroundStyle(isPaused ? palette.inkSecondary : palette.accent)
                 Spacer()
-                Text("纵轴 dBFS")
+                Text(verticalAxisLabel)
                     .foregroundStyle(palette.inkFaint)
             }
             .font(Lumen.caption)
 
-            HStack(spacing: 0) {
-                VerticalAxis(ticks: professionalDbTicks())
-                    .frame(width: 58, height: 280)
-                SpectrumLineChart(live: live, peak: peak, partials: partials)
-                    .frame(height: 280)
+            CompactSelector(
+                choices: ProfessionalViewMode.allCases,
+                selected: $mode,
+                label: \.label
+            )
+            if mode == .spectrum {
+                CompactSelector(
+                    choices: SpectrumRange.allCases,
+                    selected: $range,
+                    label: \.label
+                )
             }
-            FrequencyAxis()
-                .padding(.leading, 58)
+
+            chart
         }
         .padding(Lumen.Spacing.md)
         .background(palette.bgSurface, in: RoundedRectangle(cornerRadius: 20))
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(palette.lineSubtle))
+    }
+
+    private var verticalAxisLabel: String {
+        switch mode {
+        case .spectrum: "纵轴 dBFS"
+        case .pitch: "纵轴 MIDI 音高"
+        case .waveform: "纵轴振幅"
+        }
+    }
+
+    @ViewBuilder
+    private var chart: some View {
+        switch mode {
+        case .spectrum:
+            let wide = range == .wide
+            let minHz = wide ? professionalWideSpectrumMinHz : professionalSpectrumMinHz
+            let maxHz = wide ? wideMaxHz : professionalSpectrumMaxHz
+            let ticks = wide
+                ? professionalWideFrequencyTicks(maxHz: maxHz)
+                : professionalFrequencyTicks()
+            HStack(spacing: 0) {
+                VerticalAxis(ticks: professionalDbTicks())
+                    .frame(width: 58, height: 280)
+                SpectrumLineChart(
+                    live: wide ? wideLive : musicalLive,
+                    peak: wide ? widePeak : musicalPeak,
+                    partials: partials,
+                    minHz: minHz,
+                    maxHz: maxHz,
+                    ticks: ticks
+                )
+                .frame(height: 280)
+            }
+            FrequencyAxis(ticks: ticks)
+                .padding(.leading, 58)
+
+        case .pitch:
+            let bounds = pitchDisplayBounds(pitchTrace.map(\.midi))
+            HStack(spacing: 0) {
+                VerticalAxis(ticks: pitchAxisTicks(bounds))
+                    .frame(width: 58, height: 280)
+                PitchTraceChart(trace: pitchTrace, bounds: bounds)
+                    .frame(height: 280)
+            }
+            HorizontalAxis(
+                ticks: [
+                    SpectrumAxisTick(fraction: 0, label: "-12秒"),
+                    SpectrumAxisTick(fraction: 0.5, label: "-6秒"),
+                    SpectrumAxisTick(fraction: 1, label: "现在"),
+                ]
+            )
+            .padding(.leading, 58)
+
+        case .waveform:
+            HStack(spacing: 0) {
+                VerticalAxis(
+                    ticks: [
+                        SpectrumAxisTick(fraction: 0.05, label: "+1"),
+                        SpectrumAxisTick(fraction: 0.5, label: "0"),
+                        SpectrumAxisTick(fraction: 0.95, label: "-1"),
+                    ]
+                )
+                .frame(width: 58, height: 280)
+                WaveformChart(minimum: waveformMin, maximum: waveformMax)
+                    .frame(height: 280)
+            }
+            HorizontalAxis(ticks: waveformTimeTicks(sampleRateHz: sampleRateHz))
+                .padding(.leading, 58)
+        }
     }
 }
 
@@ -209,6 +338,9 @@ private struct SpectrumLineChart: View {
     let live: [Float]
     let peak: [Float]
     let partials: [Partial]
+    let minHz: Double
+    let maxHz: Double
+    let ticks: [SpectrumAxisTick]
     @State private var cursorFraction: CGFloat?
 
     var body: some View {
@@ -226,7 +358,7 @@ private struct SpectrumLineChart: View {
                             lineWidth: 0.5
                         )
                     }
-                    for tick in professionalFrequencyTicks() {
+                    for tick in ticks {
                         let x = size.width * CGFloat(tick.fraction)
                         context.stroke(
                             Path { path in
@@ -252,7 +384,14 @@ private struct SpectrumLineChart: View {
                         )
                     }
                     for partial in partials {
-                        let x = frequencyFraction(partial.freqHz) * size.width
+                        guard partial.freqHz >= minHz, partial.freqHz <= maxHz else {
+                            continue
+                        }
+                        let x = frequencyFraction(
+                            partial.freqHz,
+                            minHz: minHz,
+                            maxHz: maxHz
+                        ) * size.width
                         let y = dbY(partial.magnitudeDb, height: size.height)
                         context.fill(
                             Path(
@@ -299,8 +438,7 @@ private struct SpectrumLineChart: View {
     }
 
     private func cursorLabel(_ fraction: CGFloat) -> String {
-        let frequency = professionalSpectrumMinHz
-            * pow(professionalSpectrumMaxHz / professionalSpectrumMinHz, Double(fraction))
+        let frequency = minHz * pow(maxHz / minHz, Double(fraction))
         let index = min(live.count - 1, max(0, Int(fraction * CGFloat(live.count - 1))))
         let nearest = partials.min {
             abs(log($0.freqHz / frequency)) < abs(log($1.freqHz / frequency))
@@ -313,6 +451,175 @@ private struct SpectrumLineChart: View {
         }
         return String(format: "游标  %.1f Hz   %.1f dB   %@", frequency, live[index], note)
     }
+}
+
+private struct CompactSelector<Choice: Hashable>: View {
+    @Environment(\.lumen) private var palette
+    let choices: [Choice]
+    @Binding var selected: Choice
+    let label: KeyPath<Choice, String>
+
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(choices, id: \.self) { choice in
+                Button {
+                    selected = choice
+                } label: {
+                    Text(choice[keyPath: label])
+                        .font(Lumen.caption)
+                        .foregroundStyle(
+                            selected == choice ? palette.accent : palette.inkSecondary
+                        )
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 30)
+                        .background(
+                            selected == choice
+                                ? palette.accent.opacity(0.16)
+                                : palette.bgCanvas.opacity(0.65),
+                            in: RoundedRectangle(cornerRadius: 10)
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+}
+
+private func pitchAxisTicks(_ bounds: PitchDisplayBounds) -> [SpectrumAxisTick] {
+    [
+        SpectrumAxisTick(fraction: 0, label: "\(Int(bounds.maximum.rounded()))"),
+        SpectrumAxisTick(
+            fraction: 0.5,
+            label: "\(Int(((bounds.minimum + bounds.maximum) / 2).rounded()))"
+        ),
+        SpectrumAxisTick(fraction: 1, label: "\(Int(bounds.minimum.rounded()))"),
+    ]
+}
+
+private struct PitchTraceChart: View {
+    @Environment(\.lumen) private var palette
+    let trace: [SpectrumHistoryBuffer.PitchTracePoint]
+    let bounds: PitchDisplayBounds
+
+    var body: some View {
+        Canvas { context, size in
+            drawGrid(context: context, size: size, color: palette.lineSubtle)
+            guard let latest = trace.last?.timeSeconds else { return }
+            let earliest = latest - 12
+            for (left, right) in zip(trace, trace.dropFirst()) where left.segment == right.segment {
+                let start = point(left, earliest: earliest, size: size)
+                let end = point(right, earliest: earliest, size: size)
+                context.stroke(
+                    Path { path in
+                        path.move(to: start)
+                        path.addLine(to: end)
+                    },
+                    with: .color(palette.accent),
+                    lineWidth: 2
+                )
+            }
+            if let last = trace.last {
+                let position = point(last, earliest: earliest, size: size)
+                context.fill(
+                    Path(
+                        ellipseIn: CGRect(
+                            x: position.x - 4,
+                            y: position.y - 4,
+                            width: 8,
+                            height: 8
+                        )
+                    ),
+                    with: .color(palette.accent)
+                )
+            }
+        }
+        .background(palette.bgCanvas)
+    }
+
+    private func point(
+        _ point: SpectrumHistoryBuffer.PitchTracePoint,
+        earliest: Double,
+        size: CGSize
+    ) -> CGPoint {
+        CGPoint(
+            x: (point.timeSeconds - earliest) / 12 * size.width,
+            y: (
+                1 - (Double(point.midi) - bounds.minimum)
+                    / (bounds.maximum - bounds.minimum)
+            ) * size.height
+        )
+    }
+}
+
+private struct WaveformChart: View {
+    @Environment(\.lumen) private var palette
+    let minimum: [Float]
+    let maximum: [Float]
+
+    var body: some View {
+        Canvas { context, size in
+            drawGrid(context: context, size: size, color: palette.lineSubtle)
+            let count = min(minimum.count, maximum.count)
+            guard count > 1 else { return }
+            var envelope = Path()
+            for index in 0..<count {
+                let point = waveformPoint(maximum[index], index: index, count: count, size: size)
+                index == 0 ? envelope.move(to: point) : envelope.addLine(to: point)
+            }
+            for index in stride(from: count - 1, through: 0, by: -1) {
+                envelope.addLine(
+                    to: waveformPoint(minimum[index], index: index, count: count, size: size)
+                )
+            }
+            envelope.closeSubpath()
+            context.fill(envelope, with: .color(palette.accent.opacity(0.22)))
+            context.stroke(envelope, with: .color(palette.accent.opacity(0.8)), lineWidth: 1)
+        }
+        .background(palette.bgCanvas)
+    }
+
+    private func waveformPoint(
+        _ value: Float,
+        index: Int,
+        count: Int,
+        size: CGSize
+    ) -> CGPoint {
+        CGPoint(
+            x: CGFloat(index) / CGFloat(count - 1) * size.width,
+            y: (0.5 - CGFloat(min(1, max(-1, value))) * 0.45) * size.height
+        )
+    }
+}
+
+private func drawGrid(
+    context: GraphicsContext,
+    size: CGSize,
+    color: Color
+) {
+    for index in 0...4 {
+        let fraction = CGFloat(index) / 4
+        context.stroke(
+            Path { path in
+                path.move(to: CGPoint(x: 0, y: size.height * fraction))
+                path.addLine(to: CGPoint(x: size.width, y: size.height * fraction))
+                path.move(to: CGPoint(x: size.width * fraction, y: 0))
+                path.addLine(to: CGPoint(x: size.width * fraction, y: size.height))
+            },
+            with: .color(color),
+            lineWidth: 0.5
+        )
+    }
+}
+
+private func waveformTimeTicks(sampleRateHz: Double) -> [SpectrumAxisTick] {
+    let durationMs = sampleRateHz.isFinite && sampleRateHz > 0
+        ? 2_048 / sampleRateHz * 1_000
+        : 0
+    return [
+        SpectrumAxisTick(fraction: 0, label: String(format: "-%.0f ms", durationMs)),
+        SpectrumAxisTick(fraction: 0.5, label: String(format: "-%.0f ms", durationMs / 2)),
+        SpectrumAxisTick(fraction: 1, label: "现在"),
+    ]
 }
 
 private struct WaterfallChart: View {
@@ -374,22 +681,62 @@ private struct WaterfallChart: View {
 
 private struct FrequencyAxis: View {
     @Environment(\.lumen) private var palette
+    let ticks: [SpectrumAxisTick]
+
+    init(ticks: [SpectrumAxisTick] = professionalFrequencyTicks()) {
+        self.ticks = ticks
+    }
 
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .topLeading) {
-                ForEach(Array(professionalFrequencyTicks().enumerated()), id: \.offset) {
+                ForEach(Array(ticks.enumerated()), id: \.offset) {
                     index,
                     tick in
-                    Text(tick.label)
-                        .frame(width: 48, alignment: axisTextAlignment(index, count: 6))
+                    Text(tick.label).lineLimit(1)
+                        .frame(
+                            width: 48,
+                            alignment: axisTextAlignment(index, count: ticks.count)
+                        )
                         .offset(
                             x: horizontalLabelOffset(
                                 fraction: tick.fraction,
                                 index: index,
-                                count: 6,
+                                count: ticks.count,
                                 width: geometry.size.width,
                                 labelWidth: 48
+                            )
+                        )
+                }
+            }
+        }
+        .font(Lumen.caption)
+        .foregroundStyle(palette.inkFaint)
+        .frame(height: 18)
+    }
+}
+
+private struct HorizontalAxis: View {
+    @Environment(\.lumen) private var palette
+    let ticks: [SpectrumAxisTick]
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .topLeading) {
+                ForEach(Array(ticks.enumerated()), id: \.offset) { index, tick in
+                    Text(tick.label)
+                        .lineLimit(1)
+                        .frame(
+                            width: 56,
+                            alignment: axisTextAlignment(index, count: ticks.count)
+                        )
+                        .offset(
+                            x: horizontalLabelOffset(
+                                fraction: tick.fraction,
+                                index: index,
+                                count: ticks.count,
+                                width: geometry.size.width,
+                                labelWidth: 56
                             )
                         )
                 }

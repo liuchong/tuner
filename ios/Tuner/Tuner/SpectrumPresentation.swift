@@ -2,11 +2,17 @@ import Foundation
 
 let professionalSpectrumMinHz = 60.0
 let professionalSpectrumMaxHz = 2_400.0
+let professionalWideSpectrumMinHz = 20.0
 let professionalSpectrumFloorDb: Float = -80
 
 struct SpectrumAxisTick: Equatable {
     let fraction: Double
     let label: String
+}
+
+struct PitchDisplayBounds: Equatable {
+    let minimum: Double
+    let maximum: Double
 }
 
 enum SpectrumHeatBand: Equatable {
@@ -36,7 +42,39 @@ func professionalFrequencyTicks() -> [SpectrumAxisTick] {
         (1_000, "1k"),
         (2_400, "2.4k Hz"),
     ].map { frequency, label in
-        SpectrumAxisTick(fraction: frequencyFraction(frequency), label: label)
+        SpectrumAxisTick(
+            fraction: frequencyFraction(
+                frequency,
+                minHz: professionalSpectrumMinHz,
+                maxHz: professionalSpectrumMaxHz
+            ),
+            label: label
+        )
+    }
+}
+
+func professionalWideFrequencyTicks(maxHz: Double) -> [SpectrumAxisTick] {
+    let validMax = maxHz.isFinite && maxHz > professionalWideSpectrumMinHz
+        ? maxHz : professionalWideSpectrumMinHz * 2
+    var frequencies = [professionalWideSpectrumMinHz]
+    frequencies.append(
+        contentsOf: [100, 500, 1_000, 5_000].filter { $0 < validMax }
+    )
+    if frequencies.last != validMax {
+        frequencies.append(validMax)
+    }
+    return frequencies.enumerated().map { index, frequency in
+        SpectrumAxisTick(
+            fraction: frequencyFraction(
+                frequency,
+                minHz: professionalWideSpectrumMinHz,
+                maxHz: validMax
+            ),
+            label: frequencyLabel(
+                frequency,
+                suffix: index == frequencies.indices.last
+            )
+        )
     }
 }
 
@@ -72,6 +110,19 @@ func spectrumHeatBand(_ db: Float) -> SpectrumHeatBand {
     }
 }
 
+func pitchDisplayBounds(_ midiValues: [Float]) -> PitchDisplayBounds {
+    let finite = midiValues.filter(\.isFinite)
+    guard let rawMin = finite.min(), let rawMax = finite.max() else {
+        return PitchDisplayBounds(minimum: 63, maximum: 75)
+    }
+    let center = Double(rawMin + rawMax) / 2
+    let span = max(12, Double(rawMax - rawMin) + 4)
+    return PitchDisplayBounds(
+        minimum: center - span / 2,
+        maximum: center + span / 2
+    )
+}
+
 func professionalSpectrumMetrics(
     reading: TunerReading?,
     inputLevelDbfs: Float,
@@ -93,17 +144,33 @@ func professionalSpectrumMetrics(
     )
 }
 
-func frequencyFraction(_ frequency: Double) -> Double {
+func frequencyFraction(
+    _ frequency: Double,
+    minHz: Double = professionalSpectrumMinHz,
+    maxHz: Double = professionalSpectrumMaxHz
+) -> Double {
     min(
         1,
         max(
             0,
             log(
-                min(professionalSpectrumMaxHz, max(professionalSpectrumMinHz, frequency))
-                    / professionalSpectrumMinHz
-            ) / log(professionalSpectrumMaxHz / professionalSpectrumMinHz)
+                min(maxHz, max(minHz, frequency)) / minHz
+            ) / log(maxHz / minHz)
         )
     )
+}
+
+private func frequencyLabel(_ frequency: Double, suffix: Bool) -> String {
+    let base: String
+    if frequency >= 1_000 {
+        let kilo = frequency / 1_000
+        base = kilo.rounded() == kilo
+            ? "\(Int(kilo))k"
+            : String(format: "%.1fk", kilo)
+    } else {
+        base = "\(Int(frequency))"
+    }
+    return suffix ? base + " Hz" : base
 }
 
 private func oneDecimal(

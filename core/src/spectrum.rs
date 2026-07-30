@@ -1,18 +1,25 @@
 //! FFT 频谱与泛音/和弦分析（`docs/spec-core.md` §4a）。
 //!
 //! Hann 窗 + 2048 点实数 FFT（radix-2，旋转因子与位逆序表构造时预计算），
-//! 输出对数频率轴 60–2400Hz 共 64 bin 的 dBFS 幅值（每 bin 取覆盖频带内最大幅值，
-//! -80~0 钳制）。泛音检测：局部极大 + 超噪声底 12dB（噪声底 = bin 中位数），定容 8。
+//! 同一次 FFT 输出乐音范围 60–2400Hz 共 64 bin，以及 20Hz–20kHz（受奈奎斯特频率
+//! 限制）共 128 bin 的 dBFS 幅值（每 bin 取覆盖频带内最大幅值，-80~0 钳制）。
+//! 泛音检测：局部极大 + 超噪声底 12dB（噪声底 = bin 中位数），定容 8。
 //! 和弦模板匹配：先完全匹配再子集匹配。feed 路径零分配、零 panic（全部缓冲构造时预分配）。
 
 /// FFT 点数。
 pub const FFT_N: usize = 2048;
 /// 对数频谱 bin 数。
 pub const SPECTRUM_BINS: usize = 64;
+/// 全频段对数频谱 bin 数。
+pub const WIDE_SPECTRUM_BINS: usize = 128;
 /// 对数轴下限（Hz）。
 pub const F_MIN: f32 = 60.0;
 /// 对数轴上限（Hz）。
 pub const F_MAX: f32 = 2400.0;
+/// 全频段对数轴下限（Hz）。
+pub const WIDE_F_MIN: f32 = 20.0;
+/// 全频段对数轴目标上限（Hz，实际受奈奎斯特频率限制）。
+pub const WIDE_F_MAX: f32 = 20_000.0;
 /// dBFS 下限（钳制）。
 pub const DB_FLOOR: f32 = -80.0;
 /// 泛音最大个数。
@@ -54,10 +61,16 @@ pub struct Spectrum {
     mag: Vec<f32>,
     /// 每个对数 bin 覆盖的 FFT bin 范围 [k_lo, k_hi)。
     bin_ranges: Vec<(u32, u32)>,
+    /// 全频段每个对数 bin 覆盖的 FFT bin 范围 [k_lo, k_hi)。
+    wide_bin_ranges: Vec<(u32, u32)>,
     /// 每个对数 bin 的（dB 幅值, 最大 FFT bin）。
     bins: Vec<(f32, u32)>,
     /// 输出：64 bin dBFS。
     out: Vec<f32>,
+    /// 输出：128 bin 全频段 dBFS。
+    wide_out: Vec<f32>,
+    /// 全频段实际频率上限。
+    wide_max_hz: f32,
 }
 
 impl Spectrum {
@@ -81,18 +94,22 @@ impl Spectrum {
             twiddles.push(a.cos());
             twiddles.push(a.sin());
         }
-        // 对数 bin 范围：edge_i = F_MIN * (F_MAX/F_MIN)^(i/BINS)
-        let ratio = (F_MAX / F_MIN).powf(1.0 / SPECTRUM_BINS as f32);
         let bin_width = sample_rate / n as f32;
-        let bin_ranges: Vec<(u32, u32)> = (0..SPECTRUM_BINS)
-            .map(|i| {
-                let lo = (F_MIN * ratio.powf(i as f32) / bin_width) as u32;
-                let hi = ((F_MIN * ratio.powf((i + 1) as f32) / bin_width) as u32)
-                    .max(lo + 1)
-                    .min(n as u32 / 2);
-                (lo, hi.max(lo + 1))
-            })
-            .collect();
+        let bin_ranges = logarithmic_bin_ranges(
+            F_MIN,
+            F_MAX.min(sample_rate * 0.5),
+            SPECTRUM_BINS,
+            bin_width,
+            n / 2,
+        );
+        let wide_max_hz = WIDE_F_MAX.min(sample_rate * 0.5).max(WIDE_F_MIN);
+        let wide_bin_ranges = logarithmic_bin_ranges(
+            WIDE_F_MIN,
+            wide_max_hz,
+            WIDE_SPECTRUM_BINS,
+            bin_width,
+            n / 2,
+        );
         Self {
             sample_rate,
             hann,
@@ -102,8 +119,11 @@ impl Spectrum {
             im: vec![0.0; n],
             mag: vec![0.0; n / 2 + 1],
             bin_ranges,
+            wide_bin_ranges,
             bins: vec![(DB_FLOOR, 0); SPECTRUM_BINS],
             out: vec![DB_FLOOR; SPECTRUM_BINS],
+            wide_out: vec![DB_FLOOR; WIDE_SPECTRUM_BINS],
+            wide_max_hz,
         }
     }
 
@@ -118,7 +138,8 @@ impl Spectrum {
         }
         // 加窗 + 位逆序重排
         for i in 0..n {
-            self.re[self.rev[i] as usize] = pcm[i] * self.hann[i];
+            let sample = if pcm[i].is_finite() { pcm[i] } else { 0.0 };
+            self.re[self.rev[i] as usize] = sample * self.hann[i];
             self.im[i] = 0.0;
         }
         // radix-2 DIT FFT
@@ -166,7 +187,25 @@ impl Spectrum {
             self.bins[i] = (best, best_k);
             self.out[i] = best;
         }
+        for i in 0..WIDE_SPECTRUM_BINS {
+            let (lo, hi) = self.wide_bin_ranges[i];
+            let mut best = DB_FLOOR;
+            for k in lo..hi {
+                best = best.max(self.mag[k as usize]);
+            }
+            self.wide_out[i] = best;
+        }
         &self.out
+    }
+
+    /// 最近一次 `feed` 的 128 bin 全频段频谱。
+    pub fn wide_spectrum(&self) -> &[f32] {
+        &self.wide_out
+    }
+
+    /// 全频段实际频率上限（`min(20kHz, sample_rate/2)`）。
+    pub fn wide_max_hz(&self) -> f32 {
+        self.wide_max_hz
     }
 
     /// 检测泛音（局部极大 + 超噪声底 12dB，按幅值取前 MAX_PARTIALS 个）。
@@ -252,6 +291,28 @@ impl Spectrum {
             cents_off,
         }
     }
+}
+
+/// 构造对数展示桶覆盖范围；每个范围至少覆盖一个有效 FFT bin。
+fn logarithmic_bin_ranges(
+    min_hz: f32,
+    max_hz: f32,
+    count: usize,
+    fft_bin_width: f32,
+    max_fft_bin: usize,
+) -> Vec<(u32, u32)> {
+    let ratio = (max_hz / min_hz).powf(1.0 / count as f32);
+    (0..count)
+        .map(|index| {
+            let lo = (min_hz * ratio.powf(index as f32) / fft_bin_width)
+                .floor()
+                .clamp(0.0, (max_fft_bin.saturating_sub(1)) as f32) as u32;
+            let hi = (min_hz * ratio.powf((index + 1) as f32) / fft_bin_width)
+                .ceil()
+                .clamp((lo + 1) as f32, max_fft_bin as f32) as u32;
+            (lo, hi)
+        })
+        .collect()
 }
 
 /// 将实际峰按幅值降序插入固定数组，并合并映射到同一频率的重复候选。
