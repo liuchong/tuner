@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.liuchong.tuner"
+    namespace = "com.liuchong.tunar"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.liuchong.tuner"
+        applicationId = "com.liuchong.tunar"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

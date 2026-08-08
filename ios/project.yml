@@ -1,20 +1,20 @@
-name: Tuner
+name: Tunar
 options:
-  bundleIdPrefix: com.liuchong.tuner
+  bundleIdPrefix: com.liuchong.tunar
   deploymentTarget:
     iOS: "17.0"
 targets:
-  Tuner:
+  Tunar:
     type: application
     platform: iOS
     sources:
-      - Tuner
-      - TunerCore/Sources/TunerCore/tuner_core.swift
+      - Tunar
+      - TunarCore/Sources/TunarCore/tunar_core.swift
     dependencies:
-      - framework: TunerCore/tuner_core.xcframework
+      - framework: TunarCore/tunar_core.xcframework
         embed: false
     info:
-      path: Tuner/Info.plist
+      path: Tunar/Info.plist
       properties:
         UILaunchScreen: {}
         CFBundleDisplayName: TUNAR
@@ -25,27 +25,27 @@ targets:
           - UIInterfaceOrientationPortrait
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.liuchong.tuner
+        PRODUCT_BUNDLE_IDENTIFIER: com.liuchong.tunar
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: DXBQ96GC5Q
         SWIFT_VERSION: "6.0"
-        SWIFT_OBJC_BRIDGING_HEADER: Tuner/Bridge/Tuner-Bridging-Header.h
+        SWIFT_OBJC_BRIDGING_HEADER: Tunar/Bridge/Tunar-Bridging-Header.h
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ENABLE_USER_SCRIPT_SANDBOXING: NO
         MARKETING_VERSION: "0.1.0"
         # UniFFI FFI 模块（生成的 modulemap）
-        OTHER_SWIFT_FLAGS: -Xcc -fmodule-map-file=$(SRCROOT)/TunerCore/Sources/TunerCore/tuner_coreFFI.modulemap
-  TunerTests:
+        OTHER_SWIFT_FLAGS: -Xcc -fmodule-map-file=$(SRCROOT)/TunarCore/Sources/TunarCore/tunar_coreFFI.modulemap
+  TunarTests:
     type: bundle.unit-test
     platform: iOS
     sources:
-      - TunerTests
+      - TunarTests
     dependencies:
-      - target: Tuner
+      - target: Tunar
     settings:
       base:
         SWIFT_VERSION: "6.0"
         GENERATE_INFOPLIST_FILE: YES
-        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Tuner.app/Tuner
-        OTHER_SWIFT_FLAGS: -Xcc -fmodule-map-file=$(SRCROOT)/TunerCore/Sources/TunerCore/tuner_coreFFI.modulemap
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Tunar.app/Tunar
+        OTHER_SWIFT_FLAGS: -Xcc -fmodule-map-file=$(SRCROOT)/TunarCore/Sources/TunarCore/tunar_coreFFI.modulemap

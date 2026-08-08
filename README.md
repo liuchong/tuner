@@ -74,7 +74,7 @@ scripts/build-core-ios.sh
 
 # iOS generated project and simulator tests
 cd ios && xcodegen generate
-xcodebuild -scheme Tuner -destination 'platform=iOS Simulator,name=<simulator>' test
+xcodebuild -scheme Tunar -destination 'platform=iOS Simulator,name=<simulator>' test
 
 # macOS native app and tests
 cd ../macos && xcodegen generate

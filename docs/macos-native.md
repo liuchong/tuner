@@ -13,7 +13,7 @@ macOS 应用是「吐呐」的原生桌面端，不是 iOS 窗口的放大版。
 
 - 最低系统版本：macOS 14。
 - 处理器：Apple Silicon 与 Intel；Rust 静态库分别构建后合并为通用 macOS slice。
-- `ios/TunerCore/tuner_core.xcframework` 同时包含 iOS 真机、iOS 模拟器和 macOS 通用
+- `ios/TunarCore/tunar_core.xcframework` 同时包含 iOS 真机、iOS 模拟器和 macOS 通用
   slice；Swift 绑定仍由 UniFFI 一次生成，禁止手改。
 - macOS 目标使用独立 Bundle ID 和独立 `UserDefaults` 容器，不迁移或覆盖移动端数据；
   所有默认值与移动端一致。

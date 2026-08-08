@@ -16,7 +16,7 @@ microphone capture. No unfinished entry point may be exposed.
 - Minimum system: macOS 14.
 - Architectures: Apple Silicon and Intel; the Rust archives are merged into one universal
   macOS slice.
-- `ios/TunerCore/tuner_core.xcframework` contains iOS device, iOS simulator, and universal
+- `ios/TunarCore/tunar_core.xcframework` contains iOS device, iOS simulator, and universal
   macOS slices. UniFFI generates the Swift binding once; generated files are never edited.
 - macOS uses its own bundle identifier and `UserDefaults` container. It neither migrates
   nor overwrites mobile data, while keeping the same defaults.

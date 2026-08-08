@@ -1,4 +1,4 @@
-# spec-core — Rust core（tuner-core）规格
+# spec-core — Rust core（tunar-core）规格
 
 本文件是 core 的唯一权威规格。UniFFI 接口（附录 A）是原生层与 Rust 之间的合同。
 
@@ -61,7 +61,7 @@ src/
 
 ## 4a. 频谱与泛音分析（v4 新增）
 
-`TunerEngine::analyze(pcm)` 在 feed 的音高检测基础上额外返回（均预分配、零分配热路径）：
+`TunarEngine::analyze(pcm)` 在 feed 的音高检测基础上额外返回（均预分配、零分配热路径）：
 - **频谱**：Hann 窗 + 实数 FFT（旋转因子构造时预计算），输出对数频率轴 60–2400Hz 共 64 bin 幅值（dBFS，-80~0 映射）。
 - **泛音列 partials**：频谱显著峰（局部极大且超噪声底 12dB），定容 ≤8 个；映射到
   同一实际频率（差值 <0.01Hz）的候选只保留幅值更强者。每峰：频率/幅值/harmonic_index
@@ -89,13 +89,13 @@ src/
 ## 4b. 律制（Temperament，v4 新增）
 
 - N 平均律，N ∈ {12, 19, 24, 31}，默认 12；步序以 A4 为参考：`f_step = a4·2^(k/N)`。
-- TunerEvent 新增字段：`temperament`（当前 N）、`temperament_step`（最近步序 k）、`temperament_cents`（= 1200·log2(f/f_step)，范围 [-600/N, +600/N)）。
+- TunarEvent 新增字段：`temperament`（当前 N）、`temperament_step`（最近步序 k）、`temperament_cents`（= 1200·log2(f/f_step)，范围 [-600/N, +600/N)）。
 - 音名与 cents_off 主读数语义不变（12-TET）；律制读数走新字段。set_temperament 即时生效。
 - 测试：19-TET 下 A4 上方第 7 步频率 ↔ 读数一致；cents 边界正确。
 
 ## 4c. 输入门限与读数保持
 
-调音读数不得直接以单帧检测成功/失败决定出现或消失。`TunerCore` 在音高检测后使用以下
+调音读数不得直接以单帧检测成功/失败决定出现或消失。`TunarCore` 在音高检测后使用以下
 状态机，主调音页和乐器调音页只消费同一份状态，不得各自实现超时：
 
 1. `Quiet`：输入电平低于开启门限，或尚未形成可信读数。无可显示音高。
@@ -106,7 +106,7 @@ src/
    显示旧读数；第二个连续有效帧到达才回到 `Tracking` 并替换读数。候选中断或只有大声
    无效噪声时清除候选，但不清除已确认读数。
 
-门限开启值为 `TunerConfig.noise_gate_dbfs`（默认 -45dBFS，可设置 -60~-30dBFS），
+门限开启值为 `TunarConfig.noise_gate_dbfs`（默认 -45dBFS，可设置 -60~-30dBFS），
 `Tracking` 的关闭值固定比开启值低 3dB；进入 `Holding` 后必须重新超过开启值才能形成
 候选。响度达到门限但音高无效的噪声不得推动指针。默认 hop 为 1024。
 `AnalysisFrame` 必须回传输入电平、状态、是否保持和显示强度，原生界面据此渲染，不另设
@@ -171,9 +171,9 @@ src/
 无配置参数的全局函数上无从获得「当前」配置）：`list_tunings` / `list_fingering_charts`
 返回的 `freq_hz` 一律按 A4=440 换算、`solfege` 按乐器习惯调的首调简谱（古琴 F 调，
 吉他/尤克里里 C 调；管乐器按各调性筒音唱名推宫音）。预设表内只存音名/MIDI，
-带 A4 校准的实时频率换算由 `TunerEngine`（持有 TunerConfig）在 feed 事件中给出。
+带 A4 校准的实时频率换算由 `TunarEngine`（持有 TunarConfig）在 feed 事件中给出。
 （2026-07-20 M3 修复重申）上述预设条目的 `solfege` 字段不随全局唱名体系/调式设置
-变化；全局设置仅影响 `TunerEvent.solfege`。理由：乐器面板的「筒音作 X」等唱名基准
+变化；全局设置仅影响 `TunarEvent.solfege`。理由：乐器面板的「筒音作 X」等唱名基准
 必须锚定在该乐器习惯调 / 该 chart 自身调性上（如 D 调曲笛筒音作 5 必须显示 5，
 古琴正调必须显示 F 调唱名 5 6 1 2 3 5 6），用全局调式重算会失去定弦/筒音意义。
 
@@ -200,7 +200,7 @@ src/
 ## 附录 A — UniFFI API 合同（udl 签名，唯一对外接口）
 
 ```webidl
-namespace tuner {
+namespace tunar_core {
     // ---- 全局 ----
     sequence<Instrument> list_instruments();
     sequence<Tuning> list_tunings(string instrument_id);
@@ -259,7 +259,7 @@ dictionary KeyMode {
     ModeKind mode;
 };
 
-dictionary TunerConfig {
+dictionary TunarConfig {
     f64 sample_rate;
     u32 frame_hop_samples;    // 默认 1024
     f64 a4_hz;              // 415-466
@@ -272,7 +272,7 @@ dictionary TunerConfig {
 [Enum]
 interface SignalState { Quiet, Acquiring, Tracking, Holding };
 
-dictionary TunerEvent {
+dictionary TunarEvent {
     f64 freq_hz;
     string note_name;     // "A4"
     i32 midi;             // 最近 MIDI 音
@@ -294,7 +294,7 @@ dictionary Partial {
 };
 
 dictionary AnalysisFrame {
-    TunerEvent? tuner;          // Tracking/Holding 时为当前或最后有效读数
+    TunarEvent? tuner;          // Tracking/Holding 时为当前或最后有效读数
     sequence<f32> spectrum_db;  // 64 bin，对数轴 60-2400Hz，dBFS -80~0
     sequence<f32> wide_spectrum_db; // 128 bin，对数轴 20Hz-wide_spectrum_max_hz
     f64 wide_spectrum_max_hz;   // min(20000, sample_rate/2)
@@ -318,9 +318,9 @@ dictionary ReferenceTone {
     f64 cents_from_note;
 };
 
-interface TunerEngine {
-    constructor(TunerConfig config);
-    TunerEvent? feed(sequence<f32> pcm);   // 零分配路径；无效输入返回 null
+interface TunarEngine {
+    constructor(TunarConfig config);
+    TunarEvent? feed(sequence<f32> pcm);   // 零分配路径；无效输入返回 null
     AnalysisFrame analyze(sequence<f32> pcm);  // v4 新增：频谱+泛音+和弦（UniFFI 边界允许分配）
     void set_a4(f64 hz);
     void set_solfege(SolfegeSystem system, KeyMode key);

@@ -4,7 +4,7 @@
 
 ## 硬性约束
 
-1. **实时安全**：`TunerEngine::feed`、`Metronome::render` 及其调用链上：
+1. **实时安全**：`TunarEngine::feed`、`Metronome::render` 及其调用链上：
    - 禁止堆分配（Vec 增长、Box、String、format! 等）——构造时预分配，运行期复用缓冲；
    - 禁止锁（Mutex/RwLock）；跨线程用无锁结构或所有权转移；
    - 禁止 `unwrap`/`expect`/panic 路径，错误用 Option/Result 返回。

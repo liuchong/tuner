@@ -3,14 +3,16 @@
 产品品牌为中文「吐呐」、英文 `TUNAR`。跨平台调音器 + 节拍器，采用 **Rust 共享核心 +
 多端原生 UI**：Android（Kotlin/Compose）、iOS（SwiftUI）与 macOS（SwiftUI）。
 
-品牌名只影响用户可见文案。为保证已安装版本原位升级与设置数据兼容，仓库目录、Rust crate、
-Java package、iOS target/scheme、Bundle ID 和持久化键继续使用既有 `tuner` / `Tuner`
-技术标识，除非另有经确认的迁移方案。
+技术标识已随品牌全面迁移：Rust crate `tunar-core`、Java package `com.liuchong.tunar`、
+iOS target/scheme `Tunar`、Bundle ID `com.liuchong.tunar*`、UniFFI 绑定 `tunar_core`。
+注意：Bundle ID / applicationId 已变更，旧版（`com.liuchong.tuner`）安装会被系统视为新应用，
+这是经确认的破坏性迁移；持久化设置键本身不含旧标识，无需迁移。
+功能命名中的 `tuner`（如 `TunerView`、`ui/tuner/` 调音功能页）指「调音器」这一功能，予以保留。
 
 ## 仓库结构
 
 ```
-core/            Rust crate `tuner-core`：全部业务逻辑（DSP/唱名/预设/节拍引擎），UniFFI 导出
+core/            Rust crate `tunar-core`：全部业务逻辑（DSP/唱名/预设/节拍引擎），UniFFI 导出
 android/         Android App（Kotlin + Jetpack Compose）
   app/           UI 与音频桥接
   core-binding/  UniFFI Kotlin 绑定 + 各 ABI .so
@@ -44,13 +46,13 @@ cd android && ./gradlew assembleDebug
 cd android && ./gradlew testDebugUnitTest
 
 # iOS 端 Rust 库 + Swift 绑定 + XCFramework
-scripts/build-core-ios.sh           # 输出含 iOS 与通用 macOS slice 的 ios/TunerCore/
+scripts/build-core-ios.sh           # 输出含 iOS 与通用 macOS slice 的 ios/TunarCore/
 
 # iOS 构建（xcodegen 重新生成工程；模拟器/真机）
 cd ios && xcodegen generate
-xcodebuild -scheme Tuner -destination 'generic/platform=iOS Simulator' build
-xcodebuild -scheme Tuner -destination 'generic/platform=iOS' -allowProvisioningUpdates build
-# 真机安装：xcrun devicectl device install app --device <id> <Tuner.app>
+xcodebuild -scheme Tunar -destination 'generic/platform=iOS Simulator' build
+xcodebuild -scheme Tunar -destination 'generic/platform=iOS' -allowProvisioningUpdates build
+# 真机安装：xcrun devicectl device install app --device <id> <Tunar.app>
 
 # macOS 工程、单元测试与应用构建（测试运行器需访问系统 testmanagerd）
 cd macos && xcodegen generate

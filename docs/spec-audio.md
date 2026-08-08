@@ -4,8 +4,8 @@
 
 - 实现：Kotlin `AudioRecord`（MVP）；后续可换 Oboe 降延迟。
 - 参数：单声道、PCM float（API 23+），采样率优先 44100（设备协商），帧长 1024 hop / 2048 窗口。
-  实际 hop 必须写入 `TunerConfig.frame_hop_samples`，供 core 与原生层统一分析帧节奏。
-- 线程：专用读线程，循环 read → `TunerEngine.feed(pcm)` → 结果经 `tryEmit` 到 StateFlow（UI 消费，丢弃策略，不阻塞）。
+  实际 hop 必须写入 `TunarConfig.frame_hop_samples`，供 core 与原生层统一分析帧节奏。
+- 线程：专用读线程，循环 read → `TunarEngine.feed(pcm)` → 结果经 `tryEmit` 到 StateFlow（UI 消费，丢弃策略，不阻塞）。
 - 延迟目标：采集到 UI 显示 ≤ 100ms。
 - 权限：RECORD_AUDIO 运行时申请；拒绝则显示引导页。
 
@@ -51,7 +51,7 @@
 
 - 音频线程禁止：IO、网络、锁竞争、大对象分配。
 - core 侧 `feed`/`render` 零分配（见 spec-core §3/§7）。
-- UI 更新频率节流：TunerEvent ≥ 30fps 时 UI 按帧合并（conflate）。
+- UI 更新频率节流：TunarEvent ≥ 30fps 时 UI 按帧合并（conflate）。
 - 调音读数的 2 帧确认、门限滞回和无限保持由 core 完成；平台不得使用墙上时钟二次清空。
 - 专业声音视图沿用同一采集窗口和同一次 core `analyze`；全频段频谱、乐音频谱与波形包络
   随同一个 `AnalysisFrame` 返回。禁止为任一视图新增麦克风、第二次 FFT 或音频回调内历史分配。

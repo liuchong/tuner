@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.liuchong.tuner.corebinding"
+    namespace = "com.liuchong.tunar.corebinding"
     compileSdk = 35
 
     defaultConfig {

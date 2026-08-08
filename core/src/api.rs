@@ -162,7 +162,7 @@ pub struct KeyMode {
 
 /// 调音器配置。
 #[derive(Debug, Clone, uniffi::Record)]
-pub struct TunerConfig {
+pub struct TunarConfig {
     /// 采样率（Hz）。
     pub sample_rate: f64,
     /// 相邻分析帧之间推进的采样数（默认 1024）。
@@ -181,7 +181,7 @@ pub struct TunerConfig {
 
 /// 一次音高事件。
 #[derive(Debug, Clone, uniffi::Record)]
-pub struct TunerEvent {
+pub struct TunarEvent {
     /// 平滑后频率（Hz）。
     pub freq_hz: f64,
     /// 音名（如 "A4"）。
@@ -221,7 +221,7 @@ pub struct Partial {
 #[derive(Debug, Clone, uniffi::Record)]
 pub struct AnalysisFrame {
     /// 同 feed 语义（无效输入为 None）。
-    pub tuner: Option<TunerEvent>,
+    pub tuner: Option<TunarEvent>,
     /// 64 bin 对数轴 60–2400Hz 幅值（dBFS -80~0）。
     pub spectrum_db: Vec<f32>,
     /// 128 bin 对数轴 20Hz–wide_spectrum_max_hz 幅值（dBFS -80~0）。
@@ -438,10 +438,10 @@ pub fn solfege_for_midi(system: SolfegeSystem, key: KeyMode, midi: i32) -> Strin
     .to_string()
 }
 
-// ============================ TunerEngine ============================
+// ============================ TunarEngine ============================
 
-/// TunerEngine 内核（无锁，单线程使用）。
-struct TunerCore {
+/// TunarEngine 内核（无锁，单线程使用）。
+struct TunarCore {
     yin: pitch::Yin,
     smoother: smooth::PitchSmoother,
     spectrum: spectrum::Spectrum,
@@ -455,8 +455,8 @@ struct TunerCore {
     sample_position: u64,
 }
 
-impl TunerCore {
-    fn analyze_frame(&mut self, pcm: &[f32]) -> (Option<TunerEvent>, signal::SignalOutput, f32) {
+impl TunarCore {
+    fn analyze_frame(&mut self, pcm: &[f32]) -> (Option<TunarEvent>, signal::SignalOutput, f32) {
         let input_level_dbfs = signal::input_level_dbfs(pcm);
         let detected = self.yin.feed(pcm).and_then(|(freq, clarity)| {
             let a4 = self.a4;
@@ -486,7 +486,7 @@ impl TunerCore {
         let (t_step, t_cents) =
             note::temperament_step_cents(pitch.freq_hz as f64, a4, self.temperament)
                 .unwrap_or((0, 0.0));
-        let event = TunerEvent {
+        let event = TunarEvent {
             freq_hz: pitch.freq_hz as f64,
             note_name: info.name().to_string(),
             midi: info.midi,
@@ -580,20 +580,20 @@ impl TunerCore {
 
 /// 调音器引擎（UniFFI 对象）。
 #[derive(uniffi::Object)]
-pub struct TunerEngine {
-    core: Mutex<TunerCore>,
+pub struct TunarEngine {
+    core: Mutex<TunarCore>,
 }
 
 #[uniffi::export]
-impl TunerEngine {
+impl TunarEngine {
     /// 构造。`config.a4_hz` 越界时收敛到 415–466。
     #[uniffi::constructor]
-    pub fn new(config: TunerConfig) -> Arc<Self> {
+    pub fn new(config: TunarConfig) -> Arc<Self> {
         let a4 = config.a4_hz.clamp(note::A4_MIN, note::A4_MAX);
         let mut yin = pitch::Yin::new(config.sample_rate as f32);
         yin.set_noise_gate(config.noise_gate_dbfs - signal::GATE_HYSTERESIS_DB);
         Arc::new(Self {
-            core: Mutex::new(TunerCore {
+            core: Mutex::new(TunarCore {
                 yin,
                 smoother: smooth::PitchSmoother::new(),
                 spectrum: spectrum::Spectrum::new(config.sample_rate as f32),
@@ -614,7 +614,7 @@ impl TunerEngine {
     }
 
     /// 输入一帧单声道 PCM（f32 [-1,1]，长度 ≥ 2048），返回音高事件；无效输入返回 None。
-    pub fn feed(&self, pcm: Vec<f32>) -> Option<TunerEvent> {
+    pub fn feed(&self, pcm: Vec<f32>) -> Option<TunarEvent> {
         let mut core = self.core.lock().unwrap_or_else(|e| e.into_inner());
         core.analyze_frame(&pcm).0
     }
@@ -815,8 +815,8 @@ impl Metronome {
 mod tests {
     use super::*;
 
-    fn default_config() -> TunerConfig {
-        TunerConfig {
+    fn default_config() -> TunarConfig {
+        TunarConfig {
             sample_rate: 44100.0,
             frame_hop_samples: 1024,
             a4_hz: 440.0,
@@ -966,7 +966,7 @@ mod tests {
     fn tuner_engine_feed_synth() {
         // 合成 440Hz 正弦（多帧以通过平滑与滞回）
         let sr = 44100.0f32;
-        let engine = TunerEngine::new(default_config());
+        let engine = TunarEngine::new(default_config());
         let mut pcm = vec![0.0f32; 2048];
         let mut last = None;
         for frame in 0..8 {
@@ -995,7 +995,7 @@ mod tests {
 
     #[test]
     fn tuner_engine_setters() {
-        let engine = TunerEngine::new(default_config());
+        let engine = TunarEngine::new(default_config());
         engine.set_a4(442.0);
         engine.set_noise_gate(-40.0);
         engine.set_solfege(
@@ -1038,10 +1038,10 @@ mod tests {
 
     /// 连续 feed 多帧直至检出（平滑滞回需要）。
     fn feed_until_event(
-        engine: &TunerEngine,
+        engine: &TunarEngine,
         pcm: &[f32],
         max_frames: usize,
-    ) -> Option<TunerEvent> {
+    ) -> Option<TunarEvent> {
         let mut last = None;
         for _ in 0..max_frames {
             last = engine.feed(pcm.to_vec());
@@ -1051,7 +1051,7 @@ mod tests {
 
     #[test]
     fn analyze_chord_c_major_and_single_tone() {
-        let engine = TunerEngine::new(default_config());
+        let engine = TunarEngine::new(default_config());
         // C 大三和弦：多喂几帧让平滑器稳定
         let chord_pcm = synth(&[(261.63, 0.5), (329.63, 0.5), (392.0, 0.5)], 2048);
         let mut frame = engine.analyze(chord_pcm.clone());
@@ -1076,7 +1076,7 @@ mod tests {
 
     #[test]
     fn analyze_partials_harmonics() {
-        let engine = TunerEngine::new(default_config());
+        let engine = TunarEngine::new(default_config());
         let pcm = synth(
             &[(220.0, 1.0), (440.0, 0.6), (660.0, 0.4), (880.0, 0.25)],
             2048,
@@ -1095,7 +1095,7 @@ mod tests {
     fn analyze_returns_wide_spectrum_waveform_and_monotonic_position() {
         let mut config = default_config();
         config.frame_hop_samples = 800;
-        let engine = TunerEngine::new(config);
+        let engine = TunarEngine::new(config);
         let pcm = synth(&[(440.0, 0.45), (10_000.0, 0.35)], 2048);
 
         let first = engine.analyze(pcm.clone());
@@ -1146,7 +1146,7 @@ mod tests {
         let mut config = default_config();
         config.sample_rate = 32_000.0;
         config.frame_hop_samples = 800;
-        let engine = TunerEngine::new(config);
+        let engine = TunarEngine::new(config);
         let mut pcm = vec![0.0f32; 2048];
         pcm[0] = f32::NAN;
         pcm[1] = f32::INFINITY;
@@ -1167,7 +1167,7 @@ mod tests {
 
     #[test]
     fn engine_set_temperament() {
-        let engine = TunerEngine::new(default_config());
+        let engine = TunarEngine::new(default_config());
         // 19-TET：A4 上方第 7 步频率
         let f = 440.0 * 2.0_f64.powf(7.0 / 19.0);
         engine.set_temperament(19);
@@ -1189,7 +1189,7 @@ mod tests {
     #[test]
     fn analyze_performance_under_3x_feed() {
         use std::time::Instant;
-        let engine = TunerEngine::new(default_config());
+        let engine = TunarEngine::new(default_config());
         let pcm = synth(&[(440.0, 0.8), (880.0, 0.4)], 2048);
         // 预热
         for _ in 0..3 {

@@ -14,9 +14,9 @@ expect_text() {
 
 expect_text "android/app/src/main/res/values/strings.xml" '<string name="app_name">TUNAR</string>'
 expect_text "android/app/src/main/res/values-zh-rCN/strings.xml" '<string name="app_name">吐呐</string>'
-expect_text "ios/Tuner/en.lproj/InfoPlist.strings" '"CFBundleDisplayName" = "TUNAR";'
-expect_text "ios/Tuner/zh-Hans.lproj/InfoPlist.strings" '"CFBundleDisplayName" = "吐呐";'
-expect_text "ios/project.yml" "PRODUCT_BUNDLE_IDENTIFIER: com.liuchong.tuner"
+expect_text "ios/Tunar/en.lproj/InfoPlist.strings" '"CFBundleDisplayName" = "TUNAR";'
+expect_text "ios/Tunar/zh-Hans.lproj/InfoPlist.strings" '"CFBundleDisplayName" = "吐呐";'
+expect_text "ios/project.yml" "PRODUCT_BUNDLE_IDENTIFIER: com.liuchong.tunar"
 expect_text "README.md" "TUNAR · 吐呐"
 expect_text "README.zh-CN.md" "吐呐 · TUNAR"
 

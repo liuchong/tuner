@@ -2,7 +2,7 @@
 
 Preset rows store note/MIDI data. Frequencies are converted using the active A4
 calibration. Returned preset solfège follows the instrument's customary key and does
-not change with the global solfège setting; only live `TunerEvent.solfege` does.
+not change with the global solfège setting; only live `TunarEvent.solfege` does.
 
 Wind model: closed-tube MIDI = key tonic − 7. Zhudi/dongxiao offsets are
 `[0,2,4,5,7,9,11,12,14,16,17,19,21,23,24]`; shakuhachi offsets are

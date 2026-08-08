@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "tuner"
+rootProject.name = "tunar"
 include(":app", ":core-binding")

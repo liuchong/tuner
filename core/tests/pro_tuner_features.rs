@@ -1,14 +1,14 @@
 use std::f64::consts::PI;
 
-use tuner_core::api::{KeyMode, ModeKind, SignalState, SolfegeSystem, TunerConfig, TunerEngine};
-use tuner_core::pitch::NOISE_GATE_DEFAULT_DBFS;
+use tunar_core::api::{KeyMode, ModeKind, SignalState, SolfegeSystem, TunarConfig, TunarEngine};
+use tunar_core::pitch::NOISE_GATE_DEFAULT_DBFS;
 
 const SAMPLE_RATE: f64 = 44_100.0;
 const WINDOW_SAMPLES: usize = 2_048;
 const HOP_SAMPLES: u32 = 1_024;
 
-fn config() -> TunerConfig {
-    TunerConfig {
+fn config() -> TunarConfig {
+    TunarConfig {
         sample_rate: SAMPLE_RATE,
         frame_hop_samples: HOP_SAMPLES,
         a4_hz: 440.0,
@@ -43,7 +43,7 @@ fn default_noise_gate_is_minus_45_dbfs() {
 
 #[test]
 fn requires_two_consecutive_valid_frames_before_showing_pitch() {
-    let engine = TunerEngine::new(config());
+    let engine = TunarEngine::new(config());
 
     let first = engine.analyze(sine(440.0, -30.0, 0));
     assert_eq!(first.signal_state, SignalState::Acquiring);
@@ -58,7 +58,7 @@ fn requires_two_consecutive_valid_frames_before_showing_pitch() {
 
 #[test]
 fn gate_hysteresis_keeps_tracking_until_three_db_below_open_threshold() {
-    let engine = TunerEngine::new(config());
+    let engine = TunarEngine::new(config());
     let _ = engine.analyze(sine(440.0, -49.0, 0));
     let tracking = engine.analyze(sine(440.0, -49.0, HOP_SAMPLES as usize));
     assert_eq!(tracking.signal_state, SignalState::Tracking);
@@ -73,7 +73,7 @@ fn gate_hysteresis_keeps_tracking_until_three_db_below_open_threshold() {
 
 #[test]
 fn holds_last_confirmed_pitch_indefinitely_at_full_strength() {
-    let engine = TunerEngine::new(config());
+    let engine = TunarEngine::new(config());
     let _ = engine.analyze(sine(440.0, -20.0, 0));
     let acquired = engine.analyze(sine(440.0, -20.0, HOP_SAMPLES as usize));
     assert!(acquired.tuner.is_some());
@@ -91,7 +91,7 @@ fn holds_last_confirmed_pitch_indefinitely_at_full_strength() {
 
 #[test]
 fn held_pitch_is_replaced_only_after_two_consecutive_valid_frames() {
-    let engine = TunerEngine::new(config());
+    let engine = TunarEngine::new(config());
     let _ = engine.analyze(sine(440.0, -20.0, 0));
     let _ = engine.analyze(sine(440.0, -20.0, HOP_SAMPLES as usize));
     let holding = engine.analyze(silence());
@@ -116,7 +116,7 @@ fn held_pitch_is_replaced_only_after_two_consecutive_valid_frames() {
 
 #[test]
 fn reference_tones_follow_temperament_calibration_and_range() {
-    let engine = TunerEngine::new(config());
+    let engine = TunarEngine::new(config());
     engine.set_temperament(19);
     let tones = engine.list_reference_tones();
 

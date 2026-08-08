@@ -2,7 +2,7 @@
 # build-core-android.sh — 编译 Rust core 为 Android 各 ABI 的 .so，并生成 UniFFI Kotlin 绑定。
 #
 # 输出：
-#   android/core-binding/src/main/jniLibs/<abi>/libtuner_core.so
+#   android/core-binding/src/main/jniLibs/<abi>/libtunar_core.so
 #   android/core-binding/src/main/kotlin/generated/  (UniFFI 生成的 Kotlin 绑定，勿手改)
 #
 # 依赖：cargo、cargo-ndk（缺失时自动安装）、ANDROID_NDK_HOME（未设置时自动探测最新 NDK）。
@@ -51,8 +51,8 @@ mkdir -p "$JNILIBS"
     build --release)
 
 for abi in "${ABIS[@]}"; do
-    if [[ ! -f "$JNILIBS/$abi/libtuner_core.so" ]]; then
-        echo "错误：缺少 $JNILIBS/$abi/libtuner_core.so" >&2
+    if [[ ! -f "$JNILIBS/$abi/libtunar_core.so" ]]; then
+        echo "错误：缺少 $JNILIBS/$abi/libtunar_core.so" >&2
         exit 1
     fi
 done
@@ -63,7 +63,7 @@ echo ">> 生成 UniFFI Kotlin 绑定 → $KOTLIN_OUT"
 rm -rf "$KOTLIN_OUT"
 mkdir -p "$KOTLIN_OUT"
 (cd "$CORE" && cargo run --quiet --bin uniffi-bindgen -- generate \
-    --library "$JNILIBS/arm64-v8a/libtuner_core.so" \
+    --library "$JNILIBS/arm64-v8a/libtunar_core.so" \
     --language kotlin \
     --out-dir "$KOTLIN_OUT")
 

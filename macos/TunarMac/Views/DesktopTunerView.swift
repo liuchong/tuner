@@ -5,7 +5,7 @@ struct DesktopTunerView: View {
     @StateObject private var vm = TunerViewModel()
     @StateObject private var settings = SettingsStore.shared
     @StateObject private var access = MacMicrophoneAccess()
-    @StateObject private var fork = TuningForkViewModel(initialConfig: defaultTunerConfig())
+    @StateObject private var fork = TuningForkViewModel(initialConfig: defaultTunarConfig())
     let openAnalysis: () -> Void
 
     private var reading: TunerReading? {
@@ -45,7 +45,7 @@ struct DesktopTunerView: View {
                 .frame(minWidth: 620, minHeight: 520)
         }
         .onAppear {
-            fork.refresh(settings.toTunerConfig())
+            fork.refresh(settings.toTunarConfig())
             applyCaptureLifecycle(scenePhase)
         }
         .onDisappear {
@@ -58,8 +58,8 @@ struct DesktopTunerView: View {
             }
             applyCaptureLifecycle(phase)
         }
-        .onChange(of: settings.a4Hz) { _, _ in fork.refresh(settings.toTunerConfig()) }
-        .onChange(of: settings.temperament) { _, _ in fork.refresh(settings.toTunerConfig()) }
+        .onChange(of: settings.a4Hz) { _, _ in fork.refresh(settings.toTunarConfig()) }
+        .onChange(of: settings.temperament) { _, _ in fork.refresh(settings.toTunarConfig()) }
     }
 
     private func applyCaptureLifecycle(_ phase: ScenePhase) {

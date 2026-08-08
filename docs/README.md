@@ -16,5 +16,6 @@ changes that alter behavior must update both versions in the same commit.
 | Roadmap | [roadmap](en/roadmap.md) | [roadmap](roadmap.md) |
 
 Brand rule: the product is **TUNAR** in English and **吐呐** in Simplified Chinese.
-Technical identifiers remain `tuner` / `Tuner` where changing them would break upgrades,
-generated bindings, or persisted data.
+Technical identifiers (crate `tunar-core`, package `com.liuchong.tunar`, iOS target `Tunar`,
+bindings `tunar_core`) have been fully migrated to the TUNAR brand. Feature names such as
+`TunerView` refer to the tuning feature and are kept.

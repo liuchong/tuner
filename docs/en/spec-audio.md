@@ -5,9 +5,9 @@
 - Android uses `AudioRecord`; iOS uses `AVAudioEngine`.
 - Mono floating-point PCM, device-negotiated rate (44.1 kHz preferred), 1024-sample
   hop and 2048-sample analysis window.
-- The actual hop is written to `TunerConfig.frame_hop_samples` so core and native
+- The actual hop is written to `TunarConfig.frame_hop_samples` so core and native
   layers share one analysis cadence.
-- A dedicated capture path sends PCM to `TunerEngine.analyze`; UI delivery is
+- A dedicated capture path sends PCM to `TunarEngine.analyze`; UI delivery is
   non-blocking and may discard stale frames.
 - Capture-to-display latency target is ≤100 ms.
 - Microphone permission is requested at runtime. Denial shows guidance and never crashes.

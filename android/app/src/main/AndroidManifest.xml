@@ -12,7 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Tuner">
+        android:theme="@style/Theme.Tunar">
         <activity
             android:name=".MainActivity"
             android:exported="true">

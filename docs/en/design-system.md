@@ -181,8 +181,8 @@ them in reading order. Sidebar changes use only a 150 ms cross-fade.
 
 | Concept | Android Compose | Apple SwiftUI |
 |---|---|---|
-| Color | `TunerColors` | same-named asset/token |
-| Type | `TunerTypography` | `Font.system(...).monospacedDigit()` |
+| Color | `TunarColors` | same-named asset/token |
+| Type | `TunarTypography` | `Font.system(...).monospacedDigit()` |
 | Aurora | Canvas radial gradient | `RadialGradient` + `TimelineView` |
 | Needle | fast spring | 50 ms ease-out |
 | Sheet | `ModalBottomSheet` | `.sheet` |
