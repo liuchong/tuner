@@ -1,0 +1,689 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0141F6836F4080443BEF373D /* TunarMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B25159278F981E8FC13F266B /* TunarMacApp.swift */; };
+		0570B2FE61877323E8CF51D2 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 3C34FD1A59425B8BF15709AD /* InfoPlist.strings */; };
+		111264414D5C29DA7505EF74 /* TickSounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111764272440E2D82E23D155 /* TickSounds.swift */; };
+		15C1EA0C8CA86809FF1A4A8C /* AudioCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00EBE164801BB927370CA691 /* AudioCapture.swift */; };
+		1610F774959188D4D20BA82A /* MacMicrophoneAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1249667A6D8EF8089BB9F4A6 /* MacMicrophoneAccess.swift */; };
+		22F4B35D14079C0A1AAD5349 /* EngineBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0A5A1A39D51D374FFF0A6E /* EngineBridge.swift */; };
+		258CED65DED3979ADCAE4DF6 /* DesktopRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0BC7D6689A712981C3DF1B /* DesktopRootView.swift */; };
+		27768428123C122AF210AE31 /* tuner_core.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2736A277F4899153C70584E0 /* tuner_core.xcframework */; };
+		304EF5BAF8515F09E7C6A57D /* DesktopContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5EFD350A1DA088B6762DC2A /* DesktopContractTests.swift */; };
+		5ADD482661ABBFA94C4AE913 /* MacTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC422E6CCE4898EE3E39C533 /* MacTheme.swift */; };
+		685FB72A638026ADAD2E7A84 /* MetronomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FD7692A5A9F66EFFEB7E69 /* MetronomeViewModel.swift */; };
+		6B4D1BA8F032734EEFB0C8C0 /* DesktopInstrumentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99DCF68B45714E658936A5C6 /* DesktopInstrumentView.swift */; };
+		6D9AAEBD12032C514FAB455F /* SharedTunerViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB7660DF09444C069A523CDA /* SharedTunerViews.swift */; };
+		74BAD51BFF02B8EBA072D694 /* TuningForkViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3238EB221E2B93827B2CAE5A /* TuningForkViewModel.swift */; };
+		8EDBEDE4E6266EE2064F22B9 /* MacAudioAndAnalysisTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2D281E5FFEC9BCB6892ACC /* MacAudioAndAnalysisTests.swift */; };
+		A51FA4B3DC66C1C8AB3BC7BD /* DesktopNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4382829A731F8D1BD3F6687A /* DesktopNavigation.swift */; };
+		A52D02470EAB745B230270A6 /* MetronomePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD21B01B8C46CDD08F5A6B24 /* MetronomePlayer.swift */; };
+		A678D9EFCF1D07E535AE47C9 /* DesktopSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5266348E431C3A984E64BE1 /* DesktopSettingsView.swift */; };
+		AE7D28415C0F3AAD0C118DF4 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0850EACD360AA3269B351372 /* Haptics.swift */; };
+		B0E5BAAD86D60FA3DF31F98A /* SpectrumHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26FFBEBF49643703DA2E6533 /* SpectrumHistory.swift */; };
+		B5A9A7CF2268E80AE3DB6884 /* TunerAtomics.c in Sources */ = {isa = PBXBuildFile; fileRef = 8A52AAE9A137462F3C1B0357 /* TunerAtomics.c */; };
+		B6631996D7BD707113D1505D /* InstrumentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B97FE189AA57C2F902F9478 /* InstrumentViewModel.swift */; };
+		BB46947D4E7F14BE4E15FCF7 /* SpectrumPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECE3D5F3614B2FE59D37FBB7 /* SpectrumPresentation.swift */; };
+		D2B236AD3209A260B986D126 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B0305CACFCC77D0163C52BB7 /* Assets.xcassets */; };
+		E1593027EA374D7A00C8BD8C /* tuner_core.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7481F46AF52769D6B061A6FE /* tuner_core.swift */; };
+		E752366889D36461AAB475F1 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 817DF95D0CEF865FB92145E5 /* SettingsStore.swift */; };
+		EFA09931E800A45D8456C6DD /* DesktopAnalysisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55E1D09A67D95CACD8147AD3 /* DesktopAnalysisView.swift */; };
+		F2F103C25E5686C74A4949AA /* DesktopMetronomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F77C89AE821E927CB2C3CEAB /* DesktopMetronomeView.swift */; };
+		F32560E3D15CFA7C5A81AD53 /* TunerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F63688E6EBC7E1B936D42B9 /* TunerViewModel.swift */; };
+		F4485A6DAE1950F091204643 /* ReferenceTonePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3274087226E07B989F4E027A /* ReferenceTonePlayer.swift */; };
+		FC74E9C6C5878ACA36325C78 /* DesktopTunerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A70A8DBDE99B0B37F746D39 /* DesktopTunerView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2E87E26ED66938AFA9CA72C9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D3652E551E5D6E4E256A3512 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F312B97ED1758C1BD0515D24;
+			remoteInfo = TunarMac;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		00EBE164801BB927370CA691 /* AudioCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCapture.swift; sourceTree = "<group>"; };
+		0850EACD360AA3269B351372 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
+		0A70A8DBDE99B0B37F746D39 /* DesktopTunerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopTunerView.swift; sourceTree = "<group>"; };
+		111764272440E2D82E23D155 /* TickSounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TickSounds.swift; sourceTree = "<group>"; };
+		1249667A6D8EF8089BB9F4A6 /* MacMicrophoneAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacMicrophoneAccess.swift; sourceTree = "<group>"; };
+		1C0A5A1A39D51D374FFF0A6E /* EngineBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineBridge.swift; sourceTree = "<group>"; };
+		1F63688E6EBC7E1B936D42B9 /* TunerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerViewModel.swift; sourceTree = "<group>"; };
+		26FFBEBF49643703DA2E6533 /* SpectrumHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumHistory.swift; sourceTree = "<group>"; };
+		2736A277F4899153C70584E0 /* tuner_core.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = tuner_core.xcframework; path = ../ios/TunerCore/tuner_core.xcframework; sourceTree = "<group>"; };
+		3238EB221E2B93827B2CAE5A /* TuningForkViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TuningForkViewModel.swift; sourceTree = "<group>"; };
+		3274087226E07B989F4E027A /* ReferenceTonePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferenceTonePlayer.swift; sourceTree = "<group>"; };
+		40FD7692A5A9F66EFFEB7E69 /* MetronomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeViewModel.swift; sourceTree = "<group>"; };
+		4382829A731F8D1BD3F6687A /* DesktopNavigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopNavigation.swift; sourceTree = "<group>"; };
+		4BB9CDA8C5D7B18EABED39D5 /* TunarMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TunarMac.entitlements; sourceTree = "<group>"; };
+		55E1D09A67D95CACD8147AD3 /* DesktopAnalysisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopAnalysisView.swift; sourceTree = "<group>"; };
+		5F99E069110F230FE06EDE52 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		7481F46AF52769D6B061A6FE /* tuner_core.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tuner_core.swift; sourceTree = "<group>"; };
+		812B019D3137DF3B18A1238C /* TunarMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TunarMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		817DF95D0CEF865FB92145E5 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		8A52AAE9A137462F3C1B0357 /* TunerAtomics.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = TunerAtomics.c; sourceTree = "<group>"; };
+		8B97FE189AA57C2F902F9478 /* InstrumentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentViewModel.swift; sourceTree = "<group>"; };
+		94F536FF59185ACE7DE9A72E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		99DCF68B45714E658936A5C6 /* DesktopInstrumentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopInstrumentView.swift; sourceTree = "<group>"; };
+		A299F8E5579D342B897FC531 /* TunerAtomics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TunerAtomics.h; sourceTree = "<group>"; };
+		B0305CACFCC77D0163C52BB7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B25159278F981E8FC13F266B /* TunarMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunarMacApp.swift; sourceTree = "<group>"; };
+		B5266348E431C3A984E64BE1 /* DesktopSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopSettingsView.swift; sourceTree = "<group>"; };
+		BB0BC7D6689A712981C3DF1B /* DesktopRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopRootView.swift; sourceTree = "<group>"; };
+		BF4CE03A6E688D739360FAA7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		CC2D281E5FFEC9BCB6892ACC /* MacAudioAndAnalysisTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacAudioAndAnalysisTests.swift; sourceTree = "<group>"; };
+		CC422E6CCE4898EE3E39C533 /* MacTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacTheme.swift; sourceTree = "<group>"; };
+		D1A4691B25E3342258493D06 /* TunarMac-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TunarMac-Bridging-Header.h"; sourceTree = "<group>"; };
+		D5EFD350A1DA088B6762DC2A /* DesktopContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopContractTests.swift; sourceTree = "<group>"; };
+		DB8F2B9511F5302590E110F1 /* TunarMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TunarMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DD21B01B8C46CDD08F5A6B24 /* MetronomePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomePlayer.swift; sourceTree = "<group>"; };
+		EB7660DF09444C069A523CDA /* SharedTunerViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedTunerViews.swift; sourceTree = "<group>"; };
+		ECE3D5F3614B2FE59D37FBB7 /* SpectrumPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumPresentation.swift; sourceTree = "<group>"; };
+		F77C89AE821E927CB2C3CEAB /* DesktopMetronomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopMetronomeView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		15C71E190E2B693DD55DA624 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				27768428123C122AF210AE31 /* tuner_core.xcframework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		063B124F7A6E7675C763B160 /* Bridge */ = {
+			isa = PBXGroup;
+			children = (
+				D1A4691B25E3342258493D06 /* TunarMac-Bridging-Header.h */,
+			);
+			path = Bridge;
+			sourceTree = "<group>";
+		};
+		0E3BBEEB267D1DAB58A4B099 /* Bridge */ = {
+			isa = PBXGroup;
+			children = (
+				1C0A5A1A39D51D374FFF0A6E /* EngineBridge.swift */,
+				111764272440E2D82E23D155 /* TickSounds.swift */,
+				8A52AAE9A137462F3C1B0357 /* TunerAtomics.c */,
+				A299F8E5579D342B897FC531 /* TunerAtomics.h */,
+			);
+			name = Bridge;
+			path = ../ios/Tuner/Bridge;
+			sourceTree = "<group>";
+		};
+		19730FCD90BA3217DA9877A0 /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				1249667A6D8EF8089BB9F4A6 /* MacMicrophoneAccess.swift */,
+			);
+			path = Audio;
+			sourceTree = "<group>";
+		};
+		1BF7A74FA46F9E5344D59036 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				0850EACD360AA3269B351372 /* Haptics.swift */,
+			);
+			name = Common;
+			path = ../ios/Tuner/Common;
+			sourceTree = "<group>";
+		};
+		26AF3949C58650884D8A6369 /* Instrument */ = {
+			isa = PBXGroup;
+			children = (
+				8B97FE189AA57C2F902F9478 /* InstrumentViewModel.swift */,
+			);
+			name = Instrument;
+			path = ../ios/Tuner/Instrument;
+			sourceTree = "<group>";
+		};
+		3F7F3820D643BF587D28A1E8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				2736A277F4899153C70584E0 /* tuner_core.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		673D22FFA6D0166D31EC2D22 /* TunerCore */ = {
+			isa = PBXGroup;
+			children = (
+				7481F46AF52769D6B061A6FE /* tuner_core.swift */,
+			);
+			name = TunerCore;
+			path = ../ios/TunerCore/Sources/TunerCore;
+			sourceTree = "<group>";
+		};
+		675E1D6B4A2136F7D24CE025 /* Tuner */ = {
+			isa = PBXGroup;
+			children = (
+				26FFBEBF49643703DA2E6533 /* SpectrumHistory.swift */,
+				ECE3D5F3614B2FE59D37FBB7 /* SpectrumPresentation.swift */,
+				1F63688E6EBC7E1B936D42B9 /* TunerViewModel.swift */,
+				3238EB221E2B93827B2CAE5A /* TuningForkViewModel.swift */,
+			);
+			name = Tuner;
+			path = ../ios/Tuner/Tuner;
+			sourceTree = "<group>";
+		};
+		7E891F6451C65D4BB955433A /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				00EBE164801BB927370CA691 /* AudioCapture.swift */,
+				DD21B01B8C46CDD08F5A6B24 /* MetronomePlayer.swift */,
+				3274087226E07B989F4E027A /* ReferenceTonePlayer.swift */,
+			);
+			name = Audio;
+			path = ../ios/Tuner/Audio;
+			sourceTree = "<group>";
+		};
+		82923AB7F2E90FE8F27E671F /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				817DF95D0CEF865FB92145E5 /* SettingsStore.swift */,
+			);
+			name = Settings;
+			path = ../ios/Tuner/Settings;
+			sourceTree = "<group>";
+		};
+		A06F94961EE85F300AA4BA03 /* TunarMacTests */ = {
+			isa = PBXGroup;
+			children = (
+				D5EFD350A1DA088B6762DC2A /* DesktopContractTests.swift */,
+				CC2D281E5FFEC9BCB6892ACC /* MacAudioAndAnalysisTests.swift */,
+			);
+			path = TunarMacTests;
+			sourceTree = "<group>";
+		};
+		A0ADF3E3ADAA4AD14DA5A39B /* App */ = {
+			isa = PBXGroup;
+			children = (
+				4382829A731F8D1BD3F6687A /* DesktopNavigation.swift */,
+				BB0BC7D6689A712981C3DF1B /* DesktopRootView.swift */,
+				B25159278F981E8FC13F266B /* TunarMacApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		C758C3DF4BC4176B8F60EF86 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				812B019D3137DF3B18A1238C /* TunarMac.app */,
+				DB8F2B9511F5302590E110F1 /* TunarMacTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D5FA9E81E68474CBD317D980 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				55E1D09A67D95CACD8147AD3 /* DesktopAnalysisView.swift */,
+				99DCF68B45714E658936A5C6 /* DesktopInstrumentView.swift */,
+				F77C89AE821E927CB2C3CEAB /* DesktopMetronomeView.swift */,
+				B5266348E431C3A984E64BE1 /* DesktopSettingsView.swift */,
+				0A70A8DBDE99B0B37F746D39 /* DesktopTunerView.swift */,
+				EB7660DF09444C069A523CDA /* SharedTunerViews.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		DBC2626D85FB968651464452 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				CC422E6CCE4898EE3E39C533 /* MacTheme.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		E389AB54E413B9299280E3BB /* Metronome */ = {
+			isa = PBXGroup;
+			children = (
+				40FD7692A5A9F66EFFEB7E69 /* MetronomeViewModel.swift */,
+			);
+			name = Metronome;
+			path = ../ios/Tuner/Metronome;
+			sourceTree = "<group>";
+		};
+		E6C335301D1F0EDD808936D4 /* TunarMac */ = {
+			isa = PBXGroup;
+			children = (
+				B0305CACFCC77D0163C52BB7 /* Assets.xcassets */,
+				BF4CE03A6E688D739360FAA7 /* Info.plist */,
+				4BB9CDA8C5D7B18EABED39D5 /* TunarMac.entitlements */,
+				A0ADF3E3ADAA4AD14DA5A39B /* App */,
+				19730FCD90BA3217DA9877A0 /* Audio */,
+				063B124F7A6E7675C763B160 /* Bridge */,
+				3C34FD1A59425B8BF15709AD /* InfoPlist.strings */,
+				DBC2626D85FB968651464452 /* Theme */,
+				D5FA9E81E68474CBD317D980 /* Views */,
+			);
+			path = TunarMac;
+			sourceTree = "<group>";
+		};
+		EA9A76FA19D4507306F18F57 = {
+			isa = PBXGroup;
+			children = (
+				7E891F6451C65D4BB955433A /* Audio */,
+				0E3BBEEB267D1DAB58A4B099 /* Bridge */,
+				1BF7A74FA46F9E5344D59036 /* Common */,
+				26AF3949C58650884D8A6369 /* Instrument */,
+				E389AB54E413B9299280E3BB /* Metronome */,
+				82923AB7F2E90FE8F27E671F /* Settings */,
+				E6C335301D1F0EDD808936D4 /* TunarMac */,
+				A06F94961EE85F300AA4BA03 /* TunarMacTests */,
+				675E1D6B4A2136F7D24CE025 /* Tuner */,
+				673D22FFA6D0166D31EC2D22 /* TunerCore */,
+				3F7F3820D643BF587D28A1E8 /* Frameworks */,
+				C758C3DF4BC4176B8F60EF86 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B940090616BE58CA7A276865 /* TunarMacTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 57D64911349A897DC2508575 /* Build configuration list for PBXNativeTarget "TunarMacTests" */;
+			buildPhases = (
+				2335C83B598D0DF5186340D1 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6A44CF659FDE5C2F7DC40062 /* PBXTargetDependency */,
+			);
+			name = TunarMacTests;
+			packageProductDependencies = (
+			);
+			productName = TunarMacTests;
+			productReference = DB8F2B9511F5302590E110F1 /* TunarMacTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		F312B97ED1758C1BD0515D24 /* TunarMac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5D053BF8F169BB6970B493C4 /* Build configuration list for PBXNativeTarget "TunarMac" */;
+			buildPhases = (
+				2D09E9DCCEFB598209CC7E33 /* Sources */,
+				EA8FC36A1EE9FF228B55F380 /* Resources */,
+				15C71E190E2B693DD55DA624 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TunarMac;
+			packageProductDependencies = (
+			);
+			productName = TunarMac;
+			productReference = 812B019D3137DF3B18A1238C /* TunarMac.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D3652E551E5D6E4E256A3512 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					F312B97ED1758C1BD0515D24 = {
+						DevelopmentTeam = DXBQ96GC5Q;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = A7C9A7247227CAC298FDE562 /* Build configuration list for PBXProject "TunarMac" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+				"zh-Hans",
+			);
+			mainGroup = EA9A76FA19D4507306F18F57;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = C758C3DF4BC4176B8F60EF86 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F312B97ED1758C1BD0515D24 /* TunarMac */,
+				B940090616BE58CA7A276865 /* TunarMacTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		EA8FC36A1EE9FF228B55F380 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D2B236AD3209A260B986D126 /* Assets.xcassets in Resources */,
+				0570B2FE61877323E8CF51D2 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2335C83B598D0DF5186340D1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				304EF5BAF8515F09E7C6A57D /* DesktopContractTests.swift in Sources */,
+				8EDBEDE4E6266EE2064F22B9 /* MacAudioAndAnalysisTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2D09E9DCCEFB598209CC7E33 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				15C1EA0C8CA86809FF1A4A8C /* AudioCapture.swift in Sources */,
+				EFA09931E800A45D8456C6DD /* DesktopAnalysisView.swift in Sources */,
+				6B4D1BA8F032734EEFB0C8C0 /* DesktopInstrumentView.swift in Sources */,
+				F2F103C25E5686C74A4949AA /* DesktopMetronomeView.swift in Sources */,
+				A51FA4B3DC66C1C8AB3BC7BD /* DesktopNavigation.swift in Sources */,
+				258CED65DED3979ADCAE4DF6 /* DesktopRootView.swift in Sources */,
+				A678D9EFCF1D07E535AE47C9 /* DesktopSettingsView.swift in Sources */,
+				FC74E9C6C5878ACA36325C78 /* DesktopTunerView.swift in Sources */,
+				22F4B35D14079C0A1AAD5349 /* EngineBridge.swift in Sources */,
+				AE7D28415C0F3AAD0C118DF4 /* Haptics.swift in Sources */,
+				B6631996D7BD707113D1505D /* InstrumentViewModel.swift in Sources */,
+				1610F774959188D4D20BA82A /* MacMicrophoneAccess.swift in Sources */,
+				5ADD482661ABBFA94C4AE913 /* MacTheme.swift in Sources */,
+				A52D02470EAB745B230270A6 /* MetronomePlayer.swift in Sources */,
+				685FB72A638026ADAD2E7A84 /* MetronomeViewModel.swift in Sources */,
+				F4485A6DAE1950F091204643 /* ReferenceTonePlayer.swift in Sources */,
+				E752366889D36461AAB475F1 /* SettingsStore.swift in Sources */,
+				6D9AAEBD12032C514FAB455F /* SharedTunerViews.swift in Sources */,
+				B0E5BAAD86D60FA3DF31F98A /* SpectrumHistory.swift in Sources */,
+				BB46947D4E7F14BE4E15FCF7 /* SpectrumPresentation.swift in Sources */,
+				111264414D5C29DA7505EF74 /* TickSounds.swift in Sources */,
+				0141F6836F4080443BEF373D /* TunarMacApp.swift in Sources */,
+				B5A9A7CF2268E80AE3DB6884 /* TunerAtomics.c in Sources */,
+				F32560E3D15CFA7C5A81AD53 /* TunerViewModel.swift in Sources */,
+				74BAD51BFF02B8EBA072D694 /* TuningForkViewModel.swift in Sources */,
+				E1593027EA374D7A00C8BD8C /* tuner_core.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		6A44CF659FDE5C2F7DC40062 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F312B97ED1758C1BD0515D24 /* TunarMac */;
+			targetProxy = 2E87E26ED66938AFA9CA72C9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		3C34FD1A59425B8BF15709AD /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				94F536FF59185ACE7DE9A72E /* en */,
+				5F99E069110F230FE06EDE52 /* zh-Hans */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		11F5ECB4EEDBDD601E9CAD03 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = TunarMac/TunarMac.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = DXBQ96GC5Q;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"../ios/TunerCore\"",
+				);
+				INFOPLIST_FILE = TunarMac/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				OTHER_SWIFT_FLAGS = "-Xcc -fmodule-map-file=$(SRCROOT)/../ios/TunerCore/Sources/TunerCore/tuner_coreFFI.modulemap";
+				PRODUCT_BUNDLE_IDENTIFIER = com.liuchong.tuner.macos;
+				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "TunarMac/Bridge/TunarMac-Bridging-Header.h";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		135CE05CD0E1F916D2E49BCF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				OTHER_SWIFT_FLAGS = "-Xcc -fmodule-map-file=$(SRCROOT)/../ios/TunerCore/Sources/TunerCore/tuner_coreFFI.modulemap";
+				PRODUCT_BUNDLE_IDENTIFIER = com.liuchong.tuner.TunarMacTests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TunarMac.app/Contents/MacOS/TunarMac";
+			};
+			name = Release;
+		};
+		59C933CDBEC10A838F3C3D83 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				OTHER_SWIFT_FLAGS = "-Xcc -fmodule-map-file=$(SRCROOT)/../ios/TunerCore/Sources/TunerCore/tuner_coreFFI.modulemap";
+				PRODUCT_BUNDLE_IDENTIFIER = com.liuchong.tuner.TunarMacTests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TunarMac.app/Contents/MacOS/TunarMac";
+			};
+			name = Debug;
+		};
+		878E87863D0984AF4BE2A0F3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		B6038616FCB16AC05D6BE597 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = TunarMac/TunarMac.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = DXBQ96GC5Q;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"../ios/TunerCore\"",
+				);
+				INFOPLIST_FILE = TunarMac/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				OTHER_SWIFT_FLAGS = "-Xcc -fmodule-map-file=$(SRCROOT)/../ios/TunerCore/Sources/TunerCore/tuner_coreFFI.modulemap";
+				PRODUCT_BUNDLE_IDENTIFIER = com.liuchong.tuner.macos;
+				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "TunarMac/Bridge/TunarMac-Bridging-Header.h";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		C56B1904B8875048A63BE11F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		57D64911349A897DC2508575 /* Build configuration list for PBXNativeTarget "TunarMacTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				59C933CDBEC10A838F3C3D83 /* Debug */,
+				135CE05CD0E1F916D2E49BCF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		5D053BF8F169BB6970B493C4 /* Build configuration list for PBXNativeTarget "TunarMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B6038616FCB16AC05D6BE597 /* Debug */,
+				11F5ECB4EEDBDD601E9CAD03 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A7C9A7247227CAC298FDE562 /* Build configuration list for PBXProject "TunarMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C56B1904B8875048A63BE11F /* Debug */,
+				878E87863D0984AF4BE2A0F3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D3652E551E5D6E4E256A3512 /* Project object */;
+}

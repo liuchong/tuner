@@ -1,11 +1,12 @@
 #!/bin/bash
-# build-core-ios.sh — 编译 Rust core 为 iOS 静态库 + UniFFI Swift 绑定 + XCFramework。
+# build-core-ios.sh — 编译 Rust core 为 Apple 静态库 + UniFFI Swift 绑定 + XCFramework。
 #
 # 输出：
-#   ios/TunerCore/tuner_core.xcframework/      (device arm64 + simulator arm64)
+#   ios/TunerCore/tuner_core.xcframework/
+#     iOS device arm64 + iOS simulator arm64 + macOS arm64/x86_64 universal
 #   ios/TunerCore/Sources/TunerCore/           (UniFFI 生成的 Swift 绑定 + 头文件，勿手改)
 #
-# 依赖：cargo（targets aarch64-apple-ios / aarch64-apple-ios-sim）、xcodebuild。
+# 依赖：cargo（iOS + macOS arm64/x86_64 targets）、lipo、xcodebuild。
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -14,7 +15,7 @@ IOS="$ROOT/ios"
 FW="$IOS/TunerCore"
 GEN="$FW/Sources/TunerCore"
 
-echo ">> 1/4 编译 staticlib (device + sim)"
+echo ">> 1/5 编译 iOS staticlib (device + sim)"
 (cd "$CORE" && cargo build --release --target aarch64-apple-ios)
 (cd "$CORE" && cargo build --release --target aarch64-apple-ios-sim)
 
@@ -22,7 +23,22 @@ DEV_A="$CORE/target/aarch64-apple-ios/release/libtuner_core.a"
 SIM_A="$CORE/target/aarch64-apple-ios-sim/release/libtuner_core.a"
 [[ -f "$DEV_A" && -f "$SIM_A" ]] || { echo "错误：缺少 staticlib 输出" >&2; exit 1; }
 
-echo ">> 2/4 生成 UniFFI Swift 绑定 → $GEN"
+echo ">> 2/5 编译 macOS staticlib (arm64 + x86_64)"
+(cd "$CORE" && cargo build --release --target aarch64-apple-darwin)
+(cd "$CORE" && cargo build --release --target x86_64-apple-darwin)
+
+MAC_ARM_A="$CORE/target/aarch64-apple-darwin/release/libtuner_core.a"
+MAC_X64_A="$CORE/target/x86_64-apple-darwin/release/libtuner_core.a"
+MAC_UNIVERSAL="$CORE/target/apple-universal/release/libtuner_core.a"
+[[ -f "$MAC_ARM_A" && -f "$MAC_X64_A" ]] || {
+    echo "错误：缺少 macOS staticlib 输出" >&2
+    exit 1
+}
+mkdir -p "$(dirname "$MAC_UNIVERSAL")"
+lipo -create "$MAC_ARM_A" "$MAC_X64_A" -output "$MAC_UNIVERSAL"
+lipo "$MAC_UNIVERSAL" -verify_arch arm64 x86_64
+
+echo ">> 3/5 生成 UniFFI Swift 绑定 → $GEN"
 rm -rf "$GEN"
 mkdir -p "$GEN"
 (cd "$CORE" && cargo run --quiet --bin uniffi-bindgen -- generate \
@@ -37,12 +53,13 @@ find "$GEN" -type f \( -name '*.swift' -o -name '*.h' \) | while read -r f; do
 done
 ls "$GEN"
 
-echo ">> 3/4 打包 XCFramework"
+echo ">> 4/5 打包 XCFramework"
 rm -rf "$FW/tuner_core.xcframework"
 xcodebuild -create-xcframework \
     -library "$DEV_A" -headers "$GEN" \
     -library "$SIM_A" -headers "$GEN" \
+    -library "$MAC_UNIVERSAL" -headers "$GEN" \
     -output "$FW/tuner_core.xcframework"
 
-echo ">> 4/4 完成"
+echo ">> 5/5 完成"
 find "$FW/tuner_core.xcframework" -maxdepth 2 -name 'libtuner_core.a' -o -maxdepth 2 -type d | sort

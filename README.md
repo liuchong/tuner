@@ -50,7 +50,7 @@
 ```text
 android/  Kotlin + Jetpack Compose
 ios/      SwiftUI
-macos/    SwiftUI (planned)
+macos/    SwiftUI for macOS 14+
     │     UniFFI-generated native bindings
 core/     Rust: pitch, notation, presets, metronome, spectrum, chords, temperaments
 ```
@@ -69,10 +69,19 @@ cd core && cargo test
 scripts/build-core-android.sh
 cd android && ./gradlew assembleDebug testDebugUnitTest
 
-# iOS bindings, generated project, and simulator tests
+# Apple bindings and universal iOS/macOS XCFramework
 scripts/build-core-ios.sh
+
+# iOS generated project and simulator tests
 cd ios && xcodegen generate
 xcodebuild -scheme Tuner -destination 'platform=iOS Simulator,name=<simulator>' test
+
+# macOS native app and tests
+cd ../macos && xcodegen generate
+xcodebuild -project TunarMac.xcodeproj -scheme TunarMac \
+  -destination 'platform=macOS,arch=arm64' test
+xcodebuild -project TunarMac.xcodeproj -scheme TunarMac \
+  -destination 'platform=macOS,arch=x86_64' build
 ```
 
 ## Documentation
@@ -87,6 +96,7 @@ Simplified Chinese specifications.
 | [UI specification](docs/en/spec-ui.md) | User-visible behavior and navigation |
 | [Audio specification](docs/en/spec-audio.md) | Capture, playback, and real-time rules |
 | [Aurora design system](docs/en/design-system.md) | Visual, motion, and accessibility rules |
+| [Native macOS app](docs/en/macos-native.md) | Desktop layout, lifecycle, and build contract |
 | [Roadmap](docs/en/roadmap.md) | Delivery milestones |
 
 ## Brand and upgrade compatibility

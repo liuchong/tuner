@@ -172,6 +172,11 @@ not vibrate when leaving. Haptics can be disabled. Screen readers announce note 
 cents, controls expose current values, dynamic type supports 130%, and all information
 has non-color encoding.
 
+macOS presents the five destinations in a 200–240 pt sidebar. The selected row uses a
+12% accent background and accent icon. Detail content remains at least 760 pt wide;
+at 1100 pt and above related cards may use two columns, while narrower windows stack
+them in reading order. Sidebar changes use only a 150 ms cross-fade.
+
 ## 6. Platform token mapping
 
 | Concept | Android Compose | Apple SwiftUI |

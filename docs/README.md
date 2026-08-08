@@ -12,6 +12,7 @@ changes that alter behavior must update both versions in the same commit.
 | UI behavior | [spec-ui](en/spec-ui.md) | [spec-ui](spec-ui.md) |
 | Audio pipeline | [spec-audio](en/spec-audio.md) | [spec-audio](spec-audio.md) |
 | Aurora design system | [design-system](en/design-system.md) | [design-system](design-system.md) |
+| Native macOS app | [macos-native](en/macos-native.md) | [macos-native](macos-native.md) |
 | Roadmap | [roadmap](en/roadmap.md) | [roadmap](roadmap.md) |
 
 Brand rule: the product is **TUNAR** in English and **吐呐** in Simplified Chinese.
