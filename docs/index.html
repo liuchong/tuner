@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TUNAR · 吐呐 — 跨平台调音器与节拍器</title>
+  <meta name="description" content="吐呐 / TUNAR：Rust 共享核心 × 多端原生 UI 的跨平台调音器与节拍器，支持 Android、iOS 与 macOS。">
+  <link rel="icon" type="image/png" href="pages/icon.png">
+  <link rel="stylesheet" href="pages/style.css">
+</head>
+<body>
+  <div class="aurora" aria-hidden="true">
+    <div class="blob blob-a"></div>
+    <div class="blob blob-b"></div>
+    <div class="blob blob-c"></div>
+  </div>
+
+  <header class="site-header">
+    <div class="brand">
+      <img src="pages/icon.png" alt="TUNAR 图标" width="28" height="28">
+      <span>TUNAR · 吐呐</span>
+    </div>
+    <nav>
+      <a href="#features" data-i18n="nav.features">功能</a>
+      <a href="#platforms" data-i18n="nav.platforms">平台</a>
+      <a href="#architecture" data-i18n="nav.arch">架构</a>
+      <a href="#docs" data-i18n="nav.docs">文档</a>
+      <a href="https://github.com/liuchong/tunar" target="_blank" rel="noopener">GitHub</a>
+      <button id="lang-toggle" type="button" aria-label="Switch language">EN</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <img class="hero-icon" src="pages/icon.png" alt="" width="128" height="128">
+      <h1>TUNAR · 吐呐</h1>
+      <p class="tagline" data-i18n="hero.tagline">随声呼吸，自信调音。</p>
+      <p class="subtitle" data-i18n="hero.subtitle">Rust 共享核心 × 多端原生 UI 的跨平台调音器与节拍器</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="https://github.com/liuchong/tunar" target="_blank" rel="noopener" data-i18n="hero.star">在 GitHub 查看</a>
+        <a class="btn" href="#docs" data-i18n="hero.docs">阅读规格文档</a>
+      </div>
+      <ul class="badges">
+        <li>±0.5 cent</li>
+        <li>YIN + <span data-i18n="hero.badge.harmonic">谐波模型</span></li>
+        <li>Rust core</li>
+        <li>0PL</li>
+      </ul>
+    </section>
+
+    <section id="features" class="section">
+      <h2 data-i18n="features.title">功能</h2>
+      <div class="grid">
+        <article class="card">
+          <h3 data-i18n="features.tuner.title">万能调音</h3>
+          <p data-i18n="features.tuner.body">YIN 加谐波模型精化，音准误差 ±0.5 cent；可调噪声门限、两帧确认与迟滞；极光表盘单指针无残影；固定调 / 首调 / 数字 / 工尺唱名。</p>
+        </article>
+        <article class="card">
+          <h3 data-i18n="features.pro.title">专业分析</h3>
+          <p data-i18n="features.pro.body">音乐 / 全范围 FFT、12 秒音高轨迹、实时波形包络、峰值标注、瀑布历史与和弦检测；12/19/24/31 等分参考音与 A4 校准。</p>
+        </article>
+        <article class="card">
+          <h3 data-i18n="features.instrument.title">乐器调弦</h3>
+          <p data-i18n="features.instrument.body">吉他、尤克里里、古琴调弦预设；竹笛、洞箫、尺八指法表；自动目标匹配或手动锁定弦 / 音。</p>
+        </article>
+        <article class="card">
+          <h3 data-i18n="features.metro.title">节拍器</h3>
+          <p data-i18n="features.metro.body">Rust 引擎样本级定时，多音色可选；摆锤视觉与触觉反馈，与调音器共享音频通路。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="platforms" class="section">
+      <h2 data-i18n="platforms.title">平台</h2>
+      <div class="grid grid-3">
+        <article class="card">
+          <h3>Android</h3>
+          <p data-i18n="platforms.android">Kotlin + Jetpack Compose，UniFFI Kotlin 绑定，全 ABI 原生库。</p>
+        </article>
+        <article class="card">
+          <h3>iOS</h3>
+          <p data-i18n="platforms.ios">SwiftUI 原生应用，XCFramework 静态链接 Rust core。</p>
+        </article>
+        <article class="card">
+          <h3>macOS</h3>
+          <p data-i18n="platforms.macos">macOS 14+ SwiftUI 桌面应用，侧栏五入口布局。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="architecture" class="section">
+      <h2 data-i18n="arch.title">架构</h2>
+      <div class="arch-diagram" role="img" aria-label="Architecture diagram">
+        <div class="arch-row">
+          <span class="arch-node">Android<br><small>Compose</small></span>
+          <span class="arch-node">iOS<br><small>SwiftUI</small></span>
+          <span class="arch-node">macOS<br><small>SwiftUI</small></span>
+        </div>
+        <div class="arch-link" data-i18n="arch.uniffi">UniFFI 绑定（接口即合同）</div>
+        <div class="arch-row">
+          <span class="arch-node arch-core">tunar-core<br><small data-i18n="arch.core">Rust 共享核心：DSP / 唱名 / 预设 / 节拍引擎</small></span>
+        </div>
+      </div>
+      <p class="section-note" data-i18n="arch.note">全部业务逻辑只在 Rust core；原生层仅负责 UI、麦克风采集、节拍器发声与生命周期。音频回调路径零分配、无锁。</p>
+    </section>
+
+    <section id="docs" class="section">
+      <h2 data-i18n="docs.title">文档</h2>
+      <ul class="doc-list">
+        <li><a href="https://github.com/liuchong/tunar/blob/main/docs/spec-core.md" target="_blank" rel="noopener" data-i18n="docs.core">核心规格（UniFFI 合同）</a></li>
+        <li><a href="https://github.com/liuchong/tunar/blob/main/docs/spec-ui.md" target="_blank" rel="noopener" data-i18n="docs.ui">界面规格</a></li>
+        <li><a href="https://github.com/liuchong/tunar/blob/main/docs/spec-audio.md" target="_blank" rel="noopener" data-i18n="docs.audio">音频规格</a></li>
+        <li><a href="https://github.com/liuchong/tunar/blob/main/docs/spec-instruments.md" target="_blank" rel="noopener" data-i18n="docs.inst">乐器规格</a></li>
+        <li><a href="https://github.com/liuchong/tunar/blob/main/docs/design-system.md" target="_blank" rel="noopener" data-i18n="docs.design">Aurora 设计系统</a></li>
+        <li><a href="https://github.com/liuchong/tunar/blob/main/docs/roadmap.md" target="_blank" rel="noopener" data-i18n="docs.roadmap">路线图</a></li>
+        <li><a href="https://github.com/liuchong/tunar/tree/main/docs/en" target="_blank" rel="noopener" data-i18n="docs.en">English specs</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>TUNAR · 吐呐 — <a href="https://github.com/liuchong/tunar/blob/main/LICENSE" target="_blank" rel="noopener">0PL</a> ·
+      <span data-i18n="footer.made">Rust core × native UI</span>
+    </p>
+  </footer>
+
+  <script src="pages/main.js"></script>
+</body>
+</html>
