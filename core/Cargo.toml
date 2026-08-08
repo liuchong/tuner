@@ -1,5 +1,5 @@
 [package]
-name = "tuner-core"
+name = "tunar-core"
 version = "0.1.0"
 edition = "2024"
 description = "跨平台调音器+节拍器共享核心（UniFFI 导出）"

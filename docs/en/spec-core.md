@@ -1,4 +1,4 @@
-# spec-core — shared Rust core (`tuner-core`)
+# spec-core — shared Rust core (`tunar-core`)
 
 The core is the only home for DSP and product rules. Android, iOS, and macOS call it
 through generated UniFFI bindings and must not reproduce pitch, notation, temperament,
@@ -202,7 +202,7 @@ dictionary KeyMode {
   ModeKind mode;
 }
 
-dictionary TunerConfig {
+dictionary TunarConfig {
   f64 sample_rate;
   u32 frame_hop_samples;
   f64 a4_hz;
@@ -214,7 +214,7 @@ dictionary TunerConfig {
 
 enum SignalState { Quiet, Acquiring, Tracking, Holding }
 
-dictionary TunerEvent {
+dictionary TunarEvent {
   f64 freq_hz;
   string note_name;
   i32 midi;
@@ -235,7 +235,7 @@ dictionary Partial {
 }
 
 dictionary AnalysisFrame {
-  TunerEvent? tuner;
+  TunarEvent? tuner;
   sequence<f32> spectrum_db;
   sequence<f32> wide_spectrum_db;
   f64 wide_spectrum_max_hz;
@@ -259,9 +259,9 @@ dictionary ReferenceTone {
   f64 cents_from_note;
 }
 
-interface TunerEngine {
-  constructor(TunerConfig config);
-  TunerEvent? feed(sequence<f32> pcm);
+interface TunarEngine {
+  constructor(TunarConfig config);
+  TunarEvent? feed(sequence<f32> pcm);
   AnalysisFrame analyze(sequence<f32> pcm);
   void set_a4(f64 hz);
   void set_solfege(SolfegeSystem system, KeyMode key);

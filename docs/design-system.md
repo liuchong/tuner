@@ -239,11 +239,11 @@ macOS 使用 200–240pt 侧栏承载同样五项，选中项使用 `accent` 12%
 
 | 概念 | Android (Compose) | iOS/macOS (SwiftUI) |
 |---|---|---|
-| 色彩 | `TunerColors` | Asset Catalog 同名 |
-| 字体 | `TunerTypography` | `Font.system(...).monospacedDigit()` |
+| 色彩 | `TunarColors` | Asset Catalog 同名 |
+| 字体 | `TunarTypography` | `Font.system(...).monospacedDigit()` |
 | 极光 | Canvas 径向渐变 + `rememberInfiniteTransition` | `RadialGradient` + `TimelineView` |
 | 指针跟随 | `spring(0.72f, 800f)` | `.easeOut(duration: 0.05)` |
 | BottomSheet | `ModalBottomSheet` | `.sheet` |
 | 触觉 | `performHapticFeedback` | iOS `UIImpactFeedbackGenerator`；macOS 静默适配 |
 
-Android 落点：`ui/theme/TunerTheme.kt`、`ui/common/AuroraBackground.kt`、`ui/tuner/TunerDial.kt`、`ui/tuner/PitchRibbon.kt`、`ui/tuner/KeySelectorSheet.kt`、`ui/metronome/Pendulum.kt`、`ui/common/StatusChip.kt`、`ui/common/Haptics.kt`。
+Android 落点：`ui/theme/Theme.kt`（`TunarTheme`）、`ui/common/AuroraBackground.kt`、`ui/tuner/TunerDial.kt`、`ui/tuner/PitchRibbon.kt`、`ui/tuner/KeySelectorSheet.kt`、`ui/metronome/Pendulum.kt`、`ui/common/StatusChip.kt`、`ui/common/Haptics.kt`。

@@ -72,7 +72,7 @@ scripts/build-core-ios.sh
 
 # iOS 工程与模拟器测试
 cd ios && xcodegen generate
-xcodebuild -scheme Tuner -destination 'platform=iOS Simulator,name=<模拟器名称>' test
+xcodebuild -scheme Tunar -destination 'platform=iOS Simulator,name=<模拟器名称>' test
 
 # macOS 原生应用与测试
 cd ../macos && xcodegen generate

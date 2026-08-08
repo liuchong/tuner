@@ -14,7 +14,7 @@
 ## Compose 规范
 
 - UI 状态：ViewModel + StateFlow，Compose 只 collect，不做计算。
-- 指针/闪拍动画用 `Animatable`/逐帧 `withFrameNanos`，与 core 的 TunerEvent/TickInfo 对齐。
+- 指针/闪拍动画用 `Animatable`/逐帧 `withFrameNanos`，与 core 的 TunarEvent/TickInfo 对齐。
 - 面板行为以 `docs/spec-ui.md` 为准；改动行为必须同步改 spec。
 
 ## 构建

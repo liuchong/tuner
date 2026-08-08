@@ -1,0 +1,696 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0AFB28D6C0941304AE0D6973 /* InstrumentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82608678B39C9404B471FA5B /* InstrumentViewModel.swift */; };
+		0DBEB67C2EF8DE8122AC3715 /* TuningForkViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A8BDCA645F0E6D14AA1EA45 /* TuningForkViewModel.swift */; };
+		1289729D4FA6D99126BC7A27 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F63A6A6A519EE7DC93D96B0 /* SettingsStore.swift */; };
+		1293F517612EE09B1125BC63 /* ReferenceTonePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53FB4272D26DFC69A3BF9085 /* ReferenceTonePlayer.swift */; };
+		13318BF65390B9299C781D5B /* TickSounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FDD7927F276C8951B4CF29B /* TickSounds.swift */; };
+		147587438EEA152CB26D0046 /* SpectrumHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60B7BDEE77FDFD3B6F053103 /* SpectrumHistoryTests.swift */; };
+		258B7EC1F9B918ABD5AA1A3A /* SpectrumBand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060FED0B09D67D0CC3352F38 /* SpectrumBand.swift */; };
+		2C92904D4E876BB99AE80704 /* TickSoundsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AA32CA63FD30DDC525E44C9 /* TickSoundsTests.swift */; };
+		3824E3FCD5279AC87BB14F2A /* TunerViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B54A3D07C53BFAD8DE9DB9 /* TunerViewModelTests.swift */; };
+		383E3B6ED03EBD99B4679A8D /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = F55E5EFF5DB28A138D996D95 /* Haptics.swift */; };
+		39EBF2C7ABDEA849A33E5EBB /* MetronomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDF0A246AA60BA66980BAAC6 /* MetronomeScreen.swift */; };
+		3DC3B7F59EC1FF75C8644481 /* tunar_core.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7D4D2FA10DFD0DF4D5D654 /* tunar_core.swift */; };
+		41E7198841EDBA08895B427B /* TuningForkViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B89CFB630627746E0C74931 /* TuningForkViewModelTests.swift */; };
+		456E3369E08164E810D97588 /* StatusChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EA1A9237C84874DC584F84A /* StatusChip.swift */; };
+		46337A9D0BF0CC91829EABED /* AudioCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35A23066687846D1D465817F /* AudioCapture.swift */; };
+		47ECD4734248B81D9601B05B /* TunerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3680EE82BCF51ACBB763E31 /* TunerViewModel.swift */; };
+		5EFC792A9E1FA8002887349D /* SelectorPanels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B180E2A43A7F63936085C017 /* SelectorPanels.swift */; };
+		6074AD7368A9F2FAEDF8F97F /* MetronomePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 410386C31FC6732CE99D50A8 /* MetronomePlayer.swift */; };
+		6FE734D32DB700C9550E4EB2 /* InstrumentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6694B0C7D94D9F2B798F7085 /* InstrumentView.swift */; };
+		7426CE46ABDCF56E3EBE0277 /* MetronomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CA7907548222D08D5D4174 /* MetronomeView.swift */; };
+		7939D9CC8719F3FABC62B334 /* tunar_core.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 45E4F50426C738EB1EB7B0F3 /* tunar_core.xcframework */; };
+		7E0D61AE44E448F1348B44A5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5756E2D68F6C98E1883F9AEE /* Assets.xcassets */; };
+		8066ABC664AB2B8C80DE48DD /* SpectrumHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FB3D180829FA67F05BCA2E /* SpectrumHistory.swift */; };
+		8B8B370DEAC0A97108FBA622 /* MetronomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF56AF37FD23E36D8DD12075 /* MetronomeViewModel.swift */; };
+		98CF36ED4A65C9329ACC23BA /* TunerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F03A77AFFF6476A89BFCC36 /* TunerView.swift */; };
+		A938797549BE07A767FAB2C9 /* AuroraBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = E12EAF717746A095462308AD /* AuroraBackground.swift */; };
+		A971D98EDDA7D12A96D0A494 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD41853BA666BF1EC65B1446 /* SettingsView.swift */; };
+		AC1231B3CC621A99180F2FE2 /* CaptureLifecycleGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DAD30A65A66031BCA9C2CA0 /* CaptureLifecycleGateTests.swift */; };
+		B329FAB780F3660524CFD3C1 /* ProfessionalSpectrumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B462718CA8B3EF860C78B2 /* ProfessionalSpectrumView.swift */; };
+		BA973CF1CF06954DFCD00944 /* TunarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF87153133A9935D84F5E37A /* TunarApp.swift */; };
+		BE460A959BB9C8DC195E889A /* TunarAtomics.c in Sources */ = {isa = PBXBuildFile; fileRef = BF13DD700491A454BF8E952B /* TunarAtomics.c */; };
+		C602CDB5737720D69B32301E /* SpectrumPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7F6A5C20EDCCF1AFC89D61 /* SpectrumPresentationTests.swift */; };
+		C7FF38C30F149C146B6F5CDB /* EngineBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F0DF87DD7B7DB86D216346 /* EngineBridge.swift */; };
+		D201D348F6A6D8E45D151849 /* CaptureFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0718B48422CEB11668F98497 /* CaptureFormatTests.swift */; };
+		D7F0DF74F345BBF3880D8245 /* Lumen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B82EFC12C5DDB7ED28322F3A /* Lumen.swift */; };
+		DB63F11D6A65349747AB2D23 /* SpectrumPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B8257CD3F12D9D126FF4A07 /* SpectrumPresentation.swift */; };
+		DC6B32DF1A4244BB005F98A3 /* AudioFrameRingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A477CAB0ACC668399ED8CEE5 /* AudioFrameRingTests.swift */; };
+		DEC41252A4239899523BCE6B /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = EC86E8C8966C6F01CFC7D48E /* InfoPlist.strings */; };
+		EB3BE87EED824CDED468CAF4 /* MetronomeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347E89B91A922FF9B9440348 /* MetronomeViewModelTests.swift */; };
+		F45D8A250702BE1D3D549AF0 /* HaloDial.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8830AFC8D040A74A747D197 /* HaloDial.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		92DCFF76F10E744EE2F021E4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E0C99FA995E117C32C73B04D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C784ADB05D5590C89C80C593;
+			remoteInfo = Tunar;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		060FED0B09D67D0CC3352F38 /* SpectrumBand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumBand.swift; sourceTree = "<group>"; };
+		0718B48422CEB11668F98497 /* CaptureFormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureFormatTests.swift; sourceTree = "<group>"; };
+		0DAD30A65A66031BCA9C2CA0 /* CaptureLifecycleGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureLifecycleGateTests.swift; sourceTree = "<group>"; };
+		0F03A77AFFF6476A89BFCC36 /* TunerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerView.swift; sourceTree = "<group>"; };
+		1394B392DD061466D7F50AF9 /* Tunar-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tunar-Bridging-Header.h"; sourceTree = "<group>"; };
+		23FB3D180829FA67F05BCA2E /* SpectrumHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumHistory.swift; sourceTree = "<group>"; };
+		30CA7907548222D08D5D4174 /* MetronomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeView.swift; sourceTree = "<group>"; };
+		310F0123938040837D6F1C04 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		347E89B91A922FF9B9440348 /* MetronomeViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeViewModelTests.swift; sourceTree = "<group>"; };
+		35A23066687846D1D465817F /* AudioCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCapture.swift; sourceTree = "<group>"; };
+		410386C31FC6732CE99D50A8 /* MetronomePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomePlayer.swift; sourceTree = "<group>"; };
+		45E4F50426C738EB1EB7B0F3 /* tunar_core.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = tunar_core.xcframework; path = TunarCore/tunar_core.xcframework; sourceTree = "<group>"; };
+		4B89CFB630627746E0C74931 /* TuningForkViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TuningForkViewModelTests.swift; sourceTree = "<group>"; };
+		4EF36FED7F5370B8FC60688A /* TunarAtomics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TunarAtomics.h; sourceTree = "<group>"; };
+		53FB4272D26DFC69A3BF9085 /* ReferenceTonePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferenceTonePlayer.swift; sourceTree = "<group>"; };
+		5756E2D68F6C98E1883F9AEE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		60B7BDEE77FDFD3B6F053103 /* SpectrumHistoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumHistoryTests.swift; sourceTree = "<group>"; };
+		6694B0C7D94D9F2B798F7085 /* InstrumentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentView.swift; sourceTree = "<group>"; };
+		6A8BDCA645F0E6D14AA1EA45 /* TuningForkViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TuningForkViewModel.swift; sourceTree = "<group>"; };
+		6B8257CD3F12D9D126FF4A07 /* SpectrumPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumPresentation.swift; sourceTree = "<group>"; };
+		7EA1A9237C84874DC584F84A /* StatusChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusChip.swift; sourceTree = "<group>"; };
+		82608678B39C9404B471FA5B /* InstrumentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentViewModel.swift; sourceTree = "<group>"; };
+		83B462718CA8B3EF860C78B2 /* ProfessionalSpectrumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfessionalSpectrumView.swift; sourceTree = "<group>"; };
+		8E7F6A5C20EDCCF1AFC89D61 /* SpectrumPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumPresentationTests.swift; sourceTree = "<group>"; };
+		92022D4B838CAD8D1AB0520C /* Tunar.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Tunar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		96F0DF87DD7B7DB86D216346 /* EngineBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineBridge.swift; sourceTree = "<group>"; };
+		9AA32CA63FD30DDC525E44C9 /* TickSoundsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TickSoundsTests.swift; sourceTree = "<group>"; };
+		9D63D7AB975691156A65A66B /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		9F63A6A6A519EE7DC93D96B0 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		9FDD7927F276C8951B4CF29B /* TickSounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TickSounds.swift; sourceTree = "<group>"; };
+		A477CAB0ACC668399ED8CEE5 /* AudioFrameRingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFrameRingTests.swift; sourceTree = "<group>"; };
+		AF56AF37FD23E36D8DD12075 /* MetronomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeViewModel.swift; sourceTree = "<group>"; };
+		B0E4F11CFC4F7AC6CF224332 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		B180E2A43A7F63936085C017 /* SelectorPanels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectorPanels.swift; sourceTree = "<group>"; };
+		B82EFC12C5DDB7ED28322F3A /* Lumen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lumen.swift; sourceTree = "<group>"; };
+		B8830AFC8D040A74A747D197 /* HaloDial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HaloDial.swift; sourceTree = "<group>"; };
+		BA7D4D2FA10DFD0DF4D5D654 /* tunar_core.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tunar_core.swift; sourceTree = "<group>"; };
+		BB35644DBFB86E14939A394E /* TunarTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TunarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD41853BA666BF1EC65B1446 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		BF13DD700491A454BF8E952B /* TunarAtomics.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = TunarAtomics.c; sourceTree = "<group>"; };
+		C3680EE82BCF51ACBB763E31 /* TunerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerViewModel.swift; sourceTree = "<group>"; };
+		CDF0A246AA60BA66980BAAC6 /* MetronomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeScreen.swift; sourceTree = "<group>"; };
+		D2B54A3D07C53BFAD8DE9DB9 /* TunerViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerViewModelTests.swift; sourceTree = "<group>"; };
+		E12EAF717746A095462308AD /* AuroraBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraBackground.swift; sourceTree = "<group>"; };
+		EF87153133A9935D84F5E37A /* TunarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunarApp.swift; sourceTree = "<group>"; };
+		F55E5EFF5DB28A138D996D95 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F08AD4BB675BDE2801EE9882 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7939D9CC8719F3FABC62B334 /* tunar_core.xcframework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		13F7CE035D777ACA869133FF = {
+			isa = PBXGroup;
+			children = (
+				44EECFC226373935B54ABB47 /* Tunar */,
+				E4B9CD03AC52B6AD1E5DEB10 /* TunarCore */,
+				849F8BCA38E3AABC38CD038D /* TunarTests */,
+				3639366E103017B2CCEDAFC7 /* Frameworks */,
+				737D9615E4C0D42500AE0CE2 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		18BC37A7209A1380239D6E3A /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				B82EFC12C5DDB7ED28322F3A /* Lumen.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		27C8A26136BA9DE94FE7FC61 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				9F63A6A6A519EE7DC93D96B0 /* SettingsStore.swift */,
+				BD41853BA666BF1EC65B1446 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		3639366E103017B2CCEDAFC7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				45E4F50426C738EB1EB7B0F3 /* tunar_core.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		44EECFC226373935B54ABB47 /* Tunar */ = {
+			isa = PBXGroup;
+			children = (
+				5756E2D68F6C98E1883F9AEE /* Assets.xcassets */,
+				310F0123938040837D6F1C04 /* Info.plist */,
+				8B1837D9E6DE3F567D0F86FA /* App */,
+				AA4F38DF9E5432AD36BB908C /* Audio */,
+				85F40616851370F581E3E0E6 /* Bridge */,
+				B4CD35DC59626EE6FB7E2F23 /* Common */,
+				EC86E8C8966C6F01CFC7D48E /* InfoPlist.strings */,
+				CFF4FEF4225D51CB75A3B200 /* Instrument */,
+				77D7FABD2C78D9737547985A /* Metronome */,
+				27C8A26136BA9DE94FE7FC61 /* Settings */,
+				18BC37A7209A1380239D6E3A /* Theme */,
+				D3CCF1D45D397920B84FC892 /* Tuner */,
+			);
+			path = Tunar;
+			sourceTree = "<group>";
+		};
+		737D9615E4C0D42500AE0CE2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				92022D4B838CAD8D1AB0520C /* Tunar.app */,
+				BB35644DBFB86E14939A394E /* TunarTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		77D7FABD2C78D9737547985A /* Metronome */ = {
+			isa = PBXGroup;
+			children = (
+				CDF0A246AA60BA66980BAAC6 /* MetronomeScreen.swift */,
+				30CA7907548222D08D5D4174 /* MetronomeView.swift */,
+				AF56AF37FD23E36D8DD12075 /* MetronomeViewModel.swift */,
+			);
+			path = Metronome;
+			sourceTree = "<group>";
+		};
+		849F8BCA38E3AABC38CD038D /* TunarTests */ = {
+			isa = PBXGroup;
+			children = (
+				A477CAB0ACC668399ED8CEE5 /* AudioFrameRingTests.swift */,
+				0718B48422CEB11668F98497 /* CaptureFormatTests.swift */,
+				0DAD30A65A66031BCA9C2CA0 /* CaptureLifecycleGateTests.swift */,
+				347E89B91A922FF9B9440348 /* MetronomeViewModelTests.swift */,
+				60B7BDEE77FDFD3B6F053103 /* SpectrumHistoryTests.swift */,
+				8E7F6A5C20EDCCF1AFC89D61 /* SpectrumPresentationTests.swift */,
+				9AA32CA63FD30DDC525E44C9 /* TickSoundsTests.swift */,
+				D2B54A3D07C53BFAD8DE9DB9 /* TunerViewModelTests.swift */,
+				4B89CFB630627746E0C74931 /* TuningForkViewModelTests.swift */,
+			);
+			path = TunarTests;
+			sourceTree = "<group>";
+		};
+		85F40616851370F581E3E0E6 /* Bridge */ = {
+			isa = PBXGroup;
+			children = (
+				96F0DF87DD7B7DB86D216346 /* EngineBridge.swift */,
+				9FDD7927F276C8951B4CF29B /* TickSounds.swift */,
+				1394B392DD061466D7F50AF9 /* Tunar-Bridging-Header.h */,
+				BF13DD700491A454BF8E952B /* TunarAtomics.c */,
+				4EF36FED7F5370B8FC60688A /* TunarAtomics.h */,
+			);
+			path = Bridge;
+			sourceTree = "<group>";
+		};
+		8B1837D9E6DE3F567D0F86FA /* App */ = {
+			isa = PBXGroup;
+			children = (
+				EF87153133A9935D84F5E37A /* TunarApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		AA4F38DF9E5432AD36BB908C /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				35A23066687846D1D465817F /* AudioCapture.swift */,
+				410386C31FC6732CE99D50A8 /* MetronomePlayer.swift */,
+				53FB4272D26DFC69A3BF9085 /* ReferenceTonePlayer.swift */,
+			);
+			path = Audio;
+			sourceTree = "<group>";
+		};
+		B4CD35DC59626EE6FB7E2F23 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				E12EAF717746A095462308AD /* AuroraBackground.swift */,
+				F55E5EFF5DB28A138D996D95 /* Haptics.swift */,
+				7EA1A9237C84874DC584F84A /* StatusChip.swift */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		CFF4FEF4225D51CB75A3B200 /* Instrument */ = {
+			isa = PBXGroup;
+			children = (
+				6694B0C7D94D9F2B798F7085 /* InstrumentView.swift */,
+				82608678B39C9404B471FA5B /* InstrumentViewModel.swift */,
+			);
+			path = Instrument;
+			sourceTree = "<group>";
+		};
+		D3CCF1D45D397920B84FC892 /* Tuner */ = {
+			isa = PBXGroup;
+			children = (
+				B8830AFC8D040A74A747D197 /* HaloDial.swift */,
+				83B462718CA8B3EF860C78B2 /* ProfessionalSpectrumView.swift */,
+				B180E2A43A7F63936085C017 /* SelectorPanels.swift */,
+				060FED0B09D67D0CC3352F38 /* SpectrumBand.swift */,
+				23FB3D180829FA67F05BCA2E /* SpectrumHistory.swift */,
+				6B8257CD3F12D9D126FF4A07 /* SpectrumPresentation.swift */,
+				0F03A77AFFF6476A89BFCC36 /* TunerView.swift */,
+				C3680EE82BCF51ACBB763E31 /* TunerViewModel.swift */,
+				6A8BDCA645F0E6D14AA1EA45 /* TuningForkViewModel.swift */,
+			);
+			path = Tuner;
+			sourceTree = "<group>";
+		};
+		E4B9CD03AC52B6AD1E5DEB10 /* TunarCore */ = {
+			isa = PBXGroup;
+			children = (
+				BA7D4D2FA10DFD0DF4D5D654 /* tunar_core.swift */,
+			);
+			name = TunarCore;
+			path = TunarCore/Sources/TunarCore;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		4357A2E98C17ED115DAF4305 /* TunarTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 275F2DB4B69563E1396FD80E /* Build configuration list for PBXNativeTarget "TunarTests" */;
+			buildPhases = (
+				0B0565759EC4106F1C9D4DA5 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				831C91ABAFD3E1034D398B8F /* PBXTargetDependency */,
+			);
+			name = TunarTests;
+			packageProductDependencies = (
+			);
+			productName = TunarTests;
+			productReference = BB35644DBFB86E14939A394E /* TunarTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		C784ADB05D5590C89C80C593 /* Tunar */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CD90745201BED74572B68E25 /* Build configuration list for PBXNativeTarget "Tunar" */;
+			buildPhases = (
+				B8DE6A013959A1DFFD16B928 /* Sources */,
+				B63B60AC2FA4AB51B592D14A /* Resources */,
+				F08AD4BB675BDE2801EE9882 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Tunar;
+			packageProductDependencies = (
+			);
+			productName = Tunar;
+			productReference = 92022D4B838CAD8D1AB0520C /* Tunar.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E0C99FA995E117C32C73B04D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					C784ADB05D5590C89C80C593 = {
+						DevelopmentTeam = DXBQ96GC5Q;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 42F0D80A4F2FE0ED93A52F04 /* Build configuration list for PBXProject "Tunar" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+				"zh-Hans",
+			);
+			mainGroup = 13F7CE035D777ACA869133FF;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 737D9615E4C0D42500AE0CE2 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C784ADB05D5590C89C80C593 /* Tunar */,
+				4357A2E98C17ED115DAF4305 /* TunarTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B63B60AC2FA4AB51B592D14A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7E0D61AE44E448F1348B44A5 /* Assets.xcassets in Resources */,
+				DEC41252A4239899523BCE6B /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0B0565759EC4106F1C9D4DA5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DC6B32DF1A4244BB005F98A3 /* AudioFrameRingTests.swift in Sources */,
+				D201D348F6A6D8E45D151849 /* CaptureFormatTests.swift in Sources */,
+				AC1231B3CC621A99180F2FE2 /* CaptureLifecycleGateTests.swift in Sources */,
+				EB3BE87EED824CDED468CAF4 /* MetronomeViewModelTests.swift in Sources */,
+				147587438EEA152CB26D0046 /* SpectrumHistoryTests.swift in Sources */,
+				C602CDB5737720D69B32301E /* SpectrumPresentationTests.swift in Sources */,
+				2C92904D4E876BB99AE80704 /* TickSoundsTests.swift in Sources */,
+				3824E3FCD5279AC87BB14F2A /* TunerViewModelTests.swift in Sources */,
+				41E7198841EDBA08895B427B /* TuningForkViewModelTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B8DE6A013959A1DFFD16B928 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46337A9D0BF0CC91829EABED /* AudioCapture.swift in Sources */,
+				A938797549BE07A767FAB2C9 /* AuroraBackground.swift in Sources */,
+				C7FF38C30F149C146B6F5CDB /* EngineBridge.swift in Sources */,
+				F45D8A250702BE1D3D549AF0 /* HaloDial.swift in Sources */,
+				383E3B6ED03EBD99B4679A8D /* Haptics.swift in Sources */,
+				6FE734D32DB700C9550E4EB2 /* InstrumentView.swift in Sources */,
+				0AFB28D6C0941304AE0D6973 /* InstrumentViewModel.swift in Sources */,
+				D7F0DF74F345BBF3880D8245 /* Lumen.swift in Sources */,
+				6074AD7368A9F2FAEDF8F97F /* MetronomePlayer.swift in Sources */,
+				39EBF2C7ABDEA849A33E5EBB /* MetronomeScreen.swift in Sources */,
+				7426CE46ABDCF56E3EBE0277 /* MetronomeView.swift in Sources */,
+				8B8B370DEAC0A97108FBA622 /* MetronomeViewModel.swift in Sources */,
+				B329FAB780F3660524CFD3C1 /* ProfessionalSpectrumView.swift in Sources */,
+				1293F517612EE09B1125BC63 /* ReferenceTonePlayer.swift in Sources */,
+				5EFC792A9E1FA8002887349D /* SelectorPanels.swift in Sources */,
+				1289729D4FA6D99126BC7A27 /* SettingsStore.swift in Sources */,
+				A971D98EDDA7D12A96D0A494 /* SettingsView.swift in Sources */,
+				258B7EC1F9B918ABD5AA1A3A /* SpectrumBand.swift in Sources */,
+				8066ABC664AB2B8C80DE48DD /* SpectrumHistory.swift in Sources */,
+				DB63F11D6A65349747AB2D23 /* SpectrumPresentation.swift in Sources */,
+				456E3369E08164E810D97588 /* StatusChip.swift in Sources */,
+				13318BF65390B9299C781D5B /* TickSounds.swift in Sources */,
+				BA973CF1CF06954DFCD00944 /* TunarApp.swift in Sources */,
+				BE460A959BB9C8DC195E889A /* TunarAtomics.c in Sources */,
+				98CF36ED4A65C9329ACC23BA /* TunerView.swift in Sources */,
+				47ECD4734248B81D9601B05B /* TunerViewModel.swift in Sources */,
+				0DBEB67C2EF8DE8122AC3715 /* TuningForkViewModel.swift in Sources */,
+				3DC3B7F59EC1FF75C8644481 /* tunar_core.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		831C91ABAFD3E1034D398B8F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C784ADB05D5590C89C80C593 /* Tunar */;
+			targetProxy = 92DCFF76F10E744EE2F021E4 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		EC86E8C8966C6F01CFC7D48E /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B0E4F11CFC4F7AC6CF224332 /* en */,
+				9D63D7AB975691156A65A66B /* zh-Hans */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		00BB5EEF8302D3C347639B08 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = DXBQ96GC5Q;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"TunarCore\"",
+				);
+				INFOPLIST_FILE = Tunar/Info.plist;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				OTHER_SWIFT_FLAGS = "-Xcc -fmodule-map-file=$(SRCROOT)/TunarCore/Sources/TunarCore/tunar_coreFFI.modulemap";
+				PRODUCT_BUNDLE_IDENTIFIER = com.liuchong.tunar;
+				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "Tunar/Bridge/Tunar-Bridging-Header.h";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		2A6B36710AB374D98FD91E14 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		79EDE02F4E8207E6640E8D7B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				OTHER_SWIFT_FLAGS = "-Xcc -fmodule-map-file=$(SRCROOT)/TunarCore/Sources/TunarCore/tunar_coreFFI.modulemap";
+				PRODUCT_BUNDLE_IDENTIFIER = com.liuchong.tunar.TunarTests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tunar.app/Tunar";
+			};
+			name = Release;
+		};
+		87882580DF5FEF21084D0FFC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				OTHER_SWIFT_FLAGS = "-Xcc -fmodule-map-file=$(SRCROOT)/TunarCore/Sources/TunarCore/tunar_coreFFI.modulemap";
+				PRODUCT_BUNDLE_IDENTIFIER = com.liuchong.tunar.TunarTests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tunar.app/Tunar";
+			};
+			name = Debug;
+		};
+		AF80CB597FF2386B26406553 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = DXBQ96GC5Q;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"TunarCore\"",
+				);
+				INFOPLIST_FILE = Tunar/Info.plist;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				OTHER_SWIFT_FLAGS = "-Xcc -fmodule-map-file=$(SRCROOT)/TunarCore/Sources/TunarCore/tunar_coreFFI.modulemap";
+				PRODUCT_BUNDLE_IDENTIFIER = com.liuchong.tunar;
+				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "Tunar/Bridge/Tunar-Bridging-Header.h";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		EE6B059EC28236B09215C884 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		275F2DB4B69563E1396FD80E /* Build configuration list for PBXNativeTarget "TunarTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				87882580DF5FEF21084D0FFC /* Debug */,
+				79EDE02F4E8207E6640E8D7B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		42F0D80A4F2FE0ED93A52F04 /* Build configuration list for PBXProject "Tunar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2A6B36710AB374D98FD91E14 /* Debug */,
+				EE6B059EC28236B09215C884 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		CD90745201BED74572B68E25 /* Build configuration list for PBXNativeTarget "Tunar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AF80CB597FF2386B26406553 /* Debug */,
+				00BB5EEF8302D3C347639B08 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E0C99FA995E117C32C73B04D /* Project object */;
+}

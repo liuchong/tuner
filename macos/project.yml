@@ -1,6 +1,6 @@
 name: TunarMac
 options:
-  bundleIdPrefix: com.liuchong.tuner
+  bundleIdPrefix: com.liuchong.tunar
   deploymentTarget:
     macOS: "14.0"
 targets:
@@ -9,24 +9,24 @@ targets:
     platform: macOS
     sources:
       - TunarMac
-      - path: ../ios/TunerCore/Sources/TunerCore/tuner_core.swift
-      - path: ../ios/Tuner/Bridge/EngineBridge.swift
-      - path: ../ios/Tuner/Bridge/TickSounds.swift
-      - path: ../ios/Tuner/Bridge/TunerAtomics.c
-      - path: ../ios/Tuner/Bridge/TunerAtomics.h
-      - path: ../ios/Tuner/Audio/AudioCapture.swift
-      - path: ../ios/Tuner/Audio/MetronomePlayer.swift
-      - path: ../ios/Tuner/Audio/ReferenceTonePlayer.swift
-      - path: ../ios/Tuner/Common/Haptics.swift
-      - path: ../ios/Tuner/Settings/SettingsStore.swift
-      - path: ../ios/Tuner/Tuner/TunerViewModel.swift
-      - path: ../ios/Tuner/Tuner/TuningForkViewModel.swift
-      - path: ../ios/Tuner/Tuner/SpectrumHistory.swift
-      - path: ../ios/Tuner/Tuner/SpectrumPresentation.swift
-      - path: ../ios/Tuner/Instrument/InstrumentViewModel.swift
-      - path: ../ios/Tuner/Metronome/MetronomeViewModel.swift
+      - path: ../ios/TunarCore/Sources/TunarCore/tunar_core.swift
+      - path: ../ios/Tunar/Bridge/EngineBridge.swift
+      - path: ../ios/Tunar/Bridge/TickSounds.swift
+      - path: ../ios/Tunar/Bridge/TunarAtomics.c
+      - path: ../ios/Tunar/Bridge/TunarAtomics.h
+      - path: ../ios/Tunar/Audio/AudioCapture.swift
+      - path: ../ios/Tunar/Audio/MetronomePlayer.swift
+      - path: ../ios/Tunar/Audio/ReferenceTonePlayer.swift
+      - path: ../ios/Tunar/Common/Haptics.swift
+      - path: ../ios/Tunar/Settings/SettingsStore.swift
+      - path: ../ios/Tunar/Tuner/TunerViewModel.swift
+      - path: ../ios/Tunar/Tuner/TuningForkViewModel.swift
+      - path: ../ios/Tunar/Tuner/SpectrumHistory.swift
+      - path: ../ios/Tunar/Tuner/SpectrumPresentation.swift
+      - path: ../ios/Tunar/Instrument/InstrumentViewModel.swift
+      - path: ../ios/Tunar/Metronome/MetronomeViewModel.swift
     dependencies:
-      - framework: ../ios/TunerCore/tuner_core.xcframework
+      - framework: ../ios/TunarCore/tunar_core.xcframework
         embed: false
     info:
       path: TunarMac/Info.plist
@@ -36,7 +36,7 @@ targets:
         LSApplicationCategoryType: public.app-category.music
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.liuchong.tuner.macos
+        PRODUCT_BUNDLE_IDENTIFIER: com.liuchong.tunar.macos
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: DXBQ96GC5Q
         SWIFT_VERSION: "6.0"
@@ -44,7 +44,7 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ENABLE_USER_SCRIPT_SANDBOXING: NO
         CODE_SIGN_ENTITLEMENTS: TunarMac/TunarMac.entitlements
-        OTHER_SWIFT_FLAGS: -Xcc -fmodule-map-file=$(SRCROOT)/../ios/TunerCore/Sources/TunerCore/tuner_coreFFI.modulemap
+        OTHER_SWIFT_FLAGS: -Xcc -fmodule-map-file=$(SRCROOT)/../ios/TunarCore/Sources/TunarCore/tunar_coreFFI.modulemap
   TunarMacTests:
     type: bundle.unit-test
     platform: macOS
@@ -57,4 +57,4 @@ targets:
         SWIFT_VERSION: "6.0"
         GENERATE_INFOPLIST_FILE: YES
         TEST_HOST: $(BUILT_PRODUCTS_DIR)/TunarMac.app/Contents/MacOS/TunarMac
-        OTHER_SWIFT_FLAGS: -Xcc -fmodule-map-file=$(SRCROOT)/../ios/TunerCore/Sources/TunerCore/tuner_coreFFI.modulemap
+        OTHER_SWIFT_FLAGS: -Xcc -fmodule-map-file=$(SRCROOT)/../ios/TunarCore/Sources/TunarCore/tunar_coreFFI.modulemap
