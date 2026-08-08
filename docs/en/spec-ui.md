@@ -127,3 +127,23 @@ single-needle presentation. Native timers may not clear the target or needle.
 Both themes are complete. Permission denial, missing input, audio route change, and
 interruption degrade without a crash. Behavior changes update this file in English and
 `../spec-ui.md` in Chinese; visual changes update both design-system files.
+
+## 7. macOS 14+ desktop behavior
+
+- The desktop app keeps the complete Tuner, Instruments, Analysis, Metronome, and
+  Settings destinations but presents them in a `NavigationSplitView` sidebar instead
+  of a mobile bottom tab bar.
+- Selecting the tuner spectrum preview selects the same Analysis sidebar destination.
+  Every destination shares one state graph and `CaptureHub`; no parallel window or
+  analysis session is created.
+- Wide content areas may place tuner data beside its preview and the analysis main plot
+  beside the waterfall. Narrower windows stack them in reading order. A layout breakpoint
+  never resets data, history, or capture lifetime.
+- Window inactivity and navigation release capture subscriptions according to the same
+  generation-token/final-subscriber rules as iOS.
+- The reference-tone chooser uses a desktop overlay or sheet. Dismissal keeps playback
+  running; leaving Tuner or making the window inactive stops it.
+- Microphone denial exposes an explanation and Open System Settings action. Missing
+  input keeps a retryable UI and never crashes.
+- See [macos-native.md](macos-native.md) for the complete state, fallback, and build
+  contract.

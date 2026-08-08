@@ -38,7 +38,7 @@
 
 **⏱ 节拍器**
 - 30–250 BPM，tap 测速，拍号与重音型
-- 机械 click / 电子 beep / 铃声，重弱拍独立音色
+- 十二种常见合成音色，重弱拍独立选择
 - 采样级定时（抖动 < 1ms），前台保活后台续播，经典摆锤动画
 
 ## 🏗 架构
@@ -46,7 +46,7 @@
 ```
 ┌─ android/  Kotlin + Jetpack Compose（首发）
 ├─ ios/        SwiftUI（复用同一 core）
-├─ macos/      SwiftUI（规划中）
+├─ macos/      macOS 14+ SwiftUI 原生桌面应用
 │        │  UniFFI 自动生成绑定
 └─ core/  Rust —— 全部业务逻辑
    YIN 音高检测 · 唱名/调式 · 乐器预设 · 节拍引擎 · FFT 频谱/泛音/和弦 · 律制
@@ -67,10 +67,19 @@ scripts/build-core-android.sh
 # Android 构建与 JVM 单元测试
 cd android && ./gradlew assembleDebug testDebugUnitTest
 
-# iOS 绑定、工程与模拟器测试
+# 生成含 iOS 与通用 macOS slice 的 Apple 绑定
 scripts/build-core-ios.sh
+
+# iOS 工程与模拟器测试
 cd ios && xcodegen generate
 xcodebuild -scheme Tuner -destination 'platform=iOS Simulator,name=<模拟器名称>' test
+
+# macOS 原生应用与测试
+cd ../macos && xcodegen generate
+xcodebuild -project TunarMac.xcodeproj -scheme TunarMac \
+  -destination 'platform=macOS,arch=arm64' test
+xcodebuild -project TunarMac.xcodeproj -scheme TunarMac \
+  -destination 'platform=macOS,arch=x86_64' build
 ```
 
 ## 📚 文档
@@ -84,6 +93,7 @@ xcodebuild -scheme Tuner -destination 'platform=iOS Simulator,name=<模拟器名
 | [docs/spec-ui.md](docs/spec-ui.md) | 面板交互规格 |
 | [docs/spec-audio.md](docs/spec-audio.md) | 音频管线规格 |
 | [docs/design-system.md](docs/design-system.md) | Aurora 设计系统 |
+| [docs/macos-native.md](docs/macos-native.md) | macOS 桌面布局、生命周期与构建合同 |
 | [docs/roadmap.md](docs/roadmap.md) | 里程碑 |
 
 ## 🏷 品牌与兼容性

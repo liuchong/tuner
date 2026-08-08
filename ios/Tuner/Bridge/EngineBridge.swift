@@ -1,6 +1,10 @@
 import Foundation
 // 生成的 tuner_core.swift 直接编译进 App target，类型无需 import。
 
+private func coreCentsBetween(freq: Double, target: Double) -> Double? {
+    centsBetween(freqHz: freq, targetHz: target)
+}
+
 /// 引擎门面协议（业务逻辑全在 Rust core；协议化便于 XCTest mock）。
 
 protocol PitchEngine {
@@ -82,7 +86,7 @@ enum CorePresets {
         listFingeringCharts(instrumentId: instrumentId)
     }
     static func centsBetween(freq: Double, target: Double) -> Double? {
-        Tuner.centsBetween(freqHz: freq, targetHz: target)
+        coreCentsBetween(freq: freq, target: target)
     }
     static func referenceTones(config: TunerConfig) -> [ReferenceTone] {
         UniffiPitchEngine(config: config).listReferenceTones()

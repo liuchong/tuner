@@ -10,7 +10,7 @@ struct TickEvent {
 
 /// 节拍器播放器：AVAudioEngine + PlayerNode，后台队列定时 render 填缓冲。
 /// TickInfo 经 subject 驱动 UI 闪拍（与声音对齐：offset + 在途缓冲换算）。
-final class MetronomePlayer: ObservableObject {
+final class MetronomePlayer: ObservableObject, @unchecked Sendable {
     let ticks = PassthroughSubject<TickEvent, Never>()
 
     private var engine: AVAudioEngine?
@@ -27,10 +27,12 @@ final class MetronomePlayer: ObservableObject {
         guard !isPlaying else { return }
         isPlaying = true
         self.renderEngine = renderEngine
+        #if os(iOS)
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
             try AVAudioSession.sharedInstance().setActive(true)
         } catch { return }
+        #endif
 
         let av = AVAudioEngine()
         let node = AVAudioPlayerNode()
@@ -65,7 +67,7 @@ final class MetronomePlayer: ObservableObject {
             let dst = buf.floatChannelData![0]
             frame.samples.withUnsafeBufferPointer { ptr in
                 if let base = ptr.baseAddress {
-                    dst.assign(from: base, count: Int(chunk))
+                    dst.update(from: base, count: Int(chunk))
                 }
             }
             let nowMs = UInt64(ProcessInfo.processInfo.systemUptime * 1000)

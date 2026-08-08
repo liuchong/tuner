@@ -160,6 +160,10 @@ GuitarTuna（卡通吵闹、广告喧宾夺主）、Fender Tune（平淡无反�
 底部 5 tab（调音 / 乐器 / 频谱 / 节拍器 / 设置），线性图标 1.5dp，选中 `accent`
 填充态；无徽标。
 
+macOS 使用 200–240pt 侧栏承载同样五项，选中项使用 `accent` 12% 背景与强调色图标。
+内容区最小宽度 760pt；宽度 ≥1100pt 时允许相关卡片双列，低于该值按业务阅读顺序单列。
+侧栏切换只做 150ms 交叉淡入，不移动或缩放整页。
+
 ### 6.9 专业版模式（Pro Mode）
 
 - **入口**：通用调音页右上角「PRO」角标按钮（`accent` 描边胶囊，关闭态 `ink/secondary` 描边）+ 设置页同款开关。开启后角标点亮并发微光。
@@ -240,6 +244,6 @@ GuitarTuna（卡通吵闹、广告喧宾夺主）、Fender Tune（平淡无反�
 | 极光 | Canvas 径向渐变 + `rememberInfiniteTransition` | `RadialGradient` + `TimelineView` |
 | 指针跟随 | `spring(0.72f, 800f)` | `.easeOut(duration: 0.05)` |
 | BottomSheet | `ModalBottomSheet` | `.sheet` |
-| 触觉 | `performHapticFeedback` | `UIImpactFeedbackGenerator` |
+| 触觉 | `performHapticFeedback` | iOS `UIImpactFeedbackGenerator`；macOS 静默适配 |
 
 Android 落点：`ui/theme/TunerTheme.kt`、`ui/common/AuroraBackground.kt`、`ui/tuner/TunerDial.kt`、`ui/tuner/PitchRibbon.kt`、`ui/tuner/KeySelectorSheet.kt`、`ui/metronome/Pendulum.kt`、`ui/common/StatusChip.kt`、`ui/common/Haptics.kt`。

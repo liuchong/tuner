@@ -1,4 +1,4 @@
-# spec-audio — 音频管线规格（Android / iOS）
+# spec-audio — 音频管线规格（Android / iOS / macOS）
 
 ## 1. 采集（调音）
 
@@ -56,6 +56,16 @@
 - 专业声音视图沿用同一采集窗口和同一次 core `analyze`；全频段频谱、乐音频谱与波形包络
   随同一个 `AnalysisFrame` 返回。禁止为任一视图新增麦克风、第二次 FFT 或音频回调内历史分配。
 
-## 4. 变更
+## 4. macOS 设备边界
+
+- macOS 14+ 使用 `AVAudioEngine` 输入节点与播放节点，不创建 iOS 专用的 `AVAudioSession`。
+- iOS/macOS 共享预分配 `AudioFrameRing`、分析工作线程、启动令牌和 UniFFI 状态模型；
+  平台条件分支只允许处理音频会话与打开系统设置等设备差异。
+- Rust 分别构建 `aarch64-apple-darwin` 与 `x86_64-apple-darwin` 静态库，再合并为通用
+  macOS slice 加入同一 XCFramework。两种架构必须导出相同 UniFFI 合同。
+- 窗口失活或最后一个采集页面离开时停止麦克风。macOS 本阶段不支持后台持续采集、手动设备
+  路由、录音或导出。
+
+## 5. 变更
 
 任何采样率/缓冲/线程模型调整必须先更新本文件。

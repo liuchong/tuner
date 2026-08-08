@@ -239,6 +239,7 @@ final class CaptureHub: ObservableObject, @unchecked Sendable {
     static let shared = CaptureHub()
 
     @Published private(set) var running = false
+    @Published private(set) var startFailed = false
     let events = PassthroughSubject<AnalysisFrame, Never>()
 
     private let lifecycle = CaptureLifecycleGate()
@@ -253,6 +254,9 @@ final class CaptureHub: ObservableObject, @unchecked Sendable {
 
     func acquire() {
         guard let token = lifecycle.acquire() else { return }
+        DispatchQueue.main.async { [weak self] in
+            self?.startFailed = false
+        }
         startLocked(token: token, initialConfig: config)
     }
 
@@ -275,6 +279,7 @@ final class CaptureHub: ObservableObject, @unchecked Sendable {
     private func setupAndStart(token: Int, initialConfig: TunerConfig) {
         let av = AVAudioEngine()
         let input = av.inputNode
+        #if os(iOS)
         let session = AVAudioSession.sharedInstance()
         do {
             #if targetEnvironment(simulator)
@@ -284,7 +289,11 @@ final class CaptureHub: ObservableObject, @unchecked Sendable {
             #endif
             try session.setPreferredSampleRate(44_100)
             try session.setActive(true)
-        } catch { return }
+        } catch {
+            publishStartFailure(token: token)
+            return
+        }
+        #endif
 
         let format = input.outputFormat(forBus: 0)
         guard isUsableCaptureFormat(
@@ -293,7 +302,10 @@ final class CaptureHub: ObservableObject, @unchecked Sendable {
         ) else {
             // 输入节点没有有效硬件格式时不能用自造格式安装 tap；AVFAudio 会直接抛
             // Objective-C 异常而不是 Swift Error。等待下一次页面获取采集资源时重试。
+            #if os(iOS)
             try? session.setActive(false)
+            #endif
+            publishStartFailure(token: token)
             return
         }
 
@@ -346,6 +358,7 @@ final class CaptureHub: ObservableObject, @unchecked Sendable {
                     self.worker = pending.worker
                     self.audioEngine = pending.audioEngine
                     self.running = true
+                    self.startFailed = false
                 }
                 if !committed {
                     pending.discard()
@@ -353,6 +366,17 @@ final class CaptureHub: ObservableObject, @unchecked Sendable {
             }
         } catch {
             pending.discard()
+            publishStartFailure(token: token)
+        }
+    }
+
+    private func publishStartFailure(token: Int) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            _ = self.lifecycle.commitIfCurrent(token) {
+                self.running = false
+                self.startFailed = true
+            }
         }
     }
 

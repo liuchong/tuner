@@ -1,5 +1,10 @@
 import Foundation
 import SwiftUI
+#if os(iOS)
+import UIKit
+#elseif os(macOS)
+import AppKit
+#endif
 
 /// 主题模式。
 enum ThemeMode: String, CaseIterable {
@@ -70,7 +75,14 @@ final class SettingsStore: ObservableObject {
 
     var effectiveDarkScheme: Bool {
         switch themeMode {
-        case .system: return UITraitCollection.current.userInterfaceStyle == .dark
+        case .system:
+            #if os(iOS)
+            return UITraitCollection.current.userInterfaceStyle == .dark
+            #else
+            return NSApp.effectiveAppearance.bestMatch(
+                from: [.darkAqua, .aqua]
+            ) == .darkAqua
+            #endif
         case .light: return false
         case .dark: return true
         }

@@ -1,4 +1,4 @@
-# spec-audio — audio pipeline (Android / iOS)
+# spec-audio — audio pipeline (Android / iOS / macOS)
 
 ## 1. Capture for tuning and analysis
 
@@ -64,7 +64,20 @@ causes a quiet start failure and session release, followed by retry on the next 
   one core `analyze` result. No view opens a second microphone, performs a second FFT,
   or allocates display history inside the audio callback.
 
-## 5. Change log
+## 5. macOS device boundary
+
+- macOS 14+ uses `AVAudioEngine` input and playback nodes without the iOS-only
+  `AVAudioSession`.
+- iOS and macOS share the preallocated `AudioFrameRing`, analysis worker, startup token,
+  and UniFFI state model. Platform conditions are limited to device/session behavior
+  such as opening System Settings.
+- Rust builds `aarch64-apple-darwin` and `x86_64-apple-darwin`, merges them into one
+  universal macOS slice, and adds it to the same XCFramework. Both architectures export
+  the identical UniFFI contract.
+- The microphone stops when the window is inactive or the final capture section leaves.
+  Background capture, manual device routing, recording, and export are not supported.
+
+## 6. Change log
 
 - 2026-07-20: shared capture cadence and queued-sample visual synchronization.
 - 2026-07-28: twelve cross-platform synthesized metronome timbres.

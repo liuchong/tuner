@@ -1,0 +1,60 @@
+name: TunarMac
+options:
+  bundleIdPrefix: com.liuchong.tuner
+  deploymentTarget:
+    macOS: "14.0"
+targets:
+  TunarMac:
+    type: application
+    platform: macOS
+    sources:
+      - TunarMac
+      - path: ../ios/TunerCore/Sources/TunerCore/tuner_core.swift
+      - path: ../ios/Tuner/Bridge/EngineBridge.swift
+      - path: ../ios/Tuner/Bridge/TickSounds.swift
+      - path: ../ios/Tuner/Bridge/TunerAtomics.c
+      - path: ../ios/Tuner/Bridge/TunerAtomics.h
+      - path: ../ios/Tuner/Audio/AudioCapture.swift
+      - path: ../ios/Tuner/Audio/MetronomePlayer.swift
+      - path: ../ios/Tuner/Audio/ReferenceTonePlayer.swift
+      - path: ../ios/Tuner/Common/Haptics.swift
+      - path: ../ios/Tuner/Settings/SettingsStore.swift
+      - path: ../ios/Tuner/Tuner/TunerViewModel.swift
+      - path: ../ios/Tuner/Tuner/TuningForkViewModel.swift
+      - path: ../ios/Tuner/Tuner/SpectrumHistory.swift
+      - path: ../ios/Tuner/Tuner/SpectrumPresentation.swift
+      - path: ../ios/Tuner/Instrument/InstrumentViewModel.swift
+      - path: ../ios/Tuner/Metronome/MetronomeViewModel.swift
+    dependencies:
+      - framework: ../ios/TunerCore/tuner_core.xcframework
+        embed: false
+    info:
+      path: TunarMac/Info.plist
+      properties:
+        CFBundleDisplayName: TUNAR
+        NSMicrophoneUsageDescription: "调音需要访问麦克风以检测音高"
+        LSApplicationCategoryType: public.app-category.music
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.liuchong.tuner.macos
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: DXBQ96GC5Q
+        SWIFT_VERSION: "6.0"
+        SWIFT_OBJC_BRIDGING_HEADER: TunarMac/Bridge/TunarMac-Bridging-Header.h
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
+        CODE_SIGN_ENTITLEMENTS: TunarMac/TunarMac.entitlements
+        OTHER_SWIFT_FLAGS: -Xcc -fmodule-map-file=$(SRCROOT)/../ios/TunerCore/Sources/TunerCore/tuner_coreFFI.modulemap
+  TunarMacTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - TunarMacTests
+    dependencies:
+      - target: TunarMac
+    settings:
+      base:
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/TunarMac.app/Contents/MacOS/TunarMac
+        OTHER_SWIFT_FLAGS: -Xcc -fmodule-map-file=$(SRCROOT)/../ios/TunerCore/Sources/TunerCore/tuner_coreFFI.modulemap

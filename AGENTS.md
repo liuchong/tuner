@@ -1,7 +1,7 @@
 # 吐呐 / TUNAR — 项目规则（AGENTS.md）
 
 产品品牌为中文「吐呐」、英文 `TUNAR`。跨平台调音器 + 节拍器，采用 **Rust 共享核心 +
-多端原生 UI**：Android（Kotlin/Compose）与 iOS（SwiftUI），macOS 规划中。
+多端原生 UI**：Android（Kotlin/Compose）、iOS（SwiftUI）与 macOS（SwiftUI）。
 
 品牌名只影响用户可见文案。为保证已安装版本原位升级与设置数据兼容，仓库目录、Rust crate、
 Java package、iOS target/scheme、Bundle ID 和持久化键继续使用既有 `tuner` / `Tuner`
@@ -16,7 +16,7 @@ android/         Android App（Kotlin + Jetpack Compose）
   core-binding/  UniFFI Kotlin 绑定 + 各 ABI .so
   design/        图标源文件（SVG），用 scripts/generate-icons.sh 重新生成 mipmap 资源
 ios/             iOS SwiftUI App + UniFFI Swift 绑定
-macos/           macOS SwiftUI App（规划中）
+macos/           macOS 14+ SwiftUI App（侧栏式五入口桌面界面）
 docs/            中英双语规格与「Aurora/极光」设计系统，代码以此为准
 .agents/rules/   分场景开发规则
 scripts/         构建脚本（build-core-android.sh 等）
@@ -44,16 +44,25 @@ cd android && ./gradlew assembleDebug
 cd android && ./gradlew testDebugUnitTest
 
 # iOS 端 Rust 库 + Swift 绑定 + XCFramework
-scripts/build-core-ios.sh           # 输出到 ios/TunerCore/
+scripts/build-core-ios.sh           # 输出含 iOS 与通用 macOS slice 的 ios/TunerCore/
 
 # iOS 构建（xcodegen 重新生成工程；模拟器/真机）
 cd ios && xcodegen generate
 xcodebuild -scheme Tuner -destination 'generic/platform=iOS Simulator' build
 xcodebuild -scheme Tuner -destination 'generic/platform=iOS' -allowProvisioningUpdates build
 # 真机安装：xcrun devicectl device install app --device <id> <Tuner.app>
+
+# macOS 工程、单元测试与应用构建（测试运行器需访问系统 testmanagerd）
+cd macos && xcodegen generate
+xcodebuild -project TunarMac.xcodeproj -scheme TunarMac \
+  -destination 'platform=macOS,arch=arm64' test
+xcodebuild -project TunarMac.xcodeproj -scheme TunarMac \
+  -destination 'platform=macOS,arch=x86_64' build
 ```
 
-工具链：Rust stable（targets: aarch64/armv7/x86_64-linux-android）、cargo-ndk、uniffi、JDK 21、Android SDK + NDK。
+工具链：Rust stable（Android targets，以及
+`aarch64-apple-darwin` / `x86_64-apple-darwin`）、cargo-ndk、uniffi、JDK 21、
+Android SDK + NDK、Xcode 及 xcodegen。
 
 ## 编码规范
 
