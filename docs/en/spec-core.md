@@ -197,6 +197,16 @@ position error is <1 sample. Tempo changes affect the next scheduling decision w
 resetting the bar; muted beats emit timing events but no click samples. Tap tempo
 ignores invalid/outlier intervals and requires at least two taps.
 
+Clicks are voices that continue across render calls (revised 2026-08-26). Timbres are
+routinely longer than one render buffer — the bell is 250 ms (11025 samples) while the
+Apple pump asks for 1024 frames at a time — so each tick claims one of twelve fixed voice
+slots (no allocation on the hot path) and its remaining tail is mixed from the start of
+each following buffer until the sample ends. Voices overlap when a timbre outlasts the
+tick interval; when all slots are busy the most decayed voice (largest `pos`) is stolen.
+`stop()` mutes immediately and drops every tail, matching platform pause, which discards
+already-queued buffers. Previously each click was clipped to `min(sample length, frames
+left in buffer)`, so long timbres such as the bell were cut down to a single thud.
+
 ## 8. Test baseline
 
 `cargo test` must remain green and cover:

@@ -43,7 +43,10 @@ final class MetronomePlayer: ObservableObject, @unchecked Sendable {
         node.play()
         engine = av
         player = node
+        // 两个计数器必须一起归零：只清 scheduledSamples 会让重新播放时
+        // scheduledSamples - playedSamples 在 UInt64 上下溢，pump 直接停摆
         scheduledSamples = 0
+        playedSamples = 0
 
         // 后台队列：每 ~10ms 补缓冲（保持 ≥3 个在途）
         let timer = DispatchSource.makeTimerSource(queue: .global(qos: .userInitiated))
@@ -53,11 +56,17 @@ final class MetronomePlayer: ObservableObject, @unchecked Sendable {
         self.timer = timer
     }
 
+    /// 已排队但尚未回放完的采样数（饱和减法）。
+    private func inFlightSamples() -> UInt64 {
+        scheduledSamples > playedSamples ? scheduledSamples - playedSamples : 0
+    }
+
     private func pump() {
         guard isPlaying, let node = player, let re = renderEngine else { return }
         let chunk: UInt32 = 1024
-        // 保持 ≥3 个缓冲在途
-        while scheduledSamples - playedSamples < UInt64(chunk) * 3 {
+        // 保持 ≥3 个缓冲在途。playedSamples 由回放完成回调在别的线程累加，
+        // 取差值一律走饱和减法，不让计数错位把 pump 卡死。
+        while inFlightSamples() < UInt64(chunk) * 3 {
             let frame = re.render(frames: chunk)
             let buf = AVAudioPCMBuffer(
                 pcmFormat: AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1)!,
@@ -71,7 +80,7 @@ final class MetronomePlayer: ObservableObject, @unchecked Sendable {
                 }
             }
             let nowMs = UInt64(ProcessInfo.processInfo.systemUptime * 1000)
-            let queued = scheduledSamples - playedSamples
+            let queued = inFlightSamples()
             for tick in frame.ticks {
                 let atMs = nowMs + UInt64(
                     max(0.0, Double(queued + tick.sampleOffset) / sampleRate * 1000.0)

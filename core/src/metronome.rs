@@ -73,6 +73,23 @@ impl TickList {
 const DEFAULT_CLICK_LEN: usize = 2048;
 /// 注入 click 采样上限（防止 API 层传入过长采样撑爆内存）。
 pub const MAX_CLICK_LEN: usize = 48000;
+/// 同时发声的 click 数上限。音色最长 MAX_CLICK_LEN，最短 tick 间隔出现在
+/// 250BPM + 八分音符（44100Hz 下 5292 采样），最多叠 10 个，取 12 留余量。
+const MAX_VOICES: usize = 12;
+
+/// 一个正在发声的 click。音色长度可以超过一次渲染的缓冲长度，
+/// 甚至超过 tick 间隔，因此发声位置必须跨 `render_into` 保留。
+#[derive(Clone, Copy, Default)]
+struct ClickVoice {
+    /// 是否占用。
+    active: bool,
+    /// 用重拍音色（false 为弱拍音色）。
+    accent: bool,
+    /// 已放出的采样数，即下次从音色的第几个采样接着放。
+    pos: usize,
+    /// 本次渲染在缓冲内的起点：本缓冲新起的 tick 为其偏移，续放的尾巴恒为 0。
+    start: usize,
+}
 
 /// 节拍器内核。单线程使用，内部无锁。
 pub struct MetronomeCore {
@@ -94,6 +111,8 @@ pub struct MetronomeCore {
     interval: f64,
     /// 全局采样游标（已渲染采样数）。
     cursor: u64,
+    /// 发声体池（固定长度，热路径零分配）。
+    voices: [ClickVoice; MAX_VOICES],
     /// tap 时间戳环形缓冲（最近 5 次 → 4 个间隔）。
     taps: [u64; 5],
     /// tap 写入数（饱和到 5）。
@@ -139,6 +158,7 @@ impl MetronomeCore {
             tick_pos: 0.0,
             interval: 0.0,
             cursor: 0,
+            voices: [ClickVoice::default(); MAX_VOICES],
             taps: [0; 5],
             tap_count: 0,
             tap_head: 0,
@@ -204,17 +224,20 @@ impl MetronomeCore {
         }
     }
 
-    /// 从 `at_sample` 开始运行（重置拍序号与相位）。
+    /// 从 `at_sample` 开始运行（重置拍序号、相位与全部发声体）。
     pub fn start(&mut self, at_sample: u64) {
         self.running = true;
         self.beat_index = 0;
         self.cursor = at_sample;
         self.tick_pos = at_sample as f64;
+        self.voices = [ClickVoice::default(); MAX_VOICES];
     }
 
-    /// 停止。
+    /// 停止。停止即静音：未放完的尾巴一并丢弃，
+    /// 与平台侧 pause 会丢掉已排队缓冲的行为保持一致。
     pub fn stop(&mut self) {
         self.running = false;
+        self.voices = [ClickVoice::default(); MAX_VOICES];
     }
 
     /// 是否运行中。
@@ -273,6 +296,10 @@ impl MetronomeCore {
 
     /// 渲染 `frames` 个采样到 `out`（累加混入，调用方负责清零或传入静音缓冲），
     /// tick 事件写入 `ticks`。零分配、零锁、无 panic。
+    ///
+    /// 音色长度普遍超过一次渲染的缓冲长度（如 250ms 的铃声 11025 采样，
+    /// 而 Apple 侧每次只泵 1024 帧），所以发声不能裁在本缓冲内：
+    /// 每个 tick 登记成发声体，尾巴由后续渲染接着放，直到音色放完。
     pub fn render_into(&mut self, out: &mut [f32], frames: usize, ticks: &mut TickList) {
         ticks.clear();
         let n = frames.min(out.len());
@@ -292,16 +319,8 @@ impl MetronomeCore {
                         beat_index: self.beat_index,
                         accent,
                     });
-                    let click: &[f32] = match accent {
-                        Accent::Accent => &self.click_accent,
-                        Accent::Normal => &self.click_normal,
-                        Accent::Muted => &[],
-                    };
-                    let start = offset as usize;
-                    let avail = n - start;
-                    let len = click.len().min(avail);
-                    for (k, &s) in click.iter().take(len).enumerate() {
-                        out[start + k] += s;
+                    if accent != Accent::Muted {
+                        self.start_voice(accent == Accent::Accent, offset as usize);
                     }
                 }
                 // 推进到下一拍。tick_pos 保持 f64 精确累加（舍入误差 ~1e-16/tick，
@@ -310,7 +329,66 @@ impl MetronomeCore {
                 self.tick_pos += self.interval;
             }
         }
+        self.mix_voices(out, n);
         self.cursor = end;
+    }
+
+    /// 起一个发声体。有空槽用空槽；池满时抢占衰减最久（`pos` 最大）的那个，
+    /// 因为它残余能量最小，抢占最不可闻。
+    fn start_voice(&mut self, accent: bool, offset: usize) {
+        let slot = match self.voices.iter().position(|v| !v.active) {
+            Some(i) => i,
+            None => {
+                let mut worst = 0usize;
+                for i in 1..MAX_VOICES {
+                    if self.voices[i].pos > self.voices[worst].pos {
+                        worst = i;
+                    }
+                }
+                worst
+            }
+        };
+        self.voices[slot] = ClickVoice {
+            active: true,
+            accent,
+            pos: 0,
+            start: offset,
+        };
+    }
+
+    /// 把全部发声体混入本缓冲：续放的从缓冲头开始，本缓冲新起的从各自偏移开始。
+    /// 放完音色的发声体释放回池；音色被 `set_click_samples` 换短时同样按放完处理。
+    fn mix_voices(&mut self, out: &mut [f32], n: usize) {
+        let Self {
+            voices,
+            click_accent,
+            click_normal,
+            ..
+        } = self;
+        for v in voices.iter_mut() {
+            if !v.active {
+                continue;
+            }
+            let click: &[f32] = if v.accent {
+                &click_accent[..]
+            } else {
+                &click_normal[..]
+            };
+            let start = v.start.min(n);
+            v.start = 0;
+            if v.pos >= click.len() {
+                *v = ClickVoice::default();
+                continue;
+            }
+            let len = (click.len() - v.pos).min(n - start);
+            for (k, &s) in click[v.pos..v.pos + len].iter().enumerate() {
+                out[start + k] += s;
+            }
+            v.pos += len;
+            if v.pos >= click.len() {
+                *v = ClickVoice::default();
+            }
+        }
     }
 }
 
@@ -447,6 +525,89 @@ mod tests {
         assert_eq!(ticks.len, 1);
         assert_eq!(ticks.events[0].sample_offset, 0);
         assert_eq!(&buf[..3], &click);
+    }
+
+    #[test]
+    fn long_click_survives_small_render_chunks() {
+        // 音色 11025 采样（250ms 铃声），Apple 侧每次只泵 1024 帧：
+        // 必须跨缓冲续放完整，不能被裁在单个缓冲里。
+        let click: Vec<f32> = (0..11025).map(|i| 1.0 - i as f32 / 11025.0).collect();
+        let mut m = MetronomeCore::new(44100.0, 60.0, 4, 4, &[Accent::Accent]);
+        m.set_click_samples(&click, &click);
+        m.start(0);
+        let mut buf = vec![0.0f32; 1024];
+        let mut ticks = TickList::default();
+        // 连续渲染 11 块共 11264 采样，拼回来应与音色逐采样一致（tick 在 0 处）
+        let mut played = Vec::new();
+        for _ in 0..11 {
+            buf.iter_mut().for_each(|s| *s = 0.0);
+            m.render_into(&mut buf, 1024, &mut ticks);
+            played.extend_from_slice(&buf);
+        }
+        for (i, &want) in click.iter().enumerate() {
+            assert!(
+                (played[i] - want).abs() < 1e-6,
+                "第 {i} 个采样被截断：{} != {want}",
+                played[i]
+            );
+        }
+        // 音色放完后归静音，不无限拖尾
+        assert!(played[11025..].iter().all(|&v| v == 0.0));
+    }
+
+    #[test]
+    fn long_click_tail_overlaps_next_tick() {
+        // 音色比 tick 间隔长时两拍叠放，尾巴不被下一拍顶掉。
+        let click = vec![1.0f32; 30000];
+        let mut m = MetronomeCore::new(44100.0, 240.0, 4, 4, &[Accent::Normal]);
+        m.set_click_samples(&click, &click);
+        m.start(0);
+        let mut buf = vec![0.0f32; 44100];
+        let mut ticks = TickList::default();
+        m.render_into(&mut buf, 44100, &mut ticks);
+        // 240BPM 间隔 11025：第二拍起（11025）两个发声体叠加，第三拍起三个
+        assert_eq!(ticks.len, 4);
+        assert!((buf[0] - 1.0).abs() < 1e-6);
+        assert!((buf[11025] - 2.0).abs() < 1e-6);
+        assert!((buf[22050] - 3.0).abs() < 1e-6);
+        // 第一拍在 30000 处放完，第四拍在 33075 才起：此刻只剩第二、三拍在响
+        assert!((buf[29999] - 3.0).abs() < 1e-6);
+        assert!((buf[30001] - 2.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn stop_clears_ringing_tail() {
+        // 停止即静音：未放完的尾巴不能在下次渲染里冒出来。
+        let click = vec![1.0f32; 20000];
+        let mut m = MetronomeCore::new(44100.0, 60.0, 4, 4, &[Accent::Accent]);
+        m.set_click_samples(&click, &click);
+        m.start(0);
+        let mut buf = vec![0.0f32; 1024];
+        let mut ticks = TickList::default();
+        m.render_into(&mut buf, 1024, &mut ticks);
+        assert!(buf.iter().all(|&v| (v - 1.0).abs() < 1e-6));
+        m.stop();
+        buf.iter_mut().for_each(|s| *s = 0.0);
+        m.render_into(&mut buf, 1024, &mut ticks);
+        assert!(buf.iter().all(|&v| v == 0.0));
+    }
+
+    #[test]
+    fn voice_pool_never_overflows() {
+        // 最短间隔 + 最长音色：发声体池满后抢占最旧的，不 panic 也不漏音。
+        let click = vec![0.25f32; MAX_CLICK_LEN];
+        let mut m = MetronomeCore::new(44100.0, 250.0, 4, 8, &[Accent::Normal]);
+        m.set_click_samples(&click, &click);
+        m.start(0);
+        let mut buf = vec![0.0f32; 512];
+        let mut ticks = TickList::default();
+        for _ in 0..400 {
+            buf.iter_mut().for_each(|s| *s = 0.0);
+            m.render_into(&mut buf, 512, &mut ticks);
+            assert!(buf.iter().all(|v| v.is_finite()));
+        }
+        // 稳态下每个采样都在发声（叠加值 > 单个音色幅度）
+        assert!(buf[0] > 0.25);
     }
 
     #[test]

@@ -35,6 +35,14 @@ causes a quiet start failure and session release, followed by retry on the next 
   Android and iOS use the same frequencies, durations, envelopes, and gains.
 - Native playback keeps at least two buffers queued. Tick UI presentation compensates
   for already queued samples before emitting the visual beat.
+- Render chunk size is independent of timbre length (clarified 2026-08-26). When a sound
+  outlasts the buffer, core carries the voice across render calls (see spec-core §7).
+  Native layers must not enlarge chunks or defer writes to fit a whole sample.
+- Apple in-flight accounting (revised 2026-08-26): `playedSamples` is incremented from the
+  playback completion callback on another thread, so the difference against
+  `scheduledSamples` always uses saturating subtraction, and both counters are zeroed
+  together on every `start`. Otherwise resuming after pause underflows the unsigned
+  difference and the pump stalls.
 - Android uses a media-playback foreground service while running. Notification denial
   does not stop playback.
 

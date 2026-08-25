@@ -23,6 +23,11 @@
   属资源数据，非业务逻辑。
 - 缓冲：AudioTrack `bufferSizeInFrames` 分片写入（写线程保持 ≥2 个缓冲余量防欠载），
   阻塞写提供天然背压；线程优先级 URGENT_AUDIO。
+- 分片长度与音色长度无关（2026-08-26 明确）：音色比缓冲长时由 core 的发声体跨缓冲续放
+  （见 spec-core §7），平台层不得为了放完一次音色而放大分片或延后写入。
+- Apple 侧在途缓冲计数（2026-08-26 修订）：`playedSamples` 由回放完成回调在别的线程累加，
+  与 `scheduledSamples` 求差一律用饱和减法，且两个计数器必须在每次 `start` 一起归零；
+  否则暂停后重播会在 UInt64 上下溢，pump 直接停摆。
 - Tick→UI 同步（2026-07-20 补充）：`RenderFrame.ticks` 的 `sample_offset` 加上
   「已排队未播放采样数」（已写采样 − playbackHeadPosition）换算为呈现时刻（ms），
   经 StateFlow 投递，UI 延时到该时刻再触发闪拍动画。
