@@ -1,18 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 1024 1024">
+  <!-- Android 传统圆形图标：圆底 + 基准图形 -->
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#26325C"/>
-      <stop offset="1" stop-color="#0F1526"/>
+      <stop offset="0" stop-color="#22315C"/>
+      <stop offset="0.55" stop-color="#121A2E"/>
+      <stop offset="1" stop-color="#080B14"/>
     </linearGradient>
+    <radialGradient id="halo" gradientUnits="userSpaceOnUse" cx="512" cy="431.6" r="421.4">
+      <stop offset="0" stop-color="#7C9CFF" stop-opacity="0.28"/>
+      <stop offset="0.55" stop-color="#7C9CFF" stop-opacity="0.11"/>
+      <stop offset="1" stop-color="#7C9CFF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow" gradientUnits="userSpaceOnUse" cx="512" cy="596.3" r="294.0">
+      <stop offset="0" stop-color="#34E0A1" stop-opacity="0.20"/>
+      <stop offset="1" stop-color="#34E0A1" stop-opacity="0"/>
+    </radialGradient>
   </defs>
-  <circle cx="256" cy="256" r="240" fill="url(#bg)"/>
-  <g transform="translate(20,20) scale(4.37)">
-    <g fill="none" stroke-width="9" stroke-linecap="round">
-      <path d="M 24.7 54.0 A 30 30 0 0 1 36.5 40.2" stroke="#FF6B6B"/>
-      <path d="M 44.0 36.7 A 30 30 0 0 1 64.0 36.7" stroke="#3DDC97"/>
-      <path d="M 71.5 40.2 A 30 30 0 0 1 83.3 54.0" stroke="#FFC24B"/>
+  <circle cx="512" cy="512" r="504" fill="url(#bg)"/>
+  <circle cx="512" cy="512" r="504" fill="url(#halo)"/>
+  <circle cx="512" cy="512" r="504" fill="url(#glow)"/>
+  <g transform="translate(512,512) scale(0.98) translate(-512,-512)">
+    <defs>
+      <linearGradient id="needle" x1="0" y1="0" x2="0" y2="0.9">
+        <stop offset="0" stop-color="#7DF3C8"/>
+        <stop offset="0.34" stop-color="#DEF6EC"/>
+        <stop offset="1" stop-color="#F2F5F9"/>
+      </linearGradient>
+    </defs>
+    <g fill="none" stroke-linecap="round">
+      <g stroke="#7C9CFF" stroke-width="26" opacity="0.42">
+        <path d="M 629.4 236.6 A 380 380 0 0 1 841.1 788.0"/>
+        <path d="M 394.6 236.6 A 380 380 0 0 0 182.9 788.0"/>
+      </g>
+      <g stroke="#7C9CFF" stroke-width="36" opacity="0.74">
+        <path d="M 600.1 327.0 A 285 285 0 0 1 758.8 740.5"/>
+        <path d="M 423.9 327.0 A 285 285 0 0 0 265.2 740.5"/>
+      </g>
+      <g stroke="#34E0A1" stroke-width="44">
+        <path d="M 570.7 417.3 A 190 190 0 0 1 676.5 693.0"/>
+        <path d="M 453.3 417.3 A 190 190 0 0 0 347.5 693.0"/>
+      </g>
     </g>
-    <line x1="54" y1="68" x2="54" y2="38" stroke="#F8FAFC" stroke-width="6" stroke-linecap="round"/>
-    <circle cx="54" cy="68" r="7.5" fill="#F8FAFC"/>
+    <path d="M 486 598 L 500 270 L 512 214 L 524 270 L 538 598 Z" fill="url(#needle)"/>
+    <circle cx="512" cy="598" r="66" fill="none" stroke="#34E0A1" stroke-width="10" opacity="0.5"/>
+    <circle cx="512" cy="598" r="36" fill="#F2F5F9"/>
   </g>
 </svg>

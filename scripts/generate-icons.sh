@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# 从 android/design/*.svg 生成全部 Android 图标资源
+# 从 android/design/*.svg 生成 Android / iOS / macOS 全部图标资源
+# 几何唯一来源是 icon-mark.svg，各平台变体只是它的等比缩放 + 各自底板
 # 依赖: rsvg-convert (brew install librsvg)
 set -euo pipefail
 
@@ -37,15 +38,16 @@ for name in ic_launcher ic_launcher_round; do
 XML
 done
 
-# adaptive 背景（渐变 drawable）
+# adaptive 背景（渐变 drawable，与 SVG 底色三段渐变保持一致）
 mkdir -p "$RES/drawable"
 cat > "$RES/drawable/ic_launcher_background.xml" <<'XML'
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
     <gradient
         android:angle="270"
-        android:startColor="#26325C"
-        android:endColor="#0F1526"
+        android:startColor="#22315C"
+        android:centerColor="#121A2E"
+        android:endColor="#080B14"
         android:type="linear" />
 </shape>
 XML
@@ -65,5 +67,13 @@ cat > "$IOS_ASSET/Contents.json" <<'JSON'
   "info" : { "author" : "xcode", "version" : 1 }
 }
 JSON
+
+# macOS AppIcon（Apple 图标网格：824 圆角方块居中，四周留透明边）
+MAC_ASSET="$ROOT/macos/TunarMac/Assets.xcassets/AppIcon.appiconset"
+mkdir -p "$MAC_ASSET"
+for size in 16 32 64 128 256 512 1024; do
+  rsvg-convert -w "$size" -h "$size" "$DESIGN/icon-macos.svg" \
+    -o "$MAC_ASSET/AppIcon-$size.png"
+done
 
 echo "图标资源已生成"

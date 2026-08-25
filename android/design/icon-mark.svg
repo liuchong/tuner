@@ -1,25 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-  <!-- iOS：全出血方底，圆角由系统裁切，不留透明边 -->
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#22315C"/>
-      <stop offset="0.55" stop-color="#121A2E"/>
-      <stop offset="1" stop-color="#080B14"/>
-    </linearGradient>
-    <radialGradient id="halo" gradientUnits="userSpaceOnUse" cx="512" cy="423.4" r="464.4">
-      <stop offset="0" stop-color="#7C9CFF" stop-opacity="0.28"/>
-      <stop offset="0.55" stop-color="#7C9CFF" stop-opacity="0.11"/>
-      <stop offset="1" stop-color="#7C9CFF" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="glow" gradientUnits="userSpaceOnUse" cx="512" cy="604.9" r="324.0">
-      <stop offset="0" stop-color="#34E0A1" stop-opacity="0.20"/>
-      <stop offset="1" stop-color="#34E0A1" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="1024" height="1024" fill="url(#bg)"/>
-  <rect width="1024" height="1024" fill="url(#halo)"/>
-  <rect width="1024" height="1024" fill="url(#glow)"/>
-  <g transform="translate(512,512) scale(1.08) translate(-512,-512)">
+  <!--
+    吐呐 / TUNAR 图标基准图形：声呐 + 调音器。1024 坐标系，
+    其余变体一律由本图形绕画布中心 (512,512) 等比缩放得到，几何只在这里定义一次。
+
+    支点 (512,598) 起一根锥形指针指向正上方 12 点，即准音（0 音分）基准线；
+    三层同心回声弧 r=190/285/380 各自从 18° 张到 120°，共 240° 底部开口的仪表环，
+    中央 ±18° 留窄缝供指针贯穿；由内向外递减粗细与不透明度，读作回声向外扩散。
+
+    配色取自「Aurora/极光」：内环 tune/in #34E0A1，外两层 accent #7C9CFF，
+    指针为 tune/in 到 ink/primary 的纵向渐变。图形包围盒对画布中心上下左右对称。
+  -->
     <defs>
       <linearGradient id="needle" x1="0" y1="0" x2="0" y2="0.9">
         <stop offset="0" stop-color="#7DF3C8"/>
@@ -44,5 +34,4 @@
     <path d="M 486 598 L 500 270 L 512 214 L 524 270 L 538 598 Z" fill="url(#needle)"/>
     <circle cx="512" cy="598" r="66" fill="none" stroke="#34E0A1" stroke-width="10" opacity="0.5"/>
     <circle cx="512" cy="598" r="36" fill="#F2F5F9"/>
-  </g>
 </svg>

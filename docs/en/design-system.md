@@ -238,6 +238,28 @@ macOS presents the five destinations in a 200–240 pt sidebar. The selected row
 at 1100 pt and above related cards may use two columns, while narrower windows stack
 them in reading order. Sidebar changes use only a 150 ms cross-fade.
 
+## 5b. App icon
+
+The mark reads as sonar plus tuner: a tapered needle rises from a pivot to exact 12
+o'clock (the in-tune, zero-cent datum) while three concentric echo arcs spread outward.
+
+- **Single source of geometry**: `android/design/icon-mark.svg` on a 1024 grid. Pivot at
+  `(512,598)`; arcs at `r=190/285/380`, each sweeping 18° to 120° so together they form a
+  240° gauge ring open at the bottom, with a ±18° slot at the top for the needle. Stroke
+  widths `44/36/26` and opacities `1/0.74/0.42` decay outward. The bounding box is
+  symmetric about the canvas center, so the mark stays centered under any mask.
+- **Color**: inner arc `tune/in` `#34E0A1`, outer two `accent` `#7C9CFF`, needle a vertical
+  `#7DF3C8 → #F2F5F9` gradient. The plate is a `#22315C → #121A2E → #080B14` gradient with
+  an `accent` aurora halo over the arcs and a `tune/in` glow at the pivot. Arcs and needle
+  use brand color only — no shadow, outline, or gloss.
+- **Variants**: every other SVG only scales the mark about `(512,512)` and swaps the plate:
+  Android adaptive foreground `0.71` (inside the central 66 dp safe circle, so no mask can
+  clip it), legacy square `1.06`, legacy round `0.98`, iOS full-bleed `1.08`, macOS `0.85`
+  (824 rounded square centered with a transparent margin).
+- **Generation**: after editing any SVG, run `scripts/generate-icons.sh`. It emits the
+  Android mipmaps (plus adaptive background drawable and the 512 Play Store icon), the iOS
+  1024 icon, and the macOS 16–1024 set. Never hand-edit the PNGs.
+
 ## 6. Platform token mapping
 
 | Concept | Android Compose | Apple SwiftUI |
