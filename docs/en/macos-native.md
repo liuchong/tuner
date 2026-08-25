@@ -62,6 +62,48 @@ confirmation, hysteresis, and indefinite hold; macOS adds no clearing timeout. R
 tone frequencies come from core `ReferenceTone` values. A tone continues after its
 selection panel closes and stops when leaving Tuner or when the window becomes inactive.
 
+The new wind interaction ships for dongxiao first:
+
+- Dongxiao provides G/F keys and defaults to eight holes with a six-hole switch. The
+  top “Tube note as X” status is derived from the solfège mapping and is display-only.
+- Its main view keeps seven base-fingering rows, while chromatic detail independently
+  keeps 12. Both use **Low (soft breath)**, **Middle (overblown)**,
+  and **High (forceful breath)** columns. All three columns show the fingerings core
+  measures for that range (middle mostly matches low, high differs); cells the charts do
+  not cover remain visually blank and non-tappable. Missing
+  data must not be synthesized by copying Low holes or adding octave/fifth offsets.
+- Exactly one complete large vertical dongxiao sits at left and the three range
+  columns at right; fingering kinds do not create separate lanes. Eight-hole mode renders
+  exactly eight holes and six-hole mode exactly six. Open, closed, and half states are
+  visible. The first hole shifts sideways only slightly to resemble common modern
+  dongxiao placement; back holes remain on the tube centerline and use a dedicated color.
+- Every base row aligns strictly to the center of the topmost open hole identified by
+  its `anchor_hole`; all-closed anchors at the bottom outlet. A thin guide crosses the
+  tube and three columns, while a physical-hole guide with no
+  matching diatonic pattern remains blank. Cross-fingered or half-hole patterns use only
+  a small 叉 or 半 marker in their cells.
+- Every cell has a fixed note name and separate solfège badge; `D3·5` is forbidden.
+  Tapping either area pins the complete fingering over live detection until the same cell
+  is tapped again. Vertically dragging a badge updates continuously whenever it crosses
+  a full step. Main wraps seven natural degrees; detail independently wraps 12 semitone
+  degrees. Both can reach “as 2” from default “as 5” in one sustained gesture. Release
+  commits and snaps; main atomically refilters complete `1–7`, while detail remains stable.
+- Blank title-row space or the “Chromatic Detail” button opens independent
+  12-semitone chromatic detail in a large sheet rather than expanding the main view. It
+  reuses the same one-dongxiao plus three-range geometry. A close action remains visible.
+- Main and detail reuse one `CaptureHub` and the same `AnalysisFrame`; presenting the
+  sheet creates no parallel capture session or analysis pass. Each preserves independent
+  scroll position, cell preview, and interaction state. Dismissing detail restores the unchanged main-view
+  context; a pinned cell outranks live recognition in both views until the same cell is tapped again.
+- Both views scroll their three-column region horizontally so the live-hit column trends toward
+  that region's center, with the displacement clamped to the legal scroll range. Pinning and
+  manual scrolling never trigger the automatic scroll.
+- Main and detail each show exactly one complete large diagram using core's primary
+  fingering, without claiming one authoritative semitone fingering; instrument
+  construction and schools may use alternatives.
+- Zhudi and shakuhachi retain their old interaction and do not show dongxiao's
+  eight/six switch, draggable solfège badges, or independent chromatic sheet.
+
 ### 4.3 Professional analysis
 
 Analysis shares `CaptureHub` and the same `AnalysisFrame` with the tuner:
@@ -99,9 +141,16 @@ immediately.
 - Existing Rust synthetic-signal, temperament, preset, and metronome tests remain the
   cross-platform business truth.
 - macOS unit tests cover the five destinations and default selection, desktop layout
-  decisions, spectrum scale/peak hold, capture format, and startup-token behavior.
+  decisions, spectrum scale/peak hold, capture format, startup-token behavior, and
+  dongxiao eight-hole default/six-hole switch, one-large-diagram plus Low/Middle/High
+  columns, per-range measured returns (19/32 entries for eight holes), blank
+  unsynthesized chart-uncovered cells,
+  topmost-open-hole anchors and blank guides, tap-over-live priority, snap-only
+  transpose geometry stability, and independent detail state.
 - Build acceptance covers the universal Apple Silicon/Intel archive, the macOS app, and
   the macOS test target.
 - Manual acceptance covers permission allow/deny, all five sections, A4 loopback,
-  analysis pause/reset, and metronome playback.
+  analysis pause/reset, and metronome playback. Dongxiao additionally verifies the
+  large sheet, shared capture with independent main/detail state, and no regression in
+  the existing zhudi/shakuhachi paths.
 

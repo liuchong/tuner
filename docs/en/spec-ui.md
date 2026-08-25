@@ -51,11 +51,82 @@ Automatic mode highlights the nearest string; manual mode locks the selected tar
 within ±50 cents. The compact dial shows target deviation and marks a string complete
 at ±5 cents.
 
-### 2.2 Winds
+### 2.2 Winds — dongxiao first
 
-Zhudi and dongxiao choose key and tube scale degree (5/1/2); shakuhachi chooses model.
-The fingering list shows name, note, and customary solfège, highlighting the nearest
-entry and cents.
+Dongxiao adopts the new interaction first. Zhudi and shakuhachi retain their existing
+selectors and fingering lists for this delivery.
+
+- Dongxiao provides G/F keys and eight-/six-hole variants for each key. Eight-hole is
+  the default on first entry and when no prior compatible choice exists. Changing key
+  or hole system preserves the current tube-solfège mapping where possible.
+- The main view consists of one complete large vertical dongxiao and three range
+  columns: **Low (soft breath)**, **Middle (overblown)**, and
+  **High (forceful breath)**. This does not revert to a conventional table: the large
+  dongxiao remains the visual anchor, and every horizontal guide aligns its row strictly
+  to the center of the fingering's topmost open hole. The diatonic main chart keeps
+  seven base-fingering rows; chromatic detail independently keeps 12. All three columns show
+  the measured fingerings core returns: the middle range mostly reuses low patterns while the
+  high range differs. Cells the charts do not cover — above 31 semitones for eight holes, and
+  the conflicting six-hole cells — remain visually blank, non-tappable, and free of
+  placeholder notes. They must not be synthesized by copying low holes or adding
+  octave/fifth offsets.
+- Eight-hole mode renders exactly eight holes on the single tube; six-hole mode renders
+  exactly six. Each base-fingering row aligns to its `anchor_hole`; the all-closed row
+  anchors at the bottom outlet. Thin guides cross the tube and all three range columns.
+  A physical-hole guide with no matching diatonic base fingering remains visibly blank;
+  adjacent rows must not move or receive placeholder notes. Open, closed, and half-hole
+  states remain visible. The first hole shifts sideways only slightly to resemble common
+  modern dongxiao placement; the back hole stays on the tube centerline and uses a dedicated color.
+- Each cell shows a fixed note name and a separate solfège badge; concatenated text such
+  as `D3·5` is forbidden. Tapping either the note area or the solfège badge previews
+  that cell's complete fingering. A special base fingering may carry a small 叉 or 半
+  marker, but fingering kinds must never become separate lanes.
+- The large dongxiao shows only the pinned cell or the current live fingering. A pinned
+  cell outranks live detection until the same cell is tapped again. Playing also
+  shows cents, with the compact dial below.
+- The two cell highlights must be distinguishable at a glance: a live hit is filled, a
+  pinned cell is outlined only, and they never share the same background and weight;
+  accessibility state reports “live hit,” “pinned,” or “unselected.”
+- “Tube note as X” at the top is display-only and derived from the current solfège
+  mapping; it is not a button, picker, or dropdown. Users vertically drag a solfège
+  badge itself. Crossing a full step updates all badges immediately with continuous
+  motion. Main view wraps across seven natural degrees; chromatic detail independently
+  wraps across 12 semitone degrees. One sustained drag must reach “Tube note as 2” from
+  the default “as 5.” It commits to the nearest discrete
+  step on release and snaps into place; arbitrary resting positions are
+  forbidden. Commit changes all badges and display-only status. Chromatic detail keeps
+  fixed notes, holes, and anchors; the main view atomically refilters seven base rows so
+  Low always displays complete `1 2 3 4 5 6 7`, never `#4` in place of `4`.
+- Tapping blank space in the main view's title row opens separate chromatic detail,
+  which preserves all 12 chromatic base rows and the same three-range layout. A visible, accessible
+  “Chromatic Detail” button provides the explicit entry point; the table never
+  expands in place. iOS presents it full-screen, Android as a full-screen dialog,
+  and macOS as a large sheet. Every platform exposes an explicit close action and
+  preserves main-view context.
+- Main view and detail share the same `CaptureHub` and `AnalysisFrame`; no second
+  microphone or analysis pass is created. Each owns its own large diagram, scroll
+  position, cell preview, and interaction state. Closing or reopening detail must not
+  overwrite main-view state; each view's pinned cell outranks live recognition until the
+  same cell is tapped again.
+- All three range columns remain visible when width permits. On small phones the
+  dongxiao stays visible while only the register-column region scrolls horizontally,
+  or register columns auto-collapse with an explicit way to restore them. Responsive
+  behavior never hides the dongxiao, changes row anchors, or merges register meanings.
+- The register-column region scrolls horizontally on its own so the live-hit column moves as
+  close to that region's center as possible, keeping the high column from sitting offscreen.
+  This is a trend algorithm: derive the displacement from column center minus viewport center,
+  then clamp it to the legal scroll range, so edges only scroll as far as they legally can and
+  true centering is not required. Only a change of the live-hit range triggers a scroll; cell
+  pinning and manual scrolling never do.
+- The main page remains tuner-first: chart height adapts to screen height and has a firm
+  cap, while the complete dial, target readout, and status must not be pushed off-screen
+  or reduced to fragments. Larger fingering space belongs in chromatic detail.
+- The large diagrams in main and detail demonstrate core's primary fingering only.
+  Instrument construction and schools may use alternatives; visible and accessibility
+  copy must not claim a single authoritative fingering.
+- Zhudi keeps its existing key and tube-note 5/1/2 path. Shakuhachi keeps its model and
+  fixed-scale path. Neither adopts dongxiao's eight/six switch, draggable solfège badges,
+  or independent chromatic detail in this delivery.
 
 Both instrument types share the core input state machine and the universal tuner's
 single-needle presentation. Native timers may not clear the target or needle.
@@ -143,6 +214,14 @@ interruption degrade without a crash. Behavior changes update this file in Engli
   generation-token/final-subscriber rules as iOS.
 - The reference-tone chooser uses a desktop overlay or sheet. Dismissal keeps playback
   running; leaving Tuner or making the window inactive stops it.
+- Dongxiao main and detail each use a desktop side-by-side layout: one complete large
+  vertical dongxiao plus right-hand Low, Middle, and High columns. All three columns are
+  populated with measured fingerings; only chart-uncovered cells stay blank. Blank
+  title-row space or the “Chromatic Detail” button opens independent chromatic detail
+  in a large sheet. Sheet and main view share
+  capture/frames while preserving independent scroll position, cell preview, and interaction state;
+  dismissing the sheet does not reset the main view. Both regions also auto-center the live-hit
+  column horizontally as a trend.
 - Microphone denial exposes an explanation and Open System Settings action. Missing
   input keeps a retryable UI and never crashes.
 - See [macos-native.md](macos-native.md) for the complete state, fallback, and build

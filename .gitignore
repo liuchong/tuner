@@ -7,3 +7,7 @@ android/.gradle/
 android/.kotlin/
 android/**/build/
 android/local.properties
+
+# Xcode 派生数据（xcodebuild -derivedDataPath）
+ios/build/
+macos/build/

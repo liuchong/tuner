@@ -151,6 +151,146 @@ pub struct FingeringChart {
     pub notes: Vec<FingeringNote>,
 }
 
+/// 一个孔的按放状态（孔位指法图用）。
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum HoleMark {
+    /// 闭孔（按住）。
+    Closed,
+    /// 开孔（放开）。
+    Open,
+    /// 半开孔。
+    Half,
+}
+
+/// 指法在洞箫大图旁的展示分组。
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum FingeringKind {
+    /// 顺指：从下往上连续开孔（含全闭筒音与全开）。
+    Sequential,
+    /// 叉指、半孔或其他非连续指法。
+    Combination,
+}
+
+/// 洞箫传统指法表使用的三个演奏音区。
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum WindRegister {
+    /// 缓吹（低音）。
+    Low,
+    /// 超吹（中音）。
+    Middle,
+    /// 急吹（高音）。
+    High,
+}
+
+/// 指法表范围。
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum FingeringScope {
+    /// 七声基础孔位；洞箫每个孔位按低音/中音/高音各自的实测孔位展开，缺资料的格不返回。
+    Scale,
+    /// 十二基础孔位；洞箫同样按三音区实测孔位展开，其他乐器维持旧范围。
+    Chromatic,
+}
+
+/// 一档筒音唱名（筒音相对宫音的半音级）。
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct TongyinOption {
+    /// 半音级 0–11（筒音 = 宫音 + degree 半音）。7=作5、0=作1、2=作2。
+    pub degree: u8,
+    /// 该级的首调简谱唱名（"5"、"#4" 等）。
+    pub solfege: String,
+    /// 是否为该孔制的常用指法。
+    pub common: bool,
+}
+
+/// 一个管乐器型号（调性/尺寸 × 孔制）。
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct WindVariant {
+    /// 型号 id（如 "g_xiao_x8"、"shaku_1_8"）。
+    pub id: String,
+    /// 完整显示名（如 "G调洞箫 · 8孔"）。
+    pub display_name: String,
+    /// 调性/尺寸 id（同调性的不同孔制共享，如 "g_xiao"）。
+    pub key_id: String,
+    /// 调性/尺寸显示名（如 "G调洞箫"）。
+    pub key_name: String,
+    /// 孔制显示名（如 "8孔"；固定音阶类为空串）。
+    pub hole_system_name: String,
+    /// 孔数（固定音阶类为 0）。
+    pub hole_count: u8,
+    /// 末尾若干孔位于背面（拇指孔）。
+    pub back_hole_count: u8,
+    /// 筒音 MIDI。
+    pub fundamental_midi: i32,
+    /// 筒音音名。
+    pub fundamental_note_name: String,
+    /// 是否支持筒音唱名转调（孔制类支持 12 级）。
+    pub supports_tongyin: bool,
+    /// 是否支持十二音全表展开。
+    pub supports_chromatic: bool,
+    /// 12 档筒音唱名（升序 degree 0–11；固定音阶类为空）。
+    pub tongyin_options: Vec<TongyinOption>,
+    /// 默认筒音级（孔制类为作 5）。
+    pub default_tongyin_degree: u8,
+}
+
+/// 孔位指法表中的一个音。
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct WindFingering {
+    /// 同一张表内唯一的稳定 id。
+    pub fingering_id: i32,
+    /// 当前音高相对筒音低音的半音数；不同指法可能产生同一音高。
+    pub semitones: i32,
+    /// 决定孔位组合的基础半音（洞箫为 0–11）。
+    pub base_semitones: i32,
+    /// 低音、中音或高音。
+    pub register: WindRegister,
+    /// 指法名（如 "开第一二三孔"、"闭第二五六七孔·超吹"）。
+    pub label: String,
+    /// 孔位组合，索引 0 = 第一孔（最下），末位 = 最上/背孔；固定音阶类为空。
+    pub holes: Vec<HoleMark>,
+    /// 指法展示分组：顺指或叉指/半孔。
+    pub fingering_kind: FingeringKind,
+    /// 最上方开孔的孔序索引（0 = 第一孔）；全闭/无孔位为 `None`。
+    pub anchor_hole: Option<u8>,
+    /// 音名。
+    pub note_name: String,
+    /// MIDI 音高。
+    pub midi: i32,
+    /// 目标频率（Hz，按 A4=440 换算）。
+    pub freq_hz: f64,
+    /// 唱名（按当前筒音级推出的宫音，首调简谱）。
+    pub solfege: String,
+    /// 是否为当前调宫调式七声的正声（否则为偏音）。
+    pub in_scale: bool,
+    /// 是否不是低音区。
+    pub overblown: bool,
+}
+
+/// 一张孔位指法表（型号 + 筒音唱名 + 范围）。
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct WindChart {
+    /// 型号 id。
+    pub variant_id: String,
+    /// 型号显示名（如 "G调洞箫 · 8孔"）。
+    pub variant_name: String,
+    /// 当前筒音级 0–11。
+    pub tongyin_degree: u8,
+    /// 当前筒音唱名（"5" 等）。
+    pub tongyin_solfege: String,
+    /// 宫音 pitch class。
+    pub tonic_pc: u8,
+    /// 宫音音名（不含八度，如 "G"）。
+    pub tonic_name: String,
+    /// 面板标题（如 "筒音作5 · G宫"）。
+    pub key_display: String,
+    /// 孔数（固定音阶类为 0）。
+    pub hole_count: u8,
+    /// 背孔数。
+    pub back_hole_count: u8,
+    /// 音阶（升序；筒音在首位，UI 可按需倒序显示）。
+    pub notes: Vec<WindFingering>,
+}
+
 /// 调式（主音 + 调式类别）。
 #[derive(Debug, Clone, Copy, uniffi::Record)]
 pub struct KeyMode {
@@ -371,48 +511,269 @@ pub fn list_tunings(instrument_id: String) -> Vec<Tuning> {
         .collect()
 }
 
-/// 列出某管乐器的全部指法表（频率按 A4=440，唱名按各调性首调简谱）。
+/// 乐器面板唱名基准：固定简谱 + 宫调式（见 §6，不随全局唱名设置变化）。
+fn panel_solfege(pc: u8, tonic_pc: u8) -> String {
+    let mut buf = [0u8; 16];
+    solfege::solfege_of(
+        SolfegeSystem::Numbered,
+        pc,
+        tonic_pc,
+        ModeKind::Gong,
+        &mut buf,
+    )
+    .to_string()
+}
+
+/// 列出某管乐器的全部型号（调性/尺寸 × 孔制）。
+///
+/// 顺序即优先级：洞箫首项为「G 调 · 8 孔」，作为默认型号。
 #[uniffi::export]
-pub fn list_fingering_charts(instrument_id: String) -> Vec<FingeringChart> {
-    let Some(charts) = fingering::wind_charts(&instrument_id) else {
+pub fn list_wind_variants(instrument_id: String) -> Vec<WindVariant> {
+    let Some(variants) = fingering::wind_variants(&instrument_id) else {
         return Vec::new();
     };
     let mut name_buf = [0u8; 5];
-    let mut sf_buf = [0u8; 16];
-    charts
+    variants
         .iter()
-        .map(|c| {
-            let tonic_pc = fingering::tonic_pc_of(c.fundamental_midi, c.tongyin);
-            FingeringChart {
-                id: c.id.to_string(),
-                display_name: c.display_name.to_string(),
-                notes: c
-                    .offsets
-                    .iter()
-                    .zip(c.labels.iter())
-                    .map(|(&off, &label)| {
-                        let midi = c.fundamental_midi + off;
-                        FingeringNote {
-                            label: label.to_string(),
-                            note_name: note::midi_to_name(midi, &mut name_buf)
-                                .unwrap_or("")
-                                .to_string(),
-                            midi,
-                            freq_hz: note::midi_to_freq(midi as f64, note::A4_DEFAULT),
-                            solfege: solfege::solfege_of(
-                                SolfegeSystem::Numbered,
-                                note::midi_to_pc(midi),
-                                tonic_pc,
-                                ModeKind::Gong,
-                                &mut sf_buf,
-                            )
-                            .to_string(),
-                        }
-                    })
-                    .collect(),
+        .map(|v| {
+            let system = v.hole_system();
+            let tongyin_options = system
+                .map(|s| {
+                    (0u8..12)
+                        .map(|degree| TongyinOption {
+                            degree,
+                            solfege: panel_solfege(degree, 0),
+                            common: s.common_tongyin.contains(&degree),
+                        })
+                        .collect()
+                })
+                .unwrap_or_default();
+            let hole_system_name = system.map(|s| s.display_name).unwrap_or("");
+            let display_name = if hole_system_name.is_empty() {
+                v.key_name.to_string()
+            } else {
+                format!("{} · {}", v.key_name, hole_system_name)
+            };
+            WindVariant {
+                id: v.id.to_string(),
+                display_name,
+                key_id: v.key_id.to_string(),
+                key_name: v.key_name.to_string(),
+                hole_system_name: hole_system_name.to_string(),
+                hole_count: system.map(|s| s.hole_count).unwrap_or(0),
+                back_hole_count: system.map(|s| s.back_hole_count).unwrap_or(0),
+                fundamental_midi: v.fundamental_midi,
+                fundamental_note_name: note::midi_to_name(v.fundamental_midi, &mut name_buf)
+                    .unwrap_or("")
+                    .to_string(),
+                supports_tongyin: v.supports_tongyin(),
+                supports_chromatic: v.supports_chromatic(),
+                tongyin_options,
+                default_tongyin_degree: if v.supports_tongyin() {
+                    fingering::TONGYIN_SOL5
+                } else {
+                    0
+                },
             }
         })
         .collect()
+}
+
+/// 某型号在指定筒音唱名级与范围下的孔位指法表。
+///
+/// `tongyin_degree` 为筒音相对宫音的半音数 0–11（7=作5、0=作1、2=作2），越界按 12 取模；
+/// 固定音阶类型号（尺八）忽略该参数与 `Chromatic` 范围。未知型号返回 `None`。
+#[uniffi::export]
+pub fn wind_fingering_chart(
+    variant_id: String,
+    tongyin_degree: u8,
+    scope: FingeringScope,
+) -> Option<WindChart> {
+    let v = fingering::find_wind_variant(&variant_id)?;
+    let degree = if v.supports_tongyin() {
+        tongyin_degree % 12
+    } else {
+        0
+    };
+    let tonic_pc = v.tonic_pc(degree);
+    let chromatic = matches!(scope, FingeringScope::Chromatic);
+    let system = v.hole_system();
+    let notes = if v.id.contains("_xiao_") {
+        let scale_offsets = fingering::dongxiao_scale_base_offsets(degree);
+        let base_offsets: &[i32] = if chromatic {
+            &fingering::DONGXIAO_CHROMATIC_BASE_OFFSETS
+        } else {
+            &scale_offsets
+        };
+        base_offsets
+            .iter()
+            .flat_map(|&base| {
+                // 每个音区取该音高的实测孔位：中音区多数与低音区同孔位，高音区自成一套；
+                // 资料未覆盖的格直接不返回，客户端留空。fingering_id 取音高半音数，天然唯一。
+                XIAO_REGISTERS.iter().filter_map(move |&(register, shift)| {
+                    let pitch = base + shift;
+                    v.pattern_at_pitch(pitch)?;
+                    Some(make_wind_fingering(
+                        v,
+                        tonic_pc,
+                        base,
+                        pitch,
+                        pitch,
+                        register,
+                        base as usize,
+                    ))
+                })
+            })
+            .collect()
+    } else {
+        v.offsets(chromatic)
+            .iter()
+            .enumerate()
+            .map(|(index, &off)| {
+                make_wind_fingering(v, tonic_pc, off, off, off, WindRegister::Low, index)
+            })
+            .collect()
+    };
+    let tongyin_solfege = panel_solfege(degree, 0);
+    let tonic_name = note::NOTE_NAMES[tonic_pc as usize].to_string();
+    Some(WindChart {
+        variant_id: v.id.to_string(),
+        variant_name: match system {
+            Some(s) => format!("{} · {}", v.key_name, s.display_name),
+            None => v.key_name.to_string(),
+        },
+        tongyin_degree: degree,
+        tongyin_solfege: tongyin_solfege.clone(),
+        tonic_pc,
+        tonic_name: tonic_name.clone(),
+        key_display: if v.supports_tongyin() {
+            format!("筒音作{tongyin_solfege} · {tonic_name}宫")
+        } else {
+            format!("筒音为宫 · {tonic_name}宫")
+        },
+        hole_count: system.map(|s| s.hole_count).unwrap_or(0),
+        back_hole_count: system.map(|s| s.back_hole_count).unwrap_or(0),
+        notes,
+    })
+}
+
+/// 洞箫三音区与其相对低音区的半音位移；每个音区的孔位另按该音高的实测值取。
+const XIAO_REGISTERS: [(WindRegister, i32); 3] = [
+    (WindRegister::Low, 0),
+    (WindRegister::Middle, 12),
+    (WindRegister::High, 24),
+];
+
+#[allow(clippy::too_many_arguments)]
+fn make_wind_fingering(
+    variant: &fingering::WindVariantDef,
+    tonic_pc: u8,
+    base_semitones: i32,
+    pitch_semitones: i32,
+    fingering_id: i32,
+    register: WindRegister,
+    label_index: usize,
+) -> WindFingering {
+    let midi = variant.fundamental_midi + pitch_semitones;
+    let pc = note::midi_to_pc(midi);
+    // 孔位取自实际音高：中、高音区各有自己的实测孔位。
+    let pattern = variant.pattern_at(pitch_semitones);
+    let fingering_kind = if variant
+        .hole_system()
+        .is_some_and(|system| system.id == "x8")
+        && pitch_semitones.rem_euclid(12) != 10
+        && !pattern.contains('H')
+    {
+        // 八孔箫第 2、6 辅助孔常闭属于正规指法，不应因此误标为叉指。
+        FingeringKind::Sequential
+    } else {
+        fingering::fingering_kind(pattern)
+    };
+    let mut name_buf = [0u8; 5];
+    WindFingering {
+        fingering_id,
+        semitones: pitch_semitones,
+        base_semitones,
+        register,
+        label: variant.label_at(label_index, pitch_semitones),
+        holes: pattern.chars().map(hole_mark_of).collect(),
+        fingering_kind,
+        anchor_hole: fingering::fingering_anchor_hole(pattern),
+        note_name: note::midi_to_name(midi, &mut name_buf)
+            .unwrap_or("")
+            .to_string(),
+        midi,
+        freq_hz: note::midi_to_freq(midi as f64, note::A4_DEFAULT),
+        solfege: panel_solfege(pc, tonic_pc),
+        in_scale: fingering::in_gong_scale(pc, tonic_pc),
+        overblown: !matches!(register, WindRegister::Low),
+    }
+}
+
+/// 孔位编码字符 → [`HoleMark`]。
+fn hole_mark_of(c: char) -> HoleMark {
+    match c {
+        'O' => HoleMark::Open,
+        'H' => HoleMark::Half,
+        _ => HoleMark::Closed,
+    }
+}
+
+/// 列出某管乐器的全部指法表（频率按 A4=440，唱名按各调性首调简谱）。
+///
+/// 旧版三档筒音视图（作 5 / 作 1 / 作 2），数据由 [`wind_fingering_chart`] 派生，
+/// 孔制取该调性的默认孔制。保留给 Android / macOS 面板，新面板请用 [`wind_fingering_chart`]。
+#[uniffi::export]
+pub fn list_fingering_charts(instrument_id: String) -> Vec<FingeringChart> {
+    let Some(variants) = fingering::wind_variants(&instrument_id) else {
+        return Vec::new();
+    };
+    let mut out = Vec::new();
+    for v in variants {
+        // 同一调性的多种孔制只暴露默认孔制，避免旧接口出现重名 chart
+        if fingering::default_variant_of_key(&instrument_id, v.key_id).map(|d| d.id) != Some(v.id) {
+            continue;
+        }
+        let degrees: Vec<(u8, String, String)> = if v.supports_tongyin() {
+            fingering::LEGACY_TONGYIN
+                .iter()
+                .map(|&(degree, suffix)| {
+                    (
+                        degree,
+                        format!("{}_{suffix}", v.key_id),
+                        format!("{} · 筒音作{}", v.key_name, panel_solfege(degree, 0)),
+                    )
+                })
+                .collect()
+        } else {
+            vec![(0, v.id.to_string(), v.key_name.to_string())]
+        };
+        for (degree, id, display_name) in degrees {
+            let Some(chart) = wind_fingering_chart(v.id.to_string(), degree, FingeringScope::Scale)
+            else {
+                continue;
+            };
+            let mut legacy_notes = chart.notes;
+            if v.id.contains("_xiao_") {
+                legacy_notes.sort_by_key(|note| note.semitones);
+            }
+            out.push(FingeringChart {
+                id,
+                display_name,
+                notes: legacy_notes
+                    .into_iter()
+                    .map(|n| FingeringNote {
+                        label: n.label,
+                        note_name: n.note_name,
+                        midi: n.midi,
+                        freq_hz: n.freq_hz,
+                        solfege: n.solfege,
+                    })
+                    .collect(),
+            });
+        }
+    }
+    out
 }
 
 /// 两频率间的音分差：1200·log2(freq/target)（§4 公式）。无效输入（≤0）返回 None。
@@ -889,9 +1250,9 @@ mod tests {
         let d5 = charts.iter().find(|c| c.id == "d_qudi_sou5").unwrap();
         assert_eq!(d5.display_name, "D调曲笛 · 筒音作5");
         assert_eq!(d5.notes.len(), 15);
-        // 筒音 A2 = 110Hz，唱名作 5
-        assert_eq!(d5.notes[0].note_name, "A2");
-        assert!((d5.notes[0].freq_hz - 110.0).abs() < 0.1);
+        // 筒音 a1 = A4 = 440Hz，唱名作 5
+        assert_eq!(d5.notes[0].note_name, "A4");
+        assert!((d5.notes[0].freq_hz - 440.0).abs() < 0.1);
         assert_eq!(d5.notes[0].solfege, "5");
         assert_eq!(d5.notes[0].label, "筒音");
         // 升序
@@ -899,6 +1260,264 @@ mod tests {
             assert!(w[0].freq_hz < w[1].freq_hz);
         }
         assert!(list_fingering_charts("suona".to_string()).is_empty());
+    }
+
+    #[test]
+    fn list_fingering_charts_dongxiao_uses_default_hole_system() {
+        // 每调只暴露默认孔制（8 孔），共 2 调 × 3 筒音
+        let charts = list_fingering_charts("dongxiao".to_string());
+        assert_eq!(charts.len(), 6);
+        let g5 = charts.iter().find(|c| c.id == "g_xiao_sou5").unwrap();
+        assert_eq!(g5.display_name, "G调洞箫 · 筒音作5");
+        assert_eq!(g5.notes[0].note_name, "D4"); // G 调洞箫筒音 d1
+        assert_eq!(g5.notes[0].solfege, "5");
+        // 8 孔的第三个音（7）保持第 2 辅助孔关闭，与六孔的「开第一二孔」不同。
+        assert_eq!(g5.notes[2].label, "开第一三孔");
+        // 尺八无筒音档，一个型号一张表
+        assert_eq!(list_fingering_charts("shakuhachi".to_string()).len(), 4);
+    }
+
+    #[test]
+    fn list_wind_variants_dongxiao() {
+        let variants = list_wind_variants("dongxiao".to_string());
+        assert_eq!(variants.len(), 4);
+        let first = &variants[0];
+        assert_eq!(first.id, "g_xiao_x8");
+        assert_eq!(first.display_name, "G调洞箫 · 8孔");
+        assert_eq!(first.hole_system_name, "8孔");
+        assert_eq!(first.hole_count, 8);
+        assert_eq!(first.back_hole_count, 1);
+        assert_eq!(first.fundamental_note_name, "D4");
+        assert!(first.supports_tongyin);
+        assert!(first.supports_chromatic);
+        assert_eq!(first.default_tongyin_degree, 7);
+        // 12 档筒音唱名，简谱顺序，8 孔常用 5/1/2/3/6
+        let sfs: Vec<&str> = first
+            .tongyin_options
+            .iter()
+            .map(|o| o.solfege.as_str())
+            .collect();
+        assert_eq!(
+            sfs,
+            [
+                "1", "#1", "2", "#2", "3", "4", "#4", "5", "#5", "6", "b7", "7"
+            ]
+        );
+        let common: Vec<u8> = first
+            .tongyin_options
+            .iter()
+            .filter(|o| o.common)
+            .map(|o| o.degree)
+            .collect();
+        assert_eq!(common, [0, 2, 4, 7, 9]);
+        // 6 孔常用只有 5/1/2
+        let x6 = variants.iter().find(|v| v.id == "g_xiao_x6").unwrap();
+        assert_eq!(x6.hole_count, 6);
+        assert_eq!(x6.tongyin_options.iter().filter(|o| o.common).count(), 3);
+        // 尺八无筒音档
+        let shaku = list_wind_variants("shakuhachi".to_string());
+        assert_eq!(shaku.len(), 4);
+        assert_eq!(shaku[0].display_name, "尺八 1.8寸（D调）");
+        assert!(!shaku[0].supports_tongyin);
+        assert!(shaku[0].tongyin_options.is_empty());
+        assert_eq!(shaku[0].hole_count, 0);
+        assert!(list_wind_variants("suona".to_string()).is_empty());
+    }
+
+    /// 取某个基础孔位的低音区条目（三音区展开后按 base 定位更稳）。
+    fn low_note(chart: &WindChart, base_semitones: i32) -> &WindFingering {
+        chart
+            .notes
+            .iter()
+            .find(|note| {
+                note.base_semitones == base_semitones && matches!(note.register, WindRegister::Low)
+            })
+            .expect("低音区应包含该孔位")
+    }
+
+    #[test]
+    fn wind_fingering_chart_uses_measured_patterns_for_each_register() {
+        // G 调 8 孔洞箫 · 筒音作 5：筒音 d1 = D4，唱名 5，宫音 G
+        let chart =
+            wind_fingering_chart("g_xiao_x8".to_string(), 7, FingeringScope::Scale).unwrap();
+        // 7 孔位 × 3 音区，减去指法图未覆盖的两格高音（33、34 半音）。
+        assert_eq!(chart.notes.len(), 19);
+        assert_eq!(chart.tongyin_solfege, "5");
+        assert_eq!(chart.tonic_name, "G");
+        assert_eq!(chart.key_display, "筒音作5 · G宫");
+        assert_eq!(chart.hole_count, 8);
+        let first = &chart.notes[0];
+        assert_eq!(first.fingering_id, 0);
+        assert_eq!(first.semitones, 0);
+        assert_eq!(first.base_semitones, 0);
+        assert_eq!(first.register, WindRegister::Low);
+        assert_eq!(first.note_name, "D4");
+        assert_eq!(first.solfege, "5");
+        assert_eq!(first.label, "筒音");
+        assert_eq!(first.holes, vec![HoleMark::Closed; 8]);
+        assert_eq!(first.fingering_kind, FingeringKind::Sequential);
+        assert_eq!(first.anchor_hole, None);
+        assert!(first.in_scale);
+        assert!(!first.overblown);
+        // 中音区（超吹）多数沿用同一孔位。
+        let middle = &chart.notes[1];
+        assert_eq!(middle.register, WindRegister::Middle);
+        assert_eq!(middle.base_semitones, 0);
+        assert_eq!(middle.semitones, 12);
+        assert_eq!(middle.note_name, "D5");
+        assert_eq!(middle.label, "筒音·超吹");
+        assert_eq!(middle.holes, first.holes);
+        assert_eq!(middle.anchor_hole, first.anchor_hole);
+        assert!(middle.overblown);
+        // 高音区（急吹）孔位与低、中音区不同，按指法图实测取值。
+        let high = &chart.notes[2];
+        assert_eq!(high.register, WindRegister::High);
+        assert_eq!(high.semitones, 24);
+        assert_eq!(high.note_name, "D6");
+        assert_ne!(high.holes, first.holes);
+        assert_eq!(high.label, "闭第二五六七孔·超吹二");
+        assert_eq!(high.anchor_hole, Some(7));
+        assert!(high.overblown);
+        // 指法图未覆盖的高音格不返回，客户端留空。
+        assert!(
+            chart
+                .notes
+                .iter()
+                .all(|note| note.base_semitones != 9 || note.register != WindRegister::High)
+        );
+        let mut ids: Vec<i32> = chart.notes.iter().map(|note| note.fingering_id).collect();
+        ids.sort_unstable();
+        ids.dedup();
+        assert_eq!(ids.len(), chart.notes.len());
+        assert_eq!(
+            chart
+                .notes
+                .iter()
+                .filter(|note| matches!(note.register, WindRegister::Low))
+                .count(),
+            7
+        );
+        assert_eq!(
+            chart
+                .notes
+                .iter()
+                .filter(|note| matches!(note.register, WindRegister::Low))
+                .map(|note| note.solfege.as_str())
+                .collect::<Vec<_>>(),
+            ["5", "6", "7", "1", "2", "3", "4"]
+        );
+        assert_eq!(
+            chart
+                .notes
+                .iter()
+                .filter(|note| matches!(note.register, WindRegister::Low))
+                .map(|note| note.base_semitones)
+                .collect::<Vec<_>>(),
+            [0, 2, 4, 5, 7, 9, 10]
+        );
+        let regular_aux_closed = low_note(&chart, 4); // 相对筒音 4 半音
+        assert_eq!(
+            regular_aux_closed.holes,
+            vec![
+                HoleMark::Open,
+                HoleMark::Closed,
+                HoleMark::Open,
+                HoleMark::Closed,
+                HoleMark::Closed,
+                HoleMark::Closed,
+                HoleMark::Closed,
+                HoleMark::Closed,
+            ]
+        );
+        assert_eq!(regular_aux_closed.fingering_kind, FingeringKind::Sequential);
+        assert_eq!(regular_aux_closed.anchor_hole, Some(2));
+        // 十二音详情同样按三音区展开：12 低音 + 12 中音 + 指法图覆盖到 31 半音的 8 个高音。
+        let full =
+            wind_fingering_chart("g_xiao_x8".to_string(), 7, FingeringScope::Chromatic).unwrap();
+        assert_eq!(full.notes.len(), 32);
+        let middle_fork = full
+            .notes
+            .iter()
+            .find(|note| note.base_semitones == 10 && note.register == WindRegister::Middle)
+            .expect("22 半音应有中音指法");
+        assert_ne!(
+            middle_fork.holes,
+            low_note(&full, 10).holes,
+            "22 半音的中音叉口与低音叉口不同"
+        );
+        let semi1 = low_note(&full, 1);
+        assert_eq!(semi1.base_semitones, 1);
+        assert_eq!(semi1.register, WindRegister::Low);
+        assert_eq!(semi1.label, "第一孔半开");
+        assert_eq!(semi1.holes[0], HoleMark::Half);
+        assert_eq!(semi1.fingering_kind, FingeringKind::Combination);
+        assert_eq!(semi1.anchor_hole, Some(0));
+        assert!(!semi1.in_scale); // #5 是偏音
+        // 叉口指法（4）：闭第二五六七孔
+        let fork = low_note(&full, 10);
+        assert_eq!(fork.base_semitones, 10);
+        assert_eq!(fork.label, "闭第二五六七孔");
+        assert_eq!(fork.fingering_kind, FingeringKind::Combination);
+        assert_eq!(fork.anchor_hole, Some(7));
+        assert!(fork.in_scale); // G 宫下 C 为正声
+    }
+
+    #[test]
+    fn wind_fingering_chart_keeps_chromatic_stable_and_refilters_scale_by_tongyin() {
+        // 十二音详情始终稳定；七声主表按当前筒音档重筛，确保完整显示 1–7。
+        let a =
+            wind_fingering_chart("g_xiao_x8".to_string(), 7, FingeringScope::Chromatic).unwrap();
+        let b =
+            wind_fingering_chart("g_xiao_x8".to_string(), 2, FingeringScope::Chromatic).unwrap();
+        assert_eq!(a.notes.len(), b.notes.len());
+        for (x, y) in a.notes.iter().zip(b.notes.iter()) {
+            assert_eq!(x.note_name, y.note_name);
+            assert_eq!(x.label, y.label);
+            assert_eq!(x.holes, y.holes);
+        }
+        assert_eq!(b.tongyin_solfege, "2");
+        assert_eq!(b.notes[0].solfege, "2");
+        assert_eq!(b.tonic_name, "C"); // 筒音 D 作 2 → 宫 = C
+        assert_eq!(b.key_display, "筒音作2 · C宫");
+        let scale =
+            wind_fingering_chart("g_xiao_x8".to_string(), 2, FingeringScope::Scale).unwrap();
+        assert_eq!(
+            scale
+                .notes
+                .iter()
+                .filter(|note| matches!(note.register, WindRegister::Low))
+                .map(|note| note.solfege.as_str())
+                .collect::<Vec<_>>(),
+            ["2", "3", "4", "5", "6", "7", "1"]
+        );
+        assert_eq!(
+            scale
+                .notes
+                .iter()
+                .filter(|note| matches!(note.register, WindRegister::Low))
+                .map(|note| note.base_semitones)
+                .collect::<Vec<_>>(),
+            [0, 2, 3, 5, 7, 9, 10]
+        );
+        // 越界筒音级按 12 取模，等价于作 5
+        let wrapped =
+            wind_fingering_chart("g_xiao_x8".to_string(), 19, FingeringScope::Scale).unwrap();
+        assert_eq!(wrapped.tongyin_degree, 7);
+        assert_eq!(wrapped.tongyin_solfege, "5");
+    }
+
+    #[test]
+    fn wind_fingering_chart_shakuhachi_ignores_tongyin() {
+        let chart =
+            wind_fingering_chart("shaku_1_8".to_string(), 5, FingeringScope::Chromatic).unwrap();
+        // 固定音阶类：忽略筒音级与十二音范围，无孔位图
+        assert_eq!(chart.notes.len(), 11);
+        assert_eq!(chart.tongyin_degree, 0);
+        assert_eq!(chart.tonic_name, "D");
+        assert_eq!(chart.key_display, "筒音为宫 · D宫");
+        assert!(chart.notes[0].holes.is_empty());
+        assert_eq!(chart.notes[0].label, "筒音(ro)");
+        assert!(wind_fingering_chart("nope".to_string(), 0, FingeringScope::Scale).is_none());
     }
 
     #[test]

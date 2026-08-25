@@ -31,7 +31,10 @@
 		7E0D61AE44E448F1348B44A5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5756E2D68F6C98E1883F9AEE /* Assets.xcassets */; };
 		8066ABC664AB2B8C80DE48DD /* SpectrumHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FB3D180829FA67F05BCA2E /* SpectrumHistory.swift */; };
 		8B8B370DEAC0A97108FBA622 /* MetronomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF56AF37FD23E36D8DD12075 /* MetronomeViewModel.swift */; };
+		922DFB18586EB11D24F16C97 /* InstrumentViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEB123E4C6F00BEEC6133C45 /* InstrumentViewModelTests.swift */; };
 		98CF36ED4A65C9329ACC23BA /* TunerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F03A77AFFF6476A89BFCC36 /* TunerView.swift */; };
+		99317B467323A86E823FAABD /* WindFingeringPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F276787910ECE0CEA5279F8A /* WindFingeringPanel.swift */; };
+		A2FF9AB29609AEDEC318FE9A /* DongxiaoFingeringPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A380CC489DA7CB6F5CBEDD86 /* DongxiaoFingeringPanel.swift */; };
 		A938797549BE07A767FAB2C9 /* AuroraBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = E12EAF717746A095462308AD /* AuroraBackground.swift */; };
 		A971D98EDDA7D12A96D0A494 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD41853BA666BF1EC65B1446 /* SettingsView.swift */; };
 		AC1231B3CC621A99180F2FE2 /* CaptureLifecycleGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DAD30A65A66031BCA9C2CA0 /* CaptureLifecycleGateTests.swift */; };
@@ -42,6 +45,7 @@
 		C7FF38C30F149C146B6F5CDB /* EngineBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F0DF87DD7B7DB86D216346 /* EngineBridge.swift */; };
 		D201D348F6A6D8E45D151849 /* CaptureFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0718B48422CEB11668F98497 /* CaptureFormatTests.swift */; };
 		D7F0DF74F345BBF3880D8245 /* Lumen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B82EFC12C5DDB7ED28322F3A /* Lumen.swift */; };
+		D9AA4B31636D610FF88CC8B2 /* HoleDiagram.swift in Sources */ = {isa = PBXBuildFile; fileRef = 236F78C371348334CA5D9888 /* HoleDiagram.swift */; };
 		DB63F11D6A65349747AB2D23 /* SpectrumPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B8257CD3F12D9D126FF4A07 /* SpectrumPresentation.swift */; };
 		DC6B32DF1A4244BB005F98A3 /* AudioFrameRingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A477CAB0ACC668399ED8CEE5 /* AudioFrameRingTests.swift */; };
 		DEC41252A4239899523BCE6B /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = EC86E8C8966C6F01CFC7D48E /* InfoPlist.strings */; };
@@ -65,6 +69,7 @@
 		0DAD30A65A66031BCA9C2CA0 /* CaptureLifecycleGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureLifecycleGateTests.swift; sourceTree = "<group>"; };
 		0F03A77AFFF6476A89BFCC36 /* TunerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerView.swift; sourceTree = "<group>"; };
 		1394B392DD061466D7F50AF9 /* Tunar-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tunar-Bridging-Header.h"; sourceTree = "<group>"; };
+		236F78C371348334CA5D9888 /* HoleDiagram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoleDiagram.swift; sourceTree = "<group>"; };
 		23FB3D180829FA67F05BCA2E /* SpectrumHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumHistory.swift; sourceTree = "<group>"; };
 		30CA7907548222D08D5D4174 /* MetronomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeView.swift; sourceTree = "<group>"; };
 		310F0123938040837D6F1C04 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -90,6 +95,7 @@
 		9D63D7AB975691156A65A66B /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		9F63A6A6A519EE7DC93D96B0 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
 		9FDD7927F276C8951B4CF29B /* TickSounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TickSounds.swift; sourceTree = "<group>"; };
+		A380CC489DA7CB6F5CBEDD86 /* DongxiaoFingeringPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DongxiaoFingeringPanel.swift; sourceTree = "<group>"; };
 		A477CAB0ACC668399ED8CEE5 /* AudioFrameRingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFrameRingTests.swift; sourceTree = "<group>"; };
 		AF56AF37FD23E36D8DD12075 /* MetronomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeViewModel.swift; sourceTree = "<group>"; };
 		B0E4F11CFC4F7AC6CF224332 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -103,8 +109,10 @@
 		C3680EE82BCF51ACBB763E31 /* TunerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerViewModel.swift; sourceTree = "<group>"; };
 		CDF0A246AA60BA66980BAAC6 /* MetronomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeScreen.swift; sourceTree = "<group>"; };
 		D2B54A3D07C53BFAD8DE9DB9 /* TunerViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerViewModelTests.swift; sourceTree = "<group>"; };
+		DEB123E4C6F00BEEC6133C45 /* InstrumentViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentViewModelTests.swift; sourceTree = "<group>"; };
 		E12EAF717746A095462308AD /* AuroraBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraBackground.swift; sourceTree = "<group>"; };
 		EF87153133A9935D84F5E37A /* TunarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunarApp.swift; sourceTree = "<group>"; };
+		F276787910ECE0CEA5279F8A /* WindFingeringPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindFingeringPanel.swift; sourceTree = "<group>"; };
 		F55E5EFF5DB28A138D996D95 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -200,6 +208,7 @@
 				A477CAB0ACC668399ED8CEE5 /* AudioFrameRingTests.swift */,
 				0718B48422CEB11668F98497 /* CaptureFormatTests.swift */,
 				0DAD30A65A66031BCA9C2CA0 /* CaptureLifecycleGateTests.swift */,
+				DEB123E4C6F00BEEC6133C45 /* InstrumentViewModelTests.swift */,
 				347E89B91A922FF9B9440348 /* MetronomeViewModelTests.swift */,
 				60B7BDEE77FDFD3B6F053103 /* SpectrumHistoryTests.swift */,
 				8E7F6A5C20EDCCF1AFC89D61 /* SpectrumPresentationTests.swift */,
@@ -253,8 +262,11 @@
 		CFF4FEF4225D51CB75A3B200 /* Instrument */ = {
 			isa = PBXGroup;
 			children = (
+				A380CC489DA7CB6F5CBEDD86 /* DongxiaoFingeringPanel.swift */,
+				236F78C371348334CA5D9888 /* HoleDiagram.swift */,
 				6694B0C7D94D9F2B798F7085 /* InstrumentView.swift */,
 				82608678B39C9404B471FA5B /* InstrumentViewModel.swift */,
+				F276787910ECE0CEA5279F8A /* WindFingeringPanel.swift */,
 			);
 			path = Instrument;
 			sourceTree = "<group>";
@@ -380,6 +392,7 @@
 				DC6B32DF1A4244BB005F98A3 /* AudioFrameRingTests.swift in Sources */,
 				D201D348F6A6D8E45D151849 /* CaptureFormatTests.swift in Sources */,
 				AC1231B3CC621A99180F2FE2 /* CaptureLifecycleGateTests.swift in Sources */,
+				922DFB18586EB11D24F16C97 /* InstrumentViewModelTests.swift in Sources */,
 				EB3BE87EED824CDED468CAF4 /* MetronomeViewModelTests.swift in Sources */,
 				147587438EEA152CB26D0046 /* SpectrumHistoryTests.swift in Sources */,
 				C602CDB5737720D69B32301E /* SpectrumPresentationTests.swift in Sources */,
@@ -395,9 +408,11 @@
 			files = (
 				46337A9D0BF0CC91829EABED /* AudioCapture.swift in Sources */,
 				A938797549BE07A767FAB2C9 /* AuroraBackground.swift in Sources */,
+				A2FF9AB29609AEDEC318FE9A /* DongxiaoFingeringPanel.swift in Sources */,
 				C7FF38C30F149C146B6F5CDB /* EngineBridge.swift in Sources */,
 				F45D8A250702BE1D3D549AF0 /* HaloDial.swift in Sources */,
 				383E3B6ED03EBD99B4679A8D /* Haptics.swift in Sources */,
+				D9AA4B31636D610FF88CC8B2 /* HoleDiagram.swift in Sources */,
 				6FE734D32DB700C9550E4EB2 /* InstrumentView.swift in Sources */,
 				0AFB28D6C0941304AE0D6973 /* InstrumentViewModel.swift in Sources */,
 				D7F0DF74F345BBF3880D8245 /* Lumen.swift in Sources */,
@@ -420,6 +435,7 @@
 				98CF36ED4A65C9329ACC23BA /* TunerView.swift in Sources */,
 				47ECD4734248B81D9601B05B /* TunerViewModel.swift in Sources */,
 				0DBEB67C2EF8DE8122AC3715 /* TuningForkViewModel.swift in Sources */,
+				99317B467323A86E823FAABD /* WindFingeringPanel.swift in Sources */,
 				3DC3B7F59EC1FF75C8644481 /* tunar_core.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

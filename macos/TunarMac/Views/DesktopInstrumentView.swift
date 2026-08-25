@@ -109,28 +109,53 @@ struct DesktopInstrumentView: View {
                 .pickerStyle(.segmented)
                 .frame(width: 180)
             }
+        } else if vm.usesDongxiaoInteraction {
+            HStack {
+                Picker("调性/型号", selection: Binding(
+                    get: { vm.keyName },
+                    set: { vm.selectKey($0) }
+                )) {
+                    ForEach(vm.keyNames, id: \.self) { Text($0).tag($0) }
+                }
+                if vm.holeSystems.count > 1 {
+                    Picker("孔制", selection: Binding(
+                        get: { vm.holeSystem },
+                        set: { vm.selectHoleSystem($0) }
+                    )) {
+                        ForEach(vm.holeSystems, id: \.self) { Text($0).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 160)
+                }
+            }
         } else {
             HStack {
                 Picker("调性/型号", selection: Binding(
                     get: { vm.chartGroup },
-                    set: { vm.selectChart(group: $0, tongyin: vm.tongyin) }
+                    set: { vm.selectClassicChart(group: $0, tongyin: vm.classicTongyin) }
                 )) {
                     ForEach(vm.chartGroups, id: \.self) { Text($0).tag($0) }
                 }
-                if !vm.tongyinOptions.isEmpty {
+                if !vm.classicTongyinOptions.isEmpty {
                     Picker("筒音", selection: Binding(
-                        get: { vm.tongyin },
-                        set: { vm.selectChart(group: vm.chartGroup, tongyin: $0) }
+                        get: { vm.classicTongyin },
+                        set: { vm.selectClassicChart(group: vm.chartGroup, tongyin: $0) }
                     )) {
-                        ForEach(vm.tongyinOptions, id: \.self) { Text("作\($0)").tag($0) }
+                        ForEach(vm.classicTongyinOptions, id: \.self) {
+                            Text("作\($0)").tag($0)
+                        }
                     }
                 }
             }
         }
     }
 
+    @ViewBuilder
     private var targets: some View {
-        MacCard {
+        if vm.usesDongxiaoInteraction {
+            MacDongxiaoFingeringCard(vm: vm)
+        } else {
+            MacCard {
             ScrollView {
                 LazyVStack(spacing: 8) {
                     if vm.kind == .string {
@@ -158,14 +183,14 @@ struct DesktopInstrumentView: View {
                             .buttonStyle(.plain)
                         }
                     } else {
-                        ForEach(vm.notes) { note in
+                        ForEach(vm.classicNotes) { note in
                             HStack {
                                 Text(note.label)
                                 Spacer()
                                 Text(note.noteName.replacingOccurrences(of: "#", with: "♯"))
                                     .font(.headline)
                                 Text(note.solfege)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(note.inScale ? .primary : .secondary)
                             }
                             .padding(10)
                             .background(
@@ -177,7 +202,8 @@ struct DesktopInstrumentView: View {
                 }
             }
             .frame(minHeight: 330)
+            }
+            .frame(maxWidth: .infinity)
         }
-        .frame(maxWidth: .infinity)
     }
 }

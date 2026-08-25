@@ -2,6 +2,7 @@ package com.liuchong.tunar.corebinding
 
 import uniffi.tunar_core.AnalysisFrame
 import uniffi.tunar_core.FingeringChart
+import uniffi.tunar_core.FingeringScope
 import uniffi.tunar_core.Instrument
 import uniffi.tunar_core.KeyMode
 import uniffi.tunar_core.MetronomeConfig
@@ -12,9 +13,13 @@ import uniffi.tunar_core.TunarConfig
 import uniffi.tunar_core.TunarEngine
 import uniffi.tunar_core.TunarEvent
 import uniffi.tunar_core.Tuning
+import uniffi.tunar_core.WindChart
+import uniffi.tunar_core.WindVariant
 import uniffi.tunar_core.listFingeringCharts
 import uniffi.tunar_core.listInstruments
 import uniffi.tunar_core.listTunings
+import uniffi.tunar_core.listWindVariants as uniffiListWindVariants
+import uniffi.tunar_core.windFingeringChart as uniffiWindFingeringChart
 
 /**
  * 调音引擎门面接口（便于 JVM 单测 mock；业务实现全在 Rust core）。
@@ -56,6 +61,14 @@ interface TunarCoreApi {
     fun tunings(instrumentId: String): List<Tuning>
 
     fun fingeringCharts(instrumentId: String): List<FingeringChart>
+
+    fun windVariants(instrumentId: String): List<WindVariant>
+
+    fun windFingeringChart(
+        variantId: String,
+        tongyinDegree: UByte,
+        scope: FingeringScope,
+    ): WindChart?
 
     /** 两频率间的音分差 1200·log2(freq/target)；无效输入返回 null。 */
     fun centsBetween(freqHz: Double, targetHz: Double): Double?
@@ -110,6 +123,15 @@ object TunarCore : TunarCoreApi {
 
     override fun fingeringCharts(instrumentId: String): List<FingeringChart> =
         listFingeringCharts(instrumentId)
+
+    override fun windVariants(instrumentId: String): List<WindVariant> =
+        uniffiListWindVariants(instrumentId)
+
+    override fun windFingeringChart(
+        variantId: String,
+        tongyinDegree: UByte,
+        scope: FingeringScope,
+    ): WindChart? = uniffiWindFingeringChart(variantId, tongyinDegree, scope)
 
     override fun centsBetween(freqHz: Double, targetHz: Double): Double? =
         uniffi.tunar_core.centsBetween(freqHz, targetHz)

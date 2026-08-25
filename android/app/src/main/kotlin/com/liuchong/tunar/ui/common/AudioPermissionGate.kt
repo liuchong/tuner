@@ -17,6 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +29,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 
 /**
  * 录音权限门（spec-audio §1）：未授权时先申请，拒绝则显示引导页；授权后展示内容。
@@ -40,35 +44,70 @@ fun AudioPermissionGate(
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     var asked by rememberSaveable { mutableStateOf(false) }
-    var granted by remember { mutableStateOf(false) }
+    var requestInFlight by rememberSaveable { mutableStateOf(false) }
+    var granted by remember {
+        mutableStateOf(hasAudioPermission(context))
+    }
 
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { g ->
         asked = true
-        granted = g
-        if (g) onGranted()
+        requestInFlight = false
+        // 部分厂商 ROM 返回值晚于系统权限落盘，再读一次真实状态。
+        granted = g || hasAudioPermission(context)
     }
 
-    LaunchedEffect(Unit) {
-        val g = ContextCompat.checkSelfPermission(
-            context, Manifest.permission.RECORD_AUDIO,
-        ) == PackageManager.PERMISSION_GRANTED
-        if (g) {
-            granted = true
+    fun requestPermission() {
+        requestInFlight = true
+        launcher.launch(Manifest.permission.RECORD_AUDIO)
+    }
+
+    LaunchedEffect(granted) {
+        if (granted) {
             onGranted()
-        } else {
-            launcher.launch(Manifest.permission.RECORD_AUDIO)
+        } else if (!asked && !requestInFlight) {
+            requestPermission()
         }
+    }
+
+    // 某些 ROM 不回调 RequestPermission；权限弹窗或系统设置返回时以真实权限为准。
+    DisposableEffect(lifecycleOwner, context) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event != Lifecycle.Event.ON_RESUME) return@LifecycleEventObserver
+            val nowGranted = hasAudioPermission(context)
+            granted = nowGranted
+            if (requestInFlight) {
+                requestInFlight = false
+                asked = true
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     if (granted) {
         content()
     } else {
-        PermissionGuide(asked = asked, onRetry = { launcher.launch(Manifest.permission.RECORD_AUDIO) })
+        PermissionGuide(
+            asked = asked,
+            onRetry = {
+                asked = false
+                if (!requestInFlight) {
+                    requestPermission()
+                }
+            },
+        )
     }
 }
+
+private fun hasAudioPermission(context: android.content.Context): Boolean =
+    ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.RECORD_AUDIO,
+    ) == PackageManager.PERMISSION_GRANTED
 
 /** 权限引导页（拒绝时优雅降级）。 */
 @Composable

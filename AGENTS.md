@@ -16,7 +16,8 @@ core/            Rust crate `tunar-core`：全部业务逻辑（DSP/唱名/预�
 android/         Android App（Kotlin + Jetpack Compose）
   app/           UI 与音频桥接
   core-binding/  UniFFI Kotlin 绑定 + 各 ABI .so
-  design/        图标源文件（SVG），用 scripts/generate-icons.sh 重新生成 mipmap 资源
+  design/        图标源文件（SVG，几何唯一来源 icon-mark.svg），
+                 用 scripts/generate-icons.sh 重新生成三端全部图标资源
 ios/             iOS SwiftUI App + UniFFI Swift 绑定
 macos/           macOS 14+ SwiftUI App（侧栏式五入口桌面界面）
 docs/            中英双语规格与「Aurora/极光」设计系统，代码以此为准

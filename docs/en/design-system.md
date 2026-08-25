@@ -109,6 +109,67 @@ Instrument cards show icon and name. Tuning, key, and tube-note selectors are ex
 and an 8 dp icon/text gap. Narrow layouts wrap the group, never text inside a control.
 String pills show number, note, and solfège; wind charts highlight the current row.
 
+Dongxiao adopts the new component first: G/F keys, eight holes by default, and a
+six-hole switch. Its diatonic main chart keeps seven base-fingering rows; chromatic
+detail independently keeps 12. Both use Low/Middle/High range columns, each carrying the
+pattern measured for that range; cells the charts do not cover are visually blank
+and non-tappable.
+Zhudi and shakuhachi keep their existing wind lists and do not inherit the following components.
+
+The view shows exactly one complete large vertical dongxiao on the left as its major
+visual. Three columns sit on the right: **Low (soft breath)**,
+**Middle (overblown)**, and **High (forceful breath)**.
+Fingerings, notes, and frequencies for chart-uncovered cells must not be synthesized by
+copying Low holes or adding octave/fifth offsets.
+
+Every base-fingering row shares the exact horizontal coordinate of the topmost open
+hole identified by its `anchor_hole`. A thin guide crossing the tube and three columns
+makes the shared coordinate explicit.
+The all-closed row anchors at the bottom outlet. A physical-hole guide without a matching
+diatonic base fingering remains visibly blank; adjacent cells do not stretch or move.
+Eight-hole mode renders one tube with exactly eight holes; six-hole mode renders one
+tube with exactly six.
+
+The large vertical diagram follows playing orientation: mouthpiece at top, open end at
+bottom, and the first hole near the bottom with a very slight sideways offset matching
+common modern dongxiao placement. Closed holes are solid, open holes outlined, and
+half-holes half-filled. Back/thumb holes remain on the tube centerline and use a
+dedicated accent color; they must not shift sideways or gain a ring that resembles
+another hole. It depicts one
+complete instrument as the visual anchor beside the list, not a repeated hole strip.
+The diagram is core's primary fingering example, not a claim of one authoritative
+fingering; instrument differences may use alternatives.
+
+Each cell uses a fixed note name and separate solfège badge; combined strings such as
+`D3·5` are forbidden. Tapping either area pins the cell's complete fingering onto the
+large dongxiao over live detection; tapping the same cell again releases the pin.
+Cross-fingered and half-hole patterns use only a small 叉 or 半 corner marker, never a
+separate lane.
+
+The top “Tube note as X” label is display-only. Users vertically drag a solfège badge.
+Main view wraps across seven natural degrees; chromatic detail independently wraps across
+12 semitone degrees. Crossing a full step updates every badge
+immediately with continuous motion; one sustained drag must reach “as 2” from default
+“as 5.” Release commits to the nearest discrete step and snaps; arbitrary resting
+positions are forbidden. Committing updates all
+solfège badges, tonic, and display-only status. Chromatic detail stays geometrically
+stable; the diatonic main chart atomically refilters its base rows to preserve complete
+`1–7`.
+
+Tapping blank space in the main-view title row opens detail. A visible “Chromatic
+Detail” button provides at least a 48 dp/pt target and accessible name “Open chromatic
+fingering detail.” The independent 12-semitone detail reuses the same one-dongxiao plus
+three-range geometry. iOS presents it full-screen, Android in a full-screen dialog,
+and macOS in a large sheet with a persistent close action. Main and detail share capture
+but preserve independent scroll, preview, and interaction state; a pinned cell outranks
+live recognition in both.
+
+All three range columns fit when width permits. On small phones the large dongxiao
+stays visible while only the register region scrolls horizontally, or columns
+auto-collapse with an explicit restore action. The register region also auto-scrolls so the
+live-hit column trends toward its center, with the displacement clamped to the legal scroll
+range; pinning and manual scrolling never trigger it.
+
 ### 4.6 Metronome
 
 The BPM ring supports vertical drag with elastic bounds. The pendulum follows beat
@@ -185,7 +246,8 @@ them in reading order. Sidebar changes use only a 150 ms cross-fade.
 | Type | `TunarTypography` | `Font.system(...).monospacedDigit()` |
 | Aurora | Canvas radial gradient | `RadialGradient` + `TimelineView` |
 | Needle | fast spring | 50 ms ease-out |
-| Sheet | `ModalBottomSheet` | `.sheet` |
+| General sheet | `ModalBottomSheet` | `.sheet` |
+| Dongxiao chromatic detail | full-screen dialog | iOS full-screen; macOS large `.sheet` |
 | Haptics | Compose feedback | UIKit/AppKit adapter |
 
 Android reference implementations live under `ui/theme`, `ui/common`, `ui/tuner`, and

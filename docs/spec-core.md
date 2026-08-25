@@ -165,7 +165,40 @@ src/
 数据与格式见 `docs/spec-instruments.md`。接口：
 
 - 弦乐器：Tuning = 有序弦列表，每弦 { 弦号, 音名, 目标频率(随 A4 校准换算), 首调唱名 }。
-- 管乐器：FingeringChart = 调性 + 筒音唱名 → 有序音阶列表，每项 { 指法名/孔位, 音名, 目标频率, 唱名 }。
+- 新管乐接口：`WindVariant` 表示「调性/尺寸 × 孔制」，`WindChart` 表示
+  「型号 + 12 档中的一档筒音唱名 + 七声/十二音范围」。`WindFingering` 同时返回稳定半音
+  id、基础孔位半音、音区、指法文字、孔位状态、`fingering_kind`（普通或叉指/半孔标记）、
+  `anchor_hole`（最上方开孔）、音名/MIDI/频率、唱名、正声/偏音和超吹标记。
+- 洞箫 G/F 调各提供 8 孔与 6 孔，型号顺序令 8 孔成为默认；孔制型号返回 12 档
+  `TongyinOption`。`fundamental_midi` 按实物取 G 调 `d1 = 62`、F 调 `c1 = 60`
+  （2026-08-25 修复：曾误取低八度的 50/48，实吹低音区会命中中音列）。UI 固定展示**低音（缓吹）**、**中音（超吹）**、
+  **高音（急吹）**三列。core 为每个基础孔位在三个音区各取**该音高的实测孔位**
+  （+0/+12/+24 半音）：8 孔 `Scale` 19 项、`Chromatic` 32 项，6 孔更少；
+  指法表未覆盖的音高不返回，客户端该格视觉留白。
+- 中、高音区孔位不是低音区的机械平移，必须逐格抄录来源：8 孔取
+  [八孔洞箫指法表](https://simumis.com/posts/xiao/) 相对筒音 0–31 半音的 32 列，
+  中音区只有 22 半音换用另一种叉口，高音区（24–31）孔位自成一套；6 孔取
+  [donsiau.net 洞簫指法](http://donsiau.net/notedr.htm) 六孔表五个筒音列的一致项，
+  其自注「超高音指法因簫不同略有差異」，列间冲突的 18、23、28、30 半音留空。
+  超出图表范围或列间冲突的格禁止复制低音孔位，也禁止通过增加八度或五度偏移合成孔位、
+  音名或频率。未访问的 Quark 付费页不得作为已核实证据。
+- 客户端主表只用自然级 `[0,2,4,5,7,9,11]` 作为 `Scale.tongyin_degree`，按七档循环；
+  详情独立使用全部 12 档请求 `Chromatic`。两张表不得共享一个可变筒音档状态。
+- 8 孔 `holes` 采用第 2、6 辅助孔常闭的主指法：来源表若标记“可开可闭”，core 固定选择
+  `Closed`，不得退化为八孔逐孔开放。辅助孔常闭仍属于普通指法；只有真正交叉开闭的孔型
+  才返回 `Combination`，半孔则同时由 `HoleMark::Half` 明确表达。
+- 同一型号切换 `tongyin_degree` 时，`Chromatic` 返回项保持相同 `fingering_id`、孔位和音名，
+  只改变唱名/宫音字段；`Scale` 必须按
+  `(宫调式七声半音 - tongyin_degree) mod 12` 重新筛选并升序排列七个基础半音，使低音列完整
+  覆盖 `1–7`。例如作 5 为 `[0,2,4,5,7,9,10]`，作 2 为 `[0,2,3,5,7,9,10]`。
+- UI 只把一个当前目标的 `holes` 渲染到一支完整大型洞箫。每个已返回的 `WindFingering`
+  作为“基础孔位行 × 音区列”的可点单元格；某音区没有返回项时该格必须留白且不可点。
+  基础行按 `anchor_hole` 与最上方开孔孔心严格共用水平坐标；全闭
+  锚定出音口。没有对应七声基础孔位的物理孔位线保持空白。`fingering_kind` 只决定单元格
+  是否显示小型“叉”或“半”提示，不得产生独立轨道。音名与唱名是分离字段和点击区域；
+  点选单元格把完整指法固定到大图，优先于实时识别，再点一次交回实时识别。
+- 逐半音 `holes` 是 core 选用的主指法示范，不构成唯一权威指法；不同乐器/流派允许替代指法。
+- 当前产品路径以洞箫先行。竹笛和尺八可由新接口返回数据，但其客户端交互暂保持旧版。
 
 全局查询接口的校准约定（2026-07-20 修订，原附录 A 注释「按当前 A4 校准换算」在
 无配置参数的全局函数上无从获得「当前」配置）：`list_tunings` / `list_fingering_charts`
@@ -192,7 +225,12 @@ src/
 - pitch：80/110/220/440/880/1046.5/1500Hz ±0.5 cent；噪声/静音 → None。
 - note：A4=440↔MIDI69；A4=442 校准偏移；cents 边界 ±50。
 - solfege：四种体系 × 至少宫/羽/大调/小调 × 含偏音用例。
-- tuning/fingering：预设表完整性（弦数、频率随 A4 换算正确）。
+- tuning/fingering：预设表完整性（弦数、频率随 A4 换算正确）；洞箫 G/F × 8/6 孔、
+  8 孔默认、筒音音高 G=`D4`/62 与 F=`C4`/60、12 档筒音、
+  三音区按实测孔位展开（8 孔 `Scale` 19 条、`Chromatic` 32 条）、
+  中音区与低音区孔位一致（22 半音例外）而高音区不同、指法表未覆盖的格不返回且无合成
+  频率/指法、单一大图目标优先级、行锚点与空白辅助线稳定、转调仅改变唱名相关字段；
+  旧 shim 无重名且维持旧形状。
 - metronome：tick 位置、tempo 变更、tap tempo、accent pattern。
 - signal：门限上下边界、2 帧确认、3dB 滞回、无限保持、保持期两帧替换、强噪声无效音高。
 - reference：12/19/24/31 平均律 80–1500Hz 边界、排序、A4 校准和标签音分。
@@ -204,7 +242,15 @@ namespace tunar_core {
     // ---- 全局 ----
     sequence<Instrument> list_instruments();
     sequence<Tuning> list_tunings(string instrument_id);
+    // 旧兼容 shim：默认孔制 × 作5/作1/作2；新界面不得依赖它表达完整管乐能力
     sequence<FingeringChart> list_fingering_charts(string instrument_id);
+    // 新管乐接口：型号（调性/尺寸 × 孔制）与按需生成的指法表
+    sequence<WindVariant> list_wind_variants(string instrument_id);
+    WindChart? wind_fingering_chart(
+        string variant_id,
+        u8 tongyin_degree,
+        FingeringScope scope
+    );
     // 两频率间的音分差：1200·log2(freq/target)（§4 公式；无效输入返回 null）
     f64? cents_between(f64 freq_hz, f64 target_hz);
     // 任意 MIDI 音的唱名（随用户唱名体系/调式；用于乐器面板弦/孔唱名显示）
@@ -246,6 +292,80 @@ dictionary FingeringChart {
     string id;            // "d_qudi_sou5" 等
     string display_name;  // "D调曲笛 · 筒音作5"
     sequence<FingeringNote> notes;
+};
+
+// ---- 2026-08-25：洞箫先行的孔位/唱名模型 ----
+[Enum]
+interface HoleMark { Closed, Open, Half };
+
+[Enum]
+interface FingeringScope {
+    Scale,      // 洞箫：7 个基础孔位 × 三音区实测指法（8 孔 19 条）
+    Chromatic   // 洞箫：12 个基础孔位 × 三音区实测指法（8 孔 32 条）
+};
+
+[Enum]
+interface FingeringKind { Sequential, Combination };
+
+[Enum]
+interface WindRegister {
+    Low,     // 低音（缓吹）
+    Middle,  // 中音（超吹）
+    High     // 高音（急吹）
+};
+
+dictionary TongyinOption {
+    u8 degree;             // 0–11；7=作5、0=作1、2=作2
+    string solfege;        // "1"、"#1"、"2"…；首调简谱
+    boolean common;        // 常用标记，不限制选择
+};
+
+dictionary WindVariant {
+    string id;                    // "g_xiao_x8"
+    string display_name;          // "G调洞箫 · 8孔"
+    string key_id;                // "g_xiao"
+    string key_name;              // "G调洞箫"
+    string hole_system_name;      // "8孔"；固定音阶类为空
+    u8 hole_count;                // 固定音阶类为 0
+    u8 back_hole_count;
+    i32 fundamental_midi;
+    string fundamental_note_name;
+    boolean supports_tongyin;
+    boolean supports_chromatic;
+    sequence<TongyinOption> tongyin_options; // 孔制类固定 12 档
+    u8 default_tongyin_degree;    // 孔制类默认 7（作5）
+};
+
+dictionary WindFingering {
+    i32 fingering_id;       // 表内唯一，等于该条的音高半音数
+    i32 semitones;          // 当前音高相对筒音低音基准的半音数（决定孔位）
+    i32 base_semitones;     // 所属基础孔位行 0–11（音区列分组用）
+    WindRegister register;
+    string label;           // core 主指法文字
+    sequence<HoleMark> holes; // 索引 0=第一孔（最下），不宣称唯一权威指法
+    FingeringKind fingering_kind; // 仅供小型“叉/半”提示，不用于分轨
+    u8? anchor_hole;        // 最上方开孔；全闭为 null 并锚定出音口
+    string note_name;
+    i32 midi;
+    f64 freq_hz;            // A4=440
+    string solfege;         // 随 tongyin_degree 整列同步变化
+    boolean in_scale;
+    boolean overblown;
+};
+
+dictionary WindChart {
+    string variant_id;
+    string variant_name;
+    u8 tongyin_degree;
+    string tongyin_solfege;
+    u8 tonic_pc;
+    string tonic_name;
+    string key_display;
+    u8 hole_count;
+    u8 back_hole_count;
+    // 按基础孔位升序；洞箫每个基础孔位携带各音区的实测孔位。
+    // UI 映射为低/中/高三列，指法表未覆盖而缺项的格保持空白。
+    sequence<WindFingering> notes;
 };
 
 [Enum]
@@ -375,5 +495,10 @@ UniFFI 生成端自动转为各语言惯例；本附录语义未变。§3 精化
 2026-07-20（M3）：新增全局函数 cents_between / solfege_for_midi；StringSpec、
 FingeringNote 增加 midi 字段（理由：乐器面板需要「目标 cents 换算」（§4 公式，属 core 职责）
 与「随用户唱名体系重算每弦/每孔唱名」，原接口只有 A4=440 固定换算结果，不含 MIDI 基准。
+
+2026-08-25：新增 `HoleMark`、`FingeringScope`、`FingeringKind`、`WindRegister`、
+`TongyinOption`、`WindVariant`、`WindFingering`、`WindChart`，以及 `list_wind_variants` /
+`wind_fingering_chart`。旧 `list_fingering_charts` 明确为从新模型派生的兼容 shim，继续返回
+默认孔制与作 5/1/2 旧表，不扩展其返回形状。
 
 变更规则：任何签名/类型修改必须先改本附录并注明版本日期。

@@ -39,10 +39,12 @@ struct InstrumentView: View {
                     }
                 }
 
-                // 控制区（弦乐：定弦+模式；管乐：调性+筒音）
+                // 控制区（弦乐：定弦+模式；管乐：型号+筒音转轮+指法表）
+                // 管乐指法表是本页主体，优先于留白拿到剩余高度
                 controlSection
+                    .layoutPriority(1)
 
-                Spacer().frame(maxHeight: .infinity)
+                Spacer(minLength: 0)
 
                 // 目标读数行（与表盘组成视觉组；高度固定，有/无信号同构不跳动）
                 targetReadout
@@ -52,10 +54,10 @@ struct InstrumentView: View {
                     cents: vm.centsToTarget != nil ? animatedCents : nil,
                     clarity: 1
                 )
-                .frame(height: 240)
+                .frame(height: dialHeight)
                 .opacity(vm.centsToTarget == nil ? 1 : 0.35 + Double(vm.displayStrength) * 0.65)
 
-                Spacer().frame(maxHeight: .infinity)
+                Spacer(minLength: 0)
 
                 StatusChip(visible: vm.centsToTarget == nil)
                     .animation(.easeInOut(duration: 0.2), value: vm.centsToTarget == nil)
@@ -69,6 +71,12 @@ struct InstrumentView: View {
                 animatedCents = NeedlePresentation.clampedCents(newValue ?? 0)
             }
         }
+    }
+
+    /// 管乐面板内容更密，但进入十二音详情不会改变主页面表盘尺寸。
+    private var dialHeight: CGFloat {
+        guard vm.kind == .wind else { return 240 }
+        return 176
     }
 
     @ViewBuilder
@@ -96,46 +104,7 @@ struct InstrumentView: View {
                 }
             }
         } else {
-            VStack(spacing: Lumen.Spacing.sm) {
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: Lumen.Spacing.sm) {
-                        chartMenu
-                        Spacer(minLength: Lumen.Spacing.sm)
-                        tongyinPicker
-                    }
-                    VStack(alignment: .leading, spacing: Lumen.Spacing.sm) {
-                        chartMenu
-                        if !vm.tongyinOptions.isEmpty {
-                            tongyinPicker
-                        }
-                    }
-                }
-                // 指法音阶列表
-                ScrollView {
-                    LazyVStack(spacing: 2) {
-                        ForEach(vm.notes) { n in
-                            HStack {
-                                Text(n.label)
-                                    .font(Lumen.label)
-                                    .foregroundStyle(palette.inkPrimary)
-                                Spacer()
-                                Text(n.noteName.replacingOccurrences(of: "#", with: "♯"))
-                                    .font(Lumen.label)
-                                    .fontWeight(n.active ? .bold : .regular)
-                                    .foregroundStyle(palette.inkPrimary)
-                                Text(n.solfege)
-                                    .font(Lumen.caption)
-                                    .foregroundStyle(palette.inkSecondary)
-                                    .frame(width: 32, alignment: .trailing)
-                            }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(n.active ? palette.accent.opacity(0.10) : .clear)
-                        }
-                    }
-                }
-                .frame(maxHeight: 220)
-            }
+            WindFingeringPanel(vm: vm)
         }
     }
 
@@ -165,34 +134,6 @@ struct InstrumentView: View {
             }
         } label: {
             RoundedControlLabel(title: vm.tuningName)
-        }
-    }
-
-    private var chartMenu: some View {
-        Menu {
-            ForEach(vm.chartGroups, id: \.self) { group in
-                Button(group) { vm.selectChart(group: group, tongyin: vm.tongyin) }
-            }
-        } label: {
-            RoundedControlLabel(title: vm.chartGroup)
-        }
-    }
-
-    private var tongyinPicker: some View {
-        HStack(spacing: Lumen.Spacing.xs) {
-            ForEach(vm.tongyinOptions, id: \.self) { option in
-                let selected = option == vm.tongyin
-                Button { vm.selectChart(group: vm.chartGroup, tongyin: option) } label: {
-                    Text("作\(option)")
-                        .font(Lumen.label)
-                        .lineLimit(1)
-                        .foregroundStyle(selected ? palette.bgCanvas : palette.inkPrimary)
-                        .padding(.horizontal, 12)
-                        .frame(height: 48)
-                        .background(selected ? palette.accent : palette.bgSurface, in: Capsule())
-                        .overlay(Capsule().stroke(selected ? palette.accent : palette.lineSubtle))
-                }
-            }
         }
     }
 
@@ -226,7 +167,8 @@ struct InstrumentView: View {
     }
 }
 
-private struct RoundedControlLabel: View {
+/// 48pt 高圆角下拉触发器（design-system §6.6）。
+struct RoundedControlLabel: View {
     @Environment(\.lumen) private var palette
     let title: String
 

@@ -5,6 +5,14 @@ private func coreCentsBetween(freq: Double, target: Double) -> Double? {
     centsBetween(freqHz: freq, targetHz: target)
 }
 
+private func coreWindFingeringChart(
+    variantId: String,
+    tongyinDegree: UInt8,
+    scope: FingeringScope
+) -> WindChart? {
+    windFingeringChart(variantId: variantId, tongyinDegree: tongyinDegree, scope: scope)
+}
+
 /// 引擎门面协议（业务逻辑全在 Rust core；协议化便于 XCTest mock）。
 
 protocol PitchEngine {
@@ -84,6 +92,18 @@ enum CorePresets {
     static func tunings(instrumentId: String) -> [Tuning] { listTunings(instrumentId: instrumentId) }
     static func fingeringCharts(instrumentId: String) -> [FingeringChart] {
         listFingeringCharts(instrumentId: instrumentId)
+    }
+    static func windVariants(instrumentId: String) -> [WindVariant] {
+        listWindVariants(instrumentId: instrumentId)
+    }
+    static func windFingeringChart(
+        variantId: String,
+        tongyinDegree: UInt8,
+        scope: FingeringScope
+    ) -> WindChart? {
+        coreWindFingeringChart(
+            variantId: variantId, tongyinDegree: tongyinDegree, scope: scope
+        )
     }
     static func centsBetween(freq: Double, target: Double) -> Double? {
         coreCentsBetween(freq: freq, target: target)

@@ -129,6 +129,66 @@ solfège settings.
 Target cents for instrument tuning use the same `cents_between` rule as universal
 tuning. Native platforms may select UI rows but may not calculate musical targets.
 
+The new wind surface models a `WindVariant` as key/size × hole system and generates a
+`WindChart` for that variant, one of 12 tube-solfège degrees, and a diatonic/chromatic
+scope. Each `WindFingering` carries a stable fingering ID, pitch semitones,
+base-fingering semitone, register, fingering text, hole states,
+`fingering_kind` (ordinary or cross/half-hole marker),
+`anchor_hole` (topmost open hole),
+note/MIDI/frequency, solfège, scale membership, and overblown state.
+
+- Dongxiao exposes G/F × eight/six holes in an order that makes eight-hole the default.
+  Holed variants return 12 `TongyinOption` values. `fundamental_midi` matches real
+  instruments: G is `d1 = 62` and F is `c1 = 60` (fixed 2026-08-25; the presets were an
+  octave low at 50/48, so playing the low range hit the middle column). UI keeps three ranges:
+  **Low (soft breath)**, **Middle (overblown)**, and
+  **High (forceful breath)**. Core expands every base pattern into the three ranges
+  (+0/+12/+24 semitones) and takes **the pattern measured for each pitch**: eight holes
+  return 19 `Scale` and 32 `Chromatic` entries, six holes fewer. Pitches the charts do not
+  cover are omitted and clients leave those cells visually blank.
+- Upper ranges are not mechanical transpositions and must be transcribed cell by cell.
+  Eight-hole data comes from the [eight-hole xiao chart](https://simumis.com/posts/xiao/)
+  (32 columns, 0–31 semitones): the middle range reuses low patterns except at 22
+  semitones, and the high range (24–31) has its own patterns. Six-hole data keeps only the
+  values on which the five tube-note columns of
+  [donsiau.net](http://donsiau.net/notedr.htm) agree; that chart notes extreme-high
+  fingerings vary by instrument, so the conflicting 18, 23, 28, and 30 semitones stay
+  blank. Core must not fill gaps beyond the charts by copying low holes or adding
+  octave/fifth offsets to synthesize holes, note names, or frequencies. Inaccessible paid
+  Quark pages are not verified evidence.
+- Eight-hole `holes` use the primary form with auxiliary holes 2 and 6 closed. When the
+  source chart permits either state, core selects `Closed`; it must not fall back to
+  opening all eight holes in sequence. Normal auxiliary-hole closure remains ordinary,
+  while only genuinely crossed patterns return `Combination`; half holes remain explicit.
+- Main clients pass only natural degrees `[0,2,4,5,7,9,11]` to `Scale` and wrap across
+  seven positions. Detail independently uses all 12 degrees with `Chromatic`; the two
+  views must not share one mutable tube-degree state.
+- For one variant, changing `tongyin_degree` keeps all returned `Chromatic` fingering IDs,
+  holes, and note names stable while changing solfège/tonic fields. `Scale` refilters
+  seven sorted bases as `(gong-scale step - tongyin_degree) mod 12`, so Low
+  always contains complete `1–7`: as 5 uses `[0,2,4,5,7,9,10]`, and as 2 uses
+  `[0,2,3,5,7,9,10]`.
+- UI renders only one current target's `holes` on one complete large dongxiao.
+  Each emitted `WindFingering` becomes a tappable base-row × range-column cell; a range
+  with no entry for that row stays blank and non-tappable. Base rows align strictly to the
+  center of the topmost open hole exposed by `anchor_hole`; all-closed anchors at the
+  outlet, and a physical guide without a diatonic base pattern remains blank.
+  `fingering_kind` may produce only a small 叉 or 半 marker, never a separate lane.
+  Note name and solfège remain separate fields and tap areas. Tapping a cell pins its
+  complete fingering to the diagram over live detection; tapping it again releases the pin.
+- `holes` is core's primary fingering example, not a claim of one authoritative
+  semitone fingering. Instrument and school differences may use alternatives.
+- Product rollout is dongxiao first. Zhudi and shakuhachi may be represented by the new
+  core surface while their client interaction remains unchanged.
+
+Compatibility shim: `list_fingering_charts(instrument_id)` retains the old
+`FingeringChart` shape. For holed winds, it chooses each key's default hole system and
+derives the legacy tube-degree 5/1/2 scale charts through
+`wind_fingering_chart(..., Scale)`; six/eight-hole variants of one key never leak as
+duplicate legacy chart names. Fixed-scale variants still produce one chart per model.
+New UI uses `list_wind_variants` plus `wind_fingering_chart`; the shim does not expose
+12 positions, hole diagrams, the sparse three-range grid, or independent chromatic detail.
+
 ## 7. Metronome
 
 Tempo range is 30–250 BPM. Beat unit supports 2, 4, or 8 and bar length 1–12. Every
@@ -147,7 +207,14 @@ ignores invalid/outlier intervals and requires at least two taps.
 - Gate acquisition, hysteresis, indefinite holding, and replacement by a new note.
 - Spectrum bounds, measured partials, chords, and silence.
 - All temperament tables and ordered 80–1500 Hz reference tones.
-- Instrument counts, ordering, MIDI/frequency, and customary solfège.
+- Instrument counts, ordering, MIDI/frequency, and customary solfège; dongxiao G/F ×
+  eight/six holes, eight-hole default, closed-tube pitch `D4`/62 for G and `C4`/60 for F,
+  12 tube positions, three ranges expanded from
+  measured patterns (19 `Scale` and 32 `Chromatic` entries for eight holes), middle-range
+  holes matching the low range except at 22 semitones while the high range differs,
+  chart-uncovered cells omitted with no synthetic frequencies or fingerings, single-large-diagram
+  target priority, stable row anchors and blank guides, solfège-only transposition
+  stability, and a duplicate-free legacy shim.
 - 1000 metronome ticks, tempo changes, accents/mutes, tap outliers, and finite samples.
 
 ## Appendix A — UniFFI contract
@@ -156,8 +223,23 @@ The checked-in UDL/generated surface is the only native API. Rust uses snake_cas
 generated bindings map names to platform conventions. The contract contains:
 
 ```text
+namespace tunar_core {
+  sequence<Instrument> list_instruments();
+  sequence<Tuning> list_tunings(string instrument_id);
+  // Legacy shim: default hole system × tube degree 5/1/2.
+  sequence<FingeringChart> list_fingering_charts(string instrument_id);
+  sequence<WindVariant> list_wind_variants(string instrument_id);
+  WindChart? wind_fingering_chart(
+    string variant_id,
+    u8 tongyin_degree,
+    FingeringScope scope
+  );
+  f64? cents_between(f64 freq_hz, f64 target_hz);
+  string solfege_for_midi(SolfegeSystem system, KeyMode key, i32 midi);
+}
+
 enum InstrumentKind {
-  Guitar, Ukulele, Guqin, Zhudi, Dongxiao, Shakuhachi
+  String, Wind
 }
 
 dictionary Instrument {
@@ -167,7 +249,7 @@ dictionary Instrument {
 }
 
 dictionary StringSpec {
-  u8 number;
+  u32 index;
   i32 midi;
   string note_name;
   f64 freq_hz;
@@ -181,7 +263,7 @@ dictionary Tuning {
 }
 
 dictionary FingeringNote {
-  string fingering;
+  string label;
   i32 midi;
   string note_name;
   f64 freq_hz;
@@ -192,6 +274,65 @@ dictionary FingeringChart {
   string id;
   string display_name;
   sequence<FingeringNote> notes;
+}
+
+enum HoleMark { Closed, Open, Half }
+enum FingeringScope { Scale, Chromatic }
+enum FingeringKind { Sequential, Combination }
+enum WindRegister { Low, Middle, High }
+
+dictionary TongyinOption {
+  u8 degree;
+  string solfege;
+  boolean common;
+}
+
+dictionary WindVariant {
+  string id;
+  string display_name;
+  string key_id;
+  string key_name;
+  string hole_system_name;
+  u8 hole_count;
+  u8 back_hole_count;
+  i32 fundamental_midi;
+  string fundamental_note_name;
+  boolean supports_tongyin;
+  boolean supports_chromatic;
+  sequence<TongyinOption> tongyin_options;
+  u8 default_tongyin_degree;
+}
+
+dictionary WindFingering {
+  i32 fingering_id;
+  i32 semitones;
+  i32 base_semitones;
+  WindRegister register;
+  string label;
+  sequence<HoleMark> holes;
+  FingeringKind fingering_kind;
+  u8? anchor_hole;
+  string note_name;
+  i32 midi;
+  f64 freq_hz;
+  string solfege;
+  boolean in_scale;
+  boolean overblown;
+}
+
+dictionary WindChart {
+  string variant_id;
+  string variant_name;
+  u8 tongyin_degree;
+  string tongyin_solfege;
+  u8 tonic_pc;
+  string tonic_name;
+  string key_display;
+  u8 hole_count;
+  u8 back_hole_count;
+  // Ordered by base fingering, each with its per-range measured pattern; clients leave
+  // cells the charts do not cover blank.
+  sequence<WindFingering> notes;
 }
 
 enum SolfegeSystem { FixedDo, MovableDo, Numbered, Chinese }
@@ -305,7 +446,12 @@ interface Metronome {
 }
 ```
 
-Global queries expose instruments, tunings, fingering charts, cents conversion, and
-solfège conversion as defined by the checked-in UDL. Any signature/type change first
-updates this appendix in English and `../spec-core.md` in Chinese, then regenerates all
-bindings; generated binding files are never hand-edited.
+The 2026-08-25 contract adds `HoleMark`, `FingeringScope`, `FingeringKind`,
+`WindRegister`, `TongyinOption`, `WindVariant`, `WindFingering`, `WindChart`,
+`list_wind_variants`, and
+`wind_fingering_chart`. `list_fingering_charts` remains a compatibility shim derived
+from the new model and keeps its old return shape.
+
+Global queries and object methods are defined by the checked-in UniFFI surface. Any
+signature/type change first updates this appendix in English and `../spec-core.md` in
+Chinese, then regenerates all bindings; generated binding files are never hand-edited.

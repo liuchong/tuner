@@ -375,7 +375,7 @@ RustBuffer uniffi_tunar_core_fn_func_list_fingering_charts(RustBuffer instrument
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_FN_FUNC_LIST_INSTRUMENTS
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_FN_FUNC_LIST_INSTRUMENTS
 RustBuffer uniffi_tunar_core_fn_func_list_instruments(RustCallStatus *_Nonnull out_status
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_FN_FUNC_LIST_TUNINGS
@@ -383,9 +383,19 @@ RustBuffer uniffi_tunar_core_fn_func_list_instruments(RustCallStatus *_Nonnull o
 RustBuffer uniffi_tunar_core_fn_func_list_tunings(RustBuffer instrument_id, RustCallStatus *_Nonnull out_status
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_FN_FUNC_LIST_WIND_VARIANTS
+#define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_FN_FUNC_LIST_WIND_VARIANTS
+RustBuffer uniffi_tunar_core_fn_func_list_wind_variants(RustBuffer instrument_id, RustCallStatus *_Nonnull out_status
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_FN_FUNC_SOLFEGE_FOR_MIDI
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_FN_FUNC_SOLFEGE_FOR_MIDI
 RustBuffer uniffi_tunar_core_fn_func_solfege_for_midi(RustBuffer system, RustBuffer key, int32_t midi, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_FN_FUNC_WIND_FINGERING_CHART
+#define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_FN_FUNC_WIND_FINGERING_CHART
+RustBuffer uniffi_tunar_core_fn_func_wind_fingering_chart(RustBuffer variant_id, uint8_t tongyin_degree, RustBuffer scope, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_FFI_TUNAR_CORE_RUSTBUFFER_ALLOC
@@ -671,145 +681,157 @@ void ffi_tunar_core_rust_future_complete_void(uint64_t handle, RustCallStatus *_
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_FUNC_CENTS_BETWEEN
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_FUNC_CENTS_BETWEEN
 uint16_t uniffi_tunar_core_checksum_func_cents_between(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_FUNC_LIST_FINGERING_CHARTS
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_FUNC_LIST_FINGERING_CHARTS
 uint16_t uniffi_tunar_core_checksum_func_list_fingering_charts(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_FUNC_LIST_INSTRUMENTS
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_FUNC_LIST_INSTRUMENTS
 uint16_t uniffi_tunar_core_checksum_func_list_instruments(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_FUNC_LIST_TUNINGS
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_FUNC_LIST_TUNINGS
 uint16_t uniffi_tunar_core_checksum_func_list_tunings(void
-    
+
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_FUNC_LIST_WIND_VARIANTS
+#define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_FUNC_LIST_WIND_VARIANTS
+uint16_t uniffi_tunar_core_checksum_func_list_wind_variants(void
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_FUNC_SOLFEGE_FOR_MIDI
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_FUNC_SOLFEGE_FOR_MIDI
 uint16_t uniffi_tunar_core_checksum_func_solfege_for_midi(void
-    
+
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_FUNC_WIND_FINGERING_CHART
+#define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_FUNC_WIND_FINGERING_CHART
+uint16_t uniffi_tunar_core_checksum_func_wind_fingering_chart(void
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_METRONOME_IS_RUNNING
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_METRONOME_IS_RUNNING
 uint16_t uniffi_tunar_core_checksum_method_metronome_is_running(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_METRONOME_RENDER
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_METRONOME_RENDER
 uint16_t uniffi_tunar_core_checksum_method_metronome_render(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_METRONOME_SET_ACCENTS
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_METRONOME_SET_ACCENTS
 uint16_t uniffi_tunar_core_checksum_method_metronome_set_accents(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_METRONOME_SET_BPM
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_METRONOME_SET_BPM
 uint16_t uniffi_tunar_core_checksum_method_metronome_set_bpm(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_METRONOME_SET_CLICK_SAMPLES
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_METRONOME_SET_CLICK_SAMPLES
 uint16_t uniffi_tunar_core_checksum_method_metronome_set_click_samples(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_METRONOME_SET_TIME_SIGNATURE
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_METRONOME_SET_TIME_SIGNATURE
 uint16_t uniffi_tunar_core_checksum_method_metronome_set_time_signature(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_METRONOME_START
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_METRONOME_START
 uint16_t uniffi_tunar_core_checksum_method_metronome_start(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_METRONOME_STOP
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_METRONOME_STOP
 uint16_t uniffi_tunar_core_checksum_method_metronome_stop(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_METRONOME_TAP
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_METRONOME_TAP
 uint16_t uniffi_tunar_core_checksum_method_metronome_tap(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_TUNARENGINE_ANALYZE
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_TUNARENGINE_ANALYZE
 uint16_t uniffi_tunar_core_checksum_method_tunarengine_analyze(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_TUNARENGINE_FEED
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_TUNARENGINE_FEED
 uint16_t uniffi_tunar_core_checksum_method_tunarengine_feed(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_TUNARENGINE_LIST_REFERENCE_TONES
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_TUNARENGINE_LIST_REFERENCE_TONES
 uint16_t uniffi_tunar_core_checksum_method_tunarengine_list_reference_tones(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_TUNARENGINE_SET_A4
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_TUNARENGINE_SET_A4
 uint16_t uniffi_tunar_core_checksum_method_tunarengine_set_a4(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_TUNARENGINE_SET_NOISE_GATE
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_TUNARENGINE_SET_NOISE_GATE
 uint16_t uniffi_tunar_core_checksum_method_tunarengine_set_noise_gate(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_TUNARENGINE_SET_SOLFEGE
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_TUNARENGINE_SET_SOLFEGE
 uint16_t uniffi_tunar_core_checksum_method_tunarengine_set_solfege(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_TUNARENGINE_SET_TEMPERAMENT
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_METHOD_TUNARENGINE_SET_TEMPERAMENT
 uint16_t uniffi_tunar_core_checksum_method_tunarengine_set_temperament(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_CONSTRUCTOR_METRONOME_NEW
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_CONSTRUCTOR_METRONOME_NEW
 uint16_t uniffi_tunar_core_checksum_constructor_metronome_new(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_CONSTRUCTOR_TUNARENGINE_NEW
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_CONSTRUCTOR_TUNARENGINE_NEW
 uint16_t uniffi_tunar_core_checksum_constructor_tunarengine_new(void
-    
+
 );
 #endif
 #ifndef UNIFFI_FFIDEF_FFI_TUNAR_CORE_UNIFFI_CONTRACT_VERSION
 #define UNIFFI_FFIDEF_FFI_TUNAR_CORE_UNIFFI_CONTRACT_VERSION
 uint32_t ffi_tunar_core_uniffi_contract_version(void
-    
+
 );
 #endif
 

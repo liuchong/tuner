@@ -366,6 +366,10 @@ private fun StringButton(item: StringItemUi, onClick: () -> Unit) {
 /** 管乐器区（调性/筒音唱名选择 + 指法音阶列表）。 */
 @Composable
 private fun WindInstrumentSection(state: InstrumentUiState, vm: InstrumentViewModel) {
+    if (state.instrumentId == "dongxiao") {
+        DongxiaoFingeringPanel(state = state, viewModel = vm)
+        return
+    }
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val compact = maxWidth < 380.dp
         val selector: @Composable () -> Unit = {
@@ -441,7 +445,7 @@ private fun WindInstrumentSection(state: InstrumentUiState, vm: InstrumentViewMo
 /** 简单下拉选择。 */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SimpleDropdown(
+internal fun SimpleDropdown(
     label: String,
     value: String,
     options: List<Pair<String, String>>,
