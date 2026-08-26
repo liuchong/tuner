@@ -48,6 +48,8 @@ cd android && ./gradlew testDebugUnitTest
 
 # iOS 端 Rust 库 + Swift 绑定 + XCFramework
 scripts/build-core-ios.sh           # 输出含 iOS 与通用 macOS slice 的 ios/TunarCore/
+                                    # XCFramework 不入库（静态库单个 35–70MB），
+                                    # 改完 core 或全新 clone 都要先跑这一步再开 Xcode
 
 # iOS 构建（xcodegen 重新生成工程；模拟器/真机）
 cd ios && xcodegen generate

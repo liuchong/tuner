@@ -68,6 +68,8 @@ scripts/build-core-android.sh
 cd android && ./gradlew assembleDebug testDebugUnitTest
 
 # 生成含 iOS 与通用 macOS slice 的 Apple 绑定
+# 任何 Xcode 构建之前都必须先跑：XCFramework 属编译产物，静态库单个 35–70MB，不入库，
+# 全新 clone 需要自己生成。
 scripts/build-core-ios.sh
 
 # iOS 工程与模拟器测试

@@ -70,6 +70,8 @@ scripts/build-core-android.sh
 cd android && ./gradlew assembleDebug testDebugUnitTest
 
 # Apple bindings and universal iOS/macOS XCFramework
+# Required before any Xcode build: the XCFramework is a build artifact and is not tracked
+# in git (its static libraries are 35–70 MB each), so a fresh clone has to generate it.
 scripts/build-core-ios.sh
 
 # iOS generated project and simulator tests

@@ -11,3 +11,8 @@ android/local.properties
 # Xcode 派生数据（xcodebuild -derivedDataPath）
 ios/build/
 macos/build/
+
+# Rust core 编译产物：XCFramework 里的静态库单个就有 35–70MB，每次重建都是一份新大对象，
+# 一律不入库。编译 iOS/macOS 前先跑 scripts/build-core-ios.sh 生成。
+# （UniFFI 生成的 Swift/Kotlin 绑定是文本、可 diff，仍然入库以便审查 FFI 合同变化）
+ios/TunarCore/tunar_core.xcframework/
