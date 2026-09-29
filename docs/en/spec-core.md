@@ -106,6 +106,21 @@ The table uses current A4 and temperament, includes every step whose frequency i
 temperament, nearest 12-TET note name, and cents from that note. Native playback uses
 these frequencies verbatim.
 
+### 4.5 Tool tones
+
+`list_tool_tones()` returns the fixed audio presets for the Tools page (`ToolTone`) in
+display order:
+
+- Each entry carries a stable `id`, display name, one-line summary, and sine frequency
+  `frequency_hz`.
+- The frequency defines the tool itself and does **not** follow A4 calibration or
+  temperament, so this is a global function rather than an engine method.
+- There is currently one entry: `anti_motion_sickness` ("防晕车", anti-motion-sickness),
+  a pure 100 Hz sine.
+- `id` values are unique; frequencies stay within the audible 20–20000 Hz range. New tools
+  only change the core preset table; all three UIs render the list and never hard-code
+  frequencies natively.
+
 ## 5. Solfège and modes
 
 Systems:
@@ -255,6 +270,7 @@ namespace tunar_core {
   );
   f64? cents_between(f64 freq_hz, f64 target_hz);
   string solfege_for_midi(SolfegeSystem system, KeyMode key, i32 midi);
+  sequence<ToolTone> list_tool_tones();
 }
 
 enum InstrumentKind {
@@ -405,6 +421,13 @@ dictionary ReferenceTone {
   f64 cents_from_note;
 }
 
+dictionary ToolTone {
+  string id;
+  string display_name;
+  string summary;
+  f64 frequency_hz;
+}
+
 interface TunarEngine {
   constructor(TunarConfig config);
   TunarEvent? feed(sequence<f32> pcm);
@@ -460,6 +483,9 @@ The 2026-08-25 contract adds `HoleMark`, `FingeringScope`, `FingeringKind`,
 end of §6). Shakuhachi variants now carry their own hole table, report `hole_count = 5` and
 `back_hole_count = 1`, and fill `register` by octave; the zhudi uses a dedicated six-hole
 dizi pattern table.
+
+2026-09-29 also adds `ToolTone` and the global `list_tool_tones` (§4.5) for fixed-frequency
+Tools-page audio such as anti-motion-sickness.
 
 Global queries and object methods are defined by the checked-in UniFFI surface. Any
 signature/type change first updates this appendix in English and `../spec-core.md` in

@@ -12,6 +12,7 @@ pub mod signal;
 pub mod smooth;
 pub mod solfege;
 pub mod spectrum;
+pub mod tools;
 pub mod tuning;
 
 uniffi::setup_scaffolding!();

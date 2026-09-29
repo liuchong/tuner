@@ -5,6 +5,7 @@ enum DesktopSection: String, CaseIterable, Identifiable {
     case instruments
     case analysis
     case metronome
+    case tools
     case settings
 
     static let defaultSelection: DesktopSection = .tuner
@@ -17,6 +18,7 @@ enum DesktopSection: String, CaseIterable, Identifiable {
         case .instruments: "乐器"
         case .analysis: "专业分析"
         case .metronome: "节拍器"
+        case .tools: "小工具"
         case .settings: "设置"
         }
     }
@@ -27,6 +29,7 @@ enum DesktopSection: String, CaseIterable, Identifiable {
         case .instruments: "pianokeys"
         case .analysis: "waveform.path.ecg"
         case .metronome: "metronome"
+        case .tools: "wrench.and.screwdriver"
         case .settings: "gearshape"
         }
     }

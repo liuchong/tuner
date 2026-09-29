@@ -123,6 +123,16 @@ src/
   相对该音名的音分差，便于非 12 平均律仍有可读标签。
 - core 只提供频率和标签，不访问扬声器，也不生成平台音频对象。
 
+## 4e. 小工具音频
+
+`list_tool_tones()` 按展示顺序返回小工具页的固定音频预设（`ToolTone`）：
+
+- 每项包含稳定 `id`、显示名、一行说明与正弦波频率 `frequency_hz`。
+- 频率是工具本身的定义，**不随** A4 校准或律制变化，因此是全局函数而非引擎方法。
+- 当前只有一项：`anti_motion_sickness`「防晕车」，100Hz 纯正弦波。
+- `id` 在列表内唯一；频率必须落在 20–20000Hz 可闻范围内。新增工具只改 core 预设表，
+  三端界面按列表渲染，不在原生层写死频率。
+
 ## 5. 唱名体系与调式
 
 调式（KeyMode）= 主音（12 律）× 调式类别（宫/商/角/徵/羽/大调/小调）。宫商角徵羽五声调式音程（相对主音的半音数）：
@@ -270,6 +280,8 @@ namespace tunar_core {
     f64? cents_between(f64 freq_hz, f64 target_hz);
     // 任意 MIDI 音的唱名（随用户唱名体系/调式；用于乐器面板弦/孔唱名显示）
     string solfege_for_midi(SolfegeSystem system, KeyMode key, i32 midi);
+    // 小工具页固定音频（§4e；频率不随 A4/律制变化）
+    sequence<ToolTone> list_tool_tones();
 };
 
 [Enum]
@@ -439,6 +451,13 @@ dictionary ReferenceTone {
     f64 cents_from_note;
 };
 
+dictionary ToolTone {
+    string id;                 // 稳定 id，如 "anti_motion_sickness"
+    string display_name;       // 如 "防晕车"
+    string summary;            // 如 "100Hz 纯正弦波"
+    f64 frequency_hz;
+};
+
 interface TunarEngine {
     constructor(TunarConfig config);
     TunarEvent? feed(sequence<f32> pcm);   // 零分配路径；无效输入返回 null
@@ -505,5 +524,8 @@ FingeringNote 增加 midi 字段（理由：乐器面板需要「目标 cents �
 2026-09-29：删除 `list_fingering_charts` / `FingeringChart` / `FingeringNote`（理由见 §6 末）。
 尺八改由自带孔位表返回 `hole_count = 5`、`back_hole_count = 1` 与各音孔位，并按八度填写
 `register`；竹笛换用独立的六孔竹笛孔位表。
+
+2026-09-29：新增 `ToolTone` 与全局函数 `list_tool_tones`（§4e），供小工具页「防晕车」等固定
+频率音频使用。
 
 变更规则：任何签名/类型修改必须先改本附录并注明版本日期。

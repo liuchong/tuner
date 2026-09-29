@@ -4,14 +4,41 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.lumen) private var palette
     @StateObject private var settings = SettingsStore.shared
+    private let toolsFootnote = CorePresets.toolTones()
+        .map { "\($0.displayName)（\($0.summary)）" }
+        .joined(separator: "、")
 
     var body: some View {
+        NavigationStack {
+            content
+                .toolbar(.hidden, for: .navigationBar)
+        }
+    }
+
+    private var content: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Lumen.Spacing.lg) {
                 Text("设置")
                     .font(.system(size: 28, weight: .bold))
                     .foregroundStyle(palette.inkPrimary)
                     .padding(.top, Lumen.Spacing.sm)
+
+                SectionView(title: "小工具") {
+                    NavigationLink {
+                        ToolsView()
+                    } label: {
+                        HStack(spacing: Lumen.Spacing.md) {
+                            SettingLabel("辅助音频", footnote: toolsFootnote)
+                            Spacer(minLength: 0)
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(palette.inkFaint)
+                        }
+                        .frame(minHeight: 36)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
 
                 SectionView(title: "校准") {
                     SettingRow("A4 标准音") {

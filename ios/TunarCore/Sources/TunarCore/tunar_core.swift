@@ -2297,6 +2297,119 @@ public func FfiConverterTypeTongyinOption_lower(_ value: TongyinOption) -> RustB
 
 
 /**
+ * 小工具页的一条固定音频（纯正弦波，频率不随 A4 校准变化）。
+ */
+public struct ToolTone {
+    /**
+     * 稳定 id，如 "anti_motion_sickness"。
+     */
+    public var id: String
+    /**
+     * 显示名，如 "防晕车"。
+     */
+    public var displayName: String
+    /**
+     * 一行说明，如 "100Hz 纯正弦波"。
+     */
+    public var summary: String
+    /**
+     * 正弦波频率（Hz）。
+     */
+    public var frequencyHz: Double
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * 稳定 id，如 "anti_motion_sickness"。
+         */id: String, 
+        /**
+         * 显示名，如 "防晕车"。
+         */displayName: String, 
+        /**
+         * 一行说明，如 "100Hz 纯正弦波"。
+         */summary: String, 
+        /**
+         * 正弦波频率（Hz）。
+         */frequencyHz: Double) {
+        self.id = id
+        self.displayName = displayName
+        self.summary = summary
+        self.frequencyHz = frequencyHz
+    }
+}
+
+#if compiler(>=6)
+extension ToolTone: Sendable {}
+#endif
+
+
+extension ToolTone: Equatable, Hashable {
+    public static func ==(lhs: ToolTone, rhs: ToolTone) -> Bool {
+        if lhs.id != rhs.id {
+            return false
+        }
+        if lhs.displayName != rhs.displayName {
+            return false
+        }
+        if lhs.summary != rhs.summary {
+            return false
+        }
+        if lhs.frequencyHz != rhs.frequencyHz {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(displayName)
+        hasher.combine(summary)
+        hasher.combine(frequencyHz)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeToolTone: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> ToolTone {
+        return
+            try ToolTone(
+                id: FfiConverterString.read(from: &buf), 
+                displayName: FfiConverterString.read(from: &buf), 
+                summary: FfiConverterString.read(from: &buf), 
+                frequencyHz: FfiConverterDouble.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: ToolTone, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.id, into: &buf)
+        FfiConverterString.write(value.displayName, into: &buf)
+        FfiConverterString.write(value.summary, into: &buf)
+        FfiConverterDouble.write(value.frequencyHz, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeToolTone_lift(_ buf: RustBuffer) throws -> ToolTone {
+    return try FfiConverterTypeToolTone.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeToolTone_lower(_ value: ToolTone) -> RustBuffer {
+    return FfiConverterTypeToolTone.lower(value)
+}
+
+
+/**
  * 调音器配置。
  */
 public struct TunarConfig {
@@ -4550,6 +4663,31 @@ fileprivate struct FfiConverterSequenceTypeTongyinOption: FfiConverterRustBuffer
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterSequenceTypeToolTone: FfiConverterRustBuffer {
+    typealias SwiftType = [ToolTone]
+
+    public static func write(_ value: [ToolTone], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeToolTone.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [ToolTone] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [ToolTone]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeToolTone.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterSequenceTypeTuning: FfiConverterRustBuffer {
     typealias SwiftType = [Tuning]
 
@@ -4692,6 +4830,15 @@ public func listInstruments() -> [Instrument]  {
 })
 }
 /**
+ * 列出小工具页的全部固定音频，按展示顺序。
+ */
+public func listToolTones() -> [ToolTone]  {
+    return try!  FfiConverterSequenceTypeToolTone.lift(try! rustCall() {
+    uniffi_tunar_core_fn_func_list_tool_tones($0
+    )
+})
+}
+/**
  * 列出某弦乐器的全部定弦（频率按 A4=440，唱名按乐器习惯调简谱）。
  */
 public func listTunings(instrumentId: String) -> [Tuning]  {
@@ -4760,6 +4907,9 @@ private let initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_tunar_core_checksum_func_list_instruments() != 56888) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_tunar_core_checksum_func_list_tool_tones() != 57203) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_tunar_core_checksum_func_list_tunings() != 57336) {

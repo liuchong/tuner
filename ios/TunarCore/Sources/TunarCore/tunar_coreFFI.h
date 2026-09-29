@@ -373,6 +373,12 @@ RustBuffer uniffi_tunar_core_fn_func_list_instruments(RustCallStatus *_Nonnull o
     
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_FN_FUNC_LIST_TOOL_TONES
+#define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_FN_FUNC_LIST_TOOL_TONES
+RustBuffer uniffi_tunar_core_fn_func_list_tool_tones(RustCallStatus *_Nonnull out_status
+    
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_FN_FUNC_LIST_TUNINGS
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_FN_FUNC_LIST_TUNINGS
 RustBuffer uniffi_tunar_core_fn_func_list_tunings(RustBuffer instrument_id, RustCallStatus *_Nonnull out_status
@@ -682,6 +688,12 @@ uint16_t uniffi_tunar_core_checksum_func_cents_between(void
 #ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_FUNC_LIST_INSTRUMENTS
 #define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_FUNC_LIST_INSTRUMENTS
 uint16_t uniffi_tunar_core_checksum_func_list_instruments(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_FUNC_LIST_TOOL_TONES
+#define UNIFFI_FFIDEF_UNIFFI_TUNAR_CORE_CHECKSUM_FUNC_LIST_TOOL_TONES
+uint16_t uniffi_tunar_core_checksum_func_list_tool_tones(void
     
 );
 #endif

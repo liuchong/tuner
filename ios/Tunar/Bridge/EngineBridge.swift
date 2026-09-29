@@ -108,6 +108,7 @@ enum CorePresets {
     static func referenceTones(config: TunarConfig) -> [ReferenceTone] {
         UniffiPitchEngine(config: config).listReferenceTones()
     }
+    static func toolTones() -> [ToolTone] { listToolTones() }
 }
 
 /// 默认调音器配置（C 大调、简谱、A4=440、-45dBFS、12-TET）。

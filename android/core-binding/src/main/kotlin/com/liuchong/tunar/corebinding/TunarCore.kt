@@ -8,6 +8,7 @@ import uniffi.tunar_core.MetronomeConfig
 import uniffi.tunar_core.ModeKind
 import uniffi.tunar_core.ReferenceTone
 import uniffi.tunar_core.SolfegeSystem
+import uniffi.tunar_core.ToolTone
 import uniffi.tunar_core.TunarConfig
 import uniffi.tunar_core.TunarEngine
 import uniffi.tunar_core.TunarEvent
@@ -15,6 +16,7 @@ import uniffi.tunar_core.Tuning
 import uniffi.tunar_core.WindChart
 import uniffi.tunar_core.WindVariant
 import uniffi.tunar_core.listInstruments
+import uniffi.tunar_core.listToolTones
 import uniffi.tunar_core.listTunings
 import uniffi.tunar_core.listWindVariants as uniffiListWindVariants
 import uniffi.tunar_core.windFingeringChart as uniffiWindFingeringChart
@@ -128,6 +130,9 @@ object TunarCore : TunarCoreApi {
 
     override fun centsBetween(freqHz: Double, targetHz: Double): Double? =
         uniffi.tunar_core.centsBetween(freqHz, targetHz)
+
+    /** 小工具页的固定音频（如防晕车 100Hz），按展示顺序。 */
+    fun toolTones(): List<ToolTone> = listToolTones()
 
     /** 创建节拍器引擎（见 MetronomeEngine.kt 门面）。 */
     fun createMetronome(config: MetronomeConfig): MetronomeEngine =

@@ -26,6 +26,8 @@ struct DesktopRootView: View {
                     DesktopAnalysisView()
                 case .metronome:
                     DesktopMetronomeView()
+                case .tools:
+                    DesktopToolsView()
                 case .settings:
                     DesktopSettingsView()
                 }

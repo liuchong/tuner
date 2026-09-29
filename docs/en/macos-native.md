@@ -3,8 +3,8 @@
 ## 1. Goal and boundaries
 
 The macOS app is TUNAR's native desktop client, not an enlarged iOS window. It provides
-five complete sections—tuner, instruments, professional analysis, metronome, and
-settings—while sharing the same Rust business core and UniFFI contract with Android and
+six complete sections—tuner, instruments, professional analysis, metronome, tools,
+and settings—while sharing the same Rust business core and UniFFI contract with Android and
 iOS.
 
 Non-goals for this milestone are recording, saving/playback/export of audio files, a
@@ -25,7 +25,7 @@ microphone capture. No unfinished entry point may be exposed.
 
 The root window uses `NavigationSplitView`:
 
-- A sidebar exposes exactly Tuner, Instruments, Analysis, Metronome, and Settings.
+- A sidebar exposes exactly Tuner, Instruments, Analysis, Metronome, Tools, and Settings.
 - A single detail area hosts the selected section; the minimum window size keeps the
   sidebar and primary controls usable.
 - Selecting the tuner spectrum preview selects the same Analysis sidebar destination
@@ -151,7 +151,7 @@ immediately.
 
 - Existing Rust synthetic-signal, temperament, preset, and metronome tests remain the
   cross-platform business truth.
-- macOS unit tests cover the five destinations and default selection, desktop layout
+- macOS unit tests cover the six destinations and default selection, desktop layout
   decisions, spectrum scale/peak hold, capture format, startup-token behavior, and
   dongxiao eight-hole default/six-hole switch, one-large-diagram plus Low/Middle/High
   columns, per-range measured returns (19/32 entries for eight holes), blank

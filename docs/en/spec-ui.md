@@ -240,6 +240,25 @@ single-needle presentation. Native timers may not clear the target or needle.
   requires a louder signal. Changes apply immediately to universal and instrument tuner.
 - Theme: System, Light, Dark.
 - Haptics: enabled by default.
+- A "Tools" card at the top lists the current tools (from the core list) in one line and
+  opens the §5.1 Tools page.
+
+### 5.1 Tools page
+
+- Entry: on Android and iOS, the Settings top card pushes the page (no new bottom tab; the
+  bar keeps Settings highlighted and Back returns to Settings). On macOS it is a dedicated
+  "小工具" sidebar destination between Metronome and Settings.
+- Content: one card per entry of core `list_tool_tones()`, in order, showing name, summary,
+  and a play/stop button. Currently only "防晕车" (anti-motion-sickness, pure 100 Hz sine).
+  Native code never hard-codes frequencies.
+- Playback reuses the reference-tone sine player (20 ms fades, same gain and audio focus).
+  At most one tone plays; tapping the playing card stops it, tapping another switches the
+  frequency directly. The playing card gets an accent stroke and summary plus "播放中".
+- Lifetime: foreground only. Leaving the page, backgrounding, or window inactivity stops
+  playback immediately. Mobile keeps the screen on while playing and restores normal
+  screen timeout afterwards.
+- A fixed footer notes that the screen stays on, playback stops on leave/background, and
+  the audio is only a soothing aid, not a substitute for medication or medical advice.
 
 ## 6. Common requirements
 
@@ -249,7 +268,7 @@ interruption degrade without a crash. Behavior changes update this file in Engli
 
 ## 7. macOS 14+ desktop behavior
 
-- The desktop app keeps the complete Tuner, Instruments, Analysis, Metronome, and
+- The desktop app keeps the complete Tuner, Instruments, Analysis, Metronome, Tools, and
   Settings destinations but presents them in a `NavigationSplitView` sidebar instead
   of a mobile bottom tab bar.
 - Selecting the tuner spectrum preview selects the same Analysis sidebar destination.

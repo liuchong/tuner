@@ -765,6 +765,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // For large crates we prevent `MethodTooLargeException` (see #2340)
 // N.B. the name of the extension is very misleading, since it is 
 // rather `InterfaceTooLargeException`, caused by too many methods 
@@ -783,6 +785,8 @@ internal interface IntegrityCheckingUniffiLib : Library {
     fun uniffi_tunar_core_checksum_func_cents_between(
 ): Short
 fun uniffi_tunar_core_checksum_func_list_instruments(
+): Short
+fun uniffi_tunar_core_checksum_func_list_tool_tones(
 ): Short
 fun uniffi_tunar_core_checksum_func_list_tunings(
 ): Short
@@ -925,6 +929,8 @@ fun uniffi_tunar_core_fn_func_cents_between(`freqHz`: Double,`targetHz`: Double,
 ): RustBuffer.ByValue
 fun uniffi_tunar_core_fn_func_list_instruments(uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_func_list_tool_tones(uniffi_out_err: UniffiRustCallStatus, 
+): RustBuffer.ByValue
 fun uniffi_tunar_core_fn_func_list_tunings(`instrumentId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 fun uniffi_tunar_core_fn_func_list_wind_variants(`instrumentId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1063,6 +1069,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_tunar_core_checksum_func_list_instruments() != 56888.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_func_list_tool_tones() != 57203.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_tunar_core_checksum_func_list_tunings() != 57336.toShort()) {
@@ -2882,6 +2891,61 @@ public object FfiConverterTypeTongyinOption: FfiConverterRustBuffer<TongyinOptio
 
 
 /**
+ * 小工具页的一条固定音频（纯正弦波，频率不随 A4 校准变化）。
+ */
+data class ToolTone (
+    /**
+     * 稳定 id，如 "anti_motion_sickness"。
+     */
+    var `id`: kotlin.String, 
+    /**
+     * 显示名，如 "防晕车"。
+     */
+    var `displayName`: kotlin.String, 
+    /**
+     * 一行说明，如 "100Hz 纯正弦波"。
+     */
+    var `summary`: kotlin.String, 
+    /**
+     * 正弦波频率（Hz）。
+     */
+    var `frequencyHz`: kotlin.Double
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeToolTone: FfiConverterRustBuffer<ToolTone> {
+    override fun read(buf: ByteBuffer): ToolTone {
+        return ToolTone(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterDouble.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ToolTone) = (
+            FfiConverterString.allocationSize(value.`id`) +
+            FfiConverterString.allocationSize(value.`displayName`) +
+            FfiConverterString.allocationSize(value.`summary`) +
+            FfiConverterDouble.allocationSize(value.`frequencyHz`)
+    )
+
+    override fun write(value: ToolTone, buf: ByteBuffer) {
+            FfiConverterString.write(value.`id`, buf)
+            FfiConverterString.write(value.`displayName`, buf)
+            FfiConverterString.write(value.`summary`, buf)
+            FfiConverterDouble.write(value.`frequencyHz`, buf)
+    }
+}
+
+
+
+/**
  * 调音器配置。
  */
 data class TunarConfig (
@@ -4194,6 +4258,34 @@ public object FfiConverterSequenceTypeTongyinOption: FfiConverterRustBuffer<List
 /**
  * @suppress
  */
+public object FfiConverterSequenceTypeToolTone: FfiConverterRustBuffer<List<ToolTone>> {
+    override fun read(buf: ByteBuffer): List<ToolTone> {
+        val len = buf.getInt()
+        return List<ToolTone>(len) {
+            FfiConverterTypeToolTone.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<ToolTone>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeToolTone.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<ToolTone>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeToolTone.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceTypeTuning: FfiConverterRustBuffer<List<Tuning>> {
     override fun read(buf: ByteBuffer): List<Tuning> {
         val len = buf.getInt()
@@ -4345,6 +4437,18 @@ public object FfiConverterSequenceTypeTickAccent: FfiConverterRustBuffer<List<Ti
             return FfiConverterSequenceTypeInstrument.lift(
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_func_list_instruments(
+        _status)
+}
+    )
+    }
+    
+
+        /**
+         * 列出小工具页的全部固定音频，按展示顺序。
+         */ fun `listToolTones`(): List<ToolTone> {
+            return FfiConverterSequenceTypeToolTone.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_func_list_tool_tones(
         _status)
 }
     )

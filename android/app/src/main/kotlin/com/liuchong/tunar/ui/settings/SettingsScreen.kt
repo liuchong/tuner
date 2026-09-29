@@ -7,8 +7,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
@@ -34,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.liuchong.tunar.audio.CaptureHub
+import com.liuchong.tunar.corebinding.TunarCore
 import com.liuchong.tunar.data.DataStoreSettingsRepository
 import com.liuchong.tunar.data.SettingsRepository
 import com.liuchong.tunar.data.ThemeMode
@@ -45,6 +51,7 @@ import uniffi.tunar_core.SolfegeSystem
 /** 设置页（spec-ui §4）。与 MainActivity 共享 activity 作用域 ViewModel。 */
 @Composable
 fun SettingsScreen(
+    onOpenTools: () -> Unit = {},
     viewModel: SettingsViewModel = run {
         val owner = LocalContext.current as androidx.activity.ComponentActivity
         val appContext = owner.applicationContext
@@ -60,6 +67,9 @@ fun SettingsScreen(
     },
 ) {
     val s by viewModel.settings.collectAsStateWithLifecycle()
+    val toolsSummary = remember {
+        TunarCore.toolTones().joinToString("、") { "${it.displayName}（${it.summary}）" }
+    }
 
     Column(
         modifier = Modifier
@@ -68,6 +78,34 @@ fun SettingsScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        Section(title = "小工具") {
+            Surface(
+                onClick = onOpenTools,
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("辅助音频", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            toolsSummary,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+
         // A4 校准（415–466，步进 1Hz，显示 0.1）
         Section(title = "A4 校准") {
             Row(verticalAlignment = Alignment.CenterVertically) {

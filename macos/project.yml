@@ -27,6 +27,7 @@ targets:
       - path: ../ios/Tunar/Instrument/InstrumentFigures.swift
       - path: ../ios/Tunar/Instrument/WindFingeringTable.swift
       - path: ../ios/Tunar/Metronome/MetronomeViewModel.swift
+      - path: ../ios/Tunar/Tools/ToolsViewModel.swift
     dependencies:
       - framework: ../ios/TunarCore/tunar_core.xcframework
         embed: false

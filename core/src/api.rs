@@ -7,7 +7,7 @@
 use std::sync::{Arc, Mutex};
 
 use crate::{
-    fingering, metronome, note, pitch, reference, signal, smooth, solfege, spectrum, tuning,
+    fingering, metronome, note, pitch, reference, signal, smooth, solfege, spectrum, tools, tuning,
 };
 
 pub use crate::signal::SignalState;
@@ -699,6 +699,33 @@ fn hole_mark_of(c: char) -> HoleMark {
         'H' => HoleMark::Half,
         _ => HoleMark::Closed,
     }
+}
+
+/// 小工具页的一条固定音频（纯正弦波，频率不随 A4 校准变化）。
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct ToolTone {
+    /// 稳定 id，如 "anti_motion_sickness"。
+    pub id: String,
+    /// 显示名，如 "防晕车"。
+    pub display_name: String,
+    /// 一行说明，如 "100Hz 纯正弦波"。
+    pub summary: String,
+    /// 正弦波频率（Hz）。
+    pub frequency_hz: f64,
+}
+
+/// 列出小工具页的全部固定音频，按展示顺序。
+#[uniffi::export]
+pub fn list_tool_tones() -> Vec<ToolTone> {
+    tools::TOOL_TONES
+        .iter()
+        .map(|tone| ToolTone {
+            id: tone.id.to_string(),
+            display_name: tone.display_name.to_string(),
+            summary: tone.summary.to_string(),
+            frequency_hz: tone.frequency_hz,
+        })
+        .collect()
 }
 
 /// 两频率间的音分差：1200·log2(freq/target)（§4 公式）。无效输入（≤0）返回 None。

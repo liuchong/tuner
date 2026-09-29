@@ -28,6 +28,7 @@ import com.liuchong.tunar.ui.metronome.MetronomeScreen
 import com.liuchong.tunar.ui.settings.SettingsScreen
 import com.liuchong.tunar.ui.spectrum.ProfessionalSpectrumScreen
 import com.liuchong.tunar.ui.theme.LocalLumenColors
+import com.liuchong.tunar.ui.tools.ToolsScreen
 import com.liuchong.tunar.ui.tuner.TunerScreen
 
 /** 底部 tab 定义（spec-ui：调音 / 乐器 / 频谱 / 节拍器 / 设置）。 */
@@ -38,6 +39,9 @@ enum class AppTab(val route: String, val label: String, val icon: ImageVector) {
     METRONOME("metronome", "节拍器", Icons.Filled.Timer),
     SETTINGS("settings", "设置", Icons.Filled.Settings),
 }
+
+/** 小工具页从设置进入，不占底部 tab；底栏仍高亮「设置」。 */
+const val TOOLS_ROUTE = "tools"
 
 @Composable
 fun AppNav() {
@@ -61,7 +65,8 @@ fun AppNav() {
                             unselectedTextColor = colors.inkSecondary,
                             indicatorColor = colors.accent.copy(alpha = 0.12f),
                         ),
-                        selected = currentRoute == tab.route,
+                        selected = currentRoute == tab.route ||
+                            (tab == AppTab.SETTINGS && currentRoute == TOOLS_ROUTE),
                         onClick = {
                             navController.navigate(tab.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
@@ -93,7 +98,12 @@ fun AppNav() {
             composable(AppTab.INSTRUMENT.route) { InstrumentScreen() }
             composable(AppTab.SPECTRUM.route) { ProfessionalSpectrumScreen() }
             composable(AppTab.METRONOME.route) { MetronomeScreen() }
-            composable(AppTab.SETTINGS.route) { SettingsScreen() }
+            composable(AppTab.SETTINGS.route) {
+                SettingsScreen(onOpenTools = {
+                    navController.navigate(TOOLS_ROUTE) { launchSingleTop = true }
+                })
+            }
+            composable(TOOLS_ROUTE) { ToolsScreen(onBack = navController::popBackStack) }
         }
     }
 }

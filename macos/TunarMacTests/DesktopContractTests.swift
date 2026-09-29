@@ -2,10 +2,10 @@ import XCTest
 @testable import TunarMac
 
 final class DesktopContractTests: XCTestCase {
-    func testFiveDestinationsUseTunerAsDefault() {
-        XCTAssertEqual(DesktopSection.allCases.count, 5)
+    func testSixDestinationsUseTunerAsDefault() {
+        XCTAssertEqual(DesktopSection.allCases.count, 6)
         XCTAssertEqual(DesktopSection.allCases.map(\.title), [
-            "调音", "乐器", "专业分析", "节拍器", "设置",
+            "调音", "乐器", "专业分析", "节拍器", "小工具", "设置",
         ])
         XCTAssertEqual(DesktopSection.defaultSelection, .tuner)
     }

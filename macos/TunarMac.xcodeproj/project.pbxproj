@@ -26,6 +26,7 @@
 		74BAD51BFF02B8EBA072D694 /* TuningForkViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3238EB221E2B93827B2CAE5A /* TuningForkViewModel.swift */; };
 		75F1B040AA2A5D1598A2B5FD /* tunar_core.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = D449334D35FF19929DF41FF8 /* tunar_core.xcframework */; };
 		8EDBEDE4E6266EE2064F22B9 /* MacAudioAndAnalysisTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2D281E5FFEC9BCB6892ACC /* MacAudioAndAnalysisTests.swift */; };
+		9830DC18864E6BA6213698AE /* ToolsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D38ECCC6AFC629E35066320 /* ToolsViewModel.swift */; };
 		A51FA4B3DC66C1C8AB3BC7BD /* DesktopNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4382829A731F8D1BD3F6687A /* DesktopNavigation.swift */; };
 		A52D02470EAB745B230270A6 /* MetronomePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD21B01B8C46CDD08F5A6B24 /* MetronomePlayer.swift */; };
 		A5E6688F4F444CF718C370A0 /* WindFingeringTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5A0F0F36261F13B0609872F /* WindFingeringTable.swift */; };
@@ -36,6 +37,7 @@
 		BB46947D4E7F14BE4E15FCF7 /* SpectrumPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECE3D5F3614B2FE59D37FBB7 /* SpectrumPresentation.swift */; };
 		D2B236AD3209A260B986D126 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B0305CACFCC77D0163C52BB7 /* Assets.xcassets */; };
 		DAC627BC77BE52B11F305044 /* tunar_core.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6B5BCC7FE35240C72ACD96 /* tunar_core.swift */; };
+		DEF0D8B69304A24001E683F6 /* DesktopToolsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B2DF42221BB5832AB0DE94 /* DesktopToolsView.swift */; };
 		E752366889D36461AAB475F1 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 817DF95D0CEF865FB92145E5 /* SettingsStore.swift */; };
 		EFA09931E800A45D8456C6DD /* DesktopAnalysisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55E1D09A67D95CACD8147AD3 /* DesktopAnalysisView.swift */; };
 		F2F103C25E5686C74A4949AA /* DesktopMetronomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F77C89AE821E927CB2C3CEAB /* DesktopMetronomeView.swift */; };
@@ -64,6 +66,8 @@
 		1F63688E6EBC7E1B936D42B9 /* TunerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerViewModel.swift; sourceTree = "<group>"; };
 		26FFBEBF49643703DA2E6533 /* SpectrumHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumHistory.swift; sourceTree = "<group>"; };
 		2A6B32307B713194E88D08C8 /* MacInstrumentViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacInstrumentViewModelTests.swift; sourceTree = "<group>"; };
+		2D38ECCC6AFC629E35066320 /* ToolsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolsViewModel.swift; sourceTree = "<group>"; };
+		31B2DF42221BB5832AB0DE94 /* DesktopToolsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopToolsView.swift; sourceTree = "<group>"; };
 		3238EB221E2B93827B2CAE5A /* TuningForkViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TuningForkViewModel.swift; sourceTree = "<group>"; };
 		3274087226E07B989F4E027A /* ReferenceTonePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferenceTonePlayer.swift; sourceTree = "<group>"; };
 		40FD7692A5A9F66EFFEB7E69 /* MetronomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeViewModel.swift; sourceTree = "<group>"; };
@@ -237,6 +241,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		D0DE8F7B14BD980AA9C3849E /* Tools */ = {
+			isa = PBXGroup;
+			children = (
+				2D38ECCC6AFC629E35066320 /* ToolsViewModel.swift */,
+			);
+			name = Tools;
+			path = ../ios/Tunar/Tools;
+			sourceTree = "<group>";
+		};
 		D5FA9E81E68474CBD317D980 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -244,6 +257,7 @@
 				99DCF68B45714E658936A5C6 /* DesktopInstrumentView.swift */,
 				F77C89AE821E927CB2C3CEAB /* DesktopMetronomeView.swift */,
 				B5266348E431C3A984E64BE1 /* DesktopSettingsView.swift */,
+				31B2DF42221BB5832AB0DE94 /* DesktopToolsView.swift */,
 				0A70A8DBDE99B0B37F746D39 /* DesktopTunerView.swift */,
 				E0218749EB3C35C353DC6D3A /* MacWindFingeringCard.swift */,
 				EB7660DF09444C069A523CDA /* SharedTunerViews.swift */,
@@ -293,6 +307,7 @@
 				26AF3949C58650884D8A6369 /* Instrument */,
 				E389AB54E413B9299280E3BB /* Metronome */,
 				82923AB7F2E90FE8F27E671F /* Settings */,
+				D0DE8F7B14BD980AA9C3849E /* Tools */,
 				02310299C37A350DE28C81D6 /* TunarCore */,
 				E6C335301D1F0EDD808936D4 /* TunarMac */,
 				A06F94961EE85F300AA4BA03 /* TunarMacTests */,
@@ -412,6 +427,7 @@
 				A51FA4B3DC66C1C8AB3BC7BD /* DesktopNavigation.swift in Sources */,
 				258CED65DED3979ADCAE4DF6 /* DesktopRootView.swift in Sources */,
 				A678D9EFCF1D07E535AE47C9 /* DesktopSettingsView.swift in Sources */,
+				DEF0D8B69304A24001E683F6 /* DesktopToolsView.swift in Sources */,
 				FC74E9C6C5878ACA36325C78 /* DesktopTunerView.swift in Sources */,
 				22F4B35D14079C0A1AAD5349 /* EngineBridge.swift in Sources */,
 				AE7D28415C0F3AAD0C118DF4 /* Haptics.swift in Sources */,
@@ -428,6 +444,7 @@
 				B0E5BAAD86D60FA3DF31F98A /* SpectrumHistory.swift in Sources */,
 				BB46947D4E7F14BE4E15FCF7 /* SpectrumPresentation.swift in Sources */,
 				111264414D5C29DA7505EF74 /* TickSounds.swift in Sources */,
+				9830DC18864E6BA6213698AE /* ToolsViewModel.swift in Sources */,
 				3D5EDE6D3359673BB46DB26F /* TunarAtomics.c in Sources */,
 				0141F6836F4080443BEF373D /* TunarMacApp.swift in Sources */,
 				F32560E3D15CFA7C5A81AD53 /* TunerViewModel.swift in Sources */,
