@@ -77,16 +77,14 @@ struct InstrumentView: View {
                 HStack(spacing: Lumen.Spacing.sm) {
                     tuningMenu
                     Spacer(minLength: 0)
-                    headstockPicker
+                    headstockPicker(segmentPadding: 14)
                     AutoModeToggle(mode: vm.mode, onSelect: vm.selectMode)
                 }
-                VStack(alignment: .leading, spacing: Lumen.Spacing.sm) {
-                    HStack(spacing: Lumen.Spacing.sm) {
-                        tuningMenu
-                        Spacer(minLength: 0)
-                        AutoModeToggle(mode: vm.mode, onSelect: vm.selectMode)
-                    }
-                    headstockPicker
+                HStack(spacing: 6) {
+                    tuningMenu
+                    Spacer(minLength: 0)
+                    headstockPicker(segmentPadding: 8)
+                    AutoModeToggle(mode: vm.mode, onSelect: vm.selectMode, showIcon: false)
                 }
             }
         } else {
@@ -126,14 +124,16 @@ struct InstrumentView: View {
     }
 
     @ViewBuilder
-    private var headstockPicker: some View {
+    private func headstockPicker(segmentPadding: CGFloat) -> some View {
         if case .headstock(let style) = vm.stringFigure {
             LumenSegmented(
                 options: HeadstockStyle.allCases,
                 selected: style,
                 title: \.displayName,
                 accessibilityTitle: \.accessibilityName,
-                onSelect: vm.selectHeadstockStyle
+                onSelect: vm.selectHeadstockStyle,
+                horizontalPadding: segmentPadding,
+                equalWidths: true
             )
             .accessibilityLabel("琴头样式")
         }
@@ -232,6 +232,9 @@ struct LumenSegmented<Option: Hashable>: View {
     let title: (Option) -> String
     var accessibilityTitle: ((Option) -> String)?
     let onSelect: (Option) -> Void
+    var horizontalPadding: CGFloat = 12
+    /// 各段等宽（取最宽一段），文字居中；用于只有两三项、字数差距大的切换。
+    var equalWidths = false
 
     var body: some View {
         HStack(spacing: 0) {
@@ -243,7 +246,8 @@ struct LumenSegmented<Option: Hashable>: View {
                         .lineLimit(1)
                         .fixedSize()
                         .foregroundStyle(isSelected ? palette.bgCanvas : palette.inkPrimary)
-                        .padding(.horizontal, 12)
+                        .padding(.horizontal, horizontalPadding)
+                        .frame(maxWidth: equalWidths ? .infinity : nil)
                         .frame(height: 48)
                         .background(isSelected ? palette.accent : palette.bgSurface)
                         .contentShape(Rectangle())
@@ -253,6 +257,7 @@ struct LumenSegmented<Option: Hashable>: View {
                 .accessibilityAddTraits(isSelected ? .isSelected : [])
             }
         }
+        .fixedSize(horizontal: equalWidths, vertical: false)
         .clipShape(Capsule())
         .overlay(Capsule().stroke(palette.lineSubtle, lineWidth: 1))
         .animation(.easeInOut(duration: 0.15), value: selected)
@@ -287,19 +292,22 @@ struct AutoModeToggle: View {
     @Environment(\.lumen) private var palette
     let mode: SelectionMode
     let onSelect: (SelectionMode) -> Void
+    var showIcon = true
 
     var body: some View {
         let isAuto = mode == .auto
         Button { onSelect(isAuto ? .manual : .auto) } label: {
             HStack(spacing: 6) {
-                Image(systemName: isAuto ? "waveform" : "hand.point.up.left")
-                    .font(.system(size: 13, weight: .semibold))
+                if showIcon {
+                    Image(systemName: isAuto ? "waveform" : "hand.point.up.left")
+                        .font(.system(size: 13, weight: .semibold))
+                }
                 Text(isAuto ? "自动" : "手动")
                     .font(Lumen.label)
                     .fixedSize()
             }
             .foregroundStyle(isAuto ? palette.bgCanvas : palette.inkPrimary)
-            .padding(.horizontal, 14)
+            .padding(.horizontal, showIcon ? 14 : 12)
             .frame(height: 48)
             .background(isAuto ? palette.accent : palette.bgSurface, in: Capsule())
             .overlay(Capsule().stroke(isAuto ? palette.accent : palette.lineSubtle, lineWidth: 1))
@@ -403,6 +411,21 @@ struct PegButton: View {
     let selected: Bool
     let onClick: () -> Void
 
+    private var noteText: some View {
+        Text(item.noteName.replacingOccurrences(of: "#", with: "♯"))
+            .font(.system(size: 16, weight: .bold).monospacedDigit())
+            .foregroundStyle(palette.inkPrimary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+    }
+
+    private var solfegeText: some View {
+        Text(item.solfege)
+            .font(.system(size: 11, weight: .medium))
+            .foregroundStyle(palette.inkSecondary)
+            .lineLimit(1)
+    }
+
     var body: some View {
         let colors = StringButtonColors(item: item, selected: selected, palette: palette)
         Button(action: onClick) {
@@ -419,15 +442,15 @@ struct PegButton: View {
                 }
                 .foregroundStyle(colors.number)
                 .frame(width: 20, height: 20)
-                VStack(alignment: .leading, spacing: 0) {
-                    Text(item.noteName.replacingOccurrences(of: "#", with: "♯"))
-                        .font(.system(size: 16, weight: .bold).monospacedDigit())
-                        .foregroundStyle(palette.inkPrimary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                    Text(item.solfege)
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(palette.inkSecondary)
+                ViewThatFits(in: .vertical) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        noteText
+                        solfegeText
+                    }
+                    HStack(alignment: .firstTextBaseline, spacing: 4) {
+                        noteText
+                        solfegeText
+                    }
                 }
                 Spacer(minLength: 0)
             }

@@ -153,8 +153,8 @@ internal data class HeadstockPeg(
     val stringNumber: Int,
     /** 弦轴柱中心（设计坐标）。 */
     val post: Offset,
+    /** 旋钮所在侧；音高按钮与旋钮同侧，按弦轴自上而下的顺序排列。 */
     val keySide: HeadstockSide,
-    val buttonSide: HeadstockSide,
 )
 
 /**
@@ -182,6 +182,13 @@ internal class HeadstockLayout(
         peg.post.y,
     )
 
+    /** 旋钮朝外一侧的边缘中点：引线终点，贴在旋钮上。 */
+    fun keyOuterEdge(peg: HeadstockPeg): Offset {
+        val center = keyCenter(peg)
+        val outward = if (peg.keySide == HeadstockSide.LEFT) -1f else 1f
+        return Offset(center.x + outward * KEY_HALF_WIDTH, center.y)
+    }
+
     /** 点中弦轴、旋钮或琴弦时返回弦号。 */
     fun hitString(p: Offset): Int? {
         var best: Pair<Int, Float>? = null
@@ -206,6 +213,7 @@ internal class HeadstockLayout(
         const val BUSHING_RADIUS = 4.6f
         const val LEFT_KEY_X = 6.5f
         const val RIGHT_KEY_X = 93.5f
+        const val KEY_HALF_WIDTH = 4f
 
         private fun segmentDistance(p: Offset, a: Offset, b: Offset): Float {
             val d = b - a
@@ -221,12 +229,12 @@ internal class HeadstockLayout(
         /** Gibson 式 3+3：低音侧自琴枕向上接 6、5、4 弦，高音侧接 1、2、3 弦。 */
         val THREE_PLUS_THREE = HeadstockLayout(
             pegs = listOf(
-                HeadstockPeg(6, Offset(30f, 96f), HeadstockSide.LEFT, HeadstockSide.LEFT),
-                HeadstockPeg(5, Offset(30f, 68f), HeadstockSide.LEFT, HeadstockSide.LEFT),
-                HeadstockPeg(4, Offset(30f, 40f), HeadstockSide.LEFT, HeadstockSide.LEFT),
-                HeadstockPeg(1, Offset(70f, 96f), HeadstockSide.RIGHT, HeadstockSide.RIGHT),
-                HeadstockPeg(2, Offset(70f, 68f), HeadstockSide.RIGHT, HeadstockSide.RIGHT),
-                HeadstockPeg(3, Offset(70f, 40f), HeadstockSide.RIGHT, HeadstockSide.RIGHT),
+                HeadstockPeg(6, Offset(30f, 96f), HeadstockSide.LEFT),
+                HeadstockPeg(5, Offset(30f, 68f), HeadstockSide.LEFT),
+                HeadstockPeg(4, Offset(30f, 40f), HeadstockSide.LEFT),
+                HeadstockPeg(1, Offset(70f, 96f), HeadstockSide.RIGHT),
+                HeadstockPeg(2, Offset(70f, 68f), HeadstockSide.RIGHT),
+                HeadstockPeg(3, Offset(70f, 40f), HeadstockSide.RIGHT),
             ),
             nutXs = evenNut(6, 40.5f, 59.5f),
             neckHalfWidth = 12f,
@@ -244,14 +252,13 @@ internal class HeadstockLayout(
             },
         )
 
-        /** Fender 式 6-in-line：弦轴全部在低音侧一列，按钮左右交替排列。 */
+        /** Fender 式 6-in-line：弦轴全部在低音侧一列，按钮同侧一列、与旋钮顺序一致。 */
         val INLINE_6 = HeadstockLayout(
             pegs = listOf(6, 5, 4, 3, 2, 1).mapIndexed { offset, number ->
                 HeadstockPeg(
                     stringNumber = number,
-                    post = Offset(30f, 108f - offset * 16f),
+                    post = Offset(30f, 112f - offset * 18f),
                     keySide = HeadstockSide.LEFT,
-                    buttonSide = if (offset % 2 == 0) HeadstockSide.LEFT else HeadstockSide.RIGHT,
                 )
             },
             nutXs = evenNut(6, 40.5f, 59.5f),
@@ -272,10 +279,10 @@ internal class HeadstockLayout(
         /** 尤克里里 2+2：下排左 4 弦、右 1 弦，上排左 3 弦、右 2 弦。 */
         val UKULELE = HeadstockLayout(
             pegs = listOf(
-                HeadstockPeg(4, Offset(34f, 96f), HeadstockSide.LEFT, HeadstockSide.LEFT),
-                HeadstockPeg(3, Offset(34f, 58f), HeadstockSide.LEFT, HeadstockSide.LEFT),
-                HeadstockPeg(1, Offset(66f, 96f), HeadstockSide.RIGHT, HeadstockSide.RIGHT),
-                HeadstockPeg(2, Offset(66f, 58f), HeadstockSide.RIGHT, HeadstockSide.RIGHT),
+                HeadstockPeg(4, Offset(34f, 96f), HeadstockSide.LEFT),
+                HeadstockPeg(3, Offset(34f, 58f), HeadstockSide.LEFT),
+                HeadstockPeg(1, Offset(66f, 96f), HeadstockSide.RIGHT),
+                HeadstockPeg(2, Offset(66f, 58f), HeadstockSide.RIGHT),
             ),
             nutXs = evenNut(4, 43f, 57f),
             neckHalfWidth = 10f,
@@ -357,7 +364,8 @@ internal fun buttonZIndex(selected: Boolean, active: Boolean): Float = when {
 }
 
 /**
- * 琴头 + 两侧音高按钮：按钮与弦轴同高，淡线连到对应旋钮；点中弦轴、旋钮或琴弦即选中该弦。
+ * 琴头 + 音高按钮：按钮与旋钮同侧、顺序一致，虚线引到旋钮外缘并以圆点收尾；
+ * 同侧按钮过多时自动压低按钮高度。点中弦轴、旋钮或琴弦即选中该弦。
  */
 @Composable
 internal fun HeadstockPanel(
@@ -377,12 +385,22 @@ internal fun HeadstockPanel(
         val widthPx = constraints.maxWidth.toFloat()
         val heightPx = constraints.maxHeight.toFloat()
         val gapPx = with(density) { 6.dp.toPx() }
+        val pitchGapPx = with(density) { 4.dp.toPx() }
         val buttonW = with(density) { buttonWidth.toPx() }
-        val buttonH = with(density) { buttonHeight.toPx() }
+        val perSide = HeadstockSide.entries.maxOf { side -> layout.pegs.count { it.keySide == side } }
+        val buttonH = min(
+            with(density) { buttonHeight.toPx() },
+            (heightPx - (perSide - 1) * pitchGapPx) / max(perSide, 1),
+        ).coerceAtLeast(with(density) { 30.dp.toPx() })
+        val buttonHeightDp = with(density) { buttonH.toDp() }
         val columnWidth = buttonW + gapPx
+        val hasLeft = layout.pegs.any { it.keySide == HeadstockSide.LEFT }
+        val hasRight = layout.pegs.any { it.keySide == HeadstockSide.RIGHT }
+        val figureLeft = if (hasLeft) columnWidth else 0f
+        val figureRight = if (hasRight) widthPx - columnWidth else widthPx
         val t = FigureTransform(
             HeadstockLayout.DESIGN,
-            Rect(columnWidth, 0f, max(widthPx - columnWidth, columnWidth + 1f), heightPx),
+            Rect(figureLeft, 0f, max(figureRight, figureLeft + 1f), heightPx),
         )
         val leftX = max(buttonW / 2f, t.point(0f, 0f).x - gapPx - buttonW / 2f)
         val rightX = min(
@@ -391,10 +409,10 @@ internal fun HeadstockPanel(
         )
         val buttonYs = HashMap<Int, Float>(layout.pegs.size)
         HeadstockSide.entries.forEach { side ->
-            val pegs = layout.pegs.filter { it.buttonSide == side }
+            val pegs = layout.pegs.filter { it.keySide == side }
             val ys = spreadCenters(
                 ideal = pegs.map { t.point(it.post).y },
-                spacing = buttonH + with(density) { 4.dp.toPx() },
+                spacing = buttonH + pitchGapPx,
                 minY = buttonH / 2f,
                 maxY = max(heightPx - buttonH / 2f, buttonH / 2f),
             )
@@ -426,32 +444,38 @@ internal fun HeadstockPanel(
                 val item = strings.getOrNull(peg.stringNumber - 1) ?: return@forEach
                 val state = FigureStringState.of(item, selectedIndex == peg.stringNumber - 1)
                 val y = buttonY(peg)
-                val startX = if (peg.buttonSide == HeadstockSide.LEFT) {
-                    leftX + buttonW / 2f
-                } else {
-                    rightX - buttonW / 2f
+                val left = peg.keySide == HeadstockSide.LEFT
+                val start = Offset(if (left) leftX + buttonW / 2f else rightX - buttonW / 2f, y)
+                val end = t.point(layout.keyOuterEdge(peg))
+                val color = if (state.highlighted) state.color(ink) else ink.line.copy(alpha = 0.55f)
+                val elbow = Offset(start.x + (end.x - start.x) * 0.35f, y)
+                val leader = Path().apply {
+                    moveTo(start.x, start.y)
+                    lineTo(elbow.x, elbow.y)
+                    lineTo(end.x, end.y)
                 }
-                val target = if (peg.keySide == peg.buttonSide) layout.keyCenter(peg) else peg.post
-                drawLine(
-                    color = if (state.highlighted) state.color(ink).copy(alpha = 0.7f) else ink.lineFaint,
-                    start = Offset(startX, y),
-                    end = t.point(target),
-                    strokeWidth = (if (state.highlighted) 1.4f else 1f).dp.toPx(),
-                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 3.dp.toPx())),
+                drawPath(
+                    leader,
+                    color = color,
+                    style = Stroke(
+                        width = (if (state.highlighted) 1.5f else 1f).dp.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 2.5.dp.toPx())),
+                    ),
                 )
+                drawCircle(color, radius = (if (state.highlighted) 2.6f else 2f).dp.toPx(), center = end)
             }
             drawHeadstock(layout, strings, selectedIndex, ink, t)
         }
 
         layout.pegs.forEach { peg ->
             val item = strings.getOrNull(peg.stringNumber - 1) ?: return@forEach
-            val cx = if (peg.buttonSide == HeadstockSide.LEFT) leftX else rightX
+            val cx = if (peg.keySide == HeadstockSide.LEFT) leftX else rightX
             val y = buttonY(peg)
             Box(
                 modifier = Modifier
                     .zIndex(buttonZIndex(selected = selectedIndex == peg.stringNumber - 1, active = item.active))
                     .offset { IntOffset((cx - buttonW / 2f).roundToInt(), (y - buttonH / 2f).roundToInt()) }
-                    .size(buttonWidth, buttonHeight),
+                    .size(buttonWidth, buttonHeightDp),
             ) { button(item) }
         }
     }
@@ -487,7 +511,9 @@ private fun DrawScope.drawHeadstock(
         val state = state(peg.stringNumber)
         val key = layout.keyCenter(peg)
         drawLine(ink.line, t.point(peg.post), t.point(key), max(1.5f * density, s * 1.4f))
-        val knob = t.path { roundRect(key.x - 4f, key.y - 5f, 8f, 10f, 2.6f) }
+        val knob = t.path {
+            roundRect(key.x - HeadstockLayout.KEY_HALF_WIDTH, key.y - 5f, HeadstockLayout.KEY_HALF_WIDTH * 2f, 10f, 2.6f)
+        }
         drawPath(knob, if (state.highlighted) state.color(ink).copy(alpha = 0.22f) else ink.surface)
         drawPath(
             knob,
@@ -936,19 +962,42 @@ internal fun InstrumentGlyph(instrumentId: String, color: Color, modifier: Modif
 
 private fun DesignPath.glyphShape(id: String) {
     when (id) {
+        // 竖立正视：吉他细腰、下箱宽、长琴颈、3+3 弦轴；尤克里里圆胖、短琴颈、2+2 弦轴。
         "guitar" -> {
-            oval(3f, 13f, 10f, 9f)
-            oval(4.6f, 8.2f, 6.8f, 6.4f)
-            moveTo(10.5f, 12f)
-            lineTo(19f, 3.5f)
-            roundRect(17.6f, 1.6f, 4.4f, 4.4f, 1f)
+            moveTo(12f, 22.6f)
+            cubicTo(15.4f, 22.6f, 17.2f, 21f, 17.2f, 18.6f)
+            cubicTo(17.2f, 16.6f, 15f, 16.4f, 15f, 14.8f)
+            cubicTo(15f, 13.6f, 15.9f, 13.6f, 15.9f, 12.3f)
+            cubicTo(15.9f, 10.9f, 14.4f, 10.2f, 13f, 10.2f)
+            lineTo(11f, 10.2f)
+            cubicTo(9.6f, 10.2f, 8.1f, 10.9f, 8.1f, 12.3f)
+            cubicTo(8.1f, 13.6f, 9f, 13.6f, 9f, 14.8f)
+            cubicTo(9f, 16.4f, 6.8f, 16.6f, 6.8f, 18.6f)
+            cubicTo(6.8f, 21f, 8.6f, 22.6f, 12f, 22.6f)
+            close()
+            moveTo(11f, 10.2f); lineTo(11f, 5.2f)
+            moveTo(13f, 10.2f); lineTo(13f, 5.2f)
+            roundRect(10.1f, 0.8f, 3.8f, 4.4f, 1f)
+            oval(10.4f, 13.1f, 3.2f, 3.2f)
+            moveTo(9.8f, 19.6f); lineTo(14.2f, 19.6f)
         }
         "ukulele" -> {
-            oval(4f, 13.5f, 8f, 7.5f)
-            oval(5.2f, 10f, 5.6f, 5.2f)
-            moveTo(10f, 13f)
-            lineTo(17f, 6f)
-            roundRect(15.8f, 3.6f, 4f, 4f, 1f)
+            moveTo(12f, 22.4f)
+            cubicTo(15f, 22.4f, 16.4f, 21f, 16.4f, 19.2f)
+            cubicTo(16.4f, 17.6f, 15.3f, 17.3f, 15.3f, 16.2f)
+            cubicTo(15.3f, 15.2f, 15.9f, 15f, 15.9f, 14.1f)
+            cubicTo(15.9f, 12.9f, 14.5f, 12.2f, 13f, 12.2f)
+            lineTo(11f, 12.2f)
+            cubicTo(9.5f, 12.2f, 8.1f, 12.9f, 8.1f, 14.1f)
+            cubicTo(8.1f, 15f, 8.7f, 15.2f, 8.7f, 16.2f)
+            cubicTo(8.7f, 17.3f, 7.6f, 17.6f, 7.6f, 19.2f)
+            cubicTo(7.6f, 21f, 9f, 22.4f, 12f, 22.4f)
+            close()
+            moveTo(11f, 12.2f); lineTo(11f, 7.4f)
+            moveTo(13f, 12.2f); lineTo(13f, 7.4f)
+            roundRect(10.3f, 4.2f, 3.4f, 3.2f, 1f)
+            oval(10.7f, 14.5f, 2.6f, 2.6f)
+            moveTo(10.5f, 19.9f); lineTo(13.5f, 19.9f)
         }
         "guqin" -> {
             moveTo(2f, 10f)
@@ -987,8 +1036,8 @@ private fun DesignPath.glyphShape(id: String) {
 }
 
 private fun glyphDots(id: String): List<Triple<Float, Float, Float>> = when (id) {
-    "guitar" -> listOf(Triple(8f, 17.4f, 1.3f))
-    "ukulele" -> listOf(Triple(8f, 17.2f, 1.1f))
+    "guitar" -> listOf(1.7f, 3f, 4.3f).flatMap { y -> listOf(Triple(8.6f, y, 0.55f), Triple(15.4f, y, 0.55f)) }
+    "ukulele" -> listOf(5.1f, 6.5f).flatMap { y -> listOf(Triple(8.9f, y, 0.6f), Triple(15.1f, y, 0.6f)) }
     "zhudi" -> listOf(Triple(16.6f, 7.4f, 0.9f)) +
         (0 until 3).map { Triple(12.6f - it * 1.9f, 11.4f + it * 1.9f, 0.75f) }
     "dongxiao" -> (0 until 4).map { Triple(12f, 8.5f + it * 3.2f, 0.8f) }

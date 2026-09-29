@@ -88,10 +88,8 @@ struct HeadstockPeg: Identifiable, Sendable {
     let stringNumber: Int
     /// 弦轴柱中心（设计坐标）。
     let post: CGPoint
-    /// 旋钮所在侧。
+    /// 旋钮所在侧；音高按钮与旋钮同侧，按弦轴自上而下的顺序排列。
     let keySide: HeadstockSide
-    /// 音高按钮所在侧。
-    let buttonSide: HeadstockSide
 
     var id: Int { stringNumber }
 }
@@ -106,6 +104,7 @@ struct HeadstockLayout: Sendable {
     static let bushingRadius: CGFloat = 4.6
     static let leftKeyX: CGFloat = 6.5
     static let rightKeyX: CGFloat = 93.5
+    static let keyHalfWidth: CGFloat = 4
 
     let pegs: [HeadstockPeg]
     /// 琴枕处各弦 x（自左向右，对应弦号 N…1）。
@@ -131,6 +130,13 @@ struct HeadstockLayout: Sendable {
 
     func keyCenter(_ peg: HeadstockPeg) -> CGPoint {
         CGPoint(x: peg.keySide == .left ? Self.leftKeyX : Self.rightKeyX, y: peg.post.y)
+    }
+
+    /// 旋钮朝外一侧的边缘中点：引线终点，贴在旋钮上。
+    func keyOuterEdge(_ peg: HeadstockPeg) -> CGPoint {
+        let center = keyCenter(peg)
+        let outward: CGFloat = peg.keySide == .left ? -1 : 1
+        return CGPoint(x: center.x + outward * Self.keyHalfWidth, y: center.y)
     }
 
     /// 点中弦轴、旋钮或琴弦时返回弦号。
@@ -173,12 +179,12 @@ struct HeadstockLayout: Sendable {
     /// Gibson 式 3+3：低音侧自琴枕向上接 6、5、4 弦，高音侧接 1、2、3 弦。
     static let threePlusThree = HeadstockLayout(
         pegs: [
-            HeadstockPeg(stringNumber: 6, post: CGPoint(x: 30, y: 96), keySide: .left, buttonSide: .left),
-            HeadstockPeg(stringNumber: 5, post: CGPoint(x: 30, y: 68), keySide: .left, buttonSide: .left),
-            HeadstockPeg(stringNumber: 4, post: CGPoint(x: 30, y: 40), keySide: .left, buttonSide: .left),
-            HeadstockPeg(stringNumber: 1, post: CGPoint(x: 70, y: 96), keySide: .right, buttonSide: .right),
-            HeadstockPeg(stringNumber: 2, post: CGPoint(x: 70, y: 68), keySide: .right, buttonSide: .right),
-            HeadstockPeg(stringNumber: 3, post: CGPoint(x: 70, y: 40), keySide: .right, buttonSide: .right),
+            HeadstockPeg(stringNumber: 6, post: CGPoint(x: 30, y: 96), keySide: .left),
+            HeadstockPeg(stringNumber: 5, post: CGPoint(x: 30, y: 68), keySide: .left),
+            HeadstockPeg(stringNumber: 4, post: CGPoint(x: 30, y: 40), keySide: .left),
+            HeadstockPeg(stringNumber: 1, post: CGPoint(x: 70, y: 96), keySide: .right),
+            HeadstockPeg(stringNumber: 2, post: CGPoint(x: 70, y: 68), keySide: .right),
+            HeadstockPeg(stringNumber: 3, post: CGPoint(x: 70, y: 40), keySide: .right),
         ],
         nutXs: evenNut(count: 6, from: 40.5, to: 59.5),
         neckHalfWidth: 12,
@@ -204,15 +210,14 @@ struct HeadstockLayout: Sendable {
         }
     )
 
-    /// Fender 式 6-in-line：弦轴全部在低音侧一列，6 弦最靠近琴枕，1 弦在最上方。
-    /// 列间距只有两侧按钮的一半，所以按钮左右交替排列。
+    /// Fender 式 6-in-line：弦轴全部在低音侧一列，6 弦最靠近琴枕，1 弦在最上方；
+    /// 按钮同侧一列、与旋钮顺序一致。
     static let inline6 = HeadstockLayout(
         pegs: [6, 5, 4, 3, 2, 1].enumerated().map { offset, number in
             HeadstockPeg(
                 stringNumber: number,
-                post: CGPoint(x: 30, y: 108 - CGFloat(offset) * 16),
-                keySide: .left,
-                buttonSide: offset.isMultiple(of: 2) ? .left : .right
+                post: CGPoint(x: 30, y: 112 - CGFloat(offset) * 18),
+                keySide: .left
             )
         },
         nutXs: evenNut(count: 6, from: 40.5, to: 59.5),
@@ -249,10 +254,10 @@ struct HeadstockLayout: Sendable {
     /// 尤克里里 2+2：下排左 4 弦、右 1 弦，上排左 3 弦、右 2 弦。
     static let ukulele = HeadstockLayout(
         pegs: [
-            HeadstockPeg(stringNumber: 4, post: CGPoint(x: 34, y: 96), keySide: .left, buttonSide: .left),
-            HeadstockPeg(stringNumber: 3, post: CGPoint(x: 34, y: 58), keySide: .left, buttonSide: .left),
-            HeadstockPeg(stringNumber: 1, post: CGPoint(x: 66, y: 96), keySide: .right, buttonSide: .right),
-            HeadstockPeg(stringNumber: 2, post: CGPoint(x: 66, y: 58), keySide: .right, buttonSide: .right),
+            HeadstockPeg(stringNumber: 4, post: CGPoint(x: 34, y: 96), keySide: .left),
+            HeadstockPeg(stringNumber: 3, post: CGPoint(x: 34, y: 58), keySide: .left),
+            HeadstockPeg(stringNumber: 1, post: CGPoint(x: 66, y: 96), keySide: .right),
+            HeadstockPeg(stringNumber: 2, post: CGPoint(x: 66, y: 58), keySide: .right),
         ],
         nutXs: evenNut(count: 4, from: 43, to: 57),
         neckHalfWidth: 10,
@@ -345,7 +350,12 @@ struct HeadstockFigure: View {
             ctx.stroke(shaft, with: .color(ink.line), lineWidth: max(1.5, s * 1.4))
             let knob = t.path { p in
                 p.addRoundedRect(
-                    in: CGRect(x: key.x - 4, y: key.y - 5, width: 8, height: 10),
+                    in: CGRect(
+                        x: key.x - HeadstockLayout.keyHalfWidth,
+                        y: key.y - 5,
+                        width: HeadstockLayout.keyHalfWidth * 2,
+                        height: 10
+                    ),
                     cornerSize: CGSize(width: 2.6, height: 2.6)
                 )
             }
@@ -464,7 +474,8 @@ func headstockButtonZIndex(selected: Bool, active: Bool) -> Double {
     selected ? 2 : (active ? 1 : 0)
 }
 
-/// 琴头 + 两侧音高按钮：按钮尽量与弦轴同高且互不重叠，淡线连到对应旋钮。
+/// 琴头 + 音高按钮：按钮与旋钮同侧、顺序一致且互不重叠，虚线引到旋钮外缘并以圆点收尾；
+/// 同侧按钮过多时自动压低按钮高度。
 struct HeadstockPanel<StringButtonView: View>: View {
     let layout: HeadstockLayout
     let strings: [StringItemUi]
@@ -480,19 +491,24 @@ struct HeadstockPanel<StringButtonView: View>: View {
         GeometryReader { geometry in
             let size = geometry.size
             let columnWidth = buttonSize.width + gap
+            let hasLeft = layout.pegs.contains { $0.keySide == .left }
+            let hasRight = layout.pegs.contains { $0.keySide == .right }
+            let figureLeft = hasLeft ? columnWidth : 0
+            let figureRight = hasRight ? size.width - columnWidth : size.width
             let figureRect = CGRect(
-                x: columnWidth,
+                x: figureLeft,
                 y: 0,
-                width: max(size.width - columnWidth * 2, 1),
+                width: max(figureRight - figureLeft, 1),
                 height: size.height
             )
+            let buttonHeight = fittedButtonHeight(height: size.height)
             let t = FigureTransform(fitting: HeadstockLayout.design, in: figureRect)
             let leftX = max(buttonSize.width / 2, t.point(0, 0).x - gap - buttonSize.width / 2)
             let rightX = min(
                 size.width - buttonSize.width / 2,
                 t.point(HeadstockLayout.design.width, 0).x + gap + buttonSize.width / 2
             )
-            let ys = buttonYs(t: t, height: size.height)
+            let ys = buttonYs(t: t, height: size.height, buttonHeight: buttonHeight)
 
             ZStack(alignment: .topLeading) {
                 guides(t: t, leftX: leftX, rightX: rightX, ys: ys)
@@ -509,9 +525,9 @@ struct HeadstockPanel<StringButtonView: View>: View {
                 ForEach(layout.pegs) { peg in
                     if let item = strings[safe: peg.stringNumber - 1] {
                         button(item)
-                            .frame(width: buttonSize.width, height: buttonSize.height)
+                            .frame(width: buttonSize.width, height: buttonHeight)
                             .position(
-                                x: peg.buttonSide == .left ? leftX : rightX,
+                                x: peg.keySide == .left ? leftX : rightX,
                                 y: ys[peg.stringNumber] ?? t.point(peg.post).y
                             )
                             .zIndex(headstockButtonZIndex(
@@ -524,16 +540,27 @@ struct HeadstockPanel<StringButtonView: View>: View {
         }
     }
 
+    /// 同侧按钮放不下时压低高度（不低于 30pt），保证一列按钮互不重叠。
+    private func fittedButtonHeight(height: CGFloat) -> CGFloat {
+        let perSide = max(
+            layout.pegs.filter { $0.keySide == .left }.count,
+            layout.pegs.filter { $0.keySide == .right }.count,
+            1
+        )
+        let fit = (height - CGFloat(perSide - 1) * 4) / CGFloat(perSide)
+        return max(min(buttonSize.height, fit), 30)
+    }
+
     /// 弦号 → 按钮中心 y；左右两列各自排开。
-    private func buttonYs(t: FigureTransform, height: CGFloat) -> [Int: CGFloat] {
+    private func buttonYs(t: FigureTransform, height: CGFloat, buttonHeight: CGFloat) -> [Int: CGFloat] {
         var result: [Int: CGFloat] = [:]
         for side in [HeadstockSide.left, .right] {
-            let pegs = layout.pegs.filter { $0.buttonSide == side }
+            let pegs = layout.pegs.filter { $0.keySide == side }
             let ys = spreadCenters(
                 pegs.map { t.point($0.post).y },
-                spacing: buttonSize.height + 4,
-                minY: buttonSize.height / 2,
-                maxY: max(height - buttonSize.height / 2, buttonSize.height / 2)
+                spacing: buttonHeight + 4,
+                minY: buttonHeight / 2,
+                maxY: max(height - buttonHeight / 2, buttonHeight / 2)
             )
             for (peg, y) in zip(pegs, ys) { result[peg.stringNumber] = y }
         }
@@ -546,18 +573,24 @@ struct HeadstockPanel<StringButtonView: View>: View {
                 guard let item = strings[safe: peg.stringNumber - 1] else { continue }
                 let state = FigureStringState(item: item, selected: selectedIndex == peg.stringNumber - 1)
                 let y = ys[peg.stringNumber] ?? t.point(peg.post).y
-                let startX = peg.buttonSide == .left
+                let startX = peg.keySide == .left
                     ? leftX + buttonSize.width / 2
                     : rightX - buttonSize.width / 2
-                let target = peg.keySide == peg.buttonSide ? layout.keyCenter(peg) : peg.post
-                let end = t.point(target)
+                let end = t.point(layout.keyOuterEdge(peg))
+                let color = state.isHighlighted ? state.color(ink) : ink.line.opacity(0.55)
                 var path = Path()
                 path.move(to: CGPoint(x: startX, y: y))
+                path.addLine(to: CGPoint(x: startX + (end.x - startX) * 0.35, y: y))
                 path.addLine(to: end)
                 ctx.stroke(
                     path,
-                    with: .color(state.isHighlighted ? state.color(ink).opacity(0.7) : ink.lineFaint),
-                    style: StrokeStyle(lineWidth: state.isHighlighted ? 1.4 : 1, dash: [3, 3])
+                    with: .color(color),
+                    style: StrokeStyle(lineWidth: state.isHighlighted ? 1.5 : 1, dash: [3, 2.5])
+                )
+                let r: CGFloat = state.isHighlighted ? 2.6 : 2
+                ctx.fill(
+                    Path(ellipseIn: CGRect(x: end.x - r, y: end.y - r, width: r * 2, height: r * 2)),
+                    with: .color(color)
                 )
             }
         }
@@ -1041,18 +1074,31 @@ struct InstrumentGlyph: View {
 
     private func shape(_ p: inout Path) {
         switch instrumentId {
+        // 竖立正视：吉他细腰、下箱宽、长琴颈、3+3 弦轴；尤克里里圆胖、短琴颈、2+2 弦轴。
         case "guitar":
-            p.addEllipse(in: CGRect(x: 3, y: 13, width: 10, height: 9))
-            p.addEllipse(in: CGRect(x: 4.6, y: 8.2, width: 6.8, height: 6.4))
-            p.move(to: CGPoint(x: 10.5, y: 12))
-            p.addLine(to: CGPoint(x: 19, y: 3.5))
-            p.addRoundedRect(in: CGRect(x: 17.6, y: 1.6, width: 4.4, height: 4.4), cornerSize: CGSize(width: 1, height: 1))
+            body(&p, segments: [
+                [(12, 22.6), (15.4, 22.6), (17.2, 21), (17.2, 18.6)],
+                [(17.2, 18.6), (17.2, 16.6), (15, 16.4), (15, 14.8)],
+                [(15, 14.8), (15, 13.6), (15.9, 13.6), (15.9, 12.3)],
+                [(15.9, 12.3), (15.9, 10.9), (14.4, 10.2), (13, 10.2)],
+            ])
+            line(&p, (11, 10.2), (11, 5.2))
+            line(&p, (13, 10.2), (13, 5.2))
+            p.addRoundedRect(in: CGRect(x: 10.1, y: 0.8, width: 3.8, height: 4.4), cornerSize: CGSize(width: 1, height: 1))
+            p.addEllipse(in: CGRect(x: 10.4, y: 13.1, width: 3.2, height: 3.2))
+            line(&p, (9.8, 19.6), (14.2, 19.6))
         case "ukulele":
-            p.addEllipse(in: CGRect(x: 4, y: 13.5, width: 8, height: 7.5))
-            p.addEllipse(in: CGRect(x: 5.2, y: 10, width: 5.6, height: 5.2))
-            p.move(to: CGPoint(x: 10, y: 13))
-            p.addLine(to: CGPoint(x: 17, y: 6))
-            p.addRoundedRect(in: CGRect(x: 15.8, y: 3.6, width: 4, height: 4), cornerSize: CGSize(width: 1, height: 1))
+            body(&p, segments: [
+                [(12, 22.4), (15, 22.4), (16.4, 21), (16.4, 19.2)],
+                [(16.4, 19.2), (16.4, 17.6), (15.3, 17.3), (15.3, 16.2)],
+                [(15.3, 16.2), (15.3, 15.2), (15.9, 15), (15.9, 14.1)],
+                [(15.9, 14.1), (15.9, 12.9), (14.5, 12.2), (13, 12.2)],
+            ])
+            line(&p, (11, 12.2), (11, 7.4))
+            line(&p, (13, 12.2), (13, 7.4))
+            p.addRoundedRect(in: CGRect(x: 10.3, y: 4.2, width: 3.4, height: 3.2), cornerSize: CGSize(width: 1, height: 1))
+            p.addEllipse(in: CGRect(x: 10.7, y: 14.5, width: 2.6, height: 2.6))
+            line(&p, (10.5, 19.9), (13.5, 19.9))
         case "guqin":
             p.move(to: CGPoint(x: 2, y: 10))
             p.addLine(to: CGPoint(x: 19, y: 8.5))
@@ -1091,13 +1137,50 @@ struct InstrumentGlyph: View {
         }
     }
 
+    private typealias Pt = (CGFloat, CGFloat)
+
+    private func line(_ p: inout Path, _ a: Pt, _ b: Pt) {
+        p.move(to: CGPoint(x: a.0, y: a.1))
+        p.addLine(to: CGPoint(x: b.0, y: b.1))
+    }
+
+    /// 以 x = 12 为轴左右对称的琴身：`segments` 为右半边自底部中点到琴颈接口的三次曲线，
+    /// 左半边镜像生成。
+    private func body(_ p: inout Path, segments: [[Pt]]) {
+        func pt(_ v: Pt, mirrored: Bool = false) -> CGPoint {
+            CGPoint(x: mirrored ? 24 - v.0 : v.0, y: v.1)
+        }
+        guard let first = segments.first?.first, let last = segments.last?.last else { return }
+        p.move(to: pt(first))
+        for seg in segments {
+            p.addCurve(to: pt(seg[3]), control1: pt(seg[1]), control2: pt(seg[2]))
+        }
+        p.addLine(to: pt(last, mirrored: true))
+        for seg in segments.reversed() {
+            p.addCurve(
+                to: pt(seg[0], mirrored: true),
+                control1: pt(seg[2], mirrored: true),
+                control2: pt(seg[1], mirrored: true)
+            )
+        }
+        p.closeSubpath()
+    }
+
     private func dots(_ p: inout Path) {
         func dot(_ x: CGFloat, _ y: CGFloat, _ r: CGFloat = 0.9) {
             p.addEllipse(in: CGRect(x: x - r, y: y - r, width: r * 2, height: r * 2))
         }
         switch instrumentId {
-        case "guitar": dot(8, 17.4, 1.3)
-        case "ukulele": dot(8, 17.2, 1.1)
+        case "guitar":
+            for y in [1.7, 3.0, 4.3] as [CGFloat] {
+                dot(8.6, y, 0.55)
+                dot(15.4, y, 0.55)
+            }
+        case "ukulele":
+            for y in [5.1, 6.5] as [CGFloat] {
+                dot(8.9, y, 0.6)
+                dot(15.1, y, 0.6)
+            }
         case "zhudi":
             dot(16.6, 7.4)
             for step in 0..<3 { dot(12.6 - CGFloat(step) * 1.9, 11.4 + CGFloat(step) * 1.9, 0.75) }

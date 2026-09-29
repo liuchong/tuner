@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -219,7 +220,13 @@ private fun ControlRow(state: InstrumentUiState, vm: InstrumentViewModel) {
                 accessibilityLabel = "定弦，${state.tuningName}",
             )
         }
-        val headstockPicker: @Composable () -> Unit = {
+        val compact = headstock != null && maxWidth < 380.dp
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 8.dp),
+        ) {
+            Box(modifier = Modifier.weight(1f)) { tuning() }
             if (headstock != null) {
                 LumenSegmented(
                     options = HeadstockStyle.entries,
@@ -227,29 +234,11 @@ private fun ControlRow(state: InstrumentUiState, vm: InstrumentViewModel) {
                     title = { it.displayName },
                     accessibilityTitle = { it.accessibilityName },
                     onSelect = vm::selectHeadstockStyle,
+                    horizontalPadding = if (compact) 8.dp else 14.dp,
+                    equalWidths = true,
                 )
             }
-        }
-        val auto: @Composable () -> Unit = { AutoModeToggle(state.mode, vm::selectMode) }
-        if (headstock != null && maxWidth < 352.dp) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    tuning()
-                    Spacer(modifier = Modifier.weight(1f))
-                    auto()
-                }
-                headstockPicker()
-            }
-        } else {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Box(modifier = Modifier.weight(1f)) { tuning() }
-                headstockPicker()
-                auto()
-            }
+            AutoModeToggle(state.mode, vm::selectMode, showIcon = !compact)
         }
     }
 }
@@ -289,11 +278,15 @@ internal fun <T> LumenSegmented(
     title: (T) -> String,
     onSelect: (T) -> Unit,
     accessibilityTitle: (T) -> String = title,
+    horizontalPadding: Dp = 14.dp,
+    /** 各段等宽（取最宽一段），文字居中；用于只有两三项、字数差距大的切换。 */
+    equalWidths: Boolean = false,
 ) {
     val colors = LocalLumenColors.current
     Row(
         modifier = Modifier
             .height(48.dp)
+            .then(if (equalWidths) Modifier.width(IntrinsicSize.Max) else Modifier)
             .background(colors.bgSurface, CircleShape)
             .border(1.dp, colors.lineSubtle, CircleShape),
     ) {
@@ -310,13 +303,14 @@ internal fun <T> LumenSegmented(
                 color = bg,
                 modifier = Modifier
                     .height(48.dp)
+                    .then(if (equalWidths) Modifier.weight(1f) else Modifier)
                     .semantics {
                         role = Role.Tab
                         this.selected = isSelected
                         contentDescription = accessibilityTitle(option)
                     },
             ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 14.dp)) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = horizontalPadding)) {
                     Text(
                         title(option),
                         style = TunarTypography.label,
@@ -383,7 +377,7 @@ private fun PillDropdown(
 
 /** 自动选弦开关：点亮即自动识别最近的弦；点任意弦进入手动锁定，开关随之熄灭，再点回到自动。 */
 @Composable
-private fun AutoModeToggle(mode: SelectionMode, onSelect: (SelectionMode) -> Unit) {
+private fun AutoModeToggle(mode: SelectionMode, onSelect: (SelectionMode) -> Unit, showIcon: Boolean = true) {
     val colors = LocalLumenColors.current
     val isAuto = mode == SelectionMode.AUTO
     PressableSurface(
@@ -400,17 +394,19 @@ private fun AutoModeToggle(mode: SelectionMode, onSelect: (SelectionMode) -> Uni
             },
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp),
+            modifier = Modifier.padding(horizontal = if (showIcon) 14.dp else 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             val tint = if (isAuto) colors.bgCanvas else colors.inkPrimary
-            Icon(
-                if (isAuto) Icons.Filled.GraphicEq else Icons.Filled.TouchApp,
-                contentDescription = null,
-                tint = tint,
-                modifier = Modifier.size(16.dp),
-            )
+            if (showIcon) {
+                Icon(
+                    if (isAuto) Icons.Filled.GraphicEq else Icons.Filled.TouchApp,
+                    contentDescription = null,
+                    tint = tint,
+                    modifier = Modifier.size(16.dp),
+                )
+            }
             Text(if (isAuto) "自动" else "手动", style = TunarTypography.label, color = tint, maxLines = 1)
         }
     }
@@ -516,21 +512,43 @@ private fun PegButton(item: StringItemUi, selected: Boolean, onClick: () -> Unit
                 stateDescription = stringDescription(item, selected)
             },
     ) {
-        Row(
-            modifier = Modifier.padding(start = 9.dp, end = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(7.dp),
-        ) {
-            StringBadge(item, c.number, 20.dp)
-            Column {
-                Text(
-                    item.noteName.replace("#", "♯"),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colors.inkPrimary,
-                    maxLines = 1,
-                )
-                Text(item.solfege, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = colors.inkSecondary)
+        BoxWithConstraints {
+            val singleLine = maxHeight < 44.dp
+            Row(
+                modifier = Modifier.fillMaxSize().padding(start = if (singleLine) 7.dp else 9.dp, end = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(if (singleLine) 5.dp else 7.dp),
+            ) {
+                StringBadge(item, c.number, if (singleLine) 18.dp else 20.dp)
+                val note: @Composable () -> Unit = {
+                    Text(
+                        item.noteName.replace("#", "♯"),
+                        fontSize = if (singleLine) 15.sp else 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.inkPrimary,
+                        maxLines = 1,
+                    )
+                }
+                val solfege: @Composable () -> Unit = {
+                    Text(
+                        item.solfege,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = colors.inkSecondary,
+                        maxLines = 1,
+                    )
+                }
+                if (singleLine) {
+                    Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        note()
+                        solfege()
+                    }
+                } else {
+                    Column {
+                        note()
+                        solfege()
+                    }
+                }
             }
         }
     }

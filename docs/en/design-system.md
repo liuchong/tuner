@@ -111,14 +111,20 @@ a 1.5 accent outline, and accent glyph and text; other tiles use `bg/surface` wi
 
 Tuning, key, and model dropdowns and segmented controls are 48 dp/pt high, capsule
 shaped, with 14–16 dp/pt horizontal padding, one line with ellipsis, and a 6–8 dp
-icon/text gap. Narrow layouts wrap the group; text never wraps inside a control and no
-control is squeezed. The selected segment is solid `accent` with `bg/canvas` text. The
+icon/text gap. String controls (tuning, headstock style, auto-string) always share one
+row: on narrow screens segments use 8 dp/pt padding, the auto toggle drops its icon, and
+the tuning dropdown takes the remaining width with ellipsis; text never wraps inside a
+control. The two headstock segments are equal width (the wider one) with centered text. The selected segment is solid `accent` with `bg/canvas` text. The
 auto-string toggle is a capsule of the same size: solid `accent` with a waveform icon
 when on, `bg/surface` with a finger icon when off. Every press scales to 0.96 for 120 ms.
 
 String buttons are 14-radius cards with a round string-number badge, a bold note, and
 small solfège. The current string has a 1.5 `accent` outline and 14% `accent` fill; an
 in-tune string switches to `tune/in` and its badge becomes a check.
+
+Switcher glyphs are 24 × 24 upright front views: the guitar has a narrow waist, larger
+lower bout, long neck, and three peg dots per side; the ukulele has a plump body, short
+neck, and two peg dots per side; both show a sound hole and a bridge line.
 
 **Instrument line art** (guitar and ukulele headstocks, guqin, zhudi, dongxiao,
 shakuhachi) is single-color line drawing in the same stroke language as the switcher
@@ -127,10 +133,13 @@ no fills, no realism, no shadows. The current string is drawn in accent (`tune/i
 tune), about 1.5–2 dp thicker, with a 20% halo of the same color; other strings stay thin.
 Back holes and the dizi membrane hole use the dedicated `tune/near` color.
 
-- Headstocks sit centered with the string buttons on both sides. A thin dashed leader
-  joins each button to its peg; buttons follow their pegs vertically. Colliding buttons on
+- String buttons sit on the same side as their tuner keys, in peg order from top to
+  bottom (6-in-line: one column on the bass side; 3+3 and ukulele: both sides). The dashed
+  leader leaves the button horizontally, bends to the key's outer edge, and ends in a dot
+  of the same color; buttons follow their pegs vertically. Colliding buttons on
   one side are spread evenly around the mean of their peg heights (pitch = button height +
-  4 dp/pt, compressed evenly only when space runs out). The selected button stacks on top,
+  4 dp/pt, compressed evenly only when space runs out; when a column cannot fit, buttons
+  shrink to no less than 30 dp/pt and show note and solfège on one line). The selected button stacks on top,
   then the auto-detected string. The guitar has 6-in-line and 3+3 outlines; the ukulele is 2+2.
 - The guqin lies horizontally below the seven string buttons and above the dial, scaled
   to the width, with string numbers at the tail end.

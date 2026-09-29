@@ -51,9 +51,9 @@ instrument figure, the target readout, and the dial (2026-09-29).
 - **Model-control row**: strings show a tuning dropdown, a headstock segmented control
   (guitar only), and the auto-string toggle; winds show a key/model dropdown plus a
   hole-system segmented control when there is more than one hole system.
-- Every selector is 48 dp/pt high, capsule-shaped, and one-line with ellipsis. Narrow
-  screens wrap the control group in the fixed order; a control itself never wraps or is
-  squeezed. Menus are at least as wide as their trigger and mark the current item.
+- Every selector is 48 dp/pt high, capsule-shaped, and one-line with ellipsis. String
+  controls always share one row; narrow screens tighten padding, drop the auto-toggle
+  icon, and ellipsize the tuning dropdown instead of wrapping to two rows. Menus are at least as wide as their trigger and mark the current item.
 - **Target readout**: a small "Target" label and the target note on the left, ±cents
   with a "cents" unit on the right. Without a signal the right side shows a "Play a note"
   chip. With no target the left side reads "Auto detect" for strings in auto mode and
@@ -72,12 +72,12 @@ instrument figure, the target readout, and the dial (2026-09-29).
   string within ±50 cents and the toggle turns off to "Manual"; tapping the toggle
   returns to auto. Switching instruments returns to auto.
 - **Guitar and ukulele headstocks**: the figure is a line-art headstock (outline, nut,
-  strings running from the nut to the posts, and tuner keys). The string buttons sit on
-  both sides, each joined to its peg by a thin dashed guide so it is clear which key
-  tunes which string.
+  strings running from the nut to the posts, and tuner keys). Each string button sits on
+  the same side as its tuner key, in the same order, joined to that key by a thin dashed
+  guide ending in a dot, so it is clear which key tunes which string.
   - The guitar offers the two industry-standard styles: **6-in-line** (Fender style:
     six keys in one row on the bass side, string 6 nearest the nut and string 1 at the
-    tip, buttons alternating left and right) and **3+3** (Gibson style: strings 6/5/4 up
+    tip, buttons in one column on that side, strings 1…6 from top to bottom) and **3+3** (Gibson style: strings 6/5/4 up
     the left side and 1/2/3 up the right, so both E strings are nearest the nut and D and
     G are at the top). 6-in-line is the default, and the chosen style persists across
     launches.
