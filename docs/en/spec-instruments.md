@@ -61,9 +61,9 @@ The orthodox F reference treats F as scale degree 1: C D F G A c d =
 
 ## 4. Zhudi (`zhudi`, six holes)
 
-Keys: D qudi, G bangdi, F, C, and E. Each key supports tube note as scale degree 5,
-1, or 2. A chart covers the closed tube through fully open and overblown notes across
-approximately two octaves (15 ascending entries).
+Keys: D qudi, G bangdi, F, C, and E. Each key has one six-hole variant. Since
+2026-09-29 the zhudi shares the dongxiao's 12 tube-solfège positions and its
+"complete instrument drawing + three range columns" table, defaulting to tube note as 5.
 
 The closed tube sits a perfect fourth below the third hole, which is the traditional
 key-defining hole (`小工调`), and a dizi sounds one octave above a xiao of the same key
@@ -74,14 +74,23 @@ the defining `g2 = 784 Hz`), F `c2 = C5` (72), C `g1 = G4` (67, 392 Hz), and E a
 Fixed 2026-08-25: all five keys were an octave low, and C wrongly used a fifth below the
 tonic (F), so its tube note was not the key's degree 5 at all.
 
-Current delivery boundary: zhudi keeps its existing key/tube-note selectors and
-fingering-list interaction. It does not adopt the dongxiao-first hole-system switch,
-draggable solfège badges, or separate chromatic detail yet. Core may expose the new
-data surface without changing this client path.
+Holes (2026-09-29): all six holes are on the front; hole 1 is the one nearest the foot,
+and the membrane hole is drawn between the embouchure and hole 6. The low range opens
+holes in sequence like the six-hole xiao, except that 10 semitones (the "4" when the tube
+sounds 5) uses the common dizi cross fingering "open holes 1, 2, 3 and 6" rather than the
+xiao's half-covered back hole. The middle range (overblown) reuses the low patterns except
+that 12 semitones opens only hole 6 as a harmonic vent and 22 semitones switches to a cross
+fingering. The high range lists only the consistently documented 24 semitones; the other
+high cells conflict between sources, are not returned, and stay blank in clients.
+Reference: [Dizi fingerings](https://en.wikipedia.org/wiki/Dizi_(instrument)#Fingerings).
+Interaction matches the dongxiao in §5: range columns Low / Middle / High (soft /
+overblown / forceful breath), solfège-badge drag transposition, separate chromatic detail,
+and distinct pinned and live-hit highlights. The zhudi has no hole-system switch.
 
-## 5. Dongxiao (`dongxiao`, G/F, eight-hole first)
+## 5. Dongxiao (`dongxiao`, G/F, eight holes by default)
 
-The new interaction ships for dongxiao first:
+The dongxiao is the reference design for the wind table; the zhudi and shakuhachi reuse
+this section's layout and interaction, with their differences described in §4 and §6:
 
 - G and F keys each provide eight-hole and six-hole variants. Eight-hole is the
   default; users may switch to six-hole.
@@ -151,8 +160,17 @@ Models: 1.8 (D, closed D4), 1.6 (E), 2.0 (C), and 2.4 (A). The 1.8 basic pentato
 sequence is D F G A C (ro-tsu-re-chi-ha), including meri/kari labels and two octaves
 plus the upper register for 11 entries.
 
-Current delivery boundary: shakuhachi keeps its existing model and fixed-scale list.
-It has no hole diagram, draggable 12-position solfège mapping, or dongxiao chromatic detail.
+Holes and interaction (2026-09-29): five holes, four on the front and one back (thumb)
+hole drawn in the back-hole color. Pattern strings run from hole 1 (lowest, right ring
+finger) to hole 4 and then the back hole. Otsu and kan share patterns except kan ha, which
+covers only hole 1 and the back hole; daikan ro is fully open. References:
+[Alternate Fingering Chart for Five-Hole Shakuhachi](https://www.wfg.woodwind.org/shaku/index.html)
+and [JosenShakuhachi basic note charts](https://josenshakuhachi.com/shakuhachi-guides/shakuhachi-note-charts).
+Clients use the same "complete instrument drawing + three range columns" table as the
+dongxiao, with the columns named by octave: **otsu (乙音)**, **kan (甲音)**, and
+**daikan (大甲)**. Rows again anchor to the topmost open hole. Shakuhachi chromatic tones
+come from meri/kari embouchure shading rather than hole patterns, so there is no
+solfège-drag transposition and no chromatic detail.
 
 ## Data integrity
 
@@ -165,8 +183,10 @@ It has no hole diagram, draggable 12-position solfège mapping, or dongxiao chro
   semitones, and base semitones are ordered. A middle entry shares `holes` with its low
   entry (except at 22 semitones) while a high entry differs. Clients use a Low/Middle/High
   grid, keep uncovered cells blank, and never synthesize missing entries.
-- Zhudi and shakuhachi retain their existing model and scale integrity; the dongxiao
-  data extension does not change their interaction boundary.
+- Zhudi: one six-hole variant per key for five keys; range patterns follow §4, and
+  unlisted high cells are not returned.
+- Shakuhachi: five holes with one back hole; 11 `Scale` entries split 5 otsu, 5 kan, and
+  1 daikan; no tube transposition or chromatic detail.
 - Main and detail each show exactly one complete large diagram traceable to core's
   primary fingering while allowing documented alternatives for instrument differences.
 - New instruments or tunings update this specification before implementation and add

@@ -90,9 +90,6 @@ struct UniffiFactories {
 enum CorePresets {
     static func instruments() -> [Instrument] { listInstruments() }
     static func tunings(instrumentId: String) -> [Tuning] { listTunings(instrumentId: instrumentId) }
-    static func fingeringCharts(instrumentId: String) -> [FingeringChart] {
-        listFingeringCharts(instrumentId: instrumentId)
-    }
     static func windVariants(instrumentId: String) -> [WindVariant] {
         listWindVariants(instrumentId: instrumentId)
     }

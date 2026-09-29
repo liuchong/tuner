@@ -1,7 +1,6 @@
 package com.liuchong.tunar.corebinding
 
 import uniffi.tunar_core.AnalysisFrame
-import uniffi.tunar_core.FingeringChart
 import uniffi.tunar_core.FingeringScope
 import uniffi.tunar_core.Instrument
 import uniffi.tunar_core.KeyMode
@@ -15,7 +14,6 @@ import uniffi.tunar_core.TunarEvent
 import uniffi.tunar_core.Tuning
 import uniffi.tunar_core.WindChart
 import uniffi.tunar_core.WindVariant
-import uniffi.tunar_core.listFingeringCharts
 import uniffi.tunar_core.listInstruments
 import uniffi.tunar_core.listTunings
 import uniffi.tunar_core.listWindVariants as uniffiListWindVariants
@@ -59,8 +57,6 @@ interface TunarCoreApi {
     fun instruments(): List<Instrument>
 
     fun tunings(instrumentId: String): List<Tuning>
-
-    fun fingeringCharts(instrumentId: String): List<FingeringChart>
 
     fun windVariants(instrumentId: String): List<WindVariant>
 
@@ -120,9 +116,6 @@ object TunarCore : TunarCoreApi {
     override fun instruments(): List<Instrument> = listInstruments()
 
     override fun tunings(instrumentId: String): List<Tuning> = listTunings(instrumentId)
-
-    override fun fingeringCharts(instrumentId: String): List<FingeringChart> =
-        listFingeringCharts(instrumentId)
 
     override fun windVariants(instrumentId: String): List<WindVariant> =
         uniffiListWindVariants(instrumentId)

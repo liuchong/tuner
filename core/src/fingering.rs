@@ -30,14 +30,17 @@ pub const CHROMATIC_OFFSETS: [i32; (CHROMATIC_MAX + 1) as usize] = {
     out
 };
 
-/// 洞箫十二音基础孔位。
-pub const DONGXIAO_CHROMATIC_BASE_OFFSETS: [i32; 12] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+/// 孔制类（笛/箫）十二音详情的基础孔位。
+pub const CHROMATIC_BASE_OFFSETS: [i32; 12] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
 /// 宫调式七声相对宫音的半音偏移（判定某音是否为当前调的正声）。
 const GONG_SCALE_STEPS: [i32; 7] = [0, 2, 4, 5, 7, 9, 11];
 
-/// 按当前筒音唱名筛选可完整显示 `1 2 3 4 5 6 7` 的七个基础孔位。
-pub fn dongxiao_scale_base_offsets(tongyin_degree: u8) -> [i32; 7] {
+/// 孔制类（笛/箫）按当前筒音唱名筛选可完整显示 `1 2 3 4 5 6 7` 的七个基础孔位。
+///
+/// 筒音作 5 得 `[0,2,4,5,7,9,10]`：第 7 个基础孔位是 10 半音的「4」，
+/// 不是 11 半音全开的「#4」。
+pub fn scale_base_offsets(tongyin_degree: u8) -> [i32; 7] {
     let mut offsets =
         GONG_SCALE_STEPS.map(|scale_step| (scale_step - i32::from(tongyin_degree)).rem_euclid(12));
     offsets.sort_unstable();
@@ -141,7 +144,7 @@ const XIAO8_LABELS: [&str; 12] = [
     "开第一三四五七八孔",
 ];
 
-/// 六孔箫/竹笛（前五后一 / 六孔全前）孔位组合。
+/// 六孔箫（前五后一）孔位组合。
 ///
 /// 逐孔开放为七声音阶（0 2 4 5 7 9 11），五个变化音一律靠半孔取得。
 const XIAO6_PATTERNS: [&str; 12] = [
@@ -157,6 +160,54 @@ const XIAO6_PATTERNS: [&str; 12] = [
     "OOOOOC", // 9  开第一…五孔
     "OOOOOH", // 10 开第一…五孔 + 第六孔半开
     "OOOOOO", // 11 全开
+];
+
+/// 六孔竹笛（六孔全在正面）孔位组合，第一孔为靠笛尾的一孔。
+///
+/// 与六孔箫逐孔开放一致；区别是 10 半音（筒音作 5 的「4」）用竹笛通行的叉口
+/// 「开第一二三六孔」（吹口起记作 ○●●○○○），而不是六孔箫的背孔半开。
+/// 参考：[Dizi fingerings](https://en.wikipedia.org/wiki/Dizi_(instrument)#Fingerings)。
+const DIZI6_PATTERNS: [&str; 12] = [
+    "CCCCCC", // 0  筒音（全按）
+    "HCCCCC", // 1  第一孔半开
+    "OCCCCC", // 2  开第一孔
+    "OHCCCC", // 3  开第一孔 + 第二孔半开
+    "OOCCCC", // 4  开第一二孔
+    "OOOCCC", // 5  开第一二三孔
+    "OOOHCC", // 6  开第一二三孔 + 第四孔半开
+    "OOOOCC", // 7  开第一二三四孔
+    "OOOOHC", // 8  开第一二三四孔 + 第五孔半开
+    "OOOOOC", // 9  开第一…五孔
+    "OOOCCO", // 10 叉口：闭第四五孔
+    "OOOOOO", // 11 全开
+];
+
+/// 六孔竹笛相对筒音 12–31 半音的孔位。
+///
+/// 中音区（超吹）除 12 半音开第六孔作泛音孔、22 半音换叉口外沿用低音孔位；
+/// 高音区只收录资料一致的 24 半音。其余高音格资料抄录互相矛盾，保持 `None`，
+/// 客户端留空。参考同上。
+const DIZI6_UPPER_PATTERNS: [Option<&str>; 20] = [
+    Some("CCCCCO"), // 12 筒音·超吹：只开第六孔
+    Some("HCCCCC"), // 13
+    Some("OCCCCC"), // 14
+    Some("OHCCCC"), // 15
+    Some("OOCCCC"), // 16
+    Some("OOOCCC"), // 17
+    Some("OOOHCC"), // 18
+    Some("OOOOCC"), // 19
+    Some("OOOOHC"), // 20
+    Some("OOOOOC"), // 21
+    Some("CCCOCO"), // 22 中音叉口
+    Some("OOOOOO"), // 23
+    Some("CCCCCO"), // 24 高音区起
+    None,           // 25
+    None,           // 26
+    None,           // 27
+    None,           // 28
+    None,           // 29
+    None,           // 30
+    None,           // 31
 ];
 
 /// 一种孔制（孔数 + 前后分布 + 十二半音孔位组合 + 常用筒音唱名）。
@@ -200,19 +251,45 @@ pub const XIAO_6: HoleSystemDef = HoleSystemDef {
     common_tongyin: &[7, 0, 2],
 };
 
-/// 六孔竹笛：六孔全在正面，指法与六孔箫一致。
+/// 六孔竹笛：六孔全在正面。
 pub const DIZI_6: HoleSystemDef = HoleSystemDef {
     id: "d6",
     display_name: "6孔",
     hole_count: 6,
     back_hole_count: 0,
-    patterns: &XIAO6_PATTERNS,
-    upper_patterns: &XIAO6_UPPER_PATTERNS,
+    patterns: &DIZI6_PATTERNS,
+    upper_patterns: &DIZI6_UPPER_PATTERNS,
     common_tongyin: &[7, 0, 2],
 };
 
 /// 尺八基本音阶相对筒音的半音偏移（ro tsu re chi ha 五声 × 2 八度 + 大甲，11 音）。
 pub const SHAKUHACHI_OFFSETS: [i32; 11] = [0, 3, 5, 7, 10, 12, 15, 17, 19, 22, 24];
+
+/// 尺八五孔（前四后一）孔数与背孔数。
+pub const SHAKUHACHI_HOLE_COUNT: u8 = 5;
+/// 尺八背孔（拇指孔）数。
+pub const SHAKUHACHI_BACK_HOLE_COUNT: u8 = 1;
+
+/// 尺八基本音阶孔位（与 [`SHAKUHACHI_OFFSETS`] 一一对应）。
+///
+/// 字符顺序为第一孔（最下、右手无名指）→ 第四孔 → 背孔。乙音与甲音同孔位，
+/// 只有甲音ハ改为只按第一孔；大甲ロ全开。参考
+/// [Alternate Fingering Chart for Five-Hole Shakuhachi](https://www.wfg.woodwind.org/shaku/index.html)
+/// 各八度首选指法与 [JosenShakuhachi 基本音表](https://josenshakuhachi.com/shakuhachi-guides/shakuhachi-note-charts)。
+/// 变化音靠俯仰（meri/kari）而非孔位，因此不提供十二音展开。
+pub const SHAKUHACHI_PATTERNS: [&str; 11] = [
+    "CCCCC", // ロ
+    "OCCCC", // ツ：开第一孔
+    "OOCCC", // レ：开第一二孔
+    "OOOCC", // チ：开第一二三孔
+    "CCOOC", // ハ：按第一二孔与背孔
+    "CCCCC", // ロ·甲
+    "OCCCC", // ツ·甲
+    "OOCCC", // レ·甲
+    "OOOCC", // チ·甲
+    "COOOC", // ハ·甲：只按第一孔与背孔
+    "OOOOO", // 大甲ロ：全开
+];
 /// 尺八指法名（1.8 寸 D 调：D F G A C）。
 pub const SHAKUHACHI_LABELS: [&str; 11] = [
     "筒音(ro)",
@@ -232,12 +309,19 @@ pub const SHAKUHACHI_LABELS: [&str; 11] = [
 pub enum FingeringSource {
     /// 孔制类：孔位组合决定音高，支持筒音唱名转调与十二音展开。
     Holes(&'static HoleSystemDef),
-    /// 固定音阶类：只有音阶偏移与指法名（尺八变化音靠俯仰口风，不由孔位决定）。
+    /// 固定音阶类：音阶偏移、指法名与各音孔位（尺八变化音靠俯仰口风，不由孔位决定，
+    /// 因此不支持筒音转调与十二音展开）。
     Scale {
         /// 相对筒音的半音偏移（升序）。
         offsets: &'static [i32],
         /// 指法名（与 offsets 一一对应）。
         labels: &'static [&'static str],
+        /// 孔位组合（与 offsets 一一对应）。
+        patterns: &'static [&'static str],
+        /// 孔数。
+        hole_count: u8,
+        /// 末尾若干孔位于背面。
+        back_hole_count: u8,
     },
 }
 
@@ -282,6 +366,9 @@ const fn shaku(id: &'static str, name: &'static str, fundamental_midi: i32) -> W
         source: FingeringSource::Scale {
             offsets: &SHAKUHACHI_OFFSETS,
             labels: &SHAKUHACHI_LABELS,
+            patterns: &SHAKUHACHI_PATTERNS,
+            hole_count: SHAKUHACHI_HOLE_COUNT,
+            back_hole_count: SHAKUHACHI_BACK_HOLE_COUNT,
         },
     }
 }
@@ -324,13 +411,6 @@ pub const TONGYIN_SOL5: u8 = 7;
 pub const TONGYIN_DO1: u8 = 0;
 /// 筒音作 2 的半音级。
 pub const TONGYIN_RE2: u8 = 2;
-/// 旧版三档筒音（作 5 / 作 1 / 作 2）与其 chart id 后缀。
-pub const LEGACY_TONGYIN: [(u8, &str); 3] = [
-    (TONGYIN_SOL5, "sou5"),
-    (TONGYIN_DO1, "zuo1"),
-    (TONGYIN_RE2, "zuo2"),
-];
-
 /// 按乐器 id 查全部型号。
 pub fn wind_variants(instrument_id: &str) -> Option<&'static [WindVariantDef]> {
     match instrument_id {
@@ -393,6 +473,24 @@ impl WindVariantDef {
         self.hole_system().is_some()
     }
 
+    /// 孔数（孔制类取孔制，固定音阶类取自带孔位表）。
+    pub fn hole_count(&self) -> u8 {
+        match self.source {
+            FingeringSource::Holes(s) => s.hole_count,
+            FingeringSource::Scale { hole_count, .. } => hole_count,
+        }
+    }
+
+    /// 背孔数。
+    pub fn back_hole_count(&self) -> u8 {
+        match self.source {
+            FingeringSource::Holes(s) => s.back_hole_count,
+            FingeringSource::Scale {
+                back_hole_count, ..
+            } => back_hole_count,
+        }
+    }
+
     /// 宫音 pitch class：宫 = 筒音 − 筒音半音级。
     ///
     /// 筒音作 5 → 宫 = 筒音 − 7；作 1 → 宫 = 筒音；作 2 → 宫 = 筒音 − 2。
@@ -432,11 +530,11 @@ impl WindVariantDef {
         }
     }
 
-    /// 第 `semitones` 半音的孔位组合（固定音阶类返回空串）。
+    /// 第 `semitones` 半音的孔位组合（固定音阶类不在音阶内的半音返回空串）。
     pub fn pattern_at(&self, semitones: i32) -> &'static str {
         match self.source {
             FingeringSource::Holes(system) => hole_pattern(system, semitones),
-            FingeringSource::Scale { .. } => "",
+            FingeringSource::Scale { .. } => self.pattern_at_pitch(semitones).unwrap_or(""),
         }
     }
 
@@ -444,7 +542,12 @@ impl WindVariantDef {
     pub fn pattern_at_pitch(&self, semitones: i32) -> Option<&'static str> {
         match self.source {
             FingeringSource::Holes(system) => hole_pattern_at_pitch(system, semitones),
-            FingeringSource::Scale { .. } => Some(""),
+            FingeringSource::Scale {
+                offsets, patterns, ..
+            } => offsets
+                .iter()
+                .position(|&offset| offset == semitones)
+                .and_then(|index| patterns.get(index).copied()),
         }
     }
 }
@@ -650,8 +753,8 @@ mod tests {
 
     #[test]
     fn dongxiao_scale_offsets_follow_tongyin_and_cover_numbered_scale() {
-        assert_eq!(dongxiao_scale_base_offsets(7), [0, 2, 4, 5, 7, 9, 10]);
-        assert_eq!(dongxiao_scale_base_offsets(2), [0, 2, 3, 5, 7, 9, 10]);
+        assert_eq!(scale_base_offsets(7), [0, 2, 4, 5, 7, 9, 10]);
+        assert_eq!(scale_base_offsets(2), [0, 2, 3, 5, 7, 9, 10]);
     }
 
     #[test]
@@ -748,9 +851,37 @@ mod tests {
         ];
         for (semi, name) in expected {
             assert_eq!(hole_label(&XIAO_6, semi), name, "半音 {semi}");
-            assert_eq!(hole_label(&DIZI_6, semi), name, "半音 {semi}");
         }
         assert_eq!(hole_label(&XIAO_6, 10), "开第一二三四五孔·第六孔半开");
+    }
+
+    #[test]
+    fn dizi_uses_its_own_fork_and_overblow_patterns() {
+        for semi in [0, 2, 4, 5, 7, 9, 11] {
+            assert_eq!(hole_pattern(&DIZI_6, semi), hole_pattern(&XIAO_6, semi));
+        }
+        // 4 用叉口而非半孔；中音筒音开第六孔；高音只收录 24 半音。
+        assert_eq!(hole_pattern(&DIZI_6, 10), "OOOCCO");
+        assert_eq!(hole_pattern_at_pitch(&DIZI_6, 12), Some("CCCCCO"));
+        assert_eq!(hole_pattern_at_pitch(&DIZI_6, 22), Some("CCCOCO"));
+        assert_eq!(hole_pattern_at_pitch(&DIZI_6, 24), Some("CCCCCO"));
+        assert!(hole_pattern_at_pitch(&DIZI_6, 26).is_none());
+    }
+
+    #[test]
+    fn shakuhachi_patterns_cover_every_scale_note() {
+        assert_eq!(SHAKUHACHI_PATTERNS.len(), SHAKUHACHI_OFFSETS.len());
+        for pattern in SHAKUHACHI_PATTERNS {
+            assert_eq!(pattern.chars().count(), SHAKUHACHI_HOLE_COUNT as usize);
+            assert!(pattern.chars().all(|c| matches!(c, 'C' | 'O')));
+        }
+        let v = find_wind_variant("shaku_1_8").unwrap();
+        assert_eq!(v.hole_count(), 5);
+        assert_eq!(v.back_hole_count(), 1);
+        assert_eq!(v.pattern_at(3), "OCCCC");
+        assert_eq!(v.pattern_at_pitch(10), Some("CCOOC"));
+        assert_eq!(v.pattern_at_pitch(22), Some("COOOC"));
+        assert_eq!(v.pattern_at_pitch(1), None);
     }
 
     #[test]
@@ -778,7 +909,7 @@ mod tests {
         assert_eq!(shaku.offsets(true).len(), 11);
         assert!(!shaku.supports_chromatic());
         assert_eq!(shaku.label_at(0, 0), "筒音(ro)");
-        assert_eq!(shaku.pattern_at(0), "");
+        assert_eq!(shaku.pattern_at(0), "CCCCC");
     }
 
     #[test]

@@ -14,6 +14,7 @@
 		1610F774959188D4D20BA82A /* MacMicrophoneAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1249667A6D8EF8089BB9F4A6 /* MacMicrophoneAccess.swift */; };
 		22F4B35D14079C0A1AAD5349 /* EngineBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0A5A1A39D51D374FFF0A6E /* EngineBridge.swift */; };
 		258CED65DED3979ADCAE4DF6 /* DesktopRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0BC7D6689A712981C3DF1B /* DesktopRootView.swift */; };
+		2C4C9BB10B0EE295036AD8B7 /* InstrumentFigures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E57C1EDD65CE5DE3CE7C04 /* InstrumentFigures.swift */; };
 		304EF5BAF8515F09E7C6A57D /* DesktopContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5EFD350A1DA088B6762DC2A /* DesktopContractTests.swift */; };
 		3D5EDE6D3359673BB46DB26F /* TunarAtomics.c in Sources */ = {isa = PBXBuildFile; fileRef = 5E5B5633F1461E82F5F59544 /* TunarAtomics.c */; };
 		4D5F686EA9CFCE95D1E1BB77 /* MacInstrumentViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6B32307B713194E88D08C8 /* MacInstrumentViewModelTests.swift */; };
@@ -21,12 +22,13 @@
 		685FB72A638026ADAD2E7A84 /* MetronomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FD7692A5A9F66EFFEB7E69 /* MetronomeViewModel.swift */; };
 		6B4D1BA8F032734EEFB0C8C0 /* DesktopInstrumentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99DCF68B45714E658936A5C6 /* DesktopInstrumentView.swift */; };
 		6D9AAEBD12032C514FAB455F /* SharedTunerViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB7660DF09444C069A523CDA /* SharedTunerViews.swift */; };
+		7412E57B672B6471D6DCE3E2 /* MacWindFingeringCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0218749EB3C35C353DC6D3A /* MacWindFingeringCard.swift */; };
 		74BAD51BFF02B8EBA072D694 /* TuningForkViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3238EB221E2B93827B2CAE5A /* TuningForkViewModel.swift */; };
 		75F1B040AA2A5D1598A2B5FD /* tunar_core.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = D449334D35FF19929DF41FF8 /* tunar_core.xcframework */; };
-		8B8C1F01A0AB863798A834FF /* MacDongxiaoFingeringCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25C9E0A099C0FAFDF72C5CE9 /* MacDongxiaoFingeringCard.swift */; };
 		8EDBEDE4E6266EE2064F22B9 /* MacAudioAndAnalysisTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2D281E5FFEC9BCB6892ACC /* MacAudioAndAnalysisTests.swift */; };
 		A51FA4B3DC66C1C8AB3BC7BD /* DesktopNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4382829A731F8D1BD3F6687A /* DesktopNavigation.swift */; };
 		A52D02470EAB745B230270A6 /* MetronomePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD21B01B8C46CDD08F5A6B24 /* MetronomePlayer.swift */; };
+		A5E6688F4F444CF718C370A0 /* WindFingeringTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5A0F0F36261F13B0609872F /* WindFingeringTable.swift */; };
 		A678D9EFCF1D07E535AE47C9 /* DesktopSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5266348E431C3A984E64BE1 /* DesktopSettingsView.swift */; };
 		AE7D28415C0F3AAD0C118DF4 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0850EACD360AA3269B351372 /* Haptics.swift */; };
 		B0E5BAAD86D60FA3DF31F98A /* SpectrumHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26FFBEBF49643703DA2E6533 /* SpectrumHistory.swift */; };
@@ -60,12 +62,12 @@
 		1249667A6D8EF8089BB9F4A6 /* MacMicrophoneAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacMicrophoneAccess.swift; sourceTree = "<group>"; };
 		1C0A5A1A39D51D374FFF0A6E /* EngineBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineBridge.swift; sourceTree = "<group>"; };
 		1F63688E6EBC7E1B936D42B9 /* TunerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerViewModel.swift; sourceTree = "<group>"; };
-		25C9E0A099C0FAFDF72C5CE9 /* MacDongxiaoFingeringCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacDongxiaoFingeringCard.swift; sourceTree = "<group>"; };
 		26FFBEBF49643703DA2E6533 /* SpectrumHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumHistory.swift; sourceTree = "<group>"; };
 		2A6B32307B713194E88D08C8 /* MacInstrumentViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacInstrumentViewModelTests.swift; sourceTree = "<group>"; };
 		3238EB221E2B93827B2CAE5A /* TuningForkViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TuningForkViewModel.swift; sourceTree = "<group>"; };
 		3274087226E07B989F4E027A /* ReferenceTonePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferenceTonePlayer.swift; sourceTree = "<group>"; };
 		40FD7692A5A9F66EFFEB7E69 /* MetronomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeViewModel.swift; sourceTree = "<group>"; };
+		42E57C1EDD65CE5DE3CE7C04 /* InstrumentFigures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentFigures.swift; sourceTree = "<group>"; };
 		4382829A731F8D1BD3F6687A /* DesktopNavigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopNavigation.swift; sourceTree = "<group>"; };
 		4BB9CDA8C5D7B18EABED39D5 /* TunarMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TunarMac.entitlements; sourceTree = "<group>"; };
 		5225C1890A1D18D4E9A2CAAD /* TunarAtomics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TunarAtomics.h; sourceTree = "<group>"; };
@@ -82,6 +84,7 @@
 		B5266348E431C3A984E64BE1 /* DesktopSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopSettingsView.swift; sourceTree = "<group>"; };
 		BB0BC7D6689A712981C3DF1B /* DesktopRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopRootView.swift; sourceTree = "<group>"; };
 		BF4CE03A6E688D739360FAA7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		C5A0F0F36261F13B0609872F /* WindFingeringTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindFingeringTable.swift; sourceTree = "<group>"; };
 		CC2D281E5FFEC9BCB6892ACC /* MacAudioAndAnalysisTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacAudioAndAnalysisTests.swift; sourceTree = "<group>"; };
 		CC422E6CCE4898EE3E39C533 /* MacTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacTheme.swift; sourceTree = "<group>"; };
 		D1A4691B25E3342258493D06 /* TunarMac-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TunarMac-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -90,6 +93,7 @@
 		DB8F2B9511F5302590E110F1 /* TunarMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TunarMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD21B01B8C46CDD08F5A6B24 /* MetronomePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomePlayer.swift; sourceTree = "<group>"; };
 		DD6B5BCC7FE35240C72ACD96 /* tunar_core.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tunar_core.swift; sourceTree = "<group>"; };
+		E0218749EB3C35C353DC6D3A /* MacWindFingeringCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacWindFingeringCard.swift; sourceTree = "<group>"; };
 		EB7660DF09444C069A523CDA /* SharedTunerViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedTunerViews.swift; sourceTree = "<group>"; };
 		ECE3D5F3614B2FE59D37FBB7 /* SpectrumPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpectrumPresentation.swift; sourceTree = "<group>"; };
 		F77C89AE821E927CB2C3CEAB /* DesktopMetronomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopMetronomeView.swift; sourceTree = "<group>"; };
@@ -156,7 +160,9 @@
 		26AF3949C58650884D8A6369 /* Instrument */ = {
 			isa = PBXGroup;
 			children = (
+				42E57C1EDD65CE5DE3CE7C04 /* InstrumentFigures.swift */,
 				8B97FE189AA57C2F902F9478 /* InstrumentViewModel.swift */,
+				C5A0F0F36261F13B0609872F /* WindFingeringTable.swift */,
 			);
 			name = Instrument;
 			path = ../ios/Tunar/Instrument;
@@ -239,7 +245,7 @@
 				F77C89AE821E927CB2C3CEAB /* DesktopMetronomeView.swift */,
 				B5266348E431C3A984E64BE1 /* DesktopSettingsView.swift */,
 				0A70A8DBDE99B0B37F746D39 /* DesktopTunerView.swift */,
-				25C9E0A099C0FAFDF72C5CE9 /* MacDongxiaoFingeringCard.swift */,
+				E0218749EB3C35C353DC6D3A /* MacWindFingeringCard.swift */,
 				EB7660DF09444C069A523CDA /* SharedTunerViews.swift */,
 			);
 			path = Views;
@@ -409,10 +415,11 @@
 				FC74E9C6C5878ACA36325C78 /* DesktopTunerView.swift in Sources */,
 				22F4B35D14079C0A1AAD5349 /* EngineBridge.swift in Sources */,
 				AE7D28415C0F3AAD0C118DF4 /* Haptics.swift in Sources */,
+				2C4C9BB10B0EE295036AD8B7 /* InstrumentFigures.swift in Sources */,
 				B6631996D7BD707113D1505D /* InstrumentViewModel.swift in Sources */,
-				8B8C1F01A0AB863798A834FF /* MacDongxiaoFingeringCard.swift in Sources */,
 				1610F774959188D4D20BA82A /* MacMicrophoneAccess.swift in Sources */,
 				5ADD482661ABBFA94C4AE913 /* MacTheme.swift in Sources */,
+				7412E57B672B6471D6DCE3E2 /* MacWindFingeringCard.swift in Sources */,
 				A52D02470EAB745B230270A6 /* MetronomePlayer.swift in Sources */,
 				685FB72A638026ADAD2E7A84 /* MetronomeViewModel.swift in Sources */,
 				F4485A6DAE1950F091204643 /* ReferenceTonePlayer.swift in Sources */,
@@ -425,6 +432,7 @@
 				0141F6836F4080443BEF373D /* TunarMacApp.swift in Sources */,
 				F32560E3D15CFA7C5A81AD53 /* TunerViewModel.swift in Sources */,
 				74BAD51BFF02B8EBA072D694 /* TuningForkViewModel.swift in Sources */,
+				A5E6688F4F444CF718C370A0 /* WindFingeringTable.swift in Sources */,
 				DAC627BC77BE52B11F305044 /* tunar_core.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

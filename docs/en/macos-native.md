@@ -62,7 +62,18 @@ confirmation, hysteresis, and indefinite hold; macOS adds no clearing timeout. R
 tone frequencies come from core `ReferenceTone` values. A tone continues after its
 selection panel closes and stops when leaving Tuner or when the window becomes inactive.
 
-The new wind interaction ships for dongxiao first:
+The instrument page shares the line-art figure sources with iOS (headstocks, guqin, wind
+drawings, and the wind table):
+
+- The instrument switcher shows six tiles with line-art glyphs. The guitar controls add a
+  "6-in-line / 3+3" headstock segmented control and an auto/manual segmented control. The
+  figure card centers the headstock drawing with the string buttons on both sides, each
+  joined to its peg by a dashed leader. The guqin shows a row of string buttons above the
+  guqin drawing, and tapping a string in the drawing activates its button. Behavior rules
+  are in spec-ui §2.1.
+- The zhudi, dongxiao, and shakuhachi all use the wind table below, with the dongxiao as
+  the reference. The zhudi has no hole-system switch; the shakuhachi's columns are otsu /
+  kan / daikan and it offers neither solfège-drag transposition nor chromatic detail.
 
 - Dongxiao provides G/F keys and defaults to eight holes with a six-hole switch. The
   top “Tube note as X” status is derived from the solfège mapping and is display-only.

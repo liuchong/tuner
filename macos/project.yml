@@ -24,6 +24,8 @@ targets:
       - path: ../ios/Tunar/Tuner/SpectrumHistory.swift
       - path: ../ios/Tunar/Tuner/SpectrumPresentation.swift
       - path: ../ios/Tunar/Instrument/InstrumentViewModel.swift
+      - path: ../ios/Tunar/Instrument/InstrumentFigures.swift
+      - path: ../ios/Tunar/Instrument/WindFingeringTable.swift
       - path: ../ios/Tunar/Metronome/MetronomeViewModel.swift
     dependencies:
       - framework: ../ios/TunarCore/tunar_core.xcframework

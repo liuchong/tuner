@@ -49,13 +49,29 @@ struct HaloDial: View {
             let w = size.width
             let h = size.height
             let center = CGPoint(x: w / 2, y: h * 0.88)
-            let radius = min(w * 0.42, h * 0.72)
+            // 顶部数字环（tickR + 14 再加半个字高）必须留在组件内，矮表盘按高度收半径。
+            let radius = max(min(w * 0.42, (center.y - 22) / 1.10), 1)
             let alpha = fade * (clarity < 0.6 ? 0.4 : 1.0)
 
-            // 准音光池（仅 Dark）
+            // 准音光池（仅 Dark）：圆心以下用渐隐遮罩收到组件底边，不被裁出硬边。
             if isDark {
                 let glowR = radius * 0.85
-                ctx.fill(
+                var glow = ctx
+                glow.clipToLayer { mask in
+                    mask.fill(
+                        Path(CGRect(x: 0, y: 0, width: w, height: h)),
+                        with: .linearGradient(
+                            Gradient(stops: [
+                                .init(color: .black, location: 0),
+                                .init(color: .black, location: center.y / h),
+                                .init(color: .clear, location: 1),
+                            ]),
+                            startPoint: .zero,
+                            endPoint: CGPoint(x: 0, y: h)
+                        )
+                    )
+                }
+                glow.fill(
                     Path(ellipseIn: CGRect(
                         x: center.x - glowR, y: center.y - glowR,
                         width: glowR * 2, height: glowR * 2

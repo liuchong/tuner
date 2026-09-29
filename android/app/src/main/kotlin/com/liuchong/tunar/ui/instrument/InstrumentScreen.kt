@@ -1,12 +1,13 @@
 package com.liuchong.tunar.ui.instrument
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -15,30 +16,24 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.GraphicEq
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.TouchApp
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,453 +44,604 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.liuchong.tunar.audio.CaptureHub
 import com.liuchong.tunar.corebinding.TunarCore
-import com.liuchong.tunar.ui.common.AuroraBackground
 import com.liuchong.tunar.ui.common.AudioPermissionGate
-import com.liuchong.tunar.ui.common.StatusChip
+import com.liuchong.tunar.ui.common.AuroraBackground
 import com.liuchong.tunar.ui.theme.LocalLumenColors
-import com.liuchong.tunar.ui.theme.TunarSpacing
+import com.liuchong.tunar.ui.theme.LumenColors
 import com.liuchong.tunar.ui.theme.TunarTypography
 import com.liuchong.tunar.ui.theme.tuneColor
 import com.liuchong.tunar.ui.tuner.TunerDial
-import kotlinx.coroutines.delay
 import uniffi.tunar_core.InstrumentKind
 import java.util.Locale
 
-/** 乐器面板（spec-ui §2）。 */
+/** 乐器面板（spec-ui §2）：乐器切换条 + 型号控件 + 乐器图示 + 目标读数与表盘成组。 */
 @Composable
 fun InstrumentScreen(
-    viewModel: InstrumentViewModel = viewModel(initializer = {
-        InstrumentViewModel(
-            core = TunarCore,
-            stream = CaptureHub,
-            savedState = createSavedStateHandle(),
-        )
-    }),
+    viewModel: InstrumentViewModel = run {
+        val context = LocalContext.current.applicationContext
+        viewModel(initializer = {
+            InstrumentViewModel(
+                core = TunarCore,
+                stream = CaptureHub,
+                savedState = createSavedStateHandle(),
+                preferences = InstrumentPreferences.Shared(context),
+            )
+        })
+    },
 ) {
     AudioPermissionGate(onGranted = viewModel::startCapture) {
         val state by viewModel.uiState.collectAsStateWithLifecycle()
+        val animatedCents = remember { Animatable(0f) }
+        LaunchedEffect(state.centsToTarget) {
+            animatedCents.animateTo(
+                targetValue = (state.centsToTarget ?: 0f).coerceIn(-50f, 50f),
+                animationSpec = spring(dampingRatio = 0.72f, stiffness = 800f),
+            )
+        }
+        val screenHeight = LocalConfiguration.current.screenHeightDp.toFloat()
+        val dialHeight = (screenHeight * if (state.kind == InstrumentKind.WIND) 0.21f else 0.25f)
+            .coerceIn(132f, 220f).dp
 
         AuroraBackground(tuneCents = state.centsToTarget) {
-        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-            // 乐器选择卡片行（design-system §6.6：图标+名称，选中 accent 10% 底+描边）
-            Row(
-                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            Column(
+                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp).padding(top = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                val colors = LocalLumenColors.current
-                state.instruments.forEach { inst ->
-                    val selected = inst.id == state.instrumentId
-                    Surface(
-                        onClick = { viewModel.selectInstrument(inst.id) },
-                        shape = RoundedCornerShape(16.dp),
-                        color = if (selected) {
-                            colors.accent.copy(alpha = 0.10f)
-                        } else {
-                            colors.bgSurface
+                InstrumentSwitcher(state, viewModel::selectInstrument)
+                ControlRow(state, viewModel)
+                Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                    FigureArea(state, viewModel)
+                }
+                TargetReadout(
+                    targetName = readoutTarget(state),
+                    placeholder = if (state.kind == InstrumentKind.WIND) "按指法吹奏" else "自动识别",
+                    cents = state.centsToTarget,
+                )
+                TunerDial(
+                    cents = state.centsToTarget?.let { animatedCents.value },
+                    accessibilityText = state.targetNoteName?.let { "目标 $it" } ?: "无信号，请发声",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(dialHeight)
+                        .graphicsLayer {
+                            alpha = if (state.centsToTarget == null) 1f else 0.35f + 0.65f * state.displayStrength
                         },
-                        modifier = Modifier.border(
-                            1.5.dp,
-                            if (selected) colors.accent else colors.lineSubtle,
-                            RoundedCornerShape(16.dp),
-                        ),
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .height(48.dp)
-                                .padding(horizontal = 14.dp),
-                        ) {
-                            Icon(
-                                Icons.Filled.MusicNote,
-                                contentDescription = null,
-                                tint = if (selected) colors.accent else colors.inkSecondary,
-                                modifier = Modifier.height(16.dp),
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                inst.displayName,
-                                style = TunarTypography.label,
-                                color = if (selected) colors.accent else colors.inkPrimary,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                    }
-                }
-            }
-
-            when (state.kind) {
-                InstrumentKind.STRING -> StringInstrumentSection(state, viewModel)
-                InstrumentKind.WIND -> WindInstrumentSection(state, viewModel)
-            }
-
-            // 区间距少量加权分散（design-system §5 填充率纪律，总空白 ≤10% 屏高）
-            Spacer(modifier = Modifier.weight(1f))
-
-            // 目标读数行（与表盘组成视觉组；高度固定，有/无信号同构不跳动）
-            val animatedCents = remember { Animatable(0f) }
-            LaunchedEffect(state.centsToTarget) {
-                animatedCents.animateTo(
-                    targetValue = (state.centsToTarget ?: 0f).coerceIn(-50f, 50f),
-                    animationSpec = spring(dampingRatio = 0.72f, stiffness = 800f),
                 )
             }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .alpha(0.35f + 0.65f * state.displayStrength),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                val colors = LocalLumenColors.current
-                // 目标名：有信号取识别目标；无信号时手动模式回退到选中弦（「目标 E4 · —」）
-                val targetName = state.targetNoteName
-                    ?: if (state.kind == InstrumentKind.STRING) {
-                        state.strings.getOrNull(state.manualIndex)?.noteName
-                    } else {
-                        null
-                    }
-                if (targetName != null) {
-                    val color = state.centsToTarget?.let { tuneColor(it) } ?: colors.inkSecondary
-                    Text(
-                        text = "目标 ${targetName.replace("#", "♯")}",
-                        style = TunarTypography.readoutSolfege,
-                        fontWeight = FontWeight.Bold,
-                        color = color,
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text(
-                        text = state.centsToTarget?.let {
-                            String.format(Locale.US, "%+.1f cents", it)
-                        } ?: "—",
-                        style = TunarTypography.readoutValue,
-                        color = color,
-                    )
-                } else {
-                    // 未选目标时提示（占位同高）
-                    Text(
-                        text = "目标 · —",
-                        style = TunarTypography.readoutSolfege,
-                        color = colors.inkFaint,
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(TunarSpacing.sm))
-            // 表盘区（圆心不放文字；读数在其上方，与本表盘成组）
-            TunerDial(
-                cents = state.centsToTarget?.let { animatedCents.value },
-                accessibilityText = state.targetNoteName?.let { "目标 $it" } ?: "无信号，请发声",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height((LocalConfiguration.current.screenHeightDp * 0.32f).dp),
-            )
-            // 布局不变量（同调音页）：读数块 top ≥ 表盘区域 bottom + 16dp
-            Spacer(modifier = Modifier.height(16.dp))
-            Spacer(modifier = Modifier.weight(1f))
-
-            // 底部状态胶囊
-            StatusChip(visible = state.centsToTarget == null)
-            Spacer(modifier = Modifier.height(TunarSpacing.sm))
-        }
         }
     }
 }
 
-/** 弦乐器区（定弦选择 + 模式切换 + 琴弦按钮行）。 */
-@Composable
-private fun StringInstrumentSection(state: InstrumentUiState, vm: InstrumentViewModel) {
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val compact = maxWidth < 380.dp
-        val controls: @Composable () -> Unit = {
-            SimpleDropdown(
-                label = "定弦",
-                value = state.tuningName,
-                options = state.tunings.map { it.id to it.displayName },
-                onSelect = vm::selectTuning,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        val modes: @Composable () -> Unit = {
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.height(48.dp)) {
-                SelectionMode.entries.forEachIndexed { i, mode ->
-                    SegmentedButton(
-                        selected = state.mode == mode,
-                        onClick = { vm.selectMode(mode) },
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = i,
-                            count = SelectionMode.entries.size,
-                        ),
-                        modifier = Modifier.height(48.dp),
-                    ) {
-                        Text(
-                            if (mode == SelectionMode.AUTO) "自动" else "手动",
-                            maxLines = 1,
-                        )
-                    }
-                }
-            }
-        }
-        if (compact) {
-            Column {
-                controls()
-                Spacer(modifier = Modifier.height(8.dp))
-                modes()
-            }
-        } else {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Box(modifier = Modifier.weight(1f)) { controls() }
-                modes()
-            }
-        }
-    }
-    Spacer(modifier = Modifier.height(8.dp))
-    // 琴弦横排按钮
-    Row(
-        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        state.strings.forEach { s ->
-            StringButton(item = s, onClick = { vm.selectString(s.index - 1) })
-        }
-    }
-}
-
-/** 单个琴弦按钮（design-system §6.3 药丸）：弦号/音名/唱名三层；
- *  选中 accent 描边+微光，准音 tune/in 12% 填充+✓，按压 scale 0.96。 */
-@Composable
-private fun StringButton(item: StringItemUi, onClick: () -> Unit) {
-    val colors = LocalLumenColors.current
-    // 按压缩放 0.96（100ms）
-    val interactionSource = remember { MutableInteractionSource() }
-    val pressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (pressed) 0.96f else 1f,
-        animationSpec = tween(100),
-        label = "stringButtonScale",
-    )
-    val borderColor = when {
-        item.inTune -> colors.tuneIn
-        item.active -> colors.accent
-        else -> colors.lineSubtle
-    }
-    val containerColor = when {
-        item.inTune -> colors.tuneIn.copy(alpha = 0.12f)
-        item.active -> colors.accent.copy(alpha = 0.10f)
-        else -> colors.bgSurface
-    }
-    val description = if (item.inTune) {
-        "${item.index} 弦 ${item.noteName}，已调准"
+/** 有信号显示实时目标；无信号时手动锁定的弦仍给出目标，自动模式显示占位。 */
+private fun readoutTarget(state: InstrumentUiState): String? =
+    state.targetNoteName ?: if (state.kind == InstrumentKind.STRING) {
+        state.selectedStringIndex?.let { state.strings.getOrNull(it)?.noteName }
     } else {
-        "${item.index} 弦 ${item.noteName}，未调准"
+        null
     }
-    val pillShape = RoundedCornerShape(24.dp)
-    Surface(
-        onClick = onClick,
-        shape = pillShape,
-        color = containerColor,
-        interactionSource = interactionSource,
-        modifier = Modifier
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .border(1.5.dp, borderColor, pillShape)
-            .semantics { contentDescription = description },
-    ) {
-        // 微渐变底 + 顶部 1dp 内高光（design-system §6.4/§3.1）
-        Column(
-            modifier = Modifier
-                .background(
-                    Brush.verticalGradient(
-                        listOf(colors.bgSurface, colors.bgSurfaceEnd),
-                    ),
-                )
-                .drawBehind {
-                    drawLine(
-                        color = colors.highlightInner,
-                        start = Offset(0f, 0.5f),
-                        end = Offset(size.width, 0.5f),
-                        strokeWidth = 1f,
-                    )
-                }
-                .padding(horizontal = 14.dp, vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("${item.index}", style = TunarTypography.caption, color = colors.inkSecondary)
-                if (item.inTune) {
-                    Spacer(modifier = Modifier.width(2.dp))
-                    Icon(
-                        Icons.Filled.Check,
-                        contentDescription = null,
-                        tint = colors.tuneIn,
-                        modifier = Modifier.height(14.dp),
-                    )
-                }
-            }
-            Text(
-                item.noteName.replace("#", "♯"),
-                style = TunarTypography.label,
-                fontWeight = FontWeight.Bold,
-                color = colors.inkPrimary,
-            )
-            Text(item.solfege, style = TunarTypography.caption, color = colors.inkSecondary)
-        }
-    }
-}
 
-/** 管乐器区（调性/筒音唱名选择 + 指法音阶列表）。 */
-@Composable
-private fun WindInstrumentSection(state: InstrumentUiState, vm: InstrumentViewModel) {
-    if (state.instrumentId == "dongxiao") {
-        DongxiaoFingeringPanel(state = state, viewModel = vm)
-        return
-    }
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val compact = maxWidth < 380.dp
-        val selector: @Composable () -> Unit = {
-            SimpleDropdown(
-                label = if (state.tongyinOptions.isEmpty()) "型号" else "调性",
-                value = state.chartGroup,
-                options = state.chartGroups.map { it to it },
-                onSelect = { vm.selectChart(it, state.tongyin) },
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        val tongyin: @Composable () -> Unit = {
-            if (state.tongyinOptions.isNotEmpty()) {
-                SingleChoiceSegmentedButtonRow(modifier = Modifier.height(48.dp)) {
-                    state.tongyinOptions.forEachIndexed { i, ty ->
-                        SegmentedButton(
-                            selected = state.tongyin == ty,
-                            onClick = { vm.selectChart(state.chartGroup, ty) },
-                            shape = SegmentedButtonDefaults.itemShape(
-                                index = i,
-                                count = state.tongyinOptions.size,
-                            ),
-                            modifier = Modifier.height(48.dp),
-                        ) {
-                            Text("作$ty", maxLines = 1)
-                        }
-                    }
-                }
-            }
-        }
-        if (compact && state.tongyinOptions.isNotEmpty()) {
-            Column {
-                selector()
-                Spacer(modifier = Modifier.height(8.dp))
-                tongyin()
-            }
-        } else {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Box(modifier = Modifier.weight(1f)) { selector() }
-                tongyin()
-            }
-        }
-    }
-    Spacer(modifier = Modifier.height(8.dp))
-    // 指法音阶列表
-    LazyColumn(modifier = Modifier.fillMaxWidth().height(220.dp)) {
-        items(state.notes) { n ->
-            val bg = when {
-                n.active -> MaterialTheme.colorScheme.primaryContainer
-                else -> MaterialTheme.colorScheme.surface
-            }
-            Surface(color = bg, modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(n.label, modifier = Modifier.weight(1f))
-                    Text(
-                        n.noteName.replace("#", "♯"),
-                        fontWeight = if (n.active) FontWeight.Bold else FontWeight.Normal,
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(n.solfege)
-                }
-            }
-        }
-    }
-}
+// region 切换条与控件
 
-/** 简单下拉选择。 */
-@OptIn(ExperimentalMaterial3Api::class)
+/** 六种乐器等宽平铺，不需要横向滚动；每个乐器一枚线稿图标。 */
 @Composable
-internal fun SimpleDropdown(
-    label: String,
-    value: String,
-    options: List<Pair<String, String>>,
-    onSelect: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    var expanded by remember { mutableStateOf(false) }
+private fun InstrumentSwitcher(state: InstrumentUiState, onSelect: (String) -> Unit) {
     val colors = LocalLumenColors.current
-    Box(modifier = modifier) {
-        ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
-            Surface(
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        state.instruments.forEach { inst ->
+            val selected = inst.id == state.instrumentId
+            PressableSurface(
+                onClick = { onSelect(inst.id) },
+                shape = RoundedCornerShape(14.dp),
+                color = if (selected) colors.accent.copy(alpha = 0.12f) else colors.bgSurface,
+                border = BorderStroke(if (selected) 1.5.dp else 1.dp, if (selected) colors.accent else colors.lineSubtle),
                 modifier = Modifier
-                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                    .fillMaxWidth()
-                    .height(48.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = colors.bgSurface,
-                border = androidx.compose.foundation.BorderStroke(1.dp, colors.lineSubtle),
+                    .weight(1f)
+                    .height(56.dp)
+                    .semantics {
+                        this.selected = selected
+                        contentDescription = inst.displayName
+                    },
             ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
                 ) {
-                    Text(
-                        "$label · ",
-                        style = TunarTypography.caption,
-                        color = colors.inkSecondary,
-                        maxLines = 1,
+                    InstrumentGlyph(
+                        instrumentId = inst.id,
+                        color = if (selected) colors.accent else colors.inkSecondary,
+                        modifier = Modifier.size(24.dp),
                     )
+                    Spacer(modifier = Modifier.height(3.dp))
                     Text(
-                        value,
-                        modifier = Modifier.weight(1f),
-                        style = TunarTypography.label,
-                        color = colors.inkPrimary,
+                        inst.displayName,
+                        fontSize = 11.sp,
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                        color = if (selected) colors.accent else colors.inkPrimary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                 }
             }
-            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                options.forEach { (id, name) ->
-                    DropdownMenuItem(
-                        text = { Text(name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                        onClick = {
-                            onSelect(id)
-                            expanded = false
-                        },
+        }
+    }
+}
+
+@Composable
+private fun ControlRow(state: InstrumentUiState, vm: InstrumentViewModel) {
+    if (state.kind == InstrumentKind.WIND) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            PillDropdown(
+                value = state.keyName,
+                options = state.keyNames.map { it to it },
+                onSelect = vm::selectWindKey,
+                accessibilityLabel = "${state.windFigure.displayName}型号，${state.keyName}",
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            if (state.holeSystems.size > 1) {
+                LumenSegmented(
+                    options = state.holeSystems,
+                    selected = state.holeSystem,
+                    title = { it },
+                    onSelect = vm::selectHoleSystem,
+                )
+            }
+        }
+        return
+    }
+    val headstock = (state.stringFigure as? StringFigureKind.Headstock)?.style
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val tuning: @Composable () -> Unit = {
+            PillDropdown(
+                value = state.tuningName,
+                options = state.tunings.map { it.id to it.displayName },
+                onSelect = vm::selectTuning,
+                accessibilityLabel = "定弦，${state.tuningName}",
+            )
+        }
+        val headstockPicker: @Composable () -> Unit = {
+            if (headstock != null) {
+                LumenSegmented(
+                    options = HeadstockStyle.entries,
+                    selected = headstock,
+                    title = { it.displayName },
+                    accessibilityTitle = { it.accessibilityName },
+                    onSelect = vm::selectHeadstockStyle,
+                )
+            }
+        }
+        val auto: @Composable () -> Unit = { AutoModeToggle(state.mode, vm::selectMode) }
+        if (headstock != null && maxWidth < 352.dp) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    tuning()
+                    Spacer(modifier = Modifier.weight(1f))
+                    auto()
+                }
+                headstockPicker()
+            }
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Box(modifier = Modifier.weight(1f)) { tuning() }
+                headstockPicker()
+                auto()
+            }
+        }
+    }
+}
+
+/** 按下轻微缩放的平铺按钮。 */
+@Composable
+private fun PressableSurface(
+    onClick: () -> Unit,
+    shape: Shape,
+    color: androidx.compose.ui.graphics.Color,
+    border: BorderStroke?,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val scale by animateFloatAsState(if (pressed) 0.96f else 1f, tween(120), label = "pressScale")
+    Surface(
+        onClick = onClick,
+        shape = shape,
+        color = color,
+        border = border,
+        interactionSource = interaction,
+        modifier = modifier.graphicsLayer {
+            scaleX = scale
+            scaleY = scale
+        },
+        content = content,
+    )
+}
+
+/** 48dp 高的胶囊分段选择（design-system §6.6）。 */
+@Composable
+internal fun <T> LumenSegmented(
+    options: List<T>,
+    selected: T,
+    title: (T) -> String,
+    onSelect: (T) -> Unit,
+    accessibilityTitle: (T) -> String = title,
+) {
+    val colors = LocalLumenColors.current
+    Row(
+        modifier = Modifier
+            .height(48.dp)
+            .background(colors.bgSurface, CircleShape)
+            .border(1.dp, colors.lineSubtle, CircleShape),
+    ) {
+        options.forEach { option ->
+            val isSelected = option == selected
+            val bg by animateColorAsState(
+                if (isSelected) colors.accent else colors.bgSurface.copy(alpha = 0f),
+                tween(150),
+                label = "segment",
+            )
+            Surface(
+                onClick = { onSelect(option) },
+                shape = CircleShape,
+                color = bg,
+                modifier = Modifier
+                    .height(48.dp)
+                    .semantics {
+                        role = Role.Tab
+                        this.selected = isSelected
+                        contentDescription = accessibilityTitle(option)
+                    },
+            ) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 14.dp)) {
+                    Text(
+                        title(option),
+                        style = TunarTypography.label,
+                        color = if (isSelected) colors.bgCanvas else colors.inkPrimary,
+                        maxLines = 1,
                     )
                 }
+            }
+        }
+    }
+}
+
+/** 48dp 高胶囊下拉触发器。 */
+@Composable
+private fun PillDropdown(
+    value: String,
+    options: List<Pair<String, String>>,
+    onSelect: (String) -> Unit,
+    accessibilityLabel: String,
+) {
+    val colors = LocalLumenColors.current
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        PressableSurface(
+            onClick = { expanded = true },
+            shape = CircleShape,
+            color = colors.bgSurface,
+            border = BorderStroke(1.dp, colors.lineSubtle),
+            modifier = Modifier
+                .height(48.dp)
+                .semantics {
+                    role = Role.DropdownList
+                    contentDescription = accessibilityLabel
+                },
+        ) {
+            Row(
+                modifier = Modifier.padding(start = 16.dp, end = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Text(
+                    value,
+                    style = TunarTypography.label,
+                    color = colors.inkPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = colors.inkSecondary, modifier = Modifier.size(18.dp))
+            }
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            options.forEach { (id, name) ->
+                DropdownMenuItem(
+                    text = { Text(name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                    onClick = {
+                        onSelect(id)
+                        expanded = false
+                    },
+                )
+            }
+        }
+    }
+}
+
+/** 自动选弦开关：点亮即自动识别最近的弦；点任意弦进入手动锁定，开关随之熄灭，再点回到自动。 */
+@Composable
+private fun AutoModeToggle(mode: SelectionMode, onSelect: (SelectionMode) -> Unit) {
+    val colors = LocalLumenColors.current
+    val isAuto = mode == SelectionMode.AUTO
+    PressableSurface(
+        onClick = { onSelect(if (isAuto) SelectionMode.MANUAL else SelectionMode.AUTO) },
+        shape = CircleShape,
+        color = if (isAuto) colors.accent else colors.bgSurface,
+        border = BorderStroke(1.dp, if (isAuto) colors.accent else colors.lineSubtle),
+        modifier = Modifier
+            .height(48.dp)
+            .semantics {
+                role = Role.Switch
+                contentDescription = "自动选弦"
+                stateDescription = if (isAuto) "开，自动识别最近的弦" else "关，手动锁定选中的弦"
+            },
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            val tint = if (isAuto) colors.bgCanvas else colors.inkPrimary
+            Icon(
+                if (isAuto) Icons.Filled.GraphicEq else Icons.Filled.TouchApp,
+                contentDescription = null,
+                tint = tint,
+                modifier = Modifier.size(16.dp),
+            )
+            Text(if (isAuto) "自动" else "手动", style = TunarTypography.label, color = tint, maxLines = 1)
+        }
+    }
+}
+
+// endregion
+
+// region 图示区
+
+@Composable
+private fun FigureArea(state: InstrumentUiState, vm: InstrumentViewModel) {
+    val colors = LocalLumenColors.current
+    val ink = FigureInk.from(colors)
+    if (state.kind == InstrumentKind.WIND) {
+        WindFingeringPanel(state = state, viewModel = vm, modifier = Modifier.fillMaxSize())
+        return
+    }
+    when (val figure = state.stringFigure) {
+        StringFigureKind.Guqin -> Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                state.strings.forEach { item ->
+                    GuqinStringButton(
+                        item = item,
+                        selected = state.selectedStringIndex == item.index - 1,
+                        onClick = { vm.selectString(item.index - 1) },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+            Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                GuqinFigure(
+                    strings = state.strings,
+                    selectedIndex = state.selectedStringIndex,
+                    ink = ink,
+                    onSelect = vm::selectString,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(GuqinGeometry.DESIGN.width / GuqinGeometry.DESIGN.height),
+                )
+            }
+        }
+        is StringFigureKind.Headstock, StringFigureKind.UkuleleHeadstock -> {
+            val layout = HeadstockLayout.of(figure) ?: return
+            HeadstockPanel(
+                layout = layout,
+                strings = state.strings,
+                selectedIndex = state.selectedStringIndex,
+                ink = ink,
+                buttonWidth = 78.dp,
+                buttonHeight = 50.dp,
+                onSelect = vm::selectString,
+                modifier = Modifier.fillMaxSize(),
+            ) { item ->
+                PegButton(
+                    item = item,
+                    selected = state.selectedStringIndex == item.index - 1,
+                    onClick = { vm.selectString(item.index - 1) },
+                )
+            }
+        }
+        StringFigureKind.None -> Unit
+    }
+}
+
+private data class StringButtonColors(
+    val border: androidx.compose.ui.graphics.Color,
+    val fill: androidx.compose.ui.graphics.Color,
+    val number: androidx.compose.ui.graphics.Color,
+)
+
+private fun stringButtonColors(item: StringItemUi, selected: Boolean, colors: LumenColors): StringButtonColors {
+    val highlighted = item.active || selected
+    return when {
+        item.inTune && highlighted -> StringButtonColors(colors.tuneIn, colors.tuneIn.copy(alpha = 0.14f), colors.tuneIn)
+        highlighted -> StringButtonColors(colors.accent, colors.accent.copy(alpha = 0.14f), colors.accent)
+        else -> StringButtonColors(colors.lineSubtle, colors.bgSurface, colors.inkSecondary)
+    }
+}
+
+private fun stringDescription(item: StringItemUi, selected: Boolean) = when {
+    item.inTune -> "已调准"
+    item.active || selected -> "当前弦"
+    else -> "未选中"
+}
+
+/** 琴头两侧的音高按钮：弦号徽标 + 音名 + 唱名。 */
+@Composable
+private fun PegButton(item: StringItemUi, selected: Boolean, onClick: () -> Unit) {
+    val colors = LocalLumenColors.current
+    val c = stringButtonColors(item, selected, colors)
+    PressableSurface(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        color = c.fill,
+        border = BorderStroke(1.5.dp, c.border),
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics {
+                contentDescription = "${item.index} 弦 ${item.noteName}，唱名 ${item.solfege}"
+                stateDescription = stringDescription(item, selected)
+            },
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 9.dp, end = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(7.dp),
+        ) {
+            StringBadge(item, c.number, 20.dp)
+            Column {
+                Text(
+                    item.noteName.replace("#", "♯"),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.inkPrimary,
+                    maxLines = 1,
+                )
+                Text(item.solfege, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = colors.inkSecondary)
+            }
+        }
+    }
+}
+
+/** 古琴一排七弦的音高按钮：竖排弦号 / 音名 / 唱名。 */
+@Composable
+private fun GuqinStringButton(item: StringItemUi, selected: Boolean, onClick: () -> Unit, modifier: Modifier) {
+    val colors = LocalLumenColors.current
+    val c = stringButtonColors(item, selected, colors)
+    PressableSurface(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        color = c.fill,
+        border = BorderStroke(1.5.dp, c.border),
+        modifier = modifier
+            .height(60.dp)
+            .semantics {
+                contentDescription = "${item.index} 弦 ${item.noteName}，唱名 ${item.solfege}"
+                stateDescription = stringDescription(item, selected)
+            },
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            if (item.inTune) {
+                Icon(Icons.Filled.Check, contentDescription = null, tint = c.number, modifier = Modifier.size(12.dp))
+            } else {
+                Text("${item.index}", fontSize = 10.sp, lineHeight = 12.sp, fontWeight = FontWeight.SemiBold, color = c.number)
+            }
+            Text(
+                item.noteName.replace("#", "♯"),
+                fontSize = 15.sp,
+                lineHeight = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = colors.inkPrimary,
+                maxLines = 1,
+            )
+            Text(item.solfege, fontSize = 11.sp, lineHeight = 13.sp, fontWeight = FontWeight.Medium, color = colors.inkSecondary)
+        }
+    }
+}
+
+@Composable
+private fun StringBadge(item: StringItemUi, tint: androidx.compose.ui.graphics.Color, size: Dp) {
+    Box(
+        modifier = Modifier.size(size).border(1.2.dp, tint, CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (item.inTune) {
+            Icon(Icons.Filled.Check, contentDescription = null, tint = tint, modifier = Modifier.size(11.dp))
+        } else {
+            Text("${item.index}", fontSize = 11.sp, lineHeight = 12.sp, fontWeight = FontWeight.SemiBold, color = tint)
+        }
+    }
+}
+
+// endregion
+
+/** 目标读数（与表盘成组）：左侧目标音名，右侧音分偏差；无信号时右侧提示发声。高度固定不跳动。 */
+@Composable
+private fun TargetReadout(targetName: String?, placeholder: String, cents: Float?) {
+    val colors = LocalLumenColors.current
+    val color = cents?.let { tuneColor(it) } ?: colors.inkSecondary
+    Row(
+        modifier = Modifier.fillMaxWidth().height(52.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text("目标", style = TunarTypography.caption, color = colors.inkFaint)
+            if (targetName != null) {
+                Text(
+                    targetName.replace("#", "♯"),
+                    fontSize = 28.sp,
+                    lineHeight = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = color,
+                )
+            } else {
+                Text(
+                    placeholder,
+                    fontSize = 18.sp,
+                    lineHeight = 32.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colors.inkSecondary,
+                )
+            }
+        }
+        if (cents != null) {
+            Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    String.format(Locale.US, "%+.1f", cents),
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = color,
+                )
+                Text("cents", style = TunarTypography.caption, color = colors.inkSecondary, modifier = Modifier.padding(bottom = 5.dp))
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .height(32.dp)
+                    .background(colors.bgSurface, CircleShape)
+                    .border(1.dp, colors.lineSubtle, CircleShape)
+                    .padding(horizontal = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Icon(Icons.Filled.Mic, contentDescription = null, tint = colors.inkSecondary, modifier = Modifier.size(14.dp))
+                Text("请发声", style = TunarTypography.caption, color = colors.inkSecondary)
             }
         }
     }

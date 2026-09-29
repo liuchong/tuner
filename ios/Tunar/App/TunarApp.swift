@@ -15,7 +15,7 @@ struct TunarApp: App {
 
 /// 底部 5 tab（design-system §6.8）
 struct RootTabView: View {
-    @State private var selected = 0
+    @State private var selected = LaunchOverrides.initialTab
     var body: some View {
         TabView(selection: $selected) {
             TunerView { selected = 2 }
@@ -30,5 +30,25 @@ struct RootTabView: View {
                 .tabItem { Label("设置", systemImage: "gearshape") }.tag(4)
         }
         .tint(Lumen.accent)
+    }
+}
+
+/// 仅 DEBUG 生效的启动参数（`-TunarInitialTab 1 -TunarInitialInstrument guqin`），
+/// 用于截图自动化直达指定页面；Release 构建恒为默认值。
+enum LaunchOverrides {
+    static var initialTab: Int {
+        #if DEBUG
+        return UserDefaults.standard.integer(forKey: "TunarInitialTab")
+        #else
+        return 0
+        #endif
+    }
+
+    static var initialInstrument: String? {
+        #if DEBUG
+        return UserDefaults.standard.string(forKey: "TunarInitialInstrument")
+        #else
+        return nil
+        #endif
     }
 }

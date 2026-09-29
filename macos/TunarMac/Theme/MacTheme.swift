@@ -6,6 +6,18 @@ enum MacTheme {
     static let tuneNear = Color(red: 0.95, green: 0.61, blue: 0.18)
     static let tuneOff = Color(red: 0.91, green: 0.25, blue: 0.27)
 
+    /// 乐器线稿配色：跟随系统浅色 / 深色的语义色。
+    static let figureInk = FigureInk(
+        line: Color.primary.opacity(0.5),
+        lineFaint: Color.primary.opacity(0.16),
+        ink: Color.primary,
+        inkFaint: Color.secondary,
+        surface: Color(nsColor: .controlBackgroundColor),
+        accent: accent,
+        tuneIn: tuneIn,
+        back: tuneNear
+    )
+
     static func tuneColor(_ cents: Double?) -> Color {
         guard let cents else { return .secondary }
         switch abs(cents) {

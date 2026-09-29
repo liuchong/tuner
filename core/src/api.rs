@@ -125,32 +125,6 @@ pub struct Tuning {
     pub strings: Vec<StringSpec>,
 }
 
-/// 指法表中的一个音。
-#[derive(Debug, Clone, uniffi::Record)]
-pub struct FingeringNote {
-    /// 指法/孔位名（如 "筒音"、"开第一二四孔"）。
-    pub label: String,
-    /// 音名。
-    pub note_name: String,
-    /// MIDI 音高（随 A4 换算/唱名重算的基准）。
-    pub midi: i32,
-    /// 目标频率（Hz，按 A4=440 换算）。
-    pub freq_hz: f64,
-    /// 唱名（按该调性的首调简谱）。
-    pub solfege: String,
-}
-
-/// 一张指法表（调性 + 筒音唱名）。
-#[derive(Debug, Clone, uniffi::Record)]
-pub struct FingeringChart {
-    /// chart id（如 "d_qudi_sou5"）。
-    pub id: String,
-    /// 显示名（如 "D调曲笛 · 筒音作5"）。
-    pub display_name: String,
-    /// 音阶（升序，约两个八度）。
-    pub notes: Vec<FingeringNote>,
-}
-
 /// 一个孔的按放状态（孔位指法图用）。
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum HoleMark {
@@ -560,8 +534,8 @@ pub fn list_wind_variants(instrument_id: String) -> Vec<WindVariant> {
                 key_id: v.key_id.to_string(),
                 key_name: v.key_name.to_string(),
                 hole_system_name: hole_system_name.to_string(),
-                hole_count: system.map(|s| s.hole_count).unwrap_or(0),
-                back_hole_count: system.map(|s| s.back_hole_count).unwrap_or(0),
+                hole_count: v.hole_count(),
+                back_hole_count: v.back_hole_count(),
                 fundamental_midi: v.fundamental_midi,
                 fundamental_note_name: note::midi_to_name(v.fundamental_midi, &mut name_buf)
                     .unwrap_or("")
@@ -598,10 +572,10 @@ pub fn wind_fingering_chart(
     let tonic_pc = v.tonic_pc(degree);
     let chromatic = matches!(scope, FingeringScope::Chromatic);
     let system = v.hole_system();
-    let notes = if v.id.contains("_xiao_") {
-        let scale_offsets = fingering::dongxiao_scale_base_offsets(degree);
+    let notes = if system.is_some() {
+        let scale_offsets = fingering::scale_base_offsets(degree);
         let base_offsets: &[i32] = if chromatic {
-            &fingering::DONGXIAO_CHROMATIC_BASE_OFFSETS
+            &fingering::CHROMATIC_BASE_OFFSETS
         } else {
             &scale_offsets
         };
@@ -610,27 +584,35 @@ pub fn wind_fingering_chart(
             .flat_map(|&base| {
                 // 每个音区取该音高的实测孔位：中音区多数与低音区同孔位，高音区自成一套；
                 // 资料未覆盖的格直接不返回，客户端留空。fingering_id 取音高半音数，天然唯一。
-                XIAO_REGISTERS.iter().filter_map(move |&(register, shift)| {
-                    let pitch = base + shift;
-                    v.pattern_at_pitch(pitch)?;
-                    Some(make_wind_fingering(
-                        v,
-                        tonic_pc,
-                        base,
-                        pitch,
-                        pitch,
-                        register,
-                        base as usize,
-                    ))
-                })
+                HOLED_REGISTERS
+                    .iter()
+                    .filter_map(move |&(register, shift)| {
+                        let pitch = base + shift;
+                        v.pattern_at_pitch(pitch)?;
+                        Some(make_wind_fingering(
+                            v,
+                            tonic_pc,
+                            base,
+                            pitch,
+                            pitch,
+                            register,
+                            base as usize,
+                        ))
+                    })
             })
             .collect()
     } else {
+        // 固定音阶类（尺八）按八度分乙/甲/大甲三音区，base 取八度内位置以便客户端按行对齐。
         v.offsets(chromatic)
             .iter()
             .enumerate()
             .map(|(index, &off)| {
-                make_wind_fingering(v, tonic_pc, off, off, off, WindRegister::Low, index)
+                let register = match off.div_euclid(12) {
+                    0 => WindRegister::Low,
+                    1 => WindRegister::Middle,
+                    _ => WindRegister::High,
+                };
+                make_wind_fingering(v, tonic_pc, off.rem_euclid(12), off, off, register, index)
             })
             .collect()
     };
@@ -651,14 +633,14 @@ pub fn wind_fingering_chart(
         } else {
             format!("筒音为宫 · {tonic_name}宫")
         },
-        hole_count: system.map(|s| s.hole_count).unwrap_or(0),
-        back_hole_count: system.map(|s| s.back_hole_count).unwrap_or(0),
+        hole_count: v.hole_count(),
+        back_hole_count: v.back_hole_count(),
         notes,
     })
 }
 
-/// 洞箫三音区与其相对低音区的半音位移；每个音区的孔位另按该音高的实测值取。
-const XIAO_REGISTERS: [(WindRegister, i32); 3] = [
+/// 孔制类（笛/箫）三音区与其相对低音区的半音位移；每个音区的孔位另按该音高的实测值取。
+const HOLED_REGISTERS: [(WindRegister, i32); 3] = [
     (WindRegister::Low, 0),
     (WindRegister::Middle, 12),
     (WindRegister::High, 24),
@@ -717,63 +699,6 @@ fn hole_mark_of(c: char) -> HoleMark {
         'H' => HoleMark::Half,
         _ => HoleMark::Closed,
     }
-}
-
-/// 列出某管乐器的全部指法表（频率按 A4=440，唱名按各调性首调简谱）。
-///
-/// 旧版三档筒音视图（作 5 / 作 1 / 作 2），数据由 [`wind_fingering_chart`] 派生，
-/// 孔制取该调性的默认孔制。保留给 Android / macOS 面板，新面板请用 [`wind_fingering_chart`]。
-#[uniffi::export]
-pub fn list_fingering_charts(instrument_id: String) -> Vec<FingeringChart> {
-    let Some(variants) = fingering::wind_variants(&instrument_id) else {
-        return Vec::new();
-    };
-    let mut out = Vec::new();
-    for v in variants {
-        // 同一调性的多种孔制只暴露默认孔制，避免旧接口出现重名 chart
-        if fingering::default_variant_of_key(&instrument_id, v.key_id).map(|d| d.id) != Some(v.id) {
-            continue;
-        }
-        let degrees: Vec<(u8, String, String)> = if v.supports_tongyin() {
-            fingering::LEGACY_TONGYIN
-                .iter()
-                .map(|&(degree, suffix)| {
-                    (
-                        degree,
-                        format!("{}_{suffix}", v.key_id),
-                        format!("{} · 筒音作{}", v.key_name, panel_solfege(degree, 0)),
-                    )
-                })
-                .collect()
-        } else {
-            vec![(0, v.id.to_string(), v.key_name.to_string())]
-        };
-        for (degree, id, display_name) in degrees {
-            let Some(chart) = wind_fingering_chart(v.id.to_string(), degree, FingeringScope::Scale)
-            else {
-                continue;
-            };
-            let mut legacy_notes = chart.notes;
-            if v.id.contains("_xiao_") {
-                legacy_notes.sort_by_key(|note| note.semitones);
-            }
-            out.push(FingeringChart {
-                id,
-                display_name,
-                notes: legacy_notes
-                    .into_iter()
-                    .map(|n| FingeringNote {
-                        label: n.label,
-                        note_name: n.note_name,
-                        midi: n.midi,
-                        freq_hz: n.freq_hz,
-                        solfege: n.solfege,
-                    })
-                    .collect(),
-            });
-        }
-    }
-    out
 }
 
 /// 两频率间的音分差：1200·log2(freq/target)（§4 公式）。无效输入（≤0）返回 None。
@@ -1244,37 +1169,68 @@ mod tests {
     }
 
     #[test]
-    fn list_fingering_charts_zhudi() {
-        let charts = list_fingering_charts("zhudi".to_string());
-        assert_eq!(charts.len(), 15);
-        let d5 = charts.iter().find(|c| c.id == "d_qudi_sou5").unwrap();
-        assert_eq!(d5.display_name, "D调曲笛 · 筒音作5");
-        assert_eq!(d5.notes.len(), 15);
-        // 筒音 a1 = A4 = 440Hz，唱名作 5
-        assert_eq!(d5.notes[0].note_name, "A4");
-        assert!((d5.notes[0].freq_hz - 440.0).abs() < 0.1);
-        assert_eq!(d5.notes[0].solfege, "5");
-        assert_eq!(d5.notes[0].label, "筒音");
-        // 升序
-        for w in d5.notes.windows(2) {
-            assert!(w[0].freq_hz < w[1].freq_hz);
-        }
-        assert!(list_fingering_charts("suona".to_string()).is_empty());
-    }
-
-    #[test]
-    fn list_fingering_charts_dongxiao_uses_default_hole_system() {
-        // 每调只暴露默认孔制（8 孔），共 2 调 × 3 筒音
-        let charts = list_fingering_charts("dongxiao".to_string());
-        assert_eq!(charts.len(), 6);
-        let g5 = charts.iter().find(|c| c.id == "g_xiao_sou5").unwrap();
-        assert_eq!(g5.display_name, "G调洞箫 · 筒音作5");
-        assert_eq!(g5.notes[0].note_name, "D4"); // G 调洞箫筒音 d1
-        assert_eq!(g5.notes[0].solfege, "5");
-        // 8 孔的第三个音（7）保持第 2 辅助孔关闭，与六孔的「开第一二孔」不同。
-        assert_eq!(g5.notes[2].label, "开第一三孔");
-        // 尺八无筒音档，一个型号一张表
-        assert_eq!(list_fingering_charts("shakuhachi".to_string()).len(), 4);
+    fn zhudi_chart_expands_three_registers_with_dizi_fingerings() {
+        // D 调曲笛 · 筒音作 5：筒音 a1 = A4 = 440Hz
+        let chart =
+            wind_fingering_chart("d_qudi_d6".to_string(), 7, FingeringScope::Scale).unwrap();
+        assert_eq!(chart.hole_count, 6);
+        assert_eq!(chart.back_hole_count, 0);
+        assert_eq!(chart.key_display, "筒音作5 · D宫");
+        let first = low_note(&chart, 0);
+        assert_eq!(first.note_name, "A4");
+        assert!((first.freq_hz - 440.0).abs() < 0.1);
+        assert_eq!(first.solfege, "5");
+        assert_eq!(first.label, "筒音");
+        // 七声主表按筒音筛选：作 5 的第 7 个音是 4（叉口），不再出现 #4。
+        let low: Vec<&str> = chart
+            .notes
+            .iter()
+            .filter(|note| note.register == WindRegister::Low)
+            .map(|note| note.solfege.as_str())
+            .collect();
+        assert_eq!(low, ["5", "6", "7", "1", "2", "3", "4"]);
+        let fork = low_note(&chart, 10);
+        assert_eq!(
+            fork.holes,
+            vec![
+                HoleMark::Open,
+                HoleMark::Open,
+                HoleMark::Open,
+                HoleMark::Closed,
+                HoleMark::Closed,
+                HoleMark::Open,
+            ]
+        );
+        assert_eq!(fork.fingering_kind, FingeringKind::Combination);
+        // 作 2 同样不出现 #4 / #1。
+        let re2 = wind_fingering_chart("d_qudi_d6".to_string(), 2, FingeringScope::Scale).unwrap();
+        let re2_low: Vec<&str> = re2
+            .notes
+            .iter()
+            .filter(|note| note.register == WindRegister::Low)
+            .map(|note| note.solfege.as_str())
+            .collect();
+        assert_eq!(re2_low, ["2", "3", "4", "5", "6", "7", "1"]);
+        // 中音筒音开第六孔作泛音孔；高音只收录资料一致的 24 半音。
+        let middle_root = chart
+            .notes
+            .iter()
+            .find(|note| note.semitones == 12)
+            .unwrap();
+        assert_eq!(middle_root.register, WindRegister::Middle);
+        assert_eq!(middle_root.holes[5], HoleMark::Open);
+        let high: Vec<i32> = chart
+            .notes
+            .iter()
+            .filter(|note| note.register == WindRegister::High)
+            .map(|note| note.semitones)
+            .collect();
+        assert_eq!(high, [24]);
+        let mut ids: Vec<i32> = chart.notes.iter().map(|note| note.fingering_id).collect();
+        ids.sort_unstable();
+        ids.dedup();
+        assert_eq!(ids.len(), chart.notes.len());
+        assert!(wind_fingering_chart("suona".to_string(), 7, FingeringScope::Scale).is_none());
     }
 
     #[test]
@@ -1320,7 +1276,8 @@ mod tests {
         assert_eq!(shaku[0].display_name, "尺八 1.8寸（D调）");
         assert!(!shaku[0].supports_tongyin);
         assert!(shaku[0].tongyin_options.is_empty());
-        assert_eq!(shaku[0].hole_count, 0);
+        assert_eq!(shaku[0].hole_count, 5);
+        assert_eq!(shaku[0].back_hole_count, 1);
         assert!(list_wind_variants("suona".to_string()).is_empty());
     }
 
@@ -1507,16 +1464,47 @@ mod tests {
     }
 
     #[test]
-    fn wind_fingering_chart_shakuhachi_ignores_tongyin() {
+    fn wind_fingering_chart_shakuhachi_ignores_tongyin_and_splits_octaves() {
         let chart =
             wind_fingering_chart("shaku_1_8".to_string(), 5, FingeringScope::Chromatic).unwrap();
-        // 固定音阶类：忽略筒音级与十二音范围，无孔位图
+        // 固定音阶类：忽略筒音级与十二音范围
         assert_eq!(chart.notes.len(), 11);
         assert_eq!(chart.tongyin_degree, 0);
         assert_eq!(chart.tonic_name, "D");
         assert_eq!(chart.key_display, "筒音为宫 · D宫");
-        assert!(chart.notes[0].holes.is_empty());
-        assert_eq!(chart.notes[0].label, "筒音(ro)");
+        assert_eq!(chart.hole_count, 5);
+        assert_eq!(chart.back_hole_count, 1);
+        let ro = &chart.notes[0];
+        assert_eq!(ro.label, "筒音(ro)");
+        assert_eq!(ro.holes, vec![HoleMark::Closed; 5]);
+        assert_eq!(ro.register, WindRegister::Low);
+        // 乙 5 音、甲 5 音、大甲 1 音；base 取八度内位置以便对齐行。
+        let count = |register| {
+            chart
+                .notes
+                .iter()
+                .filter(|n| n.register == register)
+                .count()
+        };
+        assert_eq!(count(WindRegister::Low), 5);
+        assert_eq!(count(WindRegister::Middle), 5);
+        assert_eq!(count(WindRegister::High), 1);
+        let ha_kan = chart.notes.iter().find(|n| n.semitones == 22).unwrap();
+        assert_eq!(ha_kan.base_semitones, 10);
+        assert_eq!(ha_kan.register, WindRegister::Middle);
+        assert_eq!(
+            ha_kan.holes,
+            vec![
+                HoleMark::Closed,
+                HoleMark::Open,
+                HoleMark::Open,
+                HoleMark::Open,
+                HoleMark::Closed,
+            ]
+        );
+        let daikan = chart.notes.last().unwrap();
+        assert_eq!(daikan.register, WindRegister::High);
+        assert_eq!(daikan.holes, vec![HoleMark::Open; 5]);
         assert!(wind_fingering_chart("nope".to_string(), 0, FingeringScope::Scale).is_none());
     }
 
@@ -1561,7 +1549,7 @@ mod tests {
 
     #[test]
     fn midi_fields_consistent_with_freq_and_name() {
-        // StringSpec/FingeringNote 的 midi 与 freq_hz（A4=440）、note_name 一致
+        // StringSpec/WindFingering 的 midi 与 freq_hz（A4=440）、note_name 一致
         for t in list_tunings("guitar".to_string()) {
             for s in t.strings {
                 let f = crate::note::midi_to_freq(s.midi as f64, 440.0);
@@ -1573,8 +1561,9 @@ mod tests {
                 );
             }
         }
-        for c in list_fingering_charts("zhudi".to_string()) {
-            for n in c.notes {
+        for v in list_wind_variants("zhudi".to_string()) {
+            let chart = wind_fingering_chart(v.id, 7, FingeringScope::Chromatic).unwrap();
+            for n in chart.notes {
                 let f = crate::note::midi_to_freq(n.midi as f64, 440.0);
                 assert!((f - n.freq_hz).abs() < 1e-9);
             }

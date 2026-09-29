@@ -288,27 +288,87 @@ final class InstrumentViewModelTests: XCTestCase {
         XCTAssertEqual(vm.scaleNotes.filter(\.active).map(\.id), mainActive)
     }
 
-    func testShakuhachiKeepsClassicPlainListWithoutNewInteraction() {
+    func testShakuhachiUsesAnchoredChartSplitByOctaveWithoutTongyin() {
         let vm = makeVm(instrument: "shakuhachi")
-        XCTAssertFalse(vm.usesDongxiaoInteraction)
-        XCTAssertEqual(vm.chartGroups.count, 4)
-        XCTAssertTrue(vm.classicTongyinOptions.isEmpty)
-        XCTAssertTrue(vm.scaleNotes.isEmpty)
+        XCTAssertEqual(vm.windFigure, .shakuhachi)
+        XCTAssertFalse(vm.supportsTongyin, "尺八按五声音阶，不做筒音转调")
+        XCTAssertFalse(vm.supportsChromatic)
+        XCTAssertEqual(vm.holeCount, 5)
+        XCTAssertEqual(vm.backHoleCount, 1)
         XCTAssertTrue(vm.chromaticNotes.isEmpty)
-        XCTAssertEqual(vm.classicNotes.count, 11)
-        XCTAssertEqual(vm.classicNotes.first?.label, "筒音(ro)")
-        XCTAssertTrue(vm.classicNotes.allSatisfy { $0.holes.isEmpty })
+        XCTAssertEqual(vm.scaleNotes.count, 11)
+        XCTAssertEqual(vm.scaleNotes.first?.holes, Array(repeating: .closed, count: 5))
+        XCTAssertEqual(vm.scaleNotes.filter { $0.register == .low }.count, 5, "乙音五声")
+        XCTAssertEqual(vm.scaleNotes.filter { $0.register == .middle }.count, 5, "甲音五声")
+        XCTAssertEqual(vm.scaleNotes.filter { $0.register == .high }.count, 1)
+        XCTAssertTrue(vm.scaleNotes.allSatisfy { $0.holes.count == 5 })
     }
 
-    func testZhudiKeepsClassicGroupAndThreeTongyinButtons() {
+    func testZhudiUsesThreeRegisterChartWithTongyin() {
         let vm = makeVm(instrument: "zhudi")
-        XCTAssertFalse(vm.usesDongxiaoInteraction)
-        XCTAssertEqual(vm.chartGroups.count, 5)
-        XCTAssertEqual(vm.classicTongyinOptions, ["5", "1", "2"])
-        XCTAssertEqual(vm.classicTongyin, "5")
-        XCTAssertFalse(vm.classicNotes.isEmpty)
-        XCTAssertTrue(vm.scaleNotes.isEmpty)
-        XCTAssertTrue(vm.chromaticNotes.isEmpty)
+        XCTAssertEqual(vm.windFigure, .dizi)
+        XCTAssertTrue(vm.supportsTongyin)
+        XCTAssertTrue(vm.supportsChromatic)
+        XCTAssertEqual(vm.holeCount, 6)
+        XCTAssertTrue(vm.keyDisplay.hasPrefix("筒音作5"))
+        XCTAssertEqual(Set(vm.scaleNotes.map(\.register)), [.low, .middle, .high])
+        XCTAssertTrue(vm.scaleNotes.allSatisfy { $0.holes.count == 6 })
+        XCTAssertEqual(
+            vm.scaleNotes.filter { $0.register == .low }.map(\.solfege),
+            ["5", "6", "7", "1", "2", "3", "4"]
+        )
+        vm.selectTongyin(2)
+        XCTAssertTrue(vm.keyDisplay.hasPrefix("筒音作2"))
+        XCTAssertFalse(
+            vm.scaleNotes.contains { $0.solfege.contains("#") },
+            "七声主表按转调重新取音，不出现变化音"
+        )
+        XCTAssertFalse(vm.chromaticNotes.isEmpty)
+    }
+
+    func testGuitarHeadstockStyleDefaultsToInlineAndPersists() {
+        let suite = "InstrumentViewModelTests.headstock"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        let vm = InstrumentViewModel(events: subject.eraseToAnyPublisher(), defaults: defaults)
+        vm.selectInstrument("guitar")
+        XCTAssertEqual(vm.stringFigure, .headstock(.inline6))
+        vm.selectHeadstockStyle(.threePlusThree)
+        XCTAssertEqual(vm.stringFigure, .headstock(.threePlusThree))
+
+        let reopened = InstrumentViewModel(events: subject.eraseToAnyPublisher(), defaults: defaults)
+        reopened.selectInstrument("guitar")
+        XCTAssertEqual(reopened.stringFigure, .headstock(.threePlusThree))
+        reopened.selectInstrument("ukulele")
+        XCTAssertEqual(reopened.stringFigure, .ukuleleHeadstock)
+        reopened.selectInstrument("guqin")
+        XCTAssertEqual(reopened.stringFigure, .guqin)
+    }
+
+    func testTappingStringLocksManualAndInstrumentSwitchReturnsToAuto() {
+        let vm = makeVm(instrument: "guqin")
+        XCTAssertNil(vm.selectedStringIndex)
+        vm.selectString(3)
+        XCTAssertEqual(vm.mode, .manual)
+        XCTAssertEqual(vm.selectedStringIndex, 3)
+        vm.selectString(99)
+        XCTAssertEqual(vm.selectedStringIndex, 3, "越界索引不改变锁定")
+        vm.selectInstrument("guitar")
+        XCTAssertEqual(vm.mode, .auto)
+        XCTAssertNil(vm.selectedStringIndex)
+    }
+
+    func testHeadstockLayoutsMapEveryStringToOnePeg() {
+        for (layout, count) in [
+            (HeadstockLayout.inline6, 6), (.threePlusThree, 6), (.ukulele, 4),
+        ] {
+            XCTAssertEqual(layout.pegs.map(\.stringNumber).sorted(), Array(1...count))
+            for peg in layout.pegs {
+                XCTAssertEqual(layout.hitString(at: peg.post), peg.stringNumber)
+            }
+        }
     }
 
     /// 事件经 receive(on: main) 异步投递，测试需让主队列跑一轮。

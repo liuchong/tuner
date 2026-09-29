@@ -81,15 +81,22 @@ struct TunerView: View {
                         Spacer().frame(height: 16)
 
                         // 音名读数（表盘正下方，与表盘明确分离）
-                        Text(noteNameText(reading?.noteName))
-                            .font(Lumen.displayNote)
-                            .foregroundStyle(
-                                reading != nil
-                                    ? Lumen.tuneColor(of: animatedCents, palette)
-                                    : palette.inkFaint.opacity(0.6)
-                            )
-                            .scaleEffect(noteScale)
-                            .opacity((reading?.clarity ?? 1) < 0.6 ? 0.4 : 1)
+                        ZStack {
+                            Text("A♯4").font(Lumen.displayNote).hidden()
+                            if let name = reading?.noteName {
+                                Text(noteNameText(name))
+                                    .font(Lumen.displayNote)
+                                    .foregroundStyle(Lumen.tuneColor(of: animatedCents, palette))
+                                    .scaleEffect(noteScale)
+                                    .opacity((reading?.clarity ?? 1) < 0.6 ? 0.4 : 1)
+                            } else {
+                                Image(systemName: "waveform")
+                                    .font(.system(size: 52, weight: .light))
+                                    .foregroundStyle(palette.inkFaint.opacity(0.7))
+                                    .symbolEffect(.variableColor.iterative, options: .repeating)
+                                    .accessibilityLabel("等待声音")
+                            }
+                        }
 
                         Spacer().frame(maxHeight: .infinity)
 

@@ -40,21 +40,64 @@ behavior and interaction.
 
 ## 2. Instruments
 
-Instrument, tuning, key, model, and tube-note controls are 48 dp/pt high with 16 dp/pt
-radius and one-line ellipsis. Narrow screens wrap the control group; a control itself
-never wraps.
+From top to bottom the page shows the instrument switcher, the model-control row, the
+instrument figure, the target readout, and the dial (2026-09-29).
+
+- **Instrument switcher**: the six instruments (guitar, ukulele, guqin, zhudi, dongxiao,
+  shakuhachi) are equal-width tiles on one row with no horizontal scrolling. Each tile is
+  56 dp/pt high with a line-art glyph in the same style as the instrument figure above the
+  name. The selected tile uses an accent outline, a light accent fill, and accent glyph and
+  text; tiles scale slightly on press.
+- **Model-control row**: strings show a tuning dropdown, a headstock segmented control
+  (guitar only), and the auto-string toggle; winds show a key/model dropdown plus a
+  hole-system segmented control when there is more than one hole system.
+- Every selector is 48 dp/pt high, capsule-shaped, and one-line with ellipsis. Narrow
+  screens wrap the control group in the fixed order; a control itself never wraps or is
+  squeezed. Menus are at least as wide as their trigger and mark the current item.
+- **Target readout**: a small "Target" label and the target note on the left, ±cents
+  with a "cents" unit on the right. Without a signal the right side shows a "Play a note"
+  chip. With no target the left side reads "Auto detect" for strings in auto mode and
+  "Play by fingering" for winds; a manually locked string shows its note even without a
+  signal. The readout height is fixed so it never jumps.
+- **Dial**: its height is a proportion of the screen height with lower and upper bounds,
+  slightly taller for strings than for winds; the figure takes the remaining height.
 
 ### 2.1 Strings
 
-Guitar, ukulele, and guqin show string number, note, and preset customary solfège.
-Automatic mode highlights the nearest string; manual mode locks the selected target
-within ±50 cents. The compact dial shows target deviation and marks a string complete
-at ±5 cents.
+- String buttons show a string-number badge, the note, and the preset customary
+  solfège. The current string (live hit or manual lock) gets an accent outline and light
+  accent fill; at |cents| ≤ 5 its badge becomes a green check.
+- **Auto-string toggle**: when lit (solid accent, waveform icon, "Auto") the nearest
+  string is detected. Tapping any string button or a string in the figure locks that
+  string within ±50 cents and the toggle turns off to "Manual"; tapping the toggle
+  returns to auto. Switching instruments returns to auto.
+- **Guitar and ukulele headstocks**: the figure is a line-art headstock (outline, nut,
+  strings running from the nut to the posts, and tuner keys). The string buttons sit on
+  both sides, each joined to its peg by a thin dashed guide so it is clear which key
+  tunes which string.
+  - The guitar offers the two industry-standard styles: **6-in-line** (Fender style:
+    six keys in one row on the bass side, string 6 nearest the nut and string 1 at the
+    tip, buttons alternating left and right) and **3+3** (Gibson style: strings 6/5/4 up
+    the left side and 1/2/3 up the right, so both E strings are nearest the nut and D and
+    G are at the top). 6-in-line is the default, and the chosen style persists across
+    launches.
+  - The ukulele uses a 2+2 headstock: strings 4 and 3 on the left, 1 and 2 on the right,
+    with 4 and 1 nearest the nut.
+  - The current string is drawn thicker and colored in the headstock too: accent for a
+    live hit or lock, green when in tune. Tapping a string or peg in the figure equals
+    tapping its button.
+- **Guqin**: the seven string buttons form a row above a line-art guqin (body, bridge,
+  tail, the thirteen hui, seven strings, and string numbers). The current string is drawn
+  thicker and colored while the others stay thin. Tapping a string, or sliding vertically
+  across the strings, activates the matching button (manual lock); accessibility offers
+  "previous string" and "next string" actions.
 
-### 2.2 Winds — dongxiao first
+### 2.2 Winds — zhudi, dongxiao, shakuhachi
 
-Dongxiao adopts the new interaction first. Zhudi and shakuhachi retain their existing
-selectors and fingering lists for this delivery.
+All three winds use this section's "complete instrument drawing + three range columns"
+table (2026-09-29). The text below uses the dongxiao as the reference; the zhudi and
+shakuhachi differ only in the drawing, range names, and available abilities (see the last
+item of this section). The figure area is a rounded card.
 
 - Dongxiao provides G/F keys and eight-/six-hole variants for each key. Eight-hole is
   the default on first entry and when no prior compatible choice exists. Changing key
@@ -124,9 +167,14 @@ selectors and fingering lists for this delivery.
 - The large diagrams in main and detail demonstrate core's primary fingering only.
   Instrument construction and schools may use alternatives; visible and accessibility
   copy must not claim a single authoritative fingering.
-- Zhudi keeps its existing key and tube-note 5/1/2 path. Shakuhachi keeps its model and
-  fixed-scale path. Neither adopts dongxiao's eight/six switch, draggable solfège badges,
-  or independent chromatic detail in this delivery.
+- Per-instrument differences:
+  - Zhudi: the drawing shows the embouchure, the membrane hole (dedicated color), and six
+    front holes, with no back hole and no hole-system switch. Range names, solfège-drag
+    transposition, and chromatic detail match the dongxiao.
+  - Shakuhachi: the drawing shows the angled utaguchi, four front holes, one back hole
+    (dedicated color), and the root end. Columns are named by octave: **otsu / kan /
+    daikan** (乙音 / 甲音 / 大甲). There is no solfège-drag transposition (no drag hint,
+    and dragging does nothing) and no "12-tone" entry.
 
 Both instrument types share the core input state machine and the universal tuner's
 single-needle presentation. Native timers may not clear the target or needle.
@@ -214,8 +262,8 @@ interruption degrade without a crash. Behavior changes update this file in Engli
   generation-token/final-subscriber rules as iOS.
 - The reference-tone chooser uses a desktop overlay or sheet. Dismissal keeps playback
   running; leaving Tuner or making the window inactive stops it.
-- Dongxiao main and detail each use a desktop side-by-side layout: one complete large
-  vertical dongxiao plus right-hand Low, Middle, and High columns. All three columns are
+- Wind main and detail views each use a desktop side-by-side layout: one complete large
+  vertical instrument drawing plus the three right-hand range columns. All three columns are
   populated with measured fingerings; only chart-uncovered cells stay blank. Blank
   title-row space or the “Chromatic Detail” button opens independent chromatic detail
   in a large sheet. Sheet and main view share

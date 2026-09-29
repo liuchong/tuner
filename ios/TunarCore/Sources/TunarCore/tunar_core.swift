@@ -566,53 +566,53 @@ fileprivate struct FfiConverterString: FfiConverter {
  * 节拍器（UniFFI 对象）。
  */
 public protocol MetronomeProtocol: AnyObject, Sendable {
-
+    
     /**
      * 是否运行中。
      */
     func isRunning()  -> Bool
-
+    
     /**
      * 渲染 `frames` 个采样（含精确混入的 tick 音色），返回 PCM 与 tick 事件。
      * UniFFI 边界允许分配（marshal 开销主导）；引擎内核零分配。
      */
     func render(frames: UInt32)  -> RenderFrame
-
+    
     /**
      * 设置每拍重音型。
      */
-    func setAccents(accents: [TickAccent])
-
+    func setAccents(accents: [TickAccent]) 
+    
     /**
      * 设置 BPM（30–250），下一采样生效。
      */
-    func setBpm(bpm: Double)
-
+    func setBpm(bpm: Double) 
+    
     /**
      * 注入重拍/弱拍音色（由原生层提供；传空则恢复内置合成音色）。
      */
-    func setClickSamples(accent: [Float], normal: [Float])
-
+    func setClickSamples(accent: [Float], normal: [Float]) 
+    
     /**
      * 设置拍号。
      */
-    func setTimeSignature(beats: UInt8, unit: UInt8)
-
+    func setTimeSignature(beats: UInt8, unit: UInt8) 
+    
     /**
      * 从 `at_sample` 开始运行。
      */
-    func start(atSample: UInt64)
-
+    func start(atSample: UInt64) 
+    
     /**
      * 停止。
      */
-    func stop()
-
+    func stop() 
+    
     /**
      * tap tempo：输入 tap 的采样时间戳，返回当前 BPM。
      */
     func tap(timestampSamples: UInt64)  -> Double
-
+    
 }
 /**
  * 节拍器（UniFFI 对象）。
@@ -677,9 +677,9 @@ public convenience init(config: MetronomeConfig) {
         try! rustCall { uniffi_tunar_core_fn_free_metronome(pointer, $0) }
     }
 
+    
 
-
-
+    
     /**
      * 是否运行中。
      */
@@ -689,7 +689,7 @@ open func isRunning() -> Bool  {
     )
 })
 }
-
+    
     /**
      * 渲染 `frames` 个采样（含精确混入的 tick 音色），返回 PCM 与 tick 事件。
      * UniFFI 边界允许分配（marshal 开销主导）；引擎内核零分配。
@@ -701,7 +701,7 @@ open func render(frames: UInt32) -> RenderFrame  {
     )
 })
 }
-
+    
     /**
      * 设置每拍重音型。
      */
@@ -711,7 +711,7 @@ open func setAccents(accents: [TickAccent])  {try! rustCall() {
     )
 }
 }
-
+    
     /**
      * 设置 BPM（30–250），下一采样生效。
      */
@@ -721,7 +721,7 @@ open func setBpm(bpm: Double)  {try! rustCall() {
     )
 }
 }
-
+    
     /**
      * 注入重拍/弱拍音色（由原生层提供；传空则恢复内置合成音色）。
      */
@@ -732,7 +732,7 @@ open func setClickSamples(accent: [Float], normal: [Float])  {try! rustCall() {
     )
 }
 }
-
+    
     /**
      * 设置拍号。
      */
@@ -743,7 +743,7 @@ open func setTimeSignature(beats: UInt8, unit: UInt8)  {try! rustCall() {
     )
 }
 }
-
+    
     /**
      * 从 `at_sample` 开始运行。
      */
@@ -753,7 +753,7 @@ open func start(atSample: UInt64)  {try! rustCall() {
     )
 }
 }
-
+    
     /**
      * 停止。
      */
@@ -762,7 +762,7 @@ open func stop()  {try! rustCall() {
     )
 }
 }
-
+    
     /**
      * tap tempo：输入 tap 的采样时间戳，返回当前 BPM。
      */
@@ -773,7 +773,7 @@ open func tap(timestampSamples: UInt64) -> Double  {
     )
 })
 }
-
+    
 
 }
 
@@ -836,42 +836,42 @@ public func FfiConverterTypeMetronome_lower(_ value: Metronome) -> UnsafeMutable
  * 调音器引擎（UniFFI 对象）。
  */
 public protocol TunarEngineProtocol: AnyObject, Sendable {
-
+    
     /**
      * 完整分析帧：feed 事件 + 频谱 + 泛音 + 和弦（v4 新增，UniFFI 边界允许分配）。
      */
     func analyze(pcm: [Float])  -> AnalysisFrame
-
+    
     /**
      * 输入一帧单声道 PCM（f32 [-1,1]，长度 ≥ 2048），返回音高事件；无效输入返回 None。
      */
     func feed(pcm: [Float])  -> TunarEvent?
-
+    
     /**
      * 列出当前 A4 与平均律在 80–1500Hz 内的全部固定音高。
      */
     func listReferenceTones()  -> [ReferenceTone]
-
+    
     /**
      * 设置 A4 校准（收敛到 415–466Hz）。
      */
-    func setA4(hz: Double)
-
+    func setA4(hz: Double) 
+    
     /**
      * 设置噪声门限（dBFS）。
      */
-    func setNoiseGate(dbfs: Float)
-
+    func setNoiseGate(dbfs: Float) 
+    
     /**
      * 设置唱名体系与调式。
      */
-    func setSolfege(system: SolfegeSystem, key: KeyMode)
-
+    func setSolfege(system: SolfegeSystem, key: KeyMode) 
+    
     /**
      * 设置律制（N ∈ {12,19,24,31}；非法值忽略）。
      */
-    func setTemperament(divisions: UInt8)
-
+    func setTemperament(divisions: UInt8) 
+    
 }
 /**
  * 调音器引擎（UniFFI 对象）。
@@ -936,9 +936,9 @@ public convenience init(config: TunarConfig) {
         try! rustCall { uniffi_tunar_core_fn_free_tunarengine(pointer, $0) }
     }
 
+    
 
-
-
+    
     /**
      * 完整分析帧：feed 事件 + 频谱 + 泛音 + 和弦（v4 新增，UniFFI 边界允许分配）。
      */
@@ -949,7 +949,7 @@ open func analyze(pcm: [Float]) -> AnalysisFrame  {
     )
 })
 }
-
+    
     /**
      * 输入一帧单声道 PCM（f32 [-1,1]，长度 ≥ 2048），返回音高事件；无效输入返回 None。
      */
@@ -960,7 +960,7 @@ open func feed(pcm: [Float]) -> TunarEvent?  {
     )
 })
 }
-
+    
     /**
      * 列出当前 A4 与平均律在 80–1500Hz 内的全部固定音高。
      */
@@ -970,7 +970,7 @@ open func listReferenceTones() -> [ReferenceTone]  {
     )
 })
 }
-
+    
     /**
      * 设置 A4 校准（收敛到 415–466Hz）。
      */
@@ -980,7 +980,7 @@ open func setA4(hz: Double)  {try! rustCall() {
     )
 }
 }
-
+    
     /**
      * 设置噪声门限（dBFS）。
      */
@@ -990,7 +990,7 @@ open func setNoiseGate(dbfs: Float)  {try! rustCall() {
     )
 }
 }
-
+    
     /**
      * 设置唱名体系与调式。
      */
@@ -1001,7 +1001,7 @@ open func setSolfege(system: SolfegeSystem, key: KeyMode)  {try! rustCall() {
     )
 }
 }
-
+    
     /**
      * 设置律制（N ∈ {12,19,24,31}；非法值忽略）。
      */
@@ -1011,7 +1011,7 @@ open func setTemperament(divisions: UInt8)  {try! rustCall() {
     )
 }
 }
-
+    
 
 }
 
@@ -1134,43 +1134,43 @@ public struct AnalysisFrame {
     public init(
         /**
          * 同 feed 语义（无效输入为 None）。
-         */tuner: TunarEvent?,
+         */tuner: TunarEvent?, 
         /**
          * 64 bin 对数轴 60–2400Hz 幅值（dBFS -80~0）。
-         */spectrumDb: [Float],
+         */spectrumDb: [Float], 
         /**
          * 128 bin 对数轴 20Hz–wide_spectrum_max_hz 幅值（dBFS -80~0）。
-         */wideSpectrumDb: [Float],
+         */wideSpectrumDb: [Float], 
         /**
          * 全频段实际频率上限（min(20kHz, sample_rate/2)）。
-         */wideSpectrumMaxHz: Double,
+         */wideSpectrumMaxHz: Double, 
         /**
          * 当前分析窗口 256 列最小值包络。
-         */waveformMin: [Float],
+         */waveformMin: [Float], 
         /**
          * 当前分析窗口 256 列最大值包络。
-         */waveformMax: [Float],
+         */waveformMax: [Float], 
         /**
          * 当前帧末端相对引擎启动时的采样位置。
-         */samplePosition: UInt64,
+         */samplePosition: UInt64, 
         /**
          * 实际分析采样率。
-         */sampleRateHz: Double,
+         */sampleRateHz: Double, 
         /**
          * 泛音列（≤8，按幅值降序）。
-         */partials: [Partial],
+         */partials: [Partial], 
         /**
          * 和弦名（如 "Cmaj"），无则为 None。
-         */chord: String?,
+         */chord: String?, 
         /**
          * 输入信号状态。
-         */signalState: SignalState,
+         */signalState: SignalState, 
         /**
          * 当前分析窗口的 RMS 电平（dBFS）。
-         */inputLevelDbfs: Float,
+         */inputLevelDbfs: Float, 
         /**
          * 读数显示强度（0~1）。
-         */displayStrength: Float,
+         */displayStrength: Float, 
         /**
          * 当前读数是否来自断音保持。
          */isHeld: Bool) {
@@ -1270,19 +1270,19 @@ public struct FfiConverterTypeAnalysisFrame: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> AnalysisFrame {
         return
             try AnalysisFrame(
-                tuner: FfiConverterOptionTypeTunarEvent.read(from: &buf),
-                spectrumDb: FfiConverterSequenceFloat.read(from: &buf),
-                wideSpectrumDb: FfiConverterSequenceFloat.read(from: &buf),
-                wideSpectrumMaxHz: FfiConverterDouble.read(from: &buf),
-                waveformMin: FfiConverterSequenceFloat.read(from: &buf),
-                waveformMax: FfiConverterSequenceFloat.read(from: &buf),
-                samplePosition: FfiConverterUInt64.read(from: &buf),
-                sampleRateHz: FfiConverterDouble.read(from: &buf),
-                partials: FfiConverterSequenceTypePartial.read(from: &buf),
-                chord: FfiConverterOptionString.read(from: &buf),
-                signalState: FfiConverterTypeSignalState.read(from: &buf),
-                inputLevelDbfs: FfiConverterFloat.read(from: &buf),
-                displayStrength: FfiConverterFloat.read(from: &buf),
+                tuner: FfiConverterOptionTypeTunarEvent.read(from: &buf), 
+                spectrumDb: FfiConverterSequenceFloat.read(from: &buf), 
+                wideSpectrumDb: FfiConverterSequenceFloat.read(from: &buf), 
+                wideSpectrumMaxHz: FfiConverterDouble.read(from: &buf), 
+                waveformMin: FfiConverterSequenceFloat.read(from: &buf), 
+                waveformMax: FfiConverterSequenceFloat.read(from: &buf), 
+                samplePosition: FfiConverterUInt64.read(from: &buf), 
+                sampleRateHz: FfiConverterDouble.read(from: &buf), 
+                partials: FfiConverterSequenceTypePartial.read(from: &buf), 
+                chord: FfiConverterOptionString.read(from: &buf), 
+                signalState: FfiConverterTypeSignalState.read(from: &buf), 
+                inputLevelDbfs: FfiConverterFloat.read(from: &buf), 
+                displayStrength: FfiConverterFloat.read(from: &buf), 
                 isHeld: FfiConverterBool.read(from: &buf)
         )
     }
@@ -1322,232 +1322,6 @@ public func FfiConverterTypeAnalysisFrame_lower(_ value: AnalysisFrame) -> RustB
 
 
 /**
- * 一张指法表（调性 + 筒音唱名）。
- */
-public struct FingeringChart {
-    /**
-     * chart id（如 "d_qudi_sou5"）。
-     */
-    public var id: String
-    /**
-     * 显示名（如 "D调曲笛 · 筒音作5"）。
-     */
-    public var displayName: String
-    /**
-     * 音阶（升序，约两个八度）。
-     */
-    public var notes: [FingeringNote]
-
-    // Default memberwise initializers are never public by default, so we
-    // declare one manually.
-    public init(
-        /**
-         * chart id（如 "d_qudi_sou5"）。
-         */id: String,
-        /**
-         * 显示名（如 "D调曲笛 · 筒音作5"）。
-         */displayName: String,
-        /**
-         * 音阶（升序，约两个八度）。
-         */notes: [FingeringNote]) {
-        self.id = id
-        self.displayName = displayName
-        self.notes = notes
-    }
-}
-
-#if compiler(>=6)
-extension FingeringChart: Sendable {}
-#endif
-
-
-extension FingeringChart: Equatable, Hashable {
-    public static func ==(lhs: FingeringChart, rhs: FingeringChart) -> Bool {
-        if lhs.id != rhs.id {
-            return false
-        }
-        if lhs.displayName != rhs.displayName {
-            return false
-        }
-        if lhs.notes != rhs.notes {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-        hasher.combine(displayName)
-        hasher.combine(notes)
-    }
-}
-
-
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public struct FfiConverterTypeFingeringChart: FfiConverterRustBuffer {
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> FingeringChart {
-        return
-            try FingeringChart(
-                id: FfiConverterString.read(from: &buf),
-                displayName: FfiConverterString.read(from: &buf),
-                notes: FfiConverterSequenceTypeFingeringNote.read(from: &buf)
-        )
-    }
-
-    public static func write(_ value: FingeringChart, into buf: inout [UInt8]) {
-        FfiConverterString.write(value.id, into: &buf)
-        FfiConverterString.write(value.displayName, into: &buf)
-        FfiConverterSequenceTypeFingeringNote.write(value.notes, into: &buf)
-    }
-}
-
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypeFingeringChart_lift(_ buf: RustBuffer) throws -> FingeringChart {
-    return try FfiConverterTypeFingeringChart.lift(buf)
-}
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypeFingeringChart_lower(_ value: FingeringChart) -> RustBuffer {
-    return FfiConverterTypeFingeringChart.lower(value)
-}
-
-
-/**
- * 指法表中的一个音。
- */
-public struct FingeringNote {
-    /**
-     * 指法/孔位名（如 "筒音"、"开第一二四孔"）。
-     */
-    public var label: String
-    /**
-     * 音名。
-     */
-    public var noteName: String
-    /**
-     * MIDI 音高（随 A4 换算/唱名重算的基准）。
-     */
-    public var midi: Int32
-    /**
-     * 目标频率（Hz，按 A4=440 换算）。
-     */
-    public var freqHz: Double
-    /**
-     * 唱名（按该调性的首调简谱）。
-     */
-    public var solfege: String
-
-    // Default memberwise initializers are never public by default, so we
-    // declare one manually.
-    public init(
-        /**
-         * 指法/孔位名（如 "筒音"、"开第一二四孔"）。
-         */label: String,
-        /**
-         * 音名。
-         */noteName: String,
-        /**
-         * MIDI 音高（随 A4 换算/唱名重算的基准）。
-         */midi: Int32,
-        /**
-         * 目标频率（Hz，按 A4=440 换算）。
-         */freqHz: Double,
-        /**
-         * 唱名（按该调性的首调简谱）。
-         */solfege: String) {
-        self.label = label
-        self.noteName = noteName
-        self.midi = midi
-        self.freqHz = freqHz
-        self.solfege = solfege
-    }
-}
-
-#if compiler(>=6)
-extension FingeringNote: Sendable {}
-#endif
-
-
-extension FingeringNote: Equatable, Hashable {
-    public static func ==(lhs: FingeringNote, rhs: FingeringNote) -> Bool {
-        if lhs.label != rhs.label {
-            return false
-        }
-        if lhs.noteName != rhs.noteName {
-            return false
-        }
-        if lhs.midi != rhs.midi {
-            return false
-        }
-        if lhs.freqHz != rhs.freqHz {
-            return false
-        }
-        if lhs.solfege != rhs.solfege {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(label)
-        hasher.combine(noteName)
-        hasher.combine(midi)
-        hasher.combine(freqHz)
-        hasher.combine(solfege)
-    }
-}
-
-
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public struct FfiConverterTypeFingeringNote: FfiConverterRustBuffer {
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> FingeringNote {
-        return
-            try FingeringNote(
-                label: FfiConverterString.read(from: &buf),
-                noteName: FfiConverterString.read(from: &buf),
-                midi: FfiConverterInt32.read(from: &buf),
-                freqHz: FfiConverterDouble.read(from: &buf),
-                solfege: FfiConverterString.read(from: &buf)
-        )
-    }
-
-    public static func write(_ value: FingeringNote, into buf: inout [UInt8]) {
-        FfiConverterString.write(value.label, into: &buf)
-        FfiConverterString.write(value.noteName, into: &buf)
-        FfiConverterInt32.write(value.midi, into: &buf)
-        FfiConverterDouble.write(value.freqHz, into: &buf)
-        FfiConverterString.write(value.solfege, into: &buf)
-    }
-}
-
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypeFingeringNote_lift(_ buf: RustBuffer) throws -> FingeringNote {
-    return try FfiConverterTypeFingeringNote.lift(buf)
-}
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-public func FfiConverterTypeFingeringNote_lower(_ value: FingeringNote) -> RustBuffer {
-    return FfiConverterTypeFingeringNote.lower(value)
-}
-
-
-/**
  * 乐器元数据。
  */
 public struct Instrument {
@@ -1569,10 +1343,10 @@ public struct Instrument {
     public init(
         /**
          * 乐器 id："guitar" | "ukulele" | "zhudi" | "dongxiao" | "shakuhachi" | "guqin"。
-         */id: String,
+         */id: String, 
         /**
          * 中文显示名。
-         */displayName: String,
+         */displayName: String, 
         /**
          * 类别。
          */kind: InstrumentKind) {
@@ -1617,8 +1391,8 @@ public struct FfiConverterTypeInstrument: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Instrument {
         return
             try Instrument(
-                id: FfiConverterString.read(from: &buf),
-                displayName: FfiConverterString.read(from: &buf),
+                id: FfiConverterString.read(from: &buf), 
+                displayName: FfiConverterString.read(from: &buf), 
                 kind: FfiConverterTypeInstrumentKind.read(from: &buf)
         )
     }
@@ -1664,7 +1438,7 @@ public struct KeyMode {
     public init(
         /**
          * 主音 pitch class（0-11，C=0）。
-         */tonicPc: UInt8,
+         */tonicPc: UInt8, 
         /**
          * 调式类别。
          */mode: ModeKind) {
@@ -1704,7 +1478,7 @@ public struct FfiConverterTypeKeyMode: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> KeyMode {
         return
             try KeyMode(
-                tonicPc: FfiConverterUInt8.read(from: &buf),
+                tonicPc: FfiConverterUInt8.read(from: &buf), 
                 mode: FfiConverterTypeModeKind.read(from: &buf)
         )
     }
@@ -1761,16 +1535,16 @@ public struct MetronomeConfig {
     public init(
         /**
          * 采样率（Hz）。
-         */sampleRate: Double,
+         */sampleRate: Double, 
         /**
          * BPM（30–250，浮点）。
-         */bpm: Double,
+         */bpm: Double, 
         /**
          * 每小节拍数（1–12）。
-         */beatsPerBar: UInt8,
+         */beatsPerBar: UInt8, 
         /**
          * 拍单位（2|4|8）。
-         */beatUnit: UInt8,
+         */beatUnit: UInt8, 
         /**
          * 每拍重音型（长度 = beats_per_bar）。
          */accents: [TickAccent]) {
@@ -1825,10 +1599,10 @@ public struct FfiConverterTypeMetronomeConfig: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MetronomeConfig {
         return
             try MetronomeConfig(
-                sampleRate: FfiConverterDouble.read(from: &buf),
-                bpm: FfiConverterDouble.read(from: &buf),
-                beatsPerBar: FfiConverterUInt8.read(from: &buf),
-                beatUnit: FfiConverterUInt8.read(from: &buf),
+                sampleRate: FfiConverterDouble.read(from: &buf), 
+                bpm: FfiConverterDouble.read(from: &buf), 
+                beatsPerBar: FfiConverterUInt8.read(from: &buf), 
+                beatUnit: FfiConverterUInt8.read(from: &buf), 
                 accents: FfiConverterSequenceTypeTickAccent.read(from: &buf)
         )
     }
@@ -1888,16 +1662,16 @@ public struct Partial {
     public init(
         /**
          * 频率（Hz）。
-         */freqHz: Double,
+         */freqHz: Double, 
         /**
          * 幅值（dBFS）。
-         */magnitudeDb: Float,
+         */magnitudeDb: Float, 
         /**
          * 泛音序号：0=独立音；1=基频；2,3,4…=基频泛音。
-         */harmonicIndex: UInt8,
+         */harmonicIndex: UInt8, 
         /**
          * 独立音时的 12-TET 音名。
-         */noteName: String,
+         */noteName: String, 
         /**
          * 独立音时相对最近 12-TET 音的 cents。
          */centsOff: Double) {
@@ -1952,10 +1726,10 @@ public struct FfiConverterTypePartial: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Partial {
         return
             try Partial(
-                freqHz: FfiConverterDouble.read(from: &buf),
-                magnitudeDb: FfiConverterFloat.read(from: &buf),
-                harmonicIndex: FfiConverterUInt8.read(from: &buf),
-                noteName: FfiConverterString.read(from: &buf),
+                freqHz: FfiConverterDouble.read(from: &buf), 
+                magnitudeDb: FfiConverterFloat.read(from: &buf), 
+                harmonicIndex: FfiConverterUInt8.read(from: &buf), 
+                noteName: FfiConverterString.read(from: &buf), 
                 centsOff: FfiConverterDouble.read(from: &buf)
         )
     }
@@ -2015,16 +1789,16 @@ public struct ReferenceTone {
     public init(
         /**
          * 相对 A4 的平均律步数。
-         */stepFromA4: Int32,
+         */stepFromA4: Int32, 
         /**
          * 固定频率（Hz）。
-         */frequencyHz: Double,
+         */frequencyHz: Double, 
         /**
          * 平均律等分数。
-         */temperament: UInt8,
+         */temperament: UInt8, 
         /**
          * 最近的 12 平均律音名。
-         */noteName: String,
+         */noteName: String, 
         /**
          * 相对该音名的音分差。
          */centsFromNote: Double) {
@@ -2079,10 +1853,10 @@ public struct FfiConverterTypeReferenceTone: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> ReferenceTone {
         return
             try ReferenceTone(
-                stepFromA4: FfiConverterInt32.read(from: &buf),
-                frequencyHz: FfiConverterDouble.read(from: &buf),
-                temperament: FfiConverterUInt8.read(from: &buf),
-                noteName: FfiConverterString.read(from: &buf),
+                stepFromA4: FfiConverterInt32.read(from: &buf), 
+                frequencyHz: FfiConverterDouble.read(from: &buf), 
+                temperament: FfiConverterUInt8.read(from: &buf), 
+                noteName: FfiConverterString.read(from: &buf), 
                 centsFromNote: FfiConverterDouble.read(from: &buf)
         )
     }
@@ -2130,7 +1904,7 @@ public struct RenderFrame {
     public init(
         /**
          * PCM（含混入的 tick 音色）。
-         */samples: [Float],
+         */samples: [Float], 
         /**
          * 本区间内的 tick 事件。
          */ticks: [TickInfo]) {
@@ -2170,7 +1944,7 @@ public struct FfiConverterTypeRenderFrame: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> RenderFrame {
         return
             try RenderFrame(
-                samples: FfiConverterSequenceFloat.read(from: &buf),
+                samples: FfiConverterSequenceFloat.read(from: &buf), 
                 ticks: FfiConverterSequenceTypeTickInfo.read(from: &buf)
         )
     }
@@ -2227,16 +2001,16 @@ public struct StringSpec {
     public init(
         /**
          * 弦号（从 1 开始，含义见 spec-instruments）。
-         */index: UInt32,
+         */index: UInt32, 
         /**
          * 音名（如 "E2"）。
-         */noteName: String,
+         */noteName: String, 
         /**
          * MIDI 音高（随 A4 换算/唱名重算的基准）。
-         */midi: Int32,
+         */midi: Int32, 
         /**
          * 目标频率（Hz，按当前 A4 校准换算；全局接口按 A4=440）。
-         */freqHz: Double,
+         */freqHz: Double, 
         /**
          * 唱名（按乐器习惯调的首调简谱）。
          */solfege: String) {
@@ -2291,10 +2065,10 @@ public struct FfiConverterTypeStringSpec: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> StringSpec {
         return
             try StringSpec(
-                index: FfiConverterUInt32.read(from: &buf),
-                noteName: FfiConverterString.read(from: &buf),
-                midi: FfiConverterInt32.read(from: &buf),
-                freqHz: FfiConverterDouble.read(from: &buf),
+                index: FfiConverterUInt32.read(from: &buf), 
+                noteName: FfiConverterString.read(from: &buf), 
+                midi: FfiConverterInt32.read(from: &buf), 
+                freqHz: FfiConverterDouble.read(from: &buf), 
                 solfege: FfiConverterString.read(from: &buf)
         )
     }
@@ -2346,10 +2120,10 @@ public struct TickInfo {
     public init(
         /**
          * 相对本次 render 缓冲起点的采样偏移。
-         */sampleOffset: UInt64,
+         */sampleOffset: UInt64, 
         /**
          * 小节内第几拍（0 起）。
-         */beatIndex: UInt32,
+         */beatIndex: UInt32, 
         /**
          * 重音型。
          */accent: TickAccent) {
@@ -2394,8 +2168,8 @@ public struct FfiConverterTypeTickInfo: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> TickInfo {
         return
             try TickInfo(
-                sampleOffset: FfiConverterUInt64.read(from: &buf),
-                beatIndex: FfiConverterUInt32.read(from: &buf),
+                sampleOffset: FfiConverterUInt64.read(from: &buf), 
+                beatIndex: FfiConverterUInt32.read(from: &buf), 
                 accent: FfiConverterTypeTickAccent.read(from: &buf)
         )
     }
@@ -2445,10 +2219,10 @@ public struct TongyinOption {
     public init(
         /**
          * 半音级 0–11（筒音 = 宫音 + degree 半音）。7=作5、0=作1、2=作2。
-         */degree: UInt8,
+         */degree: UInt8, 
         /**
          * 该级的首调简谱唱名（"5"、"#4" 等）。
-         */solfege: String,
+         */solfege: String, 
         /**
          * 是否为该孔制的常用指法。
          */common: Bool) {
@@ -2493,8 +2267,8 @@ public struct FfiConverterTypeTongyinOption: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> TongyinOption {
         return
             try TongyinOption(
-                degree: FfiConverterUInt8.read(from: &buf),
-                solfege: FfiConverterString.read(from: &buf),
+                degree: FfiConverterUInt8.read(from: &buf), 
+                solfege: FfiConverterString.read(from: &buf), 
                 common: FfiConverterBool.read(from: &buf)
         )
     }
@@ -2560,22 +2334,22 @@ public struct TunarConfig {
     public init(
         /**
          * 采样率（Hz）。
-         */sampleRate: Double,
+         */sampleRate: Double, 
         /**
          * 相邻分析帧之间推进的采样数（默认 1024）。
-         */frameHopSamples: UInt32,
+         */frameHopSamples: UInt32, 
         /**
          * A4 校准（415–466Hz）。
-         */a4Hz: Double,
+         */a4Hz: Double, 
         /**
          * 噪声门限（dBFS，默认 -45）。
-         */noiseGateDbfs: Float,
+         */noiseGateDbfs: Float, 
         /**
          * 唱名体系。
-         */solfege: SolfegeSystem,
+         */solfege: SolfegeSystem, 
         /**
          * 调式。
-         */key: KeyMode,
+         */key: KeyMode, 
         /**
          * N 平均律（12/19/24/31，默认 12；v4 新增）。
          */temperament: UInt8) {
@@ -2640,12 +2414,12 @@ public struct FfiConverterTypeTunarConfig: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> TunarConfig {
         return
             try TunarConfig(
-                sampleRate: FfiConverterDouble.read(from: &buf),
-                frameHopSamples: FfiConverterUInt32.read(from: &buf),
-                a4Hz: FfiConverterDouble.read(from: &buf),
-                noiseGateDbfs: FfiConverterFloat.read(from: &buf),
-                solfege: FfiConverterTypeSolfegeSystem.read(from: &buf),
-                key: FfiConverterTypeKeyMode.read(from: &buf),
+                sampleRate: FfiConverterDouble.read(from: &buf), 
+                frameHopSamples: FfiConverterUInt32.read(from: &buf), 
+                a4Hz: FfiConverterDouble.read(from: &buf), 
+                noiseGateDbfs: FfiConverterFloat.read(from: &buf), 
+                solfege: FfiConverterTypeSolfegeSystem.read(from: &buf), 
+                key: FfiConverterTypeKeyMode.read(from: &buf), 
                 temperament: FfiConverterUInt8.read(from: &buf)
         )
     }
@@ -2723,28 +2497,28 @@ public struct TunarEvent {
     public init(
         /**
          * 平滑后频率（Hz）。
-         */freqHz: Double,
+         */freqHz: Double, 
         /**
          * 音名（如 "A4"）。
-         */noteName: String,
+         */noteName: String, 
         /**
          * 最近 MIDI 音。
-         */midi: Int32,
+         */midi: Int32, 
         /**
          * 音分偏差 [-50, +50)。
-         */centsOff: Double,
+         */centsOff: Double, 
         /**
          * 检测置信度（0-1）。
-         */clarity: Float,
+         */clarity: Float, 
         /**
          * 唱名（按 config 唱名体系）。
-         */solfege: String,
+         */solfege: String, 
         /**
          * 当前律制 N（v4 新增）。
-         */temperament: UInt8,
+         */temperament: UInt8, 
         /**
          * 最近步序 k（A4 为参考）。
-         */temperamentStep: Int32,
+         */temperamentStep: Int32, 
         /**
          * 律制音分偏差 [-600/N, +600/N)。
          */temperamentCents: Double) {
@@ -2819,14 +2593,14 @@ public struct FfiConverterTypeTunarEvent: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> TunarEvent {
         return
             try TunarEvent(
-                freqHz: FfiConverterDouble.read(from: &buf),
-                noteName: FfiConverterString.read(from: &buf),
-                midi: FfiConverterInt32.read(from: &buf),
-                centsOff: FfiConverterDouble.read(from: &buf),
-                clarity: FfiConverterFloat.read(from: &buf),
-                solfege: FfiConverterString.read(from: &buf),
-                temperament: FfiConverterUInt8.read(from: &buf),
-                temperamentStep: FfiConverterInt32.read(from: &buf),
+                freqHz: FfiConverterDouble.read(from: &buf), 
+                noteName: FfiConverterString.read(from: &buf), 
+                midi: FfiConverterInt32.read(from: &buf), 
+                centsOff: FfiConverterDouble.read(from: &buf), 
+                clarity: FfiConverterFloat.read(from: &buf), 
+                solfege: FfiConverterString.read(from: &buf), 
+                temperament: FfiConverterUInt8.read(from: &buf), 
+                temperamentStep: FfiConverterInt32.read(from: &buf), 
                 temperamentCents: FfiConverterDouble.read(from: &buf)
         )
     }
@@ -2882,10 +2656,10 @@ public struct Tuning {
     public init(
         /**
          * 定弦 id（如 "standard"、"drop_d"）。
-         */id: String,
+         */id: String, 
         /**
          * 中文显示名。
-         */displayName: String,
+         */displayName: String, 
         /**
          * 各弦（按弦号 1..=N 顺序）。
          */strings: [StringSpec]) {
@@ -2930,8 +2704,8 @@ public struct FfiConverterTypeTuning: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Tuning {
         return
             try Tuning(
-                id: FfiConverterString.read(from: &buf),
-                displayName: FfiConverterString.read(from: &buf),
+                id: FfiConverterString.read(from: &buf), 
+                displayName: FfiConverterString.read(from: &buf), 
                 strings: FfiConverterSequenceTypeStringSpec.read(from: &buf)
         )
     }
@@ -3009,31 +2783,31 @@ public struct WindChart {
     public init(
         /**
          * 型号 id。
-         */variantId: String,
+         */variantId: String, 
         /**
          * 型号显示名（如 "G调洞箫 · 8孔"）。
-         */variantName: String,
+         */variantName: String, 
         /**
          * 当前筒音级 0–11。
-         */tongyinDegree: UInt8,
+         */tongyinDegree: UInt8, 
         /**
          * 当前筒音唱名（"5" 等）。
-         */tongyinSolfege: String,
+         */tongyinSolfege: String, 
         /**
          * 宫音 pitch class。
-         */tonicPc: UInt8,
+         */tonicPc: UInt8, 
         /**
          * 宫音音名（不含八度，如 "G"）。
-         */tonicName: String,
+         */tonicName: String, 
         /**
          * 面板标题（如 "筒音作5 · G宫"）。
-         */keyDisplay: String,
+         */keyDisplay: String, 
         /**
          * 孔数（固定音阶类为 0）。
-         */holeCount: UInt8,
+         */holeCount: UInt8, 
         /**
          * 背孔数。
-         */backHoleCount: UInt8,
+         */backHoleCount: UInt8, 
         /**
          * 音阶（升序；筒音在首位，UI 可按需倒序显示）。
          */notes: [WindFingering]) {
@@ -3113,15 +2887,15 @@ public struct FfiConverterTypeWindChart: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> WindChart {
         return
             try WindChart(
-                variantId: FfiConverterString.read(from: &buf),
-                variantName: FfiConverterString.read(from: &buf),
-                tongyinDegree: FfiConverterUInt8.read(from: &buf),
-                tongyinSolfege: FfiConverterString.read(from: &buf),
-                tonicPc: FfiConverterUInt8.read(from: &buf),
-                tonicName: FfiConverterString.read(from: &buf),
-                keyDisplay: FfiConverterString.read(from: &buf),
-                holeCount: FfiConverterUInt8.read(from: &buf),
-                backHoleCount: FfiConverterUInt8.read(from: &buf),
+                variantId: FfiConverterString.read(from: &buf), 
+                variantName: FfiConverterString.read(from: &buf), 
+                tongyinDegree: FfiConverterUInt8.read(from: &buf), 
+                tongyinSolfege: FfiConverterString.read(from: &buf), 
+                tonicPc: FfiConverterUInt8.read(from: &buf), 
+                tonicName: FfiConverterString.read(from: &buf), 
+                keyDisplay: FfiConverterString.read(from: &buf), 
+                holeCount: FfiConverterUInt8.read(from: &buf), 
+                backHoleCount: FfiConverterUInt8.read(from: &buf), 
                 notes: FfiConverterSequenceTypeWindFingering.read(from: &buf)
         )
     }
@@ -3222,43 +2996,43 @@ public struct WindFingering {
     public init(
         /**
          * 同一张表内唯一的稳定 id。
-         */fingeringId: Int32,
+         */fingeringId: Int32, 
         /**
          * 当前音高相对筒音低音的半音数；不同指法可能产生同一音高。
-         */semitones: Int32,
+         */semitones: Int32, 
         /**
          * 决定孔位组合的基础半音（洞箫为 0–11）。
-         */baseSemitones: Int32,
+         */baseSemitones: Int32, 
         /**
          * 低音、中音或高音。
-         */register: WindRegister,
+         */register: WindRegister, 
         /**
          * 指法名（如 "开第一二三孔"、"闭第二五六七孔·超吹"）。
-         */label: String,
+         */label: String, 
         /**
          * 孔位组合，索引 0 = 第一孔（最下），末位 = 最上/背孔；固定音阶类为空。
-         */holes: [HoleMark],
+         */holes: [HoleMark], 
         /**
          * 指法展示分组：顺指或叉指/半孔。
-         */fingeringKind: FingeringKind,
+         */fingeringKind: FingeringKind, 
         /**
          * 最上方开孔的孔序索引（0 = 第一孔）；全闭/无孔位为 `None`。
-         */anchorHole: UInt8?,
+         */anchorHole: UInt8?, 
         /**
          * 音名。
-         */noteName: String,
+         */noteName: String, 
         /**
          * MIDI 音高。
-         */midi: Int32,
+         */midi: Int32, 
         /**
          * 目标频率（Hz，按 A4=440 换算）。
-         */freqHz: Double,
+         */freqHz: Double, 
         /**
          * 唱名（按当前筒音级推出的宫音，首调简谱）。
-         */solfege: String,
+         */solfege: String, 
         /**
          * 是否为当前调宫调式七声的正声（否则为偏音）。
-         */inScale: Bool,
+         */inScale: Bool, 
         /**
          * 是否不是低音区。
          */overblown: Bool) {
@@ -3358,19 +3132,19 @@ public struct FfiConverterTypeWindFingering: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> WindFingering {
         return
             try WindFingering(
-                fingeringId: FfiConverterInt32.read(from: &buf),
-                semitones: FfiConverterInt32.read(from: &buf),
-                baseSemitones: FfiConverterInt32.read(from: &buf),
-                register: FfiConverterTypeWindRegister.read(from: &buf),
-                label: FfiConverterString.read(from: &buf),
-                holes: FfiConverterSequenceTypeHoleMark.read(from: &buf),
-                fingeringKind: FfiConverterTypeFingeringKind.read(from: &buf),
-                anchorHole: FfiConverterOptionUInt8.read(from: &buf),
-                noteName: FfiConverterString.read(from: &buf),
-                midi: FfiConverterInt32.read(from: &buf),
-                freqHz: FfiConverterDouble.read(from: &buf),
-                solfege: FfiConverterString.read(from: &buf),
-                inScale: FfiConverterBool.read(from: &buf),
+                fingeringId: FfiConverterInt32.read(from: &buf), 
+                semitones: FfiConverterInt32.read(from: &buf), 
+                baseSemitones: FfiConverterInt32.read(from: &buf), 
+                register: FfiConverterTypeWindRegister.read(from: &buf), 
+                label: FfiConverterString.read(from: &buf), 
+                holes: FfiConverterSequenceTypeHoleMark.read(from: &buf), 
+                fingeringKind: FfiConverterTypeFingeringKind.read(from: &buf), 
+                anchorHole: FfiConverterOptionUInt8.read(from: &buf), 
+                noteName: FfiConverterString.read(from: &buf), 
+                midi: FfiConverterInt32.read(from: &buf), 
+                freqHz: FfiConverterDouble.read(from: &buf), 
+                solfege: FfiConverterString.read(from: &buf), 
+                inScale: FfiConverterBool.read(from: &buf), 
                 overblown: FfiConverterBool.read(from: &buf)
         )
     }
@@ -3471,40 +3245,40 @@ public struct WindVariant {
     public init(
         /**
          * 型号 id（如 "g_xiao_x8"、"shaku_1_8"）。
-         */id: String,
+         */id: String, 
         /**
          * 完整显示名（如 "G调洞箫 · 8孔"）。
-         */displayName: String,
+         */displayName: String, 
         /**
          * 调性/尺寸 id（同调性的不同孔制共享，如 "g_xiao"）。
-         */keyId: String,
+         */keyId: String, 
         /**
          * 调性/尺寸显示名（如 "G调洞箫"）。
-         */keyName: String,
+         */keyName: String, 
         /**
          * 孔制显示名（如 "8孔"；固定音阶类为空串）。
-         */holeSystemName: String,
+         */holeSystemName: String, 
         /**
          * 孔数（固定音阶类为 0）。
-         */holeCount: UInt8,
+         */holeCount: UInt8, 
         /**
          * 末尾若干孔位于背面（拇指孔）。
-         */backHoleCount: UInt8,
+         */backHoleCount: UInt8, 
         /**
          * 筒音 MIDI。
-         */fundamentalMidi: Int32,
+         */fundamentalMidi: Int32, 
         /**
          * 筒音音名。
-         */fundamentalNoteName: String,
+         */fundamentalNoteName: String, 
         /**
          * 是否支持筒音唱名转调（孔制类支持 12 级）。
-         */supportsTongyin: Bool,
+         */supportsTongyin: Bool, 
         /**
          * 是否支持十二音全表展开。
-         */supportsChromatic: Bool,
+         */supportsChromatic: Bool, 
         /**
          * 12 档筒音唱名（升序 degree 0–11；固定音阶类为空）。
-         */tongyinOptions: [TongyinOption],
+         */tongyinOptions: [TongyinOption], 
         /**
          * 默认筒音级（孔制类为作 5）。
          */defaultTongyinDegree: UInt8) {
@@ -3599,18 +3373,18 @@ public struct FfiConverterTypeWindVariant: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> WindVariant {
         return
             try WindVariant(
-                id: FfiConverterString.read(from: &buf),
-                displayName: FfiConverterString.read(from: &buf),
-                keyId: FfiConverterString.read(from: &buf),
-                keyName: FfiConverterString.read(from: &buf),
-                holeSystemName: FfiConverterString.read(from: &buf),
-                holeCount: FfiConverterUInt8.read(from: &buf),
-                backHoleCount: FfiConverterUInt8.read(from: &buf),
-                fundamentalMidi: FfiConverterInt32.read(from: &buf),
-                fundamentalNoteName: FfiConverterString.read(from: &buf),
-                supportsTongyin: FfiConverterBool.read(from: &buf),
-                supportsChromatic: FfiConverterBool.read(from: &buf),
-                tongyinOptions: FfiConverterSequenceTypeTongyinOption.read(from: &buf),
+                id: FfiConverterString.read(from: &buf), 
+                displayName: FfiConverterString.read(from: &buf), 
+                keyId: FfiConverterString.read(from: &buf), 
+                keyName: FfiConverterString.read(from: &buf), 
+                holeSystemName: FfiConverterString.read(from: &buf), 
+                holeCount: FfiConverterUInt8.read(from: &buf), 
+                backHoleCount: FfiConverterUInt8.read(from: &buf), 
+                fundamentalMidi: FfiConverterInt32.read(from: &buf), 
+                fundamentalNoteName: FfiConverterString.read(from: &buf), 
+                supportsTongyin: FfiConverterBool.read(from: &buf), 
+                supportsChromatic: FfiConverterBool.read(from: &buf), 
+                tongyinOptions: FfiConverterSequenceTypeTongyinOption.read(from: &buf), 
                 defaultTongyinDegree: FfiConverterUInt8.read(from: &buf)
         )
     }
@@ -3654,7 +3428,7 @@ public func FfiConverterTypeWindVariant_lower(_ value: WindVariant) -> RustBuffe
  */
 
 public enum FingeringKind {
-
+    
     /**
      * 顺指：从下往上连续开孔（含全闭筒音与全开）。
      */
@@ -3679,26 +3453,26 @@ public struct FfiConverterTypeFingeringKind: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> FingeringKind {
         let variant: Int32 = try readInt(&buf)
         switch variant {
-
+        
         case 1: return .sequential
-
+        
         case 2: return .combination
-
+        
         default: throw UniffiInternalError.unexpectedEnumCase
         }
     }
 
     public static func write(_ value: FingeringKind, into buf: inout [UInt8]) {
         switch value {
-
-
+        
+        
         case .sequential:
             writeInt(&buf, Int32(1))
-
-
+        
+        
         case .combination:
             writeInt(&buf, Int32(2))
-
+        
         }
     }
 }
@@ -3733,7 +3507,7 @@ extension FingeringKind: Equatable, Hashable {}
  */
 
 public enum FingeringScope {
-
+    
     /**
      * 七声基础孔位；洞箫每个孔位按低音/中音/高音各自的实测孔位展开，缺资料的格不返回。
      */
@@ -3758,26 +3532,26 @@ public struct FfiConverterTypeFingeringScope: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> FingeringScope {
         let variant: Int32 = try readInt(&buf)
         switch variant {
-
+        
         case 1: return .scale
-
+        
         case 2: return .chromatic
-
+        
         default: throw UniffiInternalError.unexpectedEnumCase
         }
     }
 
     public static func write(_ value: FingeringScope, into buf: inout [UInt8]) {
         switch value {
-
-
+        
+        
         case .scale:
             writeInt(&buf, Int32(1))
-
-
+        
+        
         case .chromatic:
             writeInt(&buf, Int32(2))
-
+        
         }
     }
 }
@@ -3812,7 +3586,7 @@ extension FingeringScope: Equatable, Hashable {}
  */
 
 public enum HoleMark {
-
+    
     /**
      * 闭孔（按住）。
      */
@@ -3841,32 +3615,32 @@ public struct FfiConverterTypeHoleMark: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> HoleMark {
         let variant: Int32 = try readInt(&buf)
         switch variant {
-
+        
         case 1: return .closed
-
+        
         case 2: return .`open`
-
+        
         case 3: return .half
-
+        
         default: throw UniffiInternalError.unexpectedEnumCase
         }
     }
 
     public static func write(_ value: HoleMark, into buf: inout [UInt8]) {
         switch value {
-
-
+        
+        
         case .closed:
             writeInt(&buf, Int32(1))
-
-
+        
+        
         case .`open`:
             writeInt(&buf, Int32(2))
-
-
+        
+        
         case .half:
             writeInt(&buf, Int32(3))
-
+        
         }
     }
 }
@@ -3901,7 +3675,7 @@ extension HoleMark: Equatable, Hashable {}
  */
 
 public enum InstrumentKind {
-
+    
     /**
      * 弦乐器。
      */
@@ -3926,26 +3700,26 @@ public struct FfiConverterTypeInstrumentKind: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> InstrumentKind {
         let variant: Int32 = try readInt(&buf)
         switch variant {
-
+        
         case 1: return .string
-
+        
         case 2: return .wind
-
+        
         default: throw UniffiInternalError.unexpectedEnumCase
         }
     }
 
     public static func write(_ value: InstrumentKind, into buf: inout [UInt8]) {
         switch value {
-
-
+        
+        
         case .string:
             writeInt(&buf, Int32(1))
-
-
+        
+        
         case .wind:
             writeInt(&buf, Int32(2))
-
+        
         }
     }
 }
@@ -3980,7 +3754,7 @@ extension InstrumentKind: Equatable, Hashable {}
  */
 
 public enum ModeKind {
-
+    
     /**
      * 宫调式。
      */
@@ -4025,56 +3799,56 @@ public struct FfiConverterTypeModeKind: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> ModeKind {
         let variant: Int32 = try readInt(&buf)
         switch variant {
-
+        
         case 1: return .gong
-
+        
         case 2: return .shang
-
+        
         case 3: return .jue
-
+        
         case 4: return .zhi
-
+        
         case 5: return .yu
-
+        
         case 6: return .major
-
+        
         case 7: return .minor
-
+        
         default: throw UniffiInternalError.unexpectedEnumCase
         }
     }
 
     public static func write(_ value: ModeKind, into buf: inout [UInt8]) {
         switch value {
-
-
+        
+        
         case .gong:
             writeInt(&buf, Int32(1))
-
-
+        
+        
         case .shang:
             writeInt(&buf, Int32(2))
-
-
+        
+        
         case .jue:
             writeInt(&buf, Int32(3))
-
-
+        
+        
         case .zhi:
             writeInt(&buf, Int32(4))
-
-
+        
+        
         case .yu:
             writeInt(&buf, Int32(5))
-
-
+        
+        
         case .major:
             writeInt(&buf, Int32(6))
-
-
+        
+        
         case .minor:
             writeInt(&buf, Int32(7))
-
+        
         }
     }
 }
@@ -4109,7 +3883,7 @@ extension ModeKind: Equatable, Hashable {}
  */
 
 public enum SignalState {
-
+    
     /**
      * 无可信信号。
      */
@@ -4142,38 +3916,38 @@ public struct FfiConverterTypeSignalState: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SignalState {
         let variant: Int32 = try readInt(&buf)
         switch variant {
-
+        
         case 1: return .quiet
-
+        
         case 2: return .acquiring
-
+        
         case 3: return .tracking
-
+        
         case 4: return .holding
-
+        
         default: throw UniffiInternalError.unexpectedEnumCase
         }
     }
 
     public static func write(_ value: SignalState, into buf: inout [UInt8]) {
         switch value {
-
-
+        
+        
         case .quiet:
             writeInt(&buf, Int32(1))
-
-
+        
+        
         case .acquiring:
             writeInt(&buf, Int32(2))
-
-
+        
+        
         case .tracking:
             writeInt(&buf, Int32(3))
-
-
+        
+        
         case .holding:
             writeInt(&buf, Int32(4))
-
+        
         }
     }
 }
@@ -4208,7 +3982,7 @@ extension SignalState: Equatable, Hashable {}
  */
 
 public enum SolfegeSystem {
-
+    
     /**
      * 固定 Do（C=do）。
      */
@@ -4241,38 +4015,38 @@ public struct FfiConverterTypeSolfegeSystem: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SolfegeSystem {
         let variant: Int32 = try readInt(&buf)
         switch variant {
-
+        
         case 1: return .fixedDo
-
+        
         case 2: return .movableDo
-
+        
         case 3: return .numbered
-
+        
         case 4: return .chinese
-
+        
         default: throw UniffiInternalError.unexpectedEnumCase
         }
     }
 
     public static func write(_ value: SolfegeSystem, into buf: inout [UInt8]) {
         switch value {
-
-
+        
+        
         case .fixedDo:
             writeInt(&buf, Int32(1))
-
-
+        
+        
         case .movableDo:
             writeInt(&buf, Int32(2))
-
-
+        
+        
         case .numbered:
             writeInt(&buf, Int32(3))
-
-
+        
+        
         case .chinese:
             writeInt(&buf, Int32(4))
-
+        
         }
     }
 }
@@ -4307,7 +4081,7 @@ extension SolfegeSystem: Equatable, Hashable {}
  */
 
 public enum TickAccent {
-
+    
     /**
      * 重拍。
      */
@@ -4336,32 +4110,32 @@ public struct FfiConverterTypeTickAccent: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> TickAccent {
         let variant: Int32 = try readInt(&buf)
         switch variant {
-
+        
         case 1: return .accent
-
+        
         case 2: return .normal
-
+        
         case 3: return .muted
-
+        
         default: throw UniffiInternalError.unexpectedEnumCase
         }
     }
 
     public static func write(_ value: TickAccent, into buf: inout [UInt8]) {
         switch value {
-
-
+        
+        
         case .accent:
             writeInt(&buf, Int32(1))
-
-
+        
+        
         case .normal:
             writeInt(&buf, Int32(2))
-
-
+        
+        
         case .muted:
             writeInt(&buf, Int32(3))
-
+        
         }
     }
 }
@@ -4396,7 +4170,7 @@ extension TickAccent: Equatable, Hashable {}
  */
 
 public enum WindRegister {
-
+    
     /**
      * 缓吹（低音）。
      */
@@ -4425,32 +4199,32 @@ public struct FfiConverterTypeWindRegister: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> WindRegister {
         let variant: Int32 = try readInt(&buf)
         switch variant {
-
+        
         case 1: return .low
-
+        
         case 2: return .middle
-
+        
         case 3: return .high
-
+        
         default: throw UniffiInternalError.unexpectedEnumCase
         }
     }
 
     public static func write(_ value: WindRegister, into buf: inout [UInt8]) {
         switch value {
-
-
+        
+        
         case .low:
             writeInt(&buf, Int32(1))
-
-
+        
+        
         case .middle:
             writeInt(&buf, Int32(2))
-
-
+        
+        
         case .high:
             writeInt(&buf, Int32(3))
-
+        
         }
     }
 }
@@ -4618,56 +4392,6 @@ fileprivate struct FfiConverterSequenceFloat: FfiConverterRustBuffer {
         seq.reserveCapacity(Int(len))
         for _ in 0 ..< len {
             seq.append(try FfiConverterFloat.read(from: &buf))
-        }
-        return seq
-    }
-}
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-fileprivate struct FfiConverterSequenceTypeFingeringChart: FfiConverterRustBuffer {
-    typealias SwiftType = [FingeringChart]
-
-    public static func write(_ value: [FingeringChart], into buf: inout [UInt8]) {
-        let len = Int32(value.count)
-        writeInt(&buf, len)
-        for item in value {
-            FfiConverterTypeFingeringChart.write(item, into: &buf)
-        }
-    }
-
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [FingeringChart] {
-        let len: Int32 = try readInt(&buf)
-        var seq = [FingeringChart]()
-        seq.reserveCapacity(Int(len))
-        for _ in 0 ..< len {
-            seq.append(try FfiConverterTypeFingeringChart.read(from: &buf))
-        }
-        return seq
-    }
-}
-
-#if swift(>=5.8)
-@_documentation(visibility: private)
-#endif
-fileprivate struct FfiConverterSequenceTypeFingeringNote: FfiConverterRustBuffer {
-    typealias SwiftType = [FingeringNote]
-
-    public static func write(_ value: [FingeringNote], into buf: inout [UInt8]) {
-        let len = Int32(value.count)
-        writeInt(&buf, len)
-        for item in value {
-            FfiConverterTypeFingeringNote.write(item, into: &buf)
-        }
-    }
-
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [FingeringNote] {
-        let len: Int32 = try readInt(&buf)
-        var seq = [FingeringNote]()
-        seq.reserveCapacity(Int(len))
-        for _ in 0 ..< len {
-            seq.append(try FfiConverterTypeFingeringNote.read(from: &buf))
         }
         return seq
     }
@@ -4959,19 +4683,6 @@ public func centsBetween(freqHz: Double, targetHz: Double) -> Double?  {
 })
 }
 /**
- * 列出某管乐器的全部指法表（频率按 A4=440，唱名按各调性首调简谱）。
- *
- * 旧版三档筒音视图（作 5 / 作 1 / 作 2），数据由 [`wind_fingering_chart`] 派生，
- * 孔制取该调性的默认孔制。保留给 Android / macOS 面板，新面板请用 [`wind_fingering_chart`]。
- */
-public func listFingeringCharts(instrumentId: String) -> [FingeringChart]  {
-    return try!  FfiConverterSequenceTypeFingeringChart.lift(try! rustCall() {
-    uniffi_tunar_core_fn_func_list_fingering_charts(
-        FfiConverterString.lower(instrumentId),$0
-    )
-})
-}
-/**
  * 列出全部乐器。
  */
 public func listInstruments() -> [Instrument]  {
@@ -5046,9 +4757,6 @@ private let initializationResult: InitializationResult = {
         return InitializationResult.contractVersionMismatch
     }
     if (uniffi_tunar_core_checksum_func_cents_between() != 8851) {
-        return InitializationResult.apiChecksumMismatch
-    }
-    if (uniffi_tunar_core_checksum_func_list_fingering_charts() != 43391) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_tunar_core_checksum_func_list_instruments() != 56888) {

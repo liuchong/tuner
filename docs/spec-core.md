@@ -198,11 +198,17 @@ src/
   是否显示小型“叉”或“半”提示，不得产生独立轨道。音名与唱名是分离字段和点击区域；
   点选单元格把完整指法固定到大图，优先于实时识别，再点一次交回实时识别。
 - 逐半音 `holes` 是 core 选用的主指法示范，不构成唯一权威指法；不同乐器/流派允许替代指法。
-- 当前产品路径以洞箫先行。竹笛和尺八可由新接口返回数据，但其客户端交互暂保持旧版。
+- 竹笛、洞箫、尺八三种管乐统一走本接口与同一套“完整乐器图 + 三音区列”客户端表格
+  （2026-09-29）。六孔竹笛六孔全在正面，孔位与六孔箫逐孔开放一致，唯 10 半音（作 5 的「4」）
+  用竹笛通行叉口“开第一二三六孔”；中音区 12 半音只开第六孔、22 半音换叉口，高音区只收录
+  资料一致的 24 半音，其余高音格返回空。尺八为固定音阶类：五孔（前四后一），按八度分
+  乙音 / 甲音 / 大甲三音区，`Scale` 返回 11 条；变化音靠俯仰口风（meri/kari）而非孔位，
+  因此 `supports_tongyin` 与 `supports_chromatic` 均为 false，忽略 `tongyin_degree` 与
+  `Chromatic`，客户端不提供唱名拖动转调与十二音详情。
 
 全局查询接口的校准约定（2026-07-20 修订，原附录 A 注释「按当前 A4 校准换算」在
-无配置参数的全局函数上无从获得「当前」配置）：`list_tunings` / `list_fingering_charts`
-返回的 `freq_hz` 一律按 A4=440 换算、`solfege` 按乐器习惯调的首调简谱（古琴 F 调，
+无配置参数的全局函数上无从获得「当前」配置）：`list_tunings` / `list_wind_variants` /
+`wind_fingering_chart` 返回的 `freq_hz` 一律按 A4=440 换算、`solfege` 按乐器习惯调的首调简谱（古琴 F 调，
 吉他/尤克里里 C 调；管乐器按各调性筒音唱名推宫音）。预设表内只存音名/MIDI，
 带 A4 校准的实时频率换算由 `TunarEngine`（持有 TunarConfig）在 feed 事件中给出。
 （2026-07-20 M3 修复重申）上述预设条目的 `solfege` 字段不随全局唱名体系/调式设置
@@ -210,11 +216,9 @@ src/
 必须锚定在该乐器习惯调 / 该 chart 自身调性上（如 D 调曲笛筒音作 5 必须显示 5，
 古琴正调必须显示 F 调唱名 5 6 1 2 3 5 6），用全局调式重算会失去定弦/筒音意义。
 
-兼容 shim：`list_fingering_charts(instrument_id)` 保留旧 `FingeringChart` 返回形状。对孔制类，
-它按每个调性选择默认孔制，再调用 `wind_fingering_chart(..., Scale)` 派生作 5/作 1/作 2
-三张旧表；同一调性的 6/8 孔不会同时泄漏为重名旧 chart。固定音阶类继续每型号一张。
-新界面必须使用 `list_wind_variants` + `wind_fingering_chart`；shim 只保证已发布调用方兼容，
-不得承载 12 档、孔位图、三音区稀疏网格或独立十二音详情的新能力。
+旧接口移除（2026-09-29）：`list_fingering_charts` / `FingeringChart` / `FingeringNote` 已删除。
+三端管乐面板都已改用 `list_wind_variants` + `wind_fingering_chart`，旧形状只剩“作 5 / 作 1 / 作 2”
+三档，无法表达孔位、三音区与十二音详情，继续保留只会让新旧两条路径长期分叉。
 
 ## 7. 节拍器引擎
 
@@ -242,7 +246,8 @@ src/
   三音区按实测孔位展开（8 孔 `Scale` 19 条、`Chromatic` 32 条）、
   中音区与低音区孔位一致（22 半音例外）而高音区不同、指法表未覆盖的格不返回且无合成
   频率/指法、单一大图目标优先级、行锚点与空白辅助线稳定、转调仅改变唱名相关字段；
-  旧 shim 无重名且维持旧形状。
+  竹笛六孔孔位（10 半音叉口、12/22 半音中音特例、高音只收 24 半音）与三音区唱名；
+  尺八五孔、乙/甲/大甲按八度分区共 11 条、不支持转调与十二音。
 - metronome：tick 位置、tempo 变更、tap tempo、accent pattern。
 - signal：门限上下边界、2 帧确认、3dB 滞回、无限保持、保持期两帧替换、强噪声无效音高。
 - reference：12/19/24/31 平均律 80–1500Hz 边界、排序、A4 校准和标签音分。
@@ -254,9 +259,7 @@ namespace tunar_core {
     // ---- 全局 ----
     sequence<Instrument> list_instruments();
     sequence<Tuning> list_tunings(string instrument_id);
-    // 旧兼容 shim：默认孔制 × 作5/作1/作2；新界面不得依赖它表达完整管乐能力
-    sequence<FingeringChart> list_fingering_charts(string instrument_id);
-    // 新管乐接口：型号（调性/尺寸 × 孔制）与按需生成的指法表
+    // 管乐接口：型号（调性/尺寸 × 孔制）与按需生成的指法表
     sequence<WindVariant> list_wind_variants(string instrument_id);
     WindChart? wind_fingering_chart(
         string variant_id,
@@ -292,28 +295,14 @@ dictionary Tuning {
     sequence<StringSpec> strings;
 };
 
-dictionary FingeringNote {
-    string label;         // 指法/孔位名，如 "筒音" "开第一二四孔"
-    string note_name;
-    i32 midi;             // MIDI 音高（随 A4 换算/唱名重算的基准）
-    f64 freq_hz;          // 全局接口按 A4=440 换算（见 §6 校准约定）
-    string solfege;       // 按各调性筒音唱名推宫音的首调简谱（见 §6）；不随全局唱名设置变化
-};
-
-dictionary FingeringChart {
-    string id;            // "d_qudi_sou5" 等
-    string display_name;  // "D调曲笛 · 筒音作5"
-    sequence<FingeringNote> notes;
-};
-
-// ---- 2026-08-25：洞箫先行的孔位/唱名模型 ----
+// ---- 管乐孔位/唱名模型（2026-08-25 洞箫先行，2026-09-29 覆盖竹笛与尺八）----
 [Enum]
 interface HoleMark { Closed, Open, Half };
 
 [Enum]
 interface FingeringScope {
-    Scale,      // 洞箫：7 个基础孔位 × 三音区实测指法（8 孔 19 条）
-    Chromatic   // 洞箫：12 个基础孔位 × 三音区实测指法（8 孔 32 条）
+    Scale,      // 孔制类：7 个基础孔位 × 三音区实测指法（8 孔洞箫 19 条）；尺八：基本音阶 11 条
+    Chromatic   // 孔制类：12 个基础孔位 × 三音区实测指法（8 孔洞箫 32 条）；尺八忽略
 };
 
 [Enum]
@@ -321,9 +310,9 @@ interface FingeringKind { Sequential, Combination };
 
 [Enum]
 interface WindRegister {
-    Low,     // 低音（缓吹）
-    Middle,  // 中音（超吹）
-    High     // 高音（急吹）
+    Low,     // 低音（缓吹）；尺八乙音
+    Middle,  // 中音（超吹）；尺八甲音
+    High     // 高音（急吹）；尺八大甲
 };
 
 dictionary TongyinOption {
@@ -338,7 +327,7 @@ dictionary WindVariant {
     string key_id;                // "g_xiao"
     string key_name;              // "G调洞箫"
     string hole_system_name;      // "8孔"；固定音阶类为空
-    u8 hole_count;                // 固定音阶类为 0
+    u8 hole_count;                // 尺八为 5（前四后一）
     u8 back_hole_count;
     i32 fundamental_midi;
     string fundamental_note_name;
@@ -512,5 +501,9 @@ FingeringNote 增加 midi 字段（理由：乐器面板需要「目标 cents �
 `TongyinOption`、`WindVariant`、`WindFingering`、`WindChart`，以及 `list_wind_variants` /
 `wind_fingering_chart`。旧 `list_fingering_charts` 明确为从新模型派生的兼容 shim，继续返回
 默认孔制与作 5/1/2 旧表，不扩展其返回形状。
+
+2026-09-29：删除 `list_fingering_charts` / `FingeringChart` / `FingeringNote`（理由见 §6 末）。
+尺八改由自带孔位表返回 `hole_count = 5`、`back_hole_count = 1` 与各音孔位，并按八度填写
+`register`；竹笛换用独立的六孔竹笛孔位表。
 
 变更规则：任何签名/类型修改必须先改本附录并注明版本日期。

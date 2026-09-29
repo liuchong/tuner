@@ -15,7 +15,7 @@ struct StringItemUi: Identifiable {
     var id: Int { index }
 }
 
-/// 指法表中的一个音。洞箫使用 core 的复合指法 id，旧式表使用 MIDI。
+/// 指法表中的一个音（id 为 core 的指法 id：音高相对筒音的半音数，表内唯一）。
 struct ChartNoteUi: Identifiable {
     let id: Int32
     let label: String
@@ -33,9 +33,54 @@ struct ChartNoteUi: Identifiable {
     var active = false
 }
 
-enum DongxiaoFingeringScope {
+enum WindFingeringScope {
     case scale
     case chromatic
+}
+
+/// 管乐图示外形：决定管身画法、孔心位置和音区标题。
+enum WindFigureKind {
+    case xiao
+    case dizi
+    case shakuhachi
+
+    init(instrumentId: String) {
+        switch instrumentId {
+        case "zhudi": self = .dizi
+        case "shakuhachi": self = .shakuhachi
+        default: self = .xiao
+        }
+    }
+}
+
+/// 吉他琴头样式（弦乐器图示用），名称沿用行业通行叫法。
+enum HeadstockStyle: String, CaseIterable {
+    /// Fender 式单侧 6 弦轴。
+    case inline6
+    /// Gibson 式两侧各 3 弦轴。
+    case threePlusThree
+
+    var displayName: String {
+        switch self {
+        case .inline6: "6-in-line"
+        case .threePlusThree: "3+3"
+        }
+    }
+
+    var accessibilityName: String {
+        switch self {
+        case .inline6: "Fender 式 6-in-line 单侧琴头"
+        case .threePlusThree: "Gibson 式 3+3 两侧琴头"
+        }
+    }
+}
+
+/// 弦乐器图示：吉他琴头（两种样式）、尤克里里 2+2 琴头、古琴俯视线稿。
+enum StringFigureKind: Equatable {
+    case headstock(HeadstockStyle)
+    case ukuleleHeadstock
+    case guqin
+    case none
 }
 
 struct XiaoFingeringRow: Identifiable {
@@ -84,6 +129,8 @@ enum XiaoFingeringLayout {
 
 /// 乐器面板 ViewModel（iOS 与 macOS 共用；业务换算全走 core）。
 final class InstrumentViewModel: ObservableObject {
+    static let headstockStyleKey = "guitarHeadstockStyle"
+
     @Published private(set) var instruments: [Instrument] = []
     @Published private(set) var instrumentId = ""
     @Published private(set) var instrumentName = ""
@@ -96,15 +143,9 @@ final class InstrumentViewModel: ObservableObject {
     @Published private(set) var strings: [StringItemUi] = []
     @Published private(set) var mode: SelectionMode = .auto
     @Published private(set) var manualIndex = 0
+    @Published private(set) var headstockStyle: HeadstockStyle
 
-    // 普通管乐 UI（竹笛、尺八）：保持旧 chart/group/作 5、1、2 模型。
-    @Published private(set) var chartGroups: [String] = []
-    @Published private(set) var chartGroup = ""
-    @Published private(set) var classicTongyinOptions: [String] = []
-    @Published private(set) var classicTongyin = ""
-    @Published private(set) var classicNotes: [ChartNoteUi] = []
-
-    // 洞箫专属型号与转调。
+    // 管乐型号与转调（竹笛、洞箫、尺八共用）。
     @Published private(set) var variantId = ""
     @Published private(set) var keyNames: [String] = []
     @Published private(set) var keyName = ""
@@ -112,6 +153,8 @@ final class InstrumentViewModel: ObservableObject {
     @Published private(set) var holeSystem = ""
     @Published private(set) var holeCount = 0
     @Published private(set) var backHoleCount = 0
+    @Published private(set) var supportsTongyin = false
+    @Published private(set) var supportsChromatic = false
     @Published private(set) var tongyinOptions: [TongyinOption] = []
     @Published private(set) var tongyinDegree: UInt8 = 0
     @Published private(set) var keyDisplay = ""
@@ -132,7 +175,19 @@ final class InstrumentViewModel: ObservableObject {
     @Published private(set) var displayStrength: Float = 0
     @Published private(set) var isHeld = false
 
-    var usesDongxiaoInteraction: Bool { instrumentId == "dongxiao" }
+    var windFigure: WindFigureKind { WindFigureKind(instrumentId: instrumentId) }
+
+    var stringFigure: StringFigureKind {
+        switch instrumentId {
+        case "guitar": .headstock(headstockStyle)
+        case "ukulele": .ukuleleHeadstock
+        case "guqin": .guqin
+        default: .none
+        }
+    }
+
+    /// 手动模式下锁定的弦；自动模式没有锁定弦，图示只跟随实时命中。
+    var selectedStringIndex: Int? { mode == .manual ? manualIndex : nil }
 
     /// 点选优先：点了哪条就显示哪条；未点选（或再点一次取消）时跟随实时识别，
     /// 无信号时回落最低筒音。
@@ -151,11 +206,15 @@ final class InstrumentViewModel: ObservableObject {
     private var windVariants: [WindVariant] = []
     private var lastDetectedFrequency: Double?
     private let events: AnyPublisher<AnalysisFrame, Never>
+    private let defaults: UserDefaults
     private var acquired = false
     private var cancellables = Set<AnyCancellable>()
 
-    init(events: AnyPublisher<AnalysisFrame, Never>? = nil) {
+    init(events: AnyPublisher<AnalysisFrame, Never>? = nil, defaults: UserDefaults = .standard) {
         self.events = events ?? CaptureHub.shared.events.eraseToAnyPublisher()
+        self.defaults = defaults
+        headstockStyle = defaults.string(forKey: Self.headstockStyleKey)
+            .flatMap(HeadstockStyle.init(rawValue:)) ?? .inline6
         instruments = CorePresets.instruments()
         if let first = instruments.first { selectInstrument(first.id) }
         self.events
@@ -196,17 +255,15 @@ final class InstrumentViewModel: ObservableObject {
         switch inst.kind {
         case .string:
             kind = .string
+            mode = .auto
+            manualIndex = 0
             tunings = CorePresets.tunings(instrumentId: id)
             if let tuning = tunings.first { selectTuning(tuning.id) }
         case .wind:
             kind = .wind
-            if id == "dongxiao" {
-                windVariants = CorePresets.windVariants(instrumentId: id)
-                keyNames = windVariants.map(\.keyName).removingDuplicates()
-                if let first = windVariants.first { applyDongxiaoVariant(first.id, degree: nil) }
-            } else {
-                configureClassicWind(instrumentId: id)
-            }
+            windVariants = CorePresets.windVariants(instrumentId: id)
+            keyNames = windVariants.map(\.keyName).removingDuplicates()
+            if let first = windVariants.first { applyWindVariant(first.id, degree: nil) }
         }
     }
 
@@ -223,90 +280,56 @@ final class InstrumentViewModel: ObservableObject {
                 solfege: string.solfege
             )
         }
+        manualIndex = min(manualIndex, max(strings.count - 1, 0))
         clearReading()
     }
 
     func selectMode(_ mode: SelectionMode) { self.mode = mode }
 
+    /// 点按弦按钮、弦轴或琴弦：锁定该弦并切到手动模式。
     func selectString(_ index: Int) {
+        guard strings.indices.contains(index) else { return }
         manualIndex = index
         mode = .manual
     }
 
-    // MARK: - 旧式管乐选择
-
-    func selectClassicChart(group: String, tongyin: String?) {
-        guard !usesDongxiaoInteraction else { return }
-        let charts = CorePresets.fingeringCharts(instrumentId: instrumentId)
-        let options = classicOptions(in: charts, group: group)
-        let selectedTongyin: String
-        if options.isEmpty {
-            selectedTongyin = ""
-        } else if let tongyin, options.contains(tongyin) {
-            selectedTongyin = tongyin
-        } else {
-            selectedTongyin = options.first ?? ""
-        }
-
-        chartGroup = group
-        classicTongyinOptions = options
-        classicTongyin = selectedTongyin
-        let chart = charts.first {
-            options.isEmpty
-                ? $0.displayName == group
-                : $0.displayName == "\(group) · 筒音作\(selectedTongyin)"
-        }
-        classicNotes = (chart?.notes ?? []).map { note in
-            ChartNoteUi(
-                id: note.midi,
-                label: note.label,
-                holes: [],
-                baseSemitones: note.midi,
-                register: .low,
-                fingeringKind: .sequential,
-                anchorHole: nil,
-                noteName: note.noteName,
-                midi: note.midi,
-                freqHz: note.freqHz,
-                solfege: note.solfege,
-                inScale: true,
-                overblown: false
-            )
-        }
-        clearReading()
+    func selectHeadstockStyle(_ style: HeadstockStyle) {
+        guard headstockStyle != style else { return }
+        headstockStyle = style
+        defaults.set(style.rawValue, forKey: Self.headstockStyleKey)
     }
 
-    // MARK: - 洞箫选择
+    // MARK: - 管乐型号与转调
 
     /// 换调性时保留孔制、筒音级和当前调音高亮。
     func selectKey(_ name: String) {
-        guard usesDongxiaoInteraction else { return }
+        guard kind == .wind else { return }
         let candidates = windVariants.filter { $0.keyName == name }
         guard !candidates.isEmpty else { return }
         let target = candidates.first { $0.holeSystemName == holeSystem } ?? candidates[0]
-        applyDongxiaoVariant(target.id, degree: tongyinDegree)
+        applyWindVariant(target.id, degree: tongyinDegree)
     }
 
-    /// 8 孔 / 6 孔切换保留调性、筒音级和当前调音高亮。
+    /// 孔制切换（洞箫 8 孔 / 6 孔）保留调性、筒音级和当前调音高亮。
     func selectHoleSystem(_ name: String) {
-        guard usesDongxiaoInteraction,
+        guard kind == .wind,
               let target = windVariants.first(where: {
                   $0.keyName == keyName && $0.holeSystemName == name
               })
         else { return }
-        applyDongxiaoVariant(target.id, degree: tongyinDegree)
+        applyWindVariant(target.id, degree: tongyinDegree)
     }
 
     private let naturalTongyinDegrees: [UInt8] = [0, 2, 4, 5, 7, 9, 11]
 
-    /// 主表筒音只允许作自然音阶 1–7。
+    /// 主表筒音只允许作自然音阶 1–7；尺八无筒音档，忽略。
     func selectTongyin(_ degree: UInt8) {
-        guard usesDongxiaoInteraction,
+        guard supportsTongyin,
               tongyinDegree != degree,
               naturalTongyinDegrees.contains(degree)
         else { return }
         tongyinDegree = degree
-        reloadDongxiaoCharts()
+        reloadWindCharts()
     }
 
     func stepTongyin(_ steps: Int) {
@@ -318,12 +341,12 @@ final class InstrumentViewModel: ObservableObject {
 
     /// 十二音详情保留完整 12 档，并与主表状态独立。
     func selectDetailTongyin(_ degree: UInt8) {
-        guard usesDongxiaoInteraction,
+        guard supportsTongyin,
               detailTongyinDegree != degree,
               tongyinOptions.contains(where: { $0.degree == degree })
         else { return }
         detailTongyinDegree = degree
-        reloadDongxiaoCharts()
+        reloadWindCharts()
     }
 
     func stepDetailTongyin(_ steps: Int) {
@@ -332,8 +355,8 @@ final class InstrumentViewModel: ObservableObject {
     }
 
     /// 主表和详情分别记住用户点选的孔位；再点同一条取消点选，回到实时识别。
-    func selectFingeringPreview(_ id: Int32, scope: DongxiaoFingeringScope) {
-        guard usesDongxiaoInteraction else { return }
+    func selectFingeringPreview(_ id: Int32, scope: WindFingeringScope) {
+        guard kind == .wind else { return }
         switch scope {
         case .scale:
             guard scaleNotes.contains(where: { $0.id == id }) else { return }
@@ -344,32 +367,16 @@ final class InstrumentViewModel: ObservableObject {
         }
     }
 
-    /// 详情打开时按十二音目标校音；主页面始终只按七声主表选择目标。
+    /// 详情打开时按十二音目标校音；主页面始终只按主表选择目标。
     func setChromaticDetailPresented(_ presented: Bool) {
-        guard usesDongxiaoInteraction else { return }
+        guard supportsChromatic else { return }
         isChromaticDetailPresented = presented
         if let frequency = lastDetectedFrequency {
             updateWindTarget(frequency: frequency)
         }
     }
 
-    private func configureClassicWind(instrumentId: String) {
-        let charts = CorePresets.fingeringCharts(instrumentId: instrumentId)
-        chartGroups = charts
-            .map { $0.displayName.components(separatedBy: " · ").first ?? $0.displayName }
-            .removingDuplicates()
-        chartGroup = chartGroups.first ?? ""
-        selectClassicChart(group: chartGroup, tongyin: nil)
-    }
-
-    private func classicOptions(in charts: [FingeringChart], group: String) -> [String] {
-        charts
-            .filter { $0.displayName.hasPrefix("\(group) · ") }
-            .map { $0.displayName.components(separatedBy: "筒音作").last ?? "" }
-            .removingDuplicates()
-    }
-
-    private func applyDongxiaoVariant(_ id: String, degree: UInt8?) {
+    private func applyWindVariant(_ id: String, degree: UInt8?) {
         guard let variant = windVariants.first(where: { $0.id == id }) else { return }
         let hadVariant = !variantId.isEmpty
         variantId = variant.id
@@ -380,43 +387,45 @@ final class InstrumentViewModel: ObservableObject {
             .map(\.holeSystemName)
             .filter { !$0.isEmpty }
             .removingDuplicates()
+        supportsTongyin = variant.supportsTongyin
+        supportsChromatic = variant.supportsChromatic
         tongyinOptions = variant.tongyinOptions
         tongyinDegree = degree.flatMap { requested in
-            naturalTongyinDegrees.contains(requested) ? requested : nil
+            variant.supportsTongyin && naturalTongyinDegrees.contains(requested) ? requested : nil
         } ?? variant.defaultTongyinDegree
         if !hadVariant {
             detailTongyinDegree = tongyinDegree
         }
-        reloadDongxiaoCharts()
+        reloadWindCharts()
     }
 
-    private func reloadDongxiaoCharts() {
-        guard
-            let scale = CorePresets.windFingeringChart(
-                variantId: variantId,
-                tongyinDegree: tongyinDegree,
-                scope: .scale
-            ),
-            let chromatic = CorePresets.windFingeringChart(
-                variantId: variantId,
-                tongyinDegree: detailTongyinDegree,
-                scope: .chromatic
-            )
-        else {
+    private func reloadWindCharts() {
+        guard let scale = CorePresets.windFingeringChart(
+            variantId: variantId,
+            tongyinDegree: tongyinDegree,
+            scope: .scale
+        ) else {
             scaleNotes = []
             chromaticNotes = []
             keyDisplay = ""
             return
         }
+        let chromatic = supportsChromatic
+            ? CorePresets.windFingeringChart(
+                variantId: variantId,
+                tongyinDegree: detailTongyinDegree,
+                scope: .chromatic
+            )
+            : nil
 
         let scaleActive = Set(scaleNotes.filter(\.active).map(\.id))
         let chromaticActive = Set(chromaticNotes.filter(\.active).map(\.id))
         keyDisplay = scale.keyDisplay
-        detailKeyDisplay = chromatic.keyDisplay
+        detailKeyDisplay = chromatic?.keyDisplay ?? ""
         holeCount = Int(scale.holeCount)
         backHoleCount = Int(scale.backHoleCount)
         scaleNotes = makeChartNotes(scale.notes, activeIds: scaleActive)
-        chromaticNotes = makeChartNotes(chromatic.notes, activeIds: chromaticActive)
+        chromaticNotes = makeChartNotes(chromatic?.notes ?? [], activeIds: chromaticActive)
         if let id = scalePreviewNoteId,
            !scaleNotes.contains(where: { $0.id == id }) {
             scalePreviewNoteId = nil
@@ -456,11 +465,6 @@ final class InstrumentViewModel: ObservableObject {
     }
 
     private func resetWindState() {
-        chartGroups = []
-        chartGroup = ""
-        classicTongyinOptions = []
-        classicTongyin = ""
-        classicNotes = []
         windVariants = []
         variantId = ""
         keyNames = []
@@ -469,6 +473,8 @@ final class InstrumentViewModel: ObservableObject {
         holeSystem = ""
         holeCount = 0
         backHoleCount = 0
+        supportsTongyin = false
+        supportsChromatic = false
         tongyinOptions = []
         tongyinDegree = 0
         keyDisplay = ""
@@ -513,44 +519,27 @@ final class InstrumentViewModel: ObservableObject {
     }
 
     private func updateWindTarget(frequency: Double) {
-        if usesDongxiaoInteraction {
-            let targetNotes = isChromaticDetailPresented ? chromaticNotes : scaleNotes
-            guard !targetNotes.isEmpty else { return }
-            let cents = targetNotes.map {
-                CorePresets.centsBetween(freq: frequency, target: $0.freqHz) ?? .infinity
-            }
-            let nearest = cents.enumerated().min {
-                abs($0.element) < abs($1.element)
-            }!.offset
-            let activeId = targetNotes[nearest].id
-            chromaticNotes = chromaticNotes.map {
-                var note = $0
-                note.active = note.id == activeId
-                return note
-            }
-            scaleNotes = scaleNotes.map {
-                var note = $0
-                note.active = note.id == activeId
-                return note
-            }
-            centsToTarget = Float(cents[nearest])
-            targetNoteName = targetNotes[nearest].noteName
-        } else {
-            guard !classicNotes.isEmpty else { return }
-            let cents = classicNotes.map {
-                CorePresets.centsBetween(freq: frequency, target: $0.freqHz) ?? .infinity
-            }
-            let nearest = cents.enumerated().min {
-                abs($0.element) < abs($1.element)
-            }!.offset
-            classicNotes = classicNotes.enumerated().map { index, item in
-                var item = item
-                item.active = index == nearest
-                return item
-            }
-            centsToTarget = Float(cents[nearest])
-            targetNoteName = classicNotes[nearest].noteName
+        let targetNotes = isChromaticDetailPresented ? chromaticNotes : scaleNotes
+        guard !targetNotes.isEmpty else { return }
+        let cents = targetNotes.map {
+            CorePresets.centsBetween(freq: frequency, target: $0.freqHz) ?? .infinity
         }
+        let nearest = cents.enumerated().min {
+            abs($0.element) < abs($1.element)
+        }!.offset
+        let activeId = targetNotes[nearest].id
+        chromaticNotes = chromaticNotes.map {
+            var note = $0
+            note.active = note.id == activeId
+            return note
+        }
+        scaleNotes = scaleNotes.map {
+            var note = $0
+            note.active = note.id == activeId
+            return note
+        }
+        centsToTarget = Float(cents[nearest])
+        targetNoteName = targetNotes[nearest].noteName
     }
 
     private func clearReading() {
@@ -562,11 +551,6 @@ final class InstrumentViewModel: ObservableObject {
             item.active = false
             item.inTune = false
             return item
-        }
-        classicNotes = classicNotes.map {
-            var note = $0
-            note.active = false
-            return note
         }
         scaleNotes = scaleNotes.map {
             var note = $0
@@ -589,5 +573,11 @@ extension Array where Element: Equatable {
             result.append(e)
         }
         return result
+    }
+}
+
+extension Array {
+    subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
     }
 }

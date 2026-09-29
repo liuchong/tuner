@@ -8,7 +8,8 @@ final class MacInstrumentViewModelTests: XCTestCase {
         let vm = InstrumentViewModel(events: subject.eraseToAnyPublisher())
         vm.selectInstrument("dongxiao")
 
-        XCTAssertTrue(vm.usesDongxiaoInteraction)
+        XCTAssertEqual(vm.windFigure, .xiao)
+        XCTAssertTrue(vm.supportsTongyin)
         XCTAssertEqual(vm.holeSystem, "8孔")
         // 三音区按实测孔位展开，指法图未覆盖的高音格留空。
         XCTAssertEqual(vm.scaleNotes.count, 19)
@@ -61,20 +62,39 @@ final class MacInstrumentViewModelTests: XCTestCase {
         XCTAssertEqual(rows.first { $0.baseSemitones == 10 }?.anchorHole, 7)
     }
 
-    func testOtherWindInstrumentsKeepClassicControls() {
+    func testZhudiAndShakuhachiShareTheAnchoredChart() {
         let subject = PassthroughSubject<AnalysisFrame, Never>()
         let vm = InstrumentViewModel(events: subject.eraseToAnyPublisher())
 
         vm.selectInstrument("zhudi")
-        XCTAssertFalse(vm.usesDongxiaoInteraction)
-        XCTAssertEqual(vm.classicTongyinOptions, ["5", "1", "2"])
-        XCTAssertFalse(vm.classicNotes.isEmpty)
-        XCTAssertTrue(vm.scaleNotes.isEmpty)
-        XCTAssertTrue(vm.chromaticNotes.isEmpty)
+        XCTAssertEqual(vm.windFigure, .dizi)
+        XCTAssertTrue(vm.supportsTongyin)
+        XCTAssertEqual(vm.holeCount, 6)
+        XCTAssertEqual(Set(vm.scaleNotes.map(\.register)), [.low, .middle, .high])
+        XCTAssertFalse(vm.chromaticNotes.isEmpty)
 
         vm.selectInstrument("shakuhachi")
-        XCTAssertFalse(vm.usesDongxiaoInteraction)
-        XCTAssertTrue(vm.classicTongyinOptions.isEmpty)
-        XCTAssertEqual(vm.classicNotes.count, 11)
+        XCTAssertEqual(vm.windFigure, .shakuhachi)
+        XCTAssertFalse(vm.supportsTongyin)
+        XCTAssertEqual(vm.holeCount, 5)
+        XCTAssertEqual(vm.backHoleCount, 1)
+        XCTAssertEqual(vm.scaleNotes.count, 11)
+        XCTAssertTrue(vm.chromaticNotes.isEmpty)
+    }
+
+    func testHeadstockStyleSwitchesGuitarFigure() {
+        let suite = "MacInstrumentViewModelTests.headstock"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let subject = PassthroughSubject<AnalysisFrame, Never>()
+        let vm = InstrumentViewModel(events: subject.eraseToAnyPublisher(), defaults: defaults)
+
+        vm.selectInstrument("guitar")
+        XCTAssertEqual(vm.stringFigure, .headstock(.inline6))
+        vm.selectHeadstockStyle(.threePlusThree)
+        XCTAssertEqual(vm.stringFigure, .headstock(.threePlusThree))
+        vm.selectInstrument("guqin")
+        XCTAssertEqual(vm.stringFigure, .guqin)
     }
 }

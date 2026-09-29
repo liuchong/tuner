@@ -120,8 +120,8 @@ Out-of-scale chromatic tones receive a deterministic accidental representation.
 
 ## 6. Instruments
 
-Core returns immutable `Instrument`, `Tuning`, `StringSpec`, `FingeringChart`, and
-`FingeringNote` data described in [spec-instruments.md](spec-instruments.md). Presets
+Core returns immutable `Instrument`, `Tuning`, `StringSpec`, `WindVariant`, and
+`WindChart` data described in [spec-instruments.md](spec-instruments.md). Presets
 store MIDI; A4-dependent live frequency comes from the engine. Preset customary
 solfège is part of the preset contract and is not rewritten by global live-display
 solfège settings.
@@ -178,16 +178,24 @@ note/MIDI/frequency, solfège, scale membership, and overblown state.
   complete fingering to the diagram over live detection; tapping it again releases the pin.
 - `holes` is core's primary fingering example, not a claim of one authoritative
   semitone fingering. Instrument and school differences may use alternatives.
-- Product rollout is dongxiao first. Zhudi and shakuhachi may be represented by the new
-  core surface while their client interaction remains unchanged.
+- Zhudi, dongxiao, and shakuhachi all use this surface and the same client table: one
+  complete instrument drawing plus three range columns (2026-09-29). The six-hole zhudi has
+  all six holes on the front and opens holes in sequence like the six-hole xiao, except that
+  10 semitones (the "4" when the tube sounds 5) uses the common dizi cross fingering
+  "open holes 1, 2, 3 and 6". In the middle range, 12 semitones opens only hole 6 and 22
+  semitones switches to a cross fingering; the high range lists only the consistently
+  documented 24 semitones and leaves the other high cells empty. The shakuhachi is a
+  fixed-scale variant: five holes (four front, one back), split by octave into otsu / kan /
+  daikan, with 11 `Scale` entries. Its chromatic tones come from meri/kari embouchure
+  shading rather than hole patterns, so `supports_tongyin` and `supports_chromatic` are
+  both false, `tongyin_degree` and `Chromatic` are ignored, and clients offer neither the
+  solfège-drag transposition nor the 12-tone detail.
 
-Compatibility shim: `list_fingering_charts(instrument_id)` retains the old
-`FingeringChart` shape. For holed winds, it chooses each key's default hole system and
-derives the legacy tube-degree 5/1/2 scale charts through
-`wind_fingering_chart(..., Scale)`; six/eight-hole variants of one key never leak as
-duplicate legacy chart names. Fixed-scale variants still produce one chart per model.
-New UI uses `list_wind_variants` plus `wind_fingering_chart`; the shim does not expose
-12 positions, hole diagrams, the sparse three-range grid, or independent chromatic detail.
+Legacy API removal (2026-09-29): `list_fingering_charts`, `FingeringChart`, and
+`FingeringNote` are deleted. All three clients now build their wind panels from
+`list_wind_variants` plus `wind_fingering_chart`. The old shape only carried the
+tube-degree 5/1/2 lists and could not express holes, ranges, or chromatic detail, so
+keeping it would leave two diverging wind paths.
 
 ## 7. Metronome
 
@@ -224,7 +232,10 @@ left in buffer)`, so long timbres such as the bell were cut down to a single thu
   holes matching the low range except at 22 semitones while the high range differs,
   chart-uncovered cells omitted with no synthetic frequencies or fingerings, single-large-diagram
   target priority, stable row anchors and blank guides, solfège-only transposition
-  stability, and a duplicate-free legacy shim.
+  stability; six-hole zhudi patterns (the 10-semitone cross fingering, the 12/22-semitone
+  middle-range exceptions, only 24 semitones in the high range) and range solfège; and
+  shakuhachi five holes, 11 entries split otsu/kan/daikan by octave, with no transposition
+  or chromatic detail.
 - 1000 metronome ticks, tempo changes, accents/mutes, tap outliers, and finite samples.
 
 ## Appendix A — UniFFI contract
@@ -236,8 +247,6 @@ generated bindings map names to platform conventions. The contract contains:
 namespace tunar_core {
   sequence<Instrument> list_instruments();
   sequence<Tuning> list_tunings(string instrument_id);
-  // Legacy shim: default hole system × tube degree 5/1/2.
-  sequence<FingeringChart> list_fingering_charts(string instrument_id);
   sequence<WindVariant> list_wind_variants(string instrument_id);
   WindChart? wind_fingering_chart(
     string variant_id,
@@ -270,20 +279,6 @@ dictionary Tuning {
   string id;
   string display_name;
   sequence<StringSpec> strings;
-}
-
-dictionary FingeringNote {
-  string label;
-  i32 midi;
-  string note_name;
-  f64 freq_hz;
-  string solfege;
-}
-
-dictionary FingeringChart {
-  string id;
-  string display_name;
-  sequence<FingeringNote> notes;
 }
 
 enum HoleMark { Closed, Open, Half }
@@ -459,8 +454,12 @@ interface Metronome {
 The 2026-08-25 contract adds `HoleMark`, `FingeringScope`, `FingeringKind`,
 `WindRegister`, `TongyinOption`, `WindVariant`, `WindFingering`, `WindChart`,
 `list_wind_variants`, and
-`wind_fingering_chart`. `list_fingering_charts` remains a compatibility shim derived
-from the new model and keeps its old return shape.
+`wind_fingering_chart`.
+
+2026-09-29 removes `list_fingering_charts`, `FingeringChart`, and `FingeringNote` (see the
+end of §6). Shakuhachi variants now carry their own hole table, report `hole_count = 5` and
+`back_hole_count = 1`, and fill `register` by octave; the zhudi uses a dedicated six-hole
+dizi pattern table.
 
 Global queries and object methods are defined by the checked-in UniFFI surface. Any
 signature/type change first updates this appendix in English and `../spec-core.md` in

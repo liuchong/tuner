@@ -16,8 +16,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import uniffi.tunar_core.FingeringKind
-import uniffi.tunar_core.FingeringChart
-import uniffi.tunar_core.FingeringNote
 import uniffi.tunar_core.FingeringScope
 import uniffi.tunar_core.HoleMark
 import uniffi.tunar_core.Instrument
@@ -43,6 +41,7 @@ private class FakeCoreApi : TunarCoreApi {
         Instrument("guitar", "吉他", InstrumentKind.STRING),
         Instrument("zhudi", "竹笛", InstrumentKind.WIND),
         Instrument("dongxiao", "洞箫", InstrumentKind.WIND),
+        Instrument("shakuhachi", "尺八", InstrumentKind.WIND),
     )
 
     override fun tunings(instrumentId: String) = if (instrumentId == "guitar") {
@@ -63,45 +62,33 @@ private class FakeCoreApi : TunarCoreApi {
         emptyList()
     }
 
-    override fun fingeringCharts(instrumentId: String) = if (instrumentId == "zhudi") {
-        listOf(
-            FingeringChart(
-                "d_qudi_sou5", "D调曲笛 · 筒音作5",
-                listOf(
-                    FingeringNote("筒音", "A4", 69, 440.0, "5"),
-                    FingeringNote("开第一孔", "B4", 71, 493.88, "6"),
-                    FingeringNote("开第一二孔", "C#5", 73, 554.37, "7"),
-                ),
-            ),
-            FingeringChart(
-                "d_qudi_zuo1", "D调曲笛 · 筒音作1",
-                listOf(FingeringNote("筒音", "A4", 69, 440.0, "1")),
-            ),
+    override fun windVariants(instrumentId: String): List<WindVariant> = when (instrumentId) {
+        "dongxiao" -> listOf(
+            variant("g_xiao_x8", "g_xiao", "G调洞箫", 8),
+            variant("g_xiao_x6", "g_xiao", "G调洞箫", 6),
+            variant("d_xiao_x8", "d_xiao", "D调洞箫", 8),
+            variant("d_xiao_x6", "d_xiao", "D调洞箫", 6),
         )
-    } else {
-        emptyList()
+        "zhudi" -> listOf(variant("d_qudi", "d_qudi", "D调曲笛", 6, backHoles = 0))
+        "shakuhachi" -> listOf(
+            variant("shaku_18", "shaku_18", "一尺八寸", 5, transposable = false),
+        )
+        else -> emptyList()
     }
-
-    override fun windVariants(instrumentId: String): List<WindVariant> =
-        if (instrumentId == "dongxiao") {
-            listOf(
-                variant("g_xiao_x8", "g_xiao", "G调洞箫", 8),
-                variant("g_xiao_x6", "g_xiao", "G调洞箫", 6),
-                variant("d_xiao_x8", "d_xiao", "D调洞箫", 8),
-                variant("d_xiao_x6", "d_xiao", "D调洞箫", 6),
-            )
-        } else {
-            emptyList()
-        }
 
     override fun windFingeringChart(
         variantId: String,
         tongyinDegree: UByte,
         scope: FingeringScope,
     ): WindChart? {
-        val variant = windVariants("dongxiao").firstOrNull { it.id == variantId } ?: return null
+        val variant = listOf("dongxiao", "zhudi", "shakuhachi")
+            .flatMap { windVariants(it) }
+            .firstOrNull { it.id == variantId } ?: return null
         val degree = tongyinDegree.toInt() % 12
-        val baseOffsets = if (scope == FingeringScope.SCALE) {
+        val baseOffsets = if (!variant.supportsTongyin) {
+            // 尺八按五声取音：乙音、甲音各五声，大甲只到甲音之上一音。
+            listOf(0, 3, 5, 7, 10)
+        } else if (scope == FingeringScope.SCALE) {
             listOf(0, 2, 4, 5, 7, 9, 11)
                 .map { (it - degree).floorMod(12) }
                 .sorted()
@@ -129,6 +116,9 @@ private class FakeCoreApi : TunarCoreApi {
                     val semitones = baseSemitones + registerOffset
                     // 指法图只覆盖到相对筒音 31 半音，越界的高音格没有来源。
                     if (semitones > 31) return@mapNotNull null
+                    if (!variant.supportsTongyin && register == WindRegister.HIGH && baseSemitones > 0) {
+                        return@mapNotNull null
+                    }
                     val holeCount = variant.holeCount.toInt()
                     val baseHoles = List(holeCount) { index ->
                         when {
@@ -182,6 +172,8 @@ private class FakeCoreApi : TunarCoreApi {
         keyId: String,
         keyName: String,
         holes: Int,
+        backHoles: Int = 1,
+        transposable: Boolean = true,
     ) = WindVariant(
         id = id,
         displayName = "$keyName · ${holes}孔",
@@ -189,15 +181,17 @@ private class FakeCoreApi : TunarCoreApi {
         keyName = keyName,
         holeSystemName = "${holes}孔",
         holeCount = holes.toUByte(),
-        backHoleCount = 1u,
+        backHoleCount = backHoles.toUByte(),
         fundamentalMidi = if (keyId == "g_xiao") 55 else 50,
         fundamentalNoteName = if (keyId == "g_xiao") "G3" else "D3",
-        supportsTongyin = true,
-        supportsChromatic = true,
-        tongyinOptions = (0..11).map {
-            TongyinOption(it.toUByte(), it.toString(), it in listOf(0, 2, 7))
+        supportsTongyin = transposable,
+        supportsChromatic = transposable,
+        tongyinOptions = if (transposable) {
+            (0..11).map { TongyinOption(it.toUByte(), it.toString(), it in listOf(0, 2, 7)) }
+        } else {
+            emptyList()
         },
-        defaultTongyinDegree = 7u,
+        defaultTongyinDegree = if (transposable) 7u else 0u,
     )
 }
 
@@ -233,17 +227,19 @@ class InstrumentViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun makeVm() = InstrumentViewModel(
-        core = FakeCoreApi(),
-        stream = stream,
-        savedState = savedState,
-    )
+    private fun makeVm(preferences: InstrumentPreferences = InstrumentPreferences.InMemory()) =
+        InstrumentViewModel(
+            core = FakeCoreApi(),
+            stream = stream,
+            savedState = savedState,
+            preferences = preferences,
+        )
 
     @Test
     fun `初始化加载乐器列表与默认吉他定弦`() {
         val vm = makeVm()
         val s = vm.uiState.value
-        assertEquals(3, s.instruments.size)
+        assertEquals(4, s.instruments.size)
         assertEquals("guitar", s.instrumentId)
         assertEquals(InstrumentKind.STRING, s.kind)
         assertEquals("standard", s.tuningId)
@@ -307,32 +303,102 @@ class InstrumentViewModelTest {
     }
 
     @Test
-    fun `管乐器：调性与筒音唱名选择、最近音高亮`() {
+    fun `竹笛走型号指法表：三音区、可转调、有十二音详情`() {
         val vm = makeVm()
         vm.startCapture()
         vm.selectInstrument("zhudi")
         var s = vm.uiState.value
         assertEquals(InstrumentKind.WIND, s.kind)
-        assertEquals(listOf("D调曲笛"), s.chartGroups)
-        assertEquals(listOf("5", "1"), s.tongyinOptions)
-        assertEquals("5", s.tongyin)
-        assertEquals(3, s.notes.size)
-        assertEquals("D调曲笛", s.chartGroup)
-        // 持久化
+        assertEquals(WindFigureKind.DIZI, s.windFigure)
+        assertTrue(s.supportsTongyin)
+        assertTrue(s.supportsChromatic)
+        assertEquals(6, s.holeCount)
+        assertEquals(0, s.backHoleCount)
+        assertEquals(listOf("D调曲笛"), s.keyNames)
+        assertEquals(
+            setOf(WindRegister.LOW, WindRegister.MIDDLE, WindRegister.HIGH),
+            s.notes.map { it.register }.toSet(),
+        )
+        assertTrue(s.notes.all { it.holes.size == 6 })
+        assertTrue(s.detailNotes.isNotEmpty())
         assertEquals("zhudi", savedState.get<String>("instrumentId"))
 
-        // 吹 493.9Hz（近 B4）→ 高亮「开第一孔」
-        stream.emitEvent(event(493.9))
+        val target = s.notes[2]
+        stream.emitEvent(event(target.freqHz))
         s = vm.uiState.value
-        assertEquals(1, s.notes.indexOfFirst { it.active })
-        assertEquals("B4", s.targetNoteName)
+        assertEquals(target.fingeringId, s.notes.single { it.active }.fingeringId)
+        assertEquals(target.noteName, s.targetNoteName)
 
-        // 切换筒音作 1 → 列表切换
-        vm.selectChart("D调曲笛", "1")
-        s = vm.uiState.value
-        assertEquals("1", s.tongyin)
-        assertEquals(1, s.notes.size)
-        assertEquals("筒音", s.notes[0].label)
+        vm.stepTongyin(-3)
+        assertTrue(vm.uiState.value.keyDisplay.startsWith("筒音作2"))
+    }
+
+    @Test
+    fun `尺八按五声分乙甲两音区且不提供转调与十二音`() {
+        val vm = makeVm()
+        vm.selectInstrument("shakuhachi")
+        val s = vm.uiState.value
+        assertEquals(WindFigureKind.SHAKUHACHI, s.windFigure)
+        assertFalse(s.supportsTongyin)
+        assertFalse(s.supportsChromatic)
+        assertEquals(5, s.holeCount)
+        assertEquals(1, s.backHoleCount)
+        assertEquals(11, s.notes.size)
+        assertEquals(5, s.notes.count { it.register == WindRegister.LOW })
+        assertEquals(5, s.notes.count { it.register == WindRegister.MIDDLE })
+        assertEquals(1, s.notes.count { it.register == WindRegister.HIGH })
+        assertTrue(s.detailNotes.isEmpty())
+        assertEquals("乙音", s.windFigure.registerTitle(WindRegister.LOW))
+
+        // 不可转调的型号忽略唱名拖动。
+        vm.stepTongyin(2)
+        assertEquals(s.tongyinDegree, vm.uiState.value.tongyinDegree)
+        assertEquals(s.notes, vm.uiState.value.notes)
+    }
+
+    @Test
+    fun `吉他琴头默认六联排、切换后持久化，尤克里里固定四弦琴头`() {
+        val preferences = InstrumentPreferences.InMemory()
+        val vm = makeVm(preferences)
+        assertEquals(StringFigureKind.Headstock(HeadstockStyle.INLINE_6), vm.uiState.value.stringFigure)
+
+        vm.selectHeadstockStyle(HeadstockStyle.THREE_PLUS_THREE)
+        assertEquals(HeadstockStyle.THREE_PLUS_THREE, preferences.headstockStyle)
+        assertEquals(
+            StringFigureKind.Headstock(HeadstockStyle.THREE_PLUS_THREE),
+            vm.uiState.value.stringFigure,
+        )
+        // 重建 ViewModel 仍读到上次的琴头样式。
+        assertEquals(
+            StringFigureKind.Headstock(HeadstockStyle.THREE_PLUS_THREE),
+            makeVm(preferences).uiState.value.stringFigure,
+        )
+    }
+
+    @Test
+    fun `点弦进入手动锁定，换乐器回到自动`() {
+        val vm = makeVm()
+        assertNull(vm.uiState.value.selectedStringIndex)
+        vm.selectString(2)
+        assertEquals(2, vm.uiState.value.selectedStringIndex)
+        vm.selectString(99)
+        assertEquals(2, vm.uiState.value.selectedStringIndex)
+
+        vm.selectInstrument("zhudi")
+        vm.selectInstrument("guitar")
+        assertEquals(SelectionMode.AUTO, vm.uiState.value.mode)
+        assertNull(vm.uiState.value.selectedStringIndex)
+    }
+
+    @Test
+    fun `琴头每根弦恰好对应一个弦轴`() {
+        listOf(
+            HeadstockLayout.INLINE_6 to 6,
+            HeadstockLayout.THREE_PLUS_THREE to 6,
+            HeadstockLayout.UKULELE to 4,
+        ).forEach { (layout, count) ->
+            assertEquals((1..count).toList(), layout.pegs.map { it.stringNumber }.sorted())
+        }
     }
 
     @Test
@@ -498,13 +564,22 @@ class InstrumentViewModelTest {
     }
 
     @Test
-    fun `布局使用低中高三音区列并与洞箫孔心同轴`() {
+    fun `音区列名按乐器区分且行锚定到孔心`() {
         assertEquals(
-            listOf("低音/缓吹", "中音/超吹", "高音/急吹"),
-            DONGXIAO_REGISTER_COLUMNS.map { it.title },
+            listOf("低音", "中音", "高音"),
+            WindRegister.entries.map { WindFigureKind.XIAO.registerTitle(it) },
         )
-        assertEquals(WindRegister.entries, DONGXIAO_REGISTER_COLUMNS.map { it.register })
-        assertTrue(xiaoHoleCenterFraction(7, 8) < xiaoHoleCenterFraction(0, 8))
+        assertEquals(
+            listOf("乙音", "甲音", "大甲"),
+            WindRegister.entries.map { WindFigureKind.SHAKUHACHI.registerTitle(it) },
+        )
+        WindFigureKind.entries.forEach { kind ->
+            val count = if (kind == WindFigureKind.SHAKUHACHI) 5 else 6
+            assertTrue(
+                WindFigureGeometry.fraction(kind, count - 1, count) <
+                    WindFigureGeometry.fraction(kind, 0, count),
+            )
+        }
     }
 
     @Test
@@ -537,9 +612,9 @@ class InstrumentViewModelTest {
         val toDegreeTwo = consumeTongyinDrag(0f, 106f, 32f)
         assertEquals(-3, toDegreeTwo.committedSteps)
         assertEquals(10f, toDegreeTwo.residualOffsetPx)
-        assertEquals("2", shiftedDongxiaoSolfege("5", -3, naturalScaleOnly = true))
-        assertEquals("5", shiftedDongxiaoSolfege("2", 3, naturalScaleOnly = true))
-        assertEquals("2", shiftedDongxiaoSolfege("5", -5))
+        assertEquals("2", shiftedSolfege("5", -3, naturalScaleOnly = true))
+        assertEquals("5", shiftedSolfege("2", 3, naturalScaleOnly = true))
+        assertEquals("2", shiftedSolfege("5", -5))
         assertEquals(0, tongyinDragSteps(-15f, 32f))
         assertEquals(1, tongyinDragSteps(-17f, 32f))
         assertEquals(2, tongyinDragSteps(-49f, 32f))
@@ -568,25 +643,5 @@ class InstrumentViewModelTest {
                 .filter { it.register == WindRegister.LOW }
                 .map { it.baseSemitones },
         )
-    }
-
-    @Test
-    fun `旧管乐保存状态可迁移到洞箫新选择键`() {
-        savedState = SavedStateHandle(
-            mapOf(
-                "instrumentId" to "dongxiao",
-                "chartGroup" to "D调洞箫",
-                "tongyin" to "2",
-            ),
-        )
-        val state = makeVm().uiState.value
-
-        assertEquals("dongxiao", state.instrumentId)
-        assertEquals("D调洞箫", state.keyName)
-        assertEquals("8孔", state.holeSystem)
-        assertEquals(2, state.tongyinDegree)
-        assertEquals("D调洞箫", savedState.get<String>("windKeyName"))
-        assertEquals("8孔", savedState.get<String>("windHoleSystem"))
-        assertEquals(2, savedState.get<Int>("windTongyinDegree"))
     }
 }

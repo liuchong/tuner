@@ -68,13 +68,9 @@ data class InstrumentUiState(
     val strings: List<StringItemUi> = emptyList(),
     val mode: SelectionMode = SelectionMode.AUTO,
     val manualIndex: Int = 0,
-    // 管乐
-    val chartGroups: List<String> = emptyList(),
-    val chartGroup: String = "",
-    val tongyinOptions: List<String> = emptyList(),
-    val tongyin: String = "",
+    val headstockStyle: HeadstockStyle = HeadstockStyle.INLINE_6,
+    // 管乐（竹笛、洞箫、尺八共用型号指法表）
     val notes: List<ChartNoteUi> = emptyList(),
-    // 洞箫新版指法面板
     val windVariants: List<WindVariant> = emptyList(),
     val variantId: String = "",
     val keyNames: List<String> = emptyList(),
@@ -83,6 +79,8 @@ data class InstrumentUiState(
     val holeSystem: String = "",
     val holeCount: Int = 0,
     val backHoleCount: Int = 0,
+    val supportsTongyin: Boolean = false,
+    val supportsChromatic: Boolean = false,
     val windTongyinOptions: List<TongyinOption> = emptyList(),
     val tongyinDegree: Int = 0,
     val keyDisplay: String = "",
@@ -98,7 +96,21 @@ data class InstrumentUiState(
     val signalState: SignalState = SignalState.QUIET,
     val displayStrength: Float = 0f,
     val isHeld: Boolean = false,
-)
+) {
+    val windFigure: WindFigureKind get() = WindFigureKind.of(instrumentId)
+
+    val stringFigure: StringFigureKind
+        get() = when (instrumentId) {
+            "guitar" -> StringFigureKind.Headstock(headstockStyle)
+            "ukulele" -> StringFigureKind.UkuleleHeadstock
+            "guqin" -> StringFigureKind.Guqin
+            else -> StringFigureKind.None
+        }
+
+    /** 手动锁定的弦；自动模式下为 null。 */
+    val selectedStringIndex: Int?
+        get() = manualIndex.takeIf { mode == SelectionMode.MANUAL && it in strings.indices }
+}
 
 /**
  * 乐器面板 ViewModel（spec-ui §2）。
@@ -108,6 +120,7 @@ class InstrumentViewModel(
     private val core: TunarCoreApi,
     private val stream: TunarEventStream,
     private val savedState: SavedStateHandle,
+    private val preferences: InstrumentPreferences = InstrumentPreferences.InMemory(),
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(InstrumentUiState())
@@ -154,7 +167,9 @@ class InstrumentViewModel(
         val instruments = core.instruments()
         val savedId = savedState.get<String>(KEY_INSTRUMENT)
         val initial = instruments.firstOrNull { it.id == savedId } ?: instruments.firstOrNull()
-        _uiState.update { it.copy(instruments = instruments) }
+        _uiState.update {
+            it.copy(instruments = instruments, headstockStyle = preferences.headstockStyle)
+        }
         if (initial != null) selectInstrument(initial.id)
     }
 
@@ -180,66 +195,27 @@ class InstrumentViewModel(
                         instrumentName = instrument.displayName,
                         kind = InstrumentKind.STRING,
                         tunings = tunings,
+                        mode = SelectionMode.AUTO,
+                        manualIndex = 0,
                         centsToTarget = null,
                         targetNoteName = null,
                     )
                 }
+                savedState[KEY_MODE] = SelectionMode.AUTO.name
                 if (tuning != null) selectTuning(tuning.id)
             }
-            InstrumentKind.WIND -> {
-                if (id == DONGXIAO_ID) {
-                    selectDongxiao(instrument.id, instrument.displayName)
-                } else {
-                    selectLegacyWind(instrument.id, instrument.displayName)
-                }
-            }
+            InstrumentKind.WIND -> selectWindInstrument(instrument.id, instrument.displayName)
         }
     }
 
-    private fun selectLegacyWind(id: String, displayName: String) {
-        val charts = core.fingeringCharts(id)
-        // 旧版普通管乐 UI：displayName 以 " · " 分隔（"D调曲笛 · 筒音作5"）
-        val groups = charts.map { it.displayName.substringBefore(" · ") }.distinct()
-        val savedGroup = savedState.get<String>(KEY_GROUP)
-        val group = groups.firstOrNull { it == savedGroup } ?: groups.firstOrNull().orEmpty()
-        val options = charts
-            .filter { it.displayName.startsWith("$group · ") }
-            .map { it.displayName.substringAfter("筒音作") }
-            .distinct()
-        _uiState.update {
-            it.copy(
-                instrumentId = id,
-                instrumentName = displayName,
-                kind = InstrumentKind.WIND,
-                chartGroups = groups,
-                tongyinOptions = options,
-                windVariants = emptyList(),
-                variantId = "",
-                keyNames = emptyList(),
-                keyName = "",
-                holeSystems = emptyList(),
-                holeSystem = "",
-                windTongyinOptions = emptyList(),
-                detailNotes = emptyList(),
-                detailTongyinDegree = 0,
-                detailKeyDisplay = "",
-                mainPreviewFingeringId = null,
-                detailPreviewFingeringId = null,
-                centsToTarget = null,
-                targetNoteName = null,
-            )
-        }
-        selectChart(group, savedState.get<String>(KEY_TONGYIN))
-    }
-
-    private fun selectDongxiao(id: String, displayName: String) {
+    private fun selectWindInstrument(id: String, displayName: String) {
         val variants = core.windVariants(id)
         val keyNames = variants.map { it.keyName }.distinct()
         val savedKey = savedState.get<String>(KEY_WIND_KEY)
-            ?: savedState.get<String>(KEY_GROUP)
         val keyName = keyNames.firstOrNull { it == savedKey } ?: keyNames.firstOrNull().orEmpty()
         val candidates = variants.filter { it.keyName == keyName }
         val savedVariantId = savedState.get<String>(KEY_VARIANT)
+            ?.takeIf { saved -> variants.any { it.id == saved } }
         val savedHoleSystem = savedState.get<String>(KEY_HOLE_SYSTEM)
         val variant = variants.firstOrNull { it.id == savedVariantId }
             ?: candidates.firstOrNull { it.holeSystemName == savedHoleSystem }
@@ -254,8 +230,7 @@ class InstrumentViewModel(
                 kind = InstrumentKind.WIND,
                 windVariants = variants,
                 keyNames = keyNames,
-                chartGroups = emptyList(),
-                tongyinOptions = emptyList(),
+                variantId = "",
                 mainPreviewFingeringId = null,
                 detailPreviewFingeringId = null,
                 centsToTarget = null,
@@ -263,9 +238,7 @@ class InstrumentViewModel(
             )
         }
         if (variant != null) {
-            val savedDegree = savedState.get<Int>(KEY_TONGYIN_DEGREE)
-                ?: migratedTongyinDegree(variant)
-            applyWindVariant(variant.id, savedDegree)
+            applyWindVariant(variant.id, savedState.get<Int>(KEY_TONGYIN_DEGREE))
         }
     }
 
@@ -302,53 +275,23 @@ class InstrumentViewModel(
 
     /** 点选某弦：锁定目标并切到手动模式。 */
     fun selectString(index: Int) {
+        if (index !in _uiState.value.strings.indices) return
         savedState[KEY_STRING] = index
         savedState[KEY_MODE] = SelectionMode.MANUAL.name
         _uiState.update { it.copy(manualIndex = index, mode = SelectionMode.MANUAL) }
     }
 
-    /** 选择调性/型号分组与筒音唱名。 */
-    fun selectChart(group: String, tongyin: String?) {
-        val charts = core.fingeringCharts(_uiState.value.instrumentId)
-        val options = _uiState.value.tongyinOptions
-        val ty = when {
-            options.isEmpty() -> ""
-            tongyin != null && options.contains(tongyin) -> tongyin
-            else -> options.first()
-        }
-        savedState[KEY_GROUP] = group
-        savedState[KEY_TONGYIN] = ty
-        val chart = charts.firstOrNull { c ->
-            if (options.isEmpty()) {
-                c.displayName == group
-            } else {
-                c.displayName == "$group · 筒音作$ty"
-            }
-        }
-        _uiState.update {
-            it.copy(
-                chartGroup = group,
-                tongyin = ty,
-                // 唱名直接用预设值（按该 chart 调性+筒音唱名，见 spec-core §6）
-                notes = chart?.notes?.map { n ->
-                    ChartNoteUi(
-                        label = n.label,
-                        noteName = n.noteName,
-                        midi = n.midi,
-                        freqHz = n.freqHz,
-                        solfege = n.solfege,
-                    )
-                }.orEmpty(),
-                centsToTarget = null,
-                targetNoteName = null,
-            )
-        }
+    /** 吉他琴头样式：Fender 式 6-in-line / Gibson 式 3+3，跨启动保留。 */
+    fun selectHeadstockStyle(style: HeadstockStyle) {
+        if (_uiState.value.headstockStyle == style) return
+        preferences.headstockStyle = style
+        _uiState.update { it.copy(headstockStyle = style) }
     }
 
-    /** 洞箫换调，尽量保留孔制与筒音唱名。 */
+    /** 管乐换调 / 换尺寸，尽量保留孔制与筒音唱名。 */
     fun selectWindKey(name: String) {
         val state = _uiState.value
-        if (state.instrumentId != DONGXIAO_ID) return
+        if (state.kind != InstrumentKind.WIND) return
         val candidates = state.windVariants.filter { it.keyName == name }
         val target = candidates.firstOrNull { it.holeSystemName == state.holeSystem }
             ?: candidates.firstOrNull { it.holeCount.toInt() == DEFAULT_HOLE_COUNT }
@@ -357,10 +300,10 @@ class InstrumentViewModel(
         applyWindVariant(target.id, state.tongyinDegree)
     }
 
-    /** 洞箫切换 8 孔 / 6 孔，保留调性与筒音唱名。 */
+    /** 切换孔制（洞箫 8 孔 / 6 孔），保留调性与筒音唱名。 */
     fun selectHoleSystem(name: String) {
         val state = _uiState.value
-        if (state.instrumentId != DONGXIAO_ID) return
+        if (state.kind != InstrumentKind.WIND) return
         val target = state.windVariants.firstOrNull {
             it.keyName == state.keyName && it.holeSystemName == name
         } ?: return
@@ -370,12 +313,12 @@ class InstrumentViewModel(
     /** 主表筒音只选择自然唱名 1–7。 */
     fun selectTongyinDegree(degree: Int) {
         val state = _uiState.value
-        if (state.instrumentId != DONGXIAO_ID || state.windTongyinOptions.isEmpty()) return
+        if (!state.supportsTongyin || state.windTongyinOptions.isEmpty()) return
         val normalized = degree.floorMod(TONGYIN_STEPS)
         if (normalized == state.tongyinDegree) return
         if (normalized !in NATURAL_TONGYIN_DEGREES) return
         savedState[KEY_TONGYIN_DEGREE] = normalized
-        reloadDongxiaoCharts(state.variantId, normalized, state.detailTongyinDegree)
+        reloadWindCharts(state.variantId, normalized, state.detailTongyinDegree)
     }
 
     /** 主表唱名列按七个自然音级循环。 */
@@ -391,11 +334,11 @@ class InstrumentViewModel(
     /** 十二音详情独立选择完整 12 个半音档。 */
     fun selectDetailTongyinDegree(degree: Int) {
         val state = _uiState.value
-        if (state.instrumentId != DONGXIAO_ID || state.windTongyinOptions.isEmpty()) return
+        if (!state.supportsChromatic || state.windTongyinOptions.isEmpty()) return
         val normalized = degree.floorMod(TONGYIN_STEPS)
         if (normalized == state.detailTongyinDegree) return
         savedState[KEY_DETAIL_TONGYIN_DEGREE] = normalized
-        reloadDongxiaoCharts(state.variantId, state.tongyinDegree, normalized)
+        reloadWindCharts(state.variantId, state.tongyinDegree, normalized)
     }
 
     fun stepDetailTongyin(delta: Int) {
@@ -406,7 +349,7 @@ class InstrumentViewModel(
     fun previewMainFingering(fingeringId: Int) {
         _uiState.update { state ->
             if (
-                state.instrumentId != DONGXIAO_ID ||
+                state.kind != InstrumentKind.WIND ||
                 state.notes.none { it.fingeringId == fingeringId }
             ) {
                 state
@@ -423,7 +366,7 @@ class InstrumentViewModel(
     fun previewDetailFingering(fingeringId: Int) {
         _uiState.update { state ->
             if (
-                state.instrumentId != DONGXIAO_ID ||
+                state.kind != InstrumentKind.WIND ||
                 state.detailNotes.none { it.fingeringId == fingeringId }
             ) {
                 state
@@ -442,14 +385,14 @@ class InstrumentViewModel(
         val options = variant.tongyinOptions
         val degree = preferredDegree
             ?.floorMod(TONGYIN_STEPS)
-            ?.takeIf { it in NATURAL_TONGYIN_DEGREES }
+            ?.takeIf { variant.supportsTongyin && it in NATURAL_TONGYIN_DEGREES }
             ?: variant.defaultTongyinDegree.toInt()
-        val detailDegree = if (state.variantId.isEmpty()) {
-            savedState.get<Int>(KEY_DETAIL_TONGYIN_DEGREE)
+        val detailDegree = when {
+            !variant.supportsChromatic -> degree
+            state.variantId.isEmpty() -> savedState.get<Int>(KEY_DETAIL_TONGYIN_DEGREE)
                 ?.floorMod(TONGYIN_STEPS)
                 ?: degree
-        } else {
-            state.detailTongyinDegree
+            else -> state.detailTongyinDegree
         }
         val holeSystems = state.windVariants
             .filter { it.keyId == variant.keyId }
@@ -470,15 +413,17 @@ class InstrumentViewModel(
                 holeSystem = variant.holeSystemName,
                 holeCount = variant.holeCount.toInt(),
                 backHoleCount = variant.backHoleCount.toInt(),
+                supportsTongyin = variant.supportsTongyin,
+                supportsChromatic = variant.supportsChromatic,
                 windTongyinOptions = options,
                 tongyinDegree = degree,
                 detailTongyinDegree = detailDegree,
             )
         }
-        reloadDongxiaoCharts(variant.id, degree, detailDegree)
+        reloadWindCharts(variant.id, degree, detailDegree)
     }
 
-    private fun reloadDongxiaoCharts(
+    private fun reloadWindCharts(
         variantId: String,
         degree: Int,
         detailDegree: Int,
@@ -488,11 +433,15 @@ class InstrumentViewModel(
             tongyinDegree = degree.toUByte(),
             scope = FingeringScope.SCALE,
         )
-        val detail = core.windFingeringChart(
-            variantId = variantId,
-            tongyinDegree = detailDegree.toUByte(),
-            scope = FingeringScope.CHROMATIC,
-        )
+        val detail = if (_uiState.value.supportsChromatic) {
+            core.windFingeringChart(
+                variantId = variantId,
+                tongyinDegree = detailDegree.toUByte(),
+                scope = FingeringScope.CHROMATIC,
+            )
+        } else {
+            null
+        }
         _uiState.update { state ->
             if (scale == null) {
                 state.copy(
@@ -511,9 +460,9 @@ class InstrumentViewModel(
                     .filter { it.active }
                     .mapTo(mutableSetOf()) { it.fingeringId }
                 val scaleNotes = scale.notes.map { it.toUi(activeScale.contains(it.fingeringId)) }
-                val detailNotes = (detail ?: scale).notes.map {
+                val detailNotes = detail?.notes?.map {
                     it.toUi(activeDetail.contains(it.fingeringId))
-                }
+                }.orEmpty()
                 val next = state.copy(
                     variantId = scale.variantId,
                     holeCount = scale.holeCount.toInt(),
@@ -521,7 +470,7 @@ class InstrumentViewModel(
                     tongyinDegree = scale.tongyinDegree.toInt(),
                     keyDisplay = scale.keyDisplay,
                     detailTongyinDegree = (detail ?: scale).tongyinDegree.toInt(),
-                    detailKeyDisplay = (detail ?: scale).keyDisplay,
+                    detailKeyDisplay = detail?.keyDisplay.orEmpty(),
                     notes = scaleNotes,
                     detailNotes = detailNotes,
                     // 未点选时保持 null，大图跟随实时识别（无信号时回落全闭筒音）。
@@ -533,14 +482,6 @@ class InstrumentViewModel(
                 lastFrequencyHz?.let { applyWindReading(next, it) } ?: next
             }
         }
-    }
-
-    private fun migratedTongyinDegree(variant: WindVariant): Int? {
-        val oldTongyin = savedState.get<String>(KEY_TONGYIN) ?: return null
-        return variant.tongyinOptions
-            .firstOrNull { it.solfege == oldTongyin }
-            ?.degree
-            ?.toInt()
     }
 
     /** 事件处理：计算各目标 cents、最近目标高亮、准音标记。 */
@@ -571,22 +512,7 @@ class InstrumentViewModel(
                         targetNoteName = state.strings[activeIdx].noteName,
                     )
                 }
-                InstrumentKind.WIND -> {
-                    if (state.instrumentId == DONGXIAO_ID) {
-                        applyWindReading(state, freq)
-                    } else {
-                        if (state.notes.isEmpty()) return@update state
-                        val cents = state.notes.map { n ->
-                            core.centsBetween(freq, n.freqHz) ?: Double.POSITIVE_INFINITY
-                        }
-                        val nearest = cents.indices.minBy { abs(cents[it]) }
-                        state.copy(
-                            notes = state.notes.mapIndexed { i, n -> n.copy(active = i == nearest) },
-                            centsToTarget = cents[nearest].toFloat(),
-                            targetNoteName = state.notes[nearest].noteName,
-                        )
-                    }
-                }
+                InstrumentKind.WIND -> applyWindReading(state, freq)
             }
         }
     }
@@ -627,14 +553,11 @@ class InstrumentViewModel(
         private const val KEY_TUNING = "tuningId"
         private const val KEY_MODE = "mode"
         private const val KEY_STRING = "stringIndex"
-        private const val KEY_GROUP = "chartGroup"
-        private const val KEY_TONGYIN = "tongyin"
         private const val KEY_WIND_KEY = "windKeyName"
         private const val KEY_HOLE_SYSTEM = "windHoleSystem"
         private const val KEY_VARIANT = "windVariantId"
         private const val KEY_TONGYIN_DEGREE = "windTongyinDegree"
         private const val KEY_DETAIL_TONGYIN_DEGREE = "windDetailTongyinDegree"
-        private const val DONGXIAO_ID = "dongxiao"
         private const val DEFAULT_HOLE_COUNT = 8
         private const val TONGYIN_STEPS = 12
         private val NATURAL_TONGYIN_DEGREES = listOf(0, 2, 4, 5, 7, 9, 11)

@@ -765,26 +765,22 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
-
-
 // For large crates we prevent `MethodTooLargeException` (see #2340)
-// N.B. the name of the extension is very misleading, since it is
-// rather `InterfaceTooLargeException`, caused by too many methods
+// N.B. the name of the extension is very misleading, since it is 
+// rather `InterfaceTooLargeException`, caused by too many methods 
 // in the interface for large crates.
 //
 // By splitting the otherwise huge interface into two parts
-// * UniffiLib
+// * UniffiLib 
 // * IntegrityCheckingUniffiLib (this)
 // we allow for ~2x as many methods in the UniffiLib interface.
-//
-// The `ffi_uniffi_contract_version` method and all checksum methods are put
+// 
+// The `ffi_uniffi_contract_version` method and all checksum methods are put 
 // into `IntegrityCheckingUniffiLib` and these methods are called only once,
 // when the library is loaded.
 internal interface IntegrityCheckingUniffiLib : Library {
     // Integrity check functions only
     fun uniffi_tunar_core_checksum_func_cents_between(
-): Short
-fun uniffi_tunar_core_checksum_func_list_fingering_charts(
 ): Short
 fun uniffi_tunar_core_checksum_func_list_instruments(
 ): Short
@@ -844,8 +840,8 @@ internal interface UniffiLib : Library {
         internal val INSTANCE: UniffiLib by lazy {
             val componentName = "tunar_core"
             // For large crates we prevent `MethodTooLargeException` (see #2340)
-            // N.B. the name of the extension is very misleading, since it is
-            // rather `InterfaceTooLargeException`, caused by too many methods
+            // N.B. the name of the extension is very misleading, since it is 
+            // rather `InterfaceTooLargeException`, caused by too many methods 
             // in the interface for large crates.
             //
             // By splitting the otherwise huge interface into two parts
@@ -853,7 +849,7 @@ internal interface UniffiLib : Library {
             // * IntegrityCheckingUniffiLib
             // And all checksum methods are put into `IntegrityCheckingUniffiLib`
             // we allow for ~2x as many methods in the UniffiLib interface.
-            //
+            // 
             // Thus we first load the library with `loadIndirect` as `IntegrityCheckingUniffiLib`
             // so that we can (optionally!) call `uniffiCheckApiChecksums`...
             loadIndirect<IntegrityCheckingUniffiLib>(componentName)
@@ -868,12 +864,12 @@ internal interface UniffiLib : Library {
             // to trigger this issue, the performance impact is negligible, running on
             // a macOS M1 machine the `loadIndirect` call takes ~50ms.
             val lib = loadIndirect<UniffiLib>(componentName)
-            // No need to check the contract version and checksums, since
+            // No need to check the contract version and checksums, since 
             // we already did that with `IntegrityCheckingUniffiLib` above.
             // Loading of library with integrity check done.
             lib
         }
-
+        
         // The Cleaner for the whole library
         internal val CLEANER: UniffiCleaner by lazy {
             UniffiCleaner.create()
@@ -881,71 +877,69 @@ internal interface UniffiLib : Library {
     }
 
     // FFI functions
-    fun uniffi_tunar_core_fn_clone_metronome(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+    fun uniffi_tunar_core_fn_clone_metronome(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
 ): Pointer
-fun uniffi_tunar_core_fn_free_metronome(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_free_metronome(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
-fun uniffi_tunar_core_fn_constructor_metronome_new(`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_constructor_metronome_new(`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Pointer
-fun uniffi_tunar_core_fn_method_metronome_is_running(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_method_metronome_is_running(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
 ): Byte
-fun uniffi_tunar_core_fn_method_metronome_render(`ptr`: Pointer,`frames`: Int,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_method_metronome_render(`ptr`: Pointer,`frames`: Int,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_method_metronome_set_accents(`ptr`: Pointer,`accents`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_method_metronome_set_accents(`ptr`: Pointer,`accents`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
-fun uniffi_tunar_core_fn_method_metronome_set_bpm(`ptr`: Pointer,`bpm`: Double,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_method_metronome_set_bpm(`ptr`: Pointer,`bpm`: Double,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
-fun uniffi_tunar_core_fn_method_metronome_set_click_samples(`ptr`: Pointer,`accent`: RustBuffer.ByValue,`normal`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_method_metronome_set_click_samples(`ptr`: Pointer,`accent`: RustBuffer.ByValue,`normal`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
-fun uniffi_tunar_core_fn_method_metronome_set_time_signature(`ptr`: Pointer,`beats`: Byte,`unit`: Byte,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_method_metronome_set_time_signature(`ptr`: Pointer,`beats`: Byte,`unit`: Byte,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
-fun uniffi_tunar_core_fn_method_metronome_start(`ptr`: Pointer,`atSample`: Long,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_method_metronome_start(`ptr`: Pointer,`atSample`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
-fun uniffi_tunar_core_fn_method_metronome_stop(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_method_metronome_stop(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
-fun uniffi_tunar_core_fn_method_metronome_tap(`ptr`: Pointer,`timestampSamples`: Long,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_method_metronome_tap(`ptr`: Pointer,`timestampSamples`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): Double
-fun uniffi_tunar_core_fn_clone_tunarengine(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_clone_tunarengine(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
 ): Pointer
-fun uniffi_tunar_core_fn_free_tunarengine(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_free_tunarengine(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
-fun uniffi_tunar_core_fn_constructor_tunarengine_new(`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_constructor_tunarengine_new(`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Pointer
-fun uniffi_tunar_core_fn_method_tunarengine_analyze(`ptr`: Pointer,`pcm`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_method_tunarengine_analyze(`ptr`: Pointer,`pcm`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_method_tunarengine_feed(`ptr`: Pointer,`pcm`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_method_tunarengine_feed(`ptr`: Pointer,`pcm`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_method_tunarengine_list_reference_tones(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_method_tunarengine_list_reference_tones(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_method_tunarengine_set_a4(`ptr`: Pointer,`hz`: Double,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_method_tunarengine_set_a4(`ptr`: Pointer,`hz`: Double,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
-fun uniffi_tunar_core_fn_method_tunarengine_set_noise_gate(`ptr`: Pointer,`dbfs`: Float,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_method_tunarengine_set_noise_gate(`ptr`: Pointer,`dbfs`: Float,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
-fun uniffi_tunar_core_fn_method_tunarengine_set_solfege(`ptr`: Pointer,`system`: RustBuffer.ByValue,`key`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_method_tunarengine_set_solfege(`ptr`: Pointer,`system`: RustBuffer.ByValue,`key`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
-fun uniffi_tunar_core_fn_method_tunarengine_set_temperament(`ptr`: Pointer,`divisions`: Byte,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_method_tunarengine_set_temperament(`ptr`: Pointer,`divisions`: Byte,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
-fun uniffi_tunar_core_fn_func_cents_between(`freqHz`: Double,`targetHz`: Double,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_func_cents_between(`freqHz`: Double,`targetHz`: Double,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_func_list_fingering_charts(`instrumentId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_func_list_instruments(uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_func_list_instruments(uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_func_list_tunings(`instrumentId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_func_list_tunings(`instrumentId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_func_list_wind_variants(`instrumentId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_func_list_wind_variants(`instrumentId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_func_solfege_for_midi(`system`: RustBuffer.ByValue,`key`: RustBuffer.ByValue,`midi`: Int,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_func_solfege_for_midi(`system`: RustBuffer.ByValue,`key`: RustBuffer.ByValue,`midi`: Int,uniffi_out_err: UniffiRustCallStatus,
+fun uniffi_tunar_core_fn_func_wind_fingering_chart(`variantId`: RustBuffer.ByValue,`tongyinDegree`: Byte,`scope`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_func_wind_fingering_chart(`variantId`: RustBuffer.ByValue,`tongyinDegree`: Byte,`scope`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+fun ffi_tunar_core_rustbuffer_alloc(`size`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-fun ffi_tunar_core_rustbuffer_alloc(`size`: Long,uniffi_out_err: UniffiRustCallStatus,
+fun ffi_tunar_core_rustbuffer_from_bytes(`bytes`: ForeignBytes.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
-fun ffi_tunar_core_rustbuffer_from_bytes(`bytes`: ForeignBytes.ByValue,uniffi_out_err: UniffiRustCallStatus,
-): RustBuffer.ByValue
-fun ffi_tunar_core_rustbuffer_free(`buf`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+fun ffi_tunar_core_rustbuffer_free(`buf`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
-fun ffi_tunar_core_rustbuffer_reserve(`buf`: RustBuffer.ByValue,`additional`: Long,uniffi_out_err: UniffiRustCallStatus,
+fun ffi_tunar_core_rustbuffer_reserve(`buf`: RustBuffer.ByValue,`additional`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 fun ffi_tunar_core_rust_future_poll_u8(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -953,7 +947,7 @@ fun ffi_tunar_core_rust_future_cancel_u8(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_u8(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_u8(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
+fun ffi_tunar_core_rust_future_complete_u8(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): Byte
 fun ffi_tunar_core_rust_future_poll_i8(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -961,7 +955,7 @@ fun ffi_tunar_core_rust_future_cancel_i8(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_i8(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_i8(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
+fun ffi_tunar_core_rust_future_complete_i8(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): Byte
 fun ffi_tunar_core_rust_future_poll_u16(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -969,7 +963,7 @@ fun ffi_tunar_core_rust_future_cancel_u16(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_u16(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_u16(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
+fun ffi_tunar_core_rust_future_complete_u16(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): Short
 fun ffi_tunar_core_rust_future_poll_i16(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -977,7 +971,7 @@ fun ffi_tunar_core_rust_future_cancel_i16(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_i16(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_i16(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
+fun ffi_tunar_core_rust_future_complete_i16(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): Short
 fun ffi_tunar_core_rust_future_poll_u32(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -985,7 +979,7 @@ fun ffi_tunar_core_rust_future_cancel_u32(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_u32(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_u32(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
+fun ffi_tunar_core_rust_future_complete_u32(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): Int
 fun ffi_tunar_core_rust_future_poll_i32(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -993,7 +987,7 @@ fun ffi_tunar_core_rust_future_cancel_i32(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_i32(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_i32(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
+fun ffi_tunar_core_rust_future_complete_i32(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): Int
 fun ffi_tunar_core_rust_future_poll_u64(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -1001,7 +995,7 @@ fun ffi_tunar_core_rust_future_cancel_u64(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_u64(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_u64(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
+fun ffi_tunar_core_rust_future_complete_u64(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): Long
 fun ffi_tunar_core_rust_future_poll_i64(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -1009,7 +1003,7 @@ fun ffi_tunar_core_rust_future_cancel_i64(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_i64(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_i64(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
+fun ffi_tunar_core_rust_future_complete_i64(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): Long
 fun ffi_tunar_core_rust_future_poll_f32(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -1017,7 +1011,7 @@ fun ffi_tunar_core_rust_future_cancel_f32(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_f32(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_f32(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
+fun ffi_tunar_core_rust_future_complete_f32(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): Float
 fun ffi_tunar_core_rust_future_poll_f64(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -1025,7 +1019,7 @@ fun ffi_tunar_core_rust_future_cancel_f64(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_f64(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_f64(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
+fun ffi_tunar_core_rust_future_complete_f64(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): Double
 fun ffi_tunar_core_rust_future_poll_pointer(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -1033,7 +1027,7 @@ fun ffi_tunar_core_rust_future_cancel_pointer(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_pointer(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_pointer(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
+fun ffi_tunar_core_rust_future_complete_pointer(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): Pointer
 fun ffi_tunar_core_rust_future_poll_rust_buffer(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -1041,7 +1035,7 @@ fun ffi_tunar_core_rust_future_cancel_rust_buffer(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_rust_buffer(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_rust_buffer(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
+fun ffi_tunar_core_rust_future_complete_rust_buffer(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): RustBuffer.ByValue
 fun ffi_tunar_core_rust_future_poll_void(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -1049,7 +1043,7 @@ fun ffi_tunar_core_rust_future_cancel_void(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_void(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_void(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
+fun ffi_tunar_core_rust_future_complete_void(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
 
 }
@@ -1066,9 +1060,6 @@ private fun uniffiCheckContractApiVersion(lib: IntegrityCheckingUniffiLib) {
 @Suppress("UNUSED_PARAMETER")
 private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_tunar_core_checksum_func_cents_between() != 8851.toShort()) {
-        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    }
-    if (lib.uniffi_tunar_core_checksum_func_list_fingering_charts() != 43391.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_tunar_core_checksum_func_list_instruments() != 56888.toShort()) {
@@ -1212,7 +1203,7 @@ inline fun <T : Disposable?, R> T.use(block: (T) -> R) =
         }
     }
 
-/**
+/** 
  * Used to instantiate an interface without an actual pointer, for fakes in tests, mostly.
  *
  * @suppress
@@ -1604,53 +1595,53 @@ public object FfiConverterString: FfiConverter<String, RustBuffer.ByValue> {
  * 节拍器（UniFFI 对象）。
  */
 public interface MetronomeInterface {
-
+    
     /**
      * 是否运行中。
      */
     fun `isRunning`(): kotlin.Boolean
-
+    
     /**
      * 渲染 `frames` 个采样（含精确混入的 tick 音色），返回 PCM 与 tick 事件。
      * UniFFI 边界允许分配（marshal 开销主导）；引擎内核零分配。
      */
     fun `render`(`frames`: kotlin.UInt): RenderFrame
-
+    
     /**
      * 设置每拍重音型。
      */
     fun `setAccents`(`accents`: List<TickAccent>)
-
+    
     /**
      * 设置 BPM（30–250），下一采样生效。
      */
     fun `setBpm`(`bpm`: kotlin.Double)
-
+    
     /**
      * 注入重拍/弱拍音色（由原生层提供；传空则恢复内置合成音色）。
      */
     fun `setClickSamples`(`accent`: List<kotlin.Float>, `normal`: List<kotlin.Float>)
-
+    
     /**
      * 设置拍号。
      */
     fun `setTimeSignature`(`beats`: kotlin.UByte, `unit`: kotlin.UByte)
-
+    
     /**
      * 从 `at_sample` 开始运行。
      */
     fun `start`(`atSample`: kotlin.ULong)
-
+    
     /**
      * 停止。
      */
     fun `stop`()
-
+    
     /**
      * tap tempo：输入 tap 的采样时间戳，返回当前 BPM。
      */
     fun `tap`(`timestampSamples`: kotlin.ULong): kotlin.Double
-
+    
     companion object
 }
 
@@ -1749,7 +1740,7 @@ open class Metronome: Disposable, AutoCloseable, MetronomeInterface
         }
     }
 
-
+    
     /**
      * 是否运行中。
      */override fun `isRunning`(): kotlin.Boolean {
@@ -1762,9 +1753,9 @@ open class Metronome: Disposable, AutoCloseable, MetronomeInterface
     }
     )
     }
+    
 
-
-
+    
     /**
      * 渲染 `frames` 个采样（含精确混入的 tick 音色），返回 PCM 与 tick 事件。
      * UniFFI 边界允许分配（marshal 开销主导）；引擎内核零分配。
@@ -1778,93 +1769,93 @@ open class Metronome: Disposable, AutoCloseable, MetronomeInterface
     }
     )
     }
+    
 
-
-
+    
     /**
      * 设置每拍重音型。
      */override fun `setAccents`(`accents`: List<TickAccent>)
-        =
+        = 
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_metronome_set_accents(
         it, FfiConverterSequenceTypeTickAccent.lower(`accents`),_status)
 }
     }
+    
+    
 
-
-
-
+    
     /**
      * 设置 BPM（30–250），下一采样生效。
      */override fun `setBpm`(`bpm`: kotlin.Double)
-        =
+        = 
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_metronome_set_bpm(
         it, FfiConverterDouble.lower(`bpm`),_status)
 }
     }
+    
+    
 
-
-
-
+    
     /**
      * 注入重拍/弱拍音色（由原生层提供；传空则恢复内置合成音色）。
      */override fun `setClickSamples`(`accent`: List<kotlin.Float>, `normal`: List<kotlin.Float>)
-        =
+        = 
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_metronome_set_click_samples(
         it, FfiConverterSequenceFloat.lower(`accent`),FfiConverterSequenceFloat.lower(`normal`),_status)
 }
     }
+    
+    
 
-
-
-
+    
     /**
      * 设置拍号。
      */override fun `setTimeSignature`(`beats`: kotlin.UByte, `unit`: kotlin.UByte)
-        =
+        = 
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_metronome_set_time_signature(
         it, FfiConverterUByte.lower(`beats`),FfiConverterUByte.lower(`unit`),_status)
 }
     }
+    
+    
 
-
-
-
+    
     /**
      * 从 `at_sample` 开始运行。
      */override fun `start`(`atSample`: kotlin.ULong)
-        =
+        = 
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_metronome_start(
         it, FfiConverterULong.lower(`atSample`),_status)
 }
     }
+    
+    
 
-
-
-
+    
     /**
      * 停止。
      */override fun `stop`()
-        =
+        = 
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_metronome_stop(
         it, _status)
 }
     }
+    
+    
 
-
-
-
+    
     /**
      * tap tempo：输入 tap 的采样时间戳，返回当前 BPM。
      */override fun `tap`(`timestampSamples`: kotlin.ULong): kotlin.Double {
@@ -1877,14 +1868,14 @@ open class Metronome: Disposable, AutoCloseable, MetronomeInterface
     }
     )
     }
+    
 
+    
 
-
-
-
-
+    
+    
     companion object
-
+    
 }
 
 /**
@@ -2018,42 +2009,42 @@ public object FfiConverterTypeMetronome: FfiConverter<Metronome, Pointer> {
  * 调音器引擎（UniFFI 对象）。
  */
 public interface TunarEngineInterface {
-
+    
     /**
      * 完整分析帧：feed 事件 + 频谱 + 泛音 + 和弦（v4 新增，UniFFI 边界允许分配）。
      */
     fun `analyze`(`pcm`: List<kotlin.Float>): AnalysisFrame
-
+    
     /**
      * 输入一帧单声道 PCM（f32 [-1,1]，长度 ≥ 2048），返回音高事件；无效输入返回 None。
      */
     fun `feed`(`pcm`: List<kotlin.Float>): TunarEvent?
-
+    
     /**
      * 列出当前 A4 与平均律在 80–1500Hz 内的全部固定音高。
      */
     fun `listReferenceTones`(): List<ReferenceTone>
-
+    
     /**
      * 设置 A4 校准（收敛到 415–466Hz）。
      */
     fun `setA4`(`hz`: kotlin.Double)
-
+    
     /**
      * 设置噪声门限（dBFS）。
      */
     fun `setNoiseGate`(`dbfs`: kotlin.Float)
-
+    
     /**
      * 设置唱名体系与调式。
      */
     fun `setSolfege`(`system`: SolfegeSystem, `key`: KeyMode)
-
+    
     /**
      * 设置律制（N ∈ {12,19,24,31}；非法值忽略）。
      */
     fun `setTemperament`(`divisions`: kotlin.UByte)
-
+    
     companion object
 }
 
@@ -2152,7 +2143,7 @@ open class TunarEngine: Disposable, AutoCloseable, TunarEngineInterface
         }
     }
 
-
+    
     /**
      * 完整分析帧：feed 事件 + 频谱 + 泛音 + 和弦（v4 新增，UniFFI 边界允许分配）。
      */override fun `analyze`(`pcm`: List<kotlin.Float>): AnalysisFrame {
@@ -2165,9 +2156,9 @@ open class TunarEngine: Disposable, AutoCloseable, TunarEngineInterface
     }
     )
     }
+    
 
-
-
+    
     /**
      * 输入一帧单声道 PCM（f32 [-1,1]，长度 ≥ 2048），返回音高事件；无效输入返回 None。
      */override fun `feed`(`pcm`: List<kotlin.Float>): TunarEvent? {
@@ -2180,9 +2171,9 @@ open class TunarEngine: Disposable, AutoCloseable, TunarEngineInterface
     }
     )
     }
+    
 
-
-
+    
     /**
      * 列出当前 A4 与平均律在 80–1500Hz 内的全部固定音高。
      */override fun `listReferenceTones`(): List<ReferenceTone> {
@@ -2195,70 +2186,70 @@ open class TunarEngine: Disposable, AutoCloseable, TunarEngineInterface
     }
     )
     }
+    
 
-
-
+    
     /**
      * 设置 A4 校准（收敛到 415–466Hz）。
      */override fun `setA4`(`hz`: kotlin.Double)
-        =
+        = 
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_set_a4(
         it, FfiConverterDouble.lower(`hz`),_status)
 }
     }
+    
+    
 
-
-
-
+    
     /**
      * 设置噪声门限（dBFS）。
      */override fun `setNoiseGate`(`dbfs`: kotlin.Float)
-        =
+        = 
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_set_noise_gate(
         it, FfiConverterFloat.lower(`dbfs`),_status)
 }
     }
+    
+    
 
-
-
-
+    
     /**
      * 设置唱名体系与调式。
      */override fun `setSolfege`(`system`: SolfegeSystem, `key`: KeyMode)
-        =
+        = 
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_set_solfege(
         it, FfiConverterTypeSolfegeSystem.lower(`system`),FfiConverterTypeKeyMode.lower(`key`),_status)
 }
     }
+    
+    
 
-
-
-
+    
     /**
      * 设置律制（N ∈ {12,19,24,31}；非法值忽略）。
      */override fun `setTemperament`(`divisions`: kotlin.UByte)
-        =
+        = 
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_set_temperament(
         it, FfiConverterUByte.lower(`divisions`),_status)
 }
     }
+    
+    
 
+    
 
-
-
-
-
-
+    
+    
     companion object
-
+    
 }
 
 /**
@@ -2298,61 +2289,61 @@ data class AnalysisFrame (
     /**
      * 同 feed 语义（无效输入为 None）。
      */
-    var `tuner`: TunarEvent?,
+    var `tuner`: TunarEvent?, 
     /**
      * 64 bin 对数轴 60–2400Hz 幅值（dBFS -80~0）。
      */
-    var `spectrumDb`: List<kotlin.Float>,
+    var `spectrumDb`: List<kotlin.Float>, 
     /**
      * 128 bin 对数轴 20Hz–wide_spectrum_max_hz 幅值（dBFS -80~0）。
      */
-    var `wideSpectrumDb`: List<kotlin.Float>,
+    var `wideSpectrumDb`: List<kotlin.Float>, 
     /**
      * 全频段实际频率上限（min(20kHz, sample_rate/2)）。
      */
-    var `wideSpectrumMaxHz`: kotlin.Double,
+    var `wideSpectrumMaxHz`: kotlin.Double, 
     /**
      * 当前分析窗口 256 列最小值包络。
      */
-    var `waveformMin`: List<kotlin.Float>,
+    var `waveformMin`: List<kotlin.Float>, 
     /**
      * 当前分析窗口 256 列最大值包络。
      */
-    var `waveformMax`: List<kotlin.Float>,
+    var `waveformMax`: List<kotlin.Float>, 
     /**
      * 当前帧末端相对引擎启动时的采样位置。
      */
-    var `samplePosition`: kotlin.ULong,
+    var `samplePosition`: kotlin.ULong, 
     /**
      * 实际分析采样率。
      */
-    var `sampleRateHz`: kotlin.Double,
+    var `sampleRateHz`: kotlin.Double, 
     /**
      * 泛音列（≤8，按幅值降序）。
      */
-    var `partials`: List<Partial>,
+    var `partials`: List<Partial>, 
     /**
      * 和弦名（如 "Cmaj"），无则为 None。
      */
-    var `chord`: kotlin.String?,
+    var `chord`: kotlin.String?, 
     /**
      * 输入信号状态。
      */
-    var `signalState`: SignalState,
+    var `signalState`: SignalState, 
     /**
      * 当前分析窗口的 RMS 电平（dBFS）。
      */
-    var `inputLevelDbfs`: kotlin.Float,
+    var `inputLevelDbfs`: kotlin.Float, 
     /**
      * 读数显示强度（0~1）。
      */
-    var `displayStrength`: kotlin.Float,
+    var `displayStrength`: kotlin.Float, 
     /**
      * 当前读数是否来自断音保持。
      */
     var `isHeld`: kotlin.Boolean
 ) {
-
+    
     companion object
 }
 
@@ -2417,133 +2408,23 @@ public object FfiConverterTypeAnalysisFrame: FfiConverterRustBuffer<AnalysisFram
 
 
 /**
- * 一张指法表（调性 + 筒音唱名）。
- */
-data class FingeringChart (
-    /**
-     * chart id（如 "d_qudi_sou5"）。
-     */
-    var `id`: kotlin.String,
-    /**
-     * 显示名（如 "D调曲笛 · 筒音作5"）。
-     */
-    var `displayName`: kotlin.String,
-    /**
-     * 音阶（升序，约两个八度）。
-     */
-    var `notes`: List<FingeringNote>
-) {
-
-    companion object
-}
-
-/**
- * @suppress
- */
-public object FfiConverterTypeFingeringChart: FfiConverterRustBuffer<FingeringChart> {
-    override fun read(buf: ByteBuffer): FingeringChart {
-        return FingeringChart(
-            FfiConverterString.read(buf),
-            FfiConverterString.read(buf),
-            FfiConverterSequenceTypeFingeringNote.read(buf),
-        )
-    }
-
-    override fun allocationSize(value: FingeringChart) = (
-            FfiConverterString.allocationSize(value.`id`) +
-            FfiConverterString.allocationSize(value.`displayName`) +
-            FfiConverterSequenceTypeFingeringNote.allocationSize(value.`notes`)
-    )
-
-    override fun write(value: FingeringChart, buf: ByteBuffer) {
-            FfiConverterString.write(value.`id`, buf)
-            FfiConverterString.write(value.`displayName`, buf)
-            FfiConverterSequenceTypeFingeringNote.write(value.`notes`, buf)
-    }
-}
-
-
-
-/**
- * 指法表中的一个音。
- */
-data class FingeringNote (
-    /**
-     * 指法/孔位名（如 "筒音"、"开第一二四孔"）。
-     */
-    var `label`: kotlin.String,
-    /**
-     * 音名。
-     */
-    var `noteName`: kotlin.String,
-    /**
-     * MIDI 音高（随 A4 换算/唱名重算的基准）。
-     */
-    var `midi`: kotlin.Int,
-    /**
-     * 目标频率（Hz，按 A4=440 换算）。
-     */
-    var `freqHz`: kotlin.Double,
-    /**
-     * 唱名（按该调性的首调简谱）。
-     */
-    var `solfege`: kotlin.String
-) {
-
-    companion object
-}
-
-/**
- * @suppress
- */
-public object FfiConverterTypeFingeringNote: FfiConverterRustBuffer<FingeringNote> {
-    override fun read(buf: ByteBuffer): FingeringNote {
-        return FingeringNote(
-            FfiConverterString.read(buf),
-            FfiConverterString.read(buf),
-            FfiConverterInt.read(buf),
-            FfiConverterDouble.read(buf),
-            FfiConverterString.read(buf),
-        )
-    }
-
-    override fun allocationSize(value: FingeringNote) = (
-            FfiConverterString.allocationSize(value.`label`) +
-            FfiConverterString.allocationSize(value.`noteName`) +
-            FfiConverterInt.allocationSize(value.`midi`) +
-            FfiConverterDouble.allocationSize(value.`freqHz`) +
-            FfiConverterString.allocationSize(value.`solfege`)
-    )
-
-    override fun write(value: FingeringNote, buf: ByteBuffer) {
-            FfiConverterString.write(value.`label`, buf)
-            FfiConverterString.write(value.`noteName`, buf)
-            FfiConverterInt.write(value.`midi`, buf)
-            FfiConverterDouble.write(value.`freqHz`, buf)
-            FfiConverterString.write(value.`solfege`, buf)
-    }
-}
-
-
-
-/**
  * 乐器元数据。
  */
 data class Instrument (
     /**
      * 乐器 id："guitar" | "ukulele" | "zhudi" | "dongxiao" | "shakuhachi" | "guqin"。
      */
-    var `id`: kotlin.String,
+    var `id`: kotlin.String, 
     /**
      * 中文显示名。
      */
-    var `displayName`: kotlin.String,
+    var `displayName`: kotlin.String, 
     /**
      * 类别。
      */
     var `kind`: InstrumentKind
 ) {
-
+    
     companion object
 }
 
@@ -2581,13 +2462,13 @@ data class KeyMode (
     /**
      * 主音 pitch class（0-11，C=0）。
      */
-    var `tonicPc`: kotlin.UByte,
+    var `tonicPc`: kotlin.UByte, 
     /**
      * 调式类别。
      */
     var `mode`: ModeKind
 ) {
-
+    
     companion object
 }
 
@@ -2622,25 +2503,25 @@ data class MetronomeConfig (
     /**
      * 采样率（Hz）。
      */
-    var `sampleRate`: kotlin.Double,
+    var `sampleRate`: kotlin.Double, 
     /**
      * BPM（30–250，浮点）。
      */
-    var `bpm`: kotlin.Double,
+    var `bpm`: kotlin.Double, 
     /**
      * 每小节拍数（1–12）。
      */
-    var `beatsPerBar`: kotlin.UByte,
+    var `beatsPerBar`: kotlin.UByte, 
     /**
      * 拍单位（2|4|8）。
      */
-    var `beatUnit`: kotlin.UByte,
+    var `beatUnit`: kotlin.UByte, 
     /**
      * 每拍重音型（长度 = beats_per_bar）。
      */
     var `accents`: List<TickAccent>
 ) {
-
+    
     companion object
 }
 
@@ -2684,25 +2565,25 @@ data class Partial (
     /**
      * 频率（Hz）。
      */
-    var `freqHz`: kotlin.Double,
+    var `freqHz`: kotlin.Double, 
     /**
      * 幅值（dBFS）。
      */
-    var `magnitudeDb`: kotlin.Float,
+    var `magnitudeDb`: kotlin.Float, 
     /**
      * 泛音序号：0=独立音；1=基频；2,3,4…=基频泛音。
      */
-    var `harmonicIndex`: kotlin.UByte,
+    var `harmonicIndex`: kotlin.UByte, 
     /**
      * 独立音时的 12-TET 音名。
      */
-    var `noteName`: kotlin.String,
+    var `noteName`: kotlin.String, 
     /**
      * 独立音时相对最近 12-TET 音的 cents。
      */
     var `centsOff`: kotlin.Double
 ) {
-
+    
     companion object
 }
 
@@ -2746,25 +2627,25 @@ data class ReferenceTone (
     /**
      * 相对 A4 的平均律步数。
      */
-    var `stepFromA4`: kotlin.Int,
+    var `stepFromA4`: kotlin.Int, 
     /**
      * 固定频率（Hz）。
      */
-    var `frequencyHz`: kotlin.Double,
+    var `frequencyHz`: kotlin.Double, 
     /**
      * 平均律等分数。
      */
-    var `temperament`: kotlin.UByte,
+    var `temperament`: kotlin.UByte, 
     /**
      * 最近的 12 平均律音名。
      */
-    var `noteName`: kotlin.String,
+    var `noteName`: kotlin.String, 
     /**
      * 相对该音名的音分差。
      */
     var `centsFromNote`: kotlin.Double
 ) {
-
+    
     companion object
 }
 
@@ -2808,13 +2689,13 @@ data class RenderFrame (
     /**
      * PCM（含混入的 tick 音色）。
      */
-    var `samples`: List<kotlin.Float>,
+    var `samples`: List<kotlin.Float>, 
     /**
      * 本区间内的 tick 事件。
      */
     var `ticks`: List<TickInfo>
 ) {
-
+    
     companion object
 }
 
@@ -2849,25 +2730,25 @@ data class StringSpec (
     /**
      * 弦号（从 1 开始，含义见 spec-instruments）。
      */
-    var `index`: kotlin.UInt,
+    var `index`: kotlin.UInt, 
     /**
      * 音名（如 "E2"）。
      */
-    var `noteName`: kotlin.String,
+    var `noteName`: kotlin.String, 
     /**
      * MIDI 音高（随 A4 换算/唱名重算的基准）。
      */
-    var `midi`: kotlin.Int,
+    var `midi`: kotlin.Int, 
     /**
      * 目标频率（Hz，按当前 A4 校准换算；全局接口按 A4=440）。
      */
-    var `freqHz`: kotlin.Double,
+    var `freqHz`: kotlin.Double, 
     /**
      * 唱名（按乐器习惯调的首调简谱）。
      */
     var `solfege`: kotlin.String
 ) {
-
+    
     companion object
 }
 
@@ -2911,17 +2792,17 @@ data class TickInfo (
     /**
      * 相对本次 render 缓冲起点的采样偏移。
      */
-    var `sampleOffset`: kotlin.ULong,
+    var `sampleOffset`: kotlin.ULong, 
     /**
      * 小节内第几拍（0 起）。
      */
-    var `beatIndex`: kotlin.UInt,
+    var `beatIndex`: kotlin.UInt, 
     /**
      * 重音型。
      */
     var `accent`: TickAccent
 ) {
-
+    
     companion object
 }
 
@@ -2959,17 +2840,17 @@ data class TongyinOption (
     /**
      * 半音级 0–11（筒音 = 宫音 + degree 半音）。7=作5、0=作1、2=作2。
      */
-    var `degree`: kotlin.UByte,
+    var `degree`: kotlin.UByte, 
     /**
      * 该级的首调简谱唱名（"5"、"#4" 等）。
      */
-    var `solfege`: kotlin.String,
+    var `solfege`: kotlin.String, 
     /**
      * 是否为该孔制的常用指法。
      */
     var `common`: kotlin.Boolean
 ) {
-
+    
     companion object
 }
 
@@ -3007,33 +2888,33 @@ data class TunarConfig (
     /**
      * 采样率（Hz）。
      */
-    var `sampleRate`: kotlin.Double,
+    var `sampleRate`: kotlin.Double, 
     /**
      * 相邻分析帧之间推进的采样数（默认 1024）。
      */
-    var `frameHopSamples`: kotlin.UInt,
+    var `frameHopSamples`: kotlin.UInt, 
     /**
      * A4 校准（415–466Hz）。
      */
-    var `a4Hz`: kotlin.Double,
+    var `a4Hz`: kotlin.Double, 
     /**
      * 噪声门限（dBFS，默认 -45）。
      */
-    var `noiseGateDbfs`: kotlin.Float,
+    var `noiseGateDbfs`: kotlin.Float, 
     /**
      * 唱名体系。
      */
-    var `solfege`: SolfegeSystem,
+    var `solfege`: SolfegeSystem, 
     /**
      * 调式。
      */
-    var `key`: KeyMode,
+    var `key`: KeyMode, 
     /**
      * N 平均律（12/19/24/31，默认 12；v4 新增）。
      */
     var `temperament`: kotlin.UByte
 ) {
-
+    
     companion object
 }
 
@@ -3083,41 +2964,41 @@ data class TunarEvent (
     /**
      * 平滑后频率（Hz）。
      */
-    var `freqHz`: kotlin.Double,
+    var `freqHz`: kotlin.Double, 
     /**
      * 音名（如 "A4"）。
      */
-    var `noteName`: kotlin.String,
+    var `noteName`: kotlin.String, 
     /**
      * 最近 MIDI 音。
      */
-    var `midi`: kotlin.Int,
+    var `midi`: kotlin.Int, 
     /**
      * 音分偏差 [-50, +50)。
      */
-    var `centsOff`: kotlin.Double,
+    var `centsOff`: kotlin.Double, 
     /**
      * 检测置信度（0-1）。
      */
-    var `clarity`: kotlin.Float,
+    var `clarity`: kotlin.Float, 
     /**
      * 唱名（按 config 唱名体系）。
      */
-    var `solfege`: kotlin.String,
+    var `solfege`: kotlin.String, 
     /**
      * 当前律制 N（v4 新增）。
      */
-    var `temperament`: kotlin.UByte,
+    var `temperament`: kotlin.UByte, 
     /**
      * 最近步序 k（A4 为参考）。
      */
-    var `temperamentStep`: kotlin.Int,
+    var `temperamentStep`: kotlin.Int, 
     /**
      * 律制音分偏差 [-600/N, +600/N)。
      */
     var `temperamentCents`: kotlin.Double
 ) {
-
+    
     companion object
 }
 
@@ -3173,17 +3054,17 @@ data class Tuning (
     /**
      * 定弦 id（如 "standard"、"drop_d"）。
      */
-    var `id`: kotlin.String,
+    var `id`: kotlin.String, 
     /**
      * 中文显示名。
      */
-    var `displayName`: kotlin.String,
+    var `displayName`: kotlin.String, 
     /**
      * 各弦（按弦号 1..=N 顺序）。
      */
     var `strings`: List<StringSpec>
 ) {
-
+    
     companion object
 }
 
@@ -3221,45 +3102,45 @@ data class WindChart (
     /**
      * 型号 id。
      */
-    var `variantId`: kotlin.String,
+    var `variantId`: kotlin.String, 
     /**
      * 型号显示名（如 "G调洞箫 · 8孔"）。
      */
-    var `variantName`: kotlin.String,
+    var `variantName`: kotlin.String, 
     /**
      * 当前筒音级 0–11。
      */
-    var `tongyinDegree`: kotlin.UByte,
+    var `tongyinDegree`: kotlin.UByte, 
     /**
      * 当前筒音唱名（"5" 等）。
      */
-    var `tongyinSolfege`: kotlin.String,
+    var `tongyinSolfege`: kotlin.String, 
     /**
      * 宫音 pitch class。
      */
-    var `tonicPc`: kotlin.UByte,
+    var `tonicPc`: kotlin.UByte, 
     /**
      * 宫音音名（不含八度，如 "G"）。
      */
-    var `tonicName`: kotlin.String,
+    var `tonicName`: kotlin.String, 
     /**
      * 面板标题（如 "筒音作5 · G宫"）。
      */
-    var `keyDisplay`: kotlin.String,
+    var `keyDisplay`: kotlin.String, 
     /**
      * 孔数（固定音阶类为 0）。
      */
-    var `holeCount`: kotlin.UByte,
+    var `holeCount`: kotlin.UByte, 
     /**
      * 背孔数。
      */
-    var `backHoleCount`: kotlin.UByte,
+    var `backHoleCount`: kotlin.UByte, 
     /**
      * 音阶（升序；筒音在首位，UI 可按需倒序显示）。
      */
     var `notes`: List<WindFingering>
 ) {
-
+    
     companion object
 }
 
@@ -3318,61 +3199,61 @@ data class WindFingering (
     /**
      * 同一张表内唯一的稳定 id。
      */
-    var `fingeringId`: kotlin.Int,
+    var `fingeringId`: kotlin.Int, 
     /**
      * 当前音高相对筒音低音的半音数；不同指法可能产生同一音高。
      */
-    var `semitones`: kotlin.Int,
+    var `semitones`: kotlin.Int, 
     /**
      * 决定孔位组合的基础半音（洞箫为 0–11）。
      */
-    var `baseSemitones`: kotlin.Int,
+    var `baseSemitones`: kotlin.Int, 
     /**
      * 低音、中音或高音。
      */
-    var `register`: WindRegister,
+    var `register`: WindRegister, 
     /**
      * 指法名（如 "开第一二三孔"、"闭第二五六七孔·超吹"）。
      */
-    var `label`: kotlin.String,
+    var `label`: kotlin.String, 
     /**
      * 孔位组合，索引 0 = 第一孔（最下），末位 = 最上/背孔；固定音阶类为空。
      */
-    var `holes`: List<HoleMark>,
+    var `holes`: List<HoleMark>, 
     /**
      * 指法展示分组：顺指或叉指/半孔。
      */
-    var `fingeringKind`: FingeringKind,
+    var `fingeringKind`: FingeringKind, 
     /**
      * 最上方开孔的孔序索引（0 = 第一孔）；全闭/无孔位为 `None`。
      */
-    var `anchorHole`: kotlin.UByte?,
+    var `anchorHole`: kotlin.UByte?, 
     /**
      * 音名。
      */
-    var `noteName`: kotlin.String,
+    var `noteName`: kotlin.String, 
     /**
      * MIDI 音高。
      */
-    var `midi`: kotlin.Int,
+    var `midi`: kotlin.Int, 
     /**
      * 目标频率（Hz，按 A4=440 换算）。
      */
-    var `freqHz`: kotlin.Double,
+    var `freqHz`: kotlin.Double, 
     /**
      * 唱名（按当前筒音级推出的宫音，首调简谱）。
      */
-    var `solfege`: kotlin.String,
+    var `solfege`: kotlin.String, 
     /**
      * 是否为当前调宫调式七声的正声（否则为偏音）。
      */
-    var `inScale`: kotlin.Boolean,
+    var `inScale`: kotlin.Boolean, 
     /**
      * 是否不是低音区。
      */
     var `overblown`: kotlin.Boolean
 ) {
-
+    
     companion object
 }
 
@@ -3443,57 +3324,57 @@ data class WindVariant (
     /**
      * 型号 id（如 "g_xiao_x8"、"shaku_1_8"）。
      */
-    var `id`: kotlin.String,
+    var `id`: kotlin.String, 
     /**
      * 完整显示名（如 "G调洞箫 · 8孔"）。
      */
-    var `displayName`: kotlin.String,
+    var `displayName`: kotlin.String, 
     /**
      * 调性/尺寸 id（同调性的不同孔制共享，如 "g_xiao"）。
      */
-    var `keyId`: kotlin.String,
+    var `keyId`: kotlin.String, 
     /**
      * 调性/尺寸显示名（如 "G调洞箫"）。
      */
-    var `keyName`: kotlin.String,
+    var `keyName`: kotlin.String, 
     /**
      * 孔制显示名（如 "8孔"；固定音阶类为空串）。
      */
-    var `holeSystemName`: kotlin.String,
+    var `holeSystemName`: kotlin.String, 
     /**
      * 孔数（固定音阶类为 0）。
      */
-    var `holeCount`: kotlin.UByte,
+    var `holeCount`: kotlin.UByte, 
     /**
      * 末尾若干孔位于背面（拇指孔）。
      */
-    var `backHoleCount`: kotlin.UByte,
+    var `backHoleCount`: kotlin.UByte, 
     /**
      * 筒音 MIDI。
      */
-    var `fundamentalMidi`: kotlin.Int,
+    var `fundamentalMidi`: kotlin.Int, 
     /**
      * 筒音音名。
      */
-    var `fundamentalNoteName`: kotlin.String,
+    var `fundamentalNoteName`: kotlin.String, 
     /**
      * 是否支持筒音唱名转调（孔制类支持 12 级）。
      */
-    var `supportsTongyin`: kotlin.Boolean,
+    var `supportsTongyin`: kotlin.Boolean, 
     /**
      * 是否支持十二音全表展开。
      */
-    var `supportsChromatic`: kotlin.Boolean,
+    var `supportsChromatic`: kotlin.Boolean, 
     /**
      * 12 档筒音唱名（升序 degree 0–11；固定音阶类为空）。
      */
-    var `tongyinOptions`: List<TongyinOption>,
+    var `tongyinOptions`: List<TongyinOption>, 
     /**
      * 默认筒音级（孔制类为作 5）。
      */
     var `defaultTongyinDegree`: kotlin.UByte
 ) {
-
+    
     companion object
 }
 
@@ -3559,7 +3440,7 @@ public object FfiConverterTypeWindVariant: FfiConverterRustBuffer<WindVariant> {
  */
 
 enum class FingeringKind {
-
+    
     /**
      * 顺指：从下往上连续开孔（含全闭筒音与全开）。
      */
@@ -3598,7 +3479,7 @@ public object FfiConverterTypeFingeringKind: FfiConverterRustBuffer<FingeringKin
  */
 
 enum class FingeringScope {
-
+    
     /**
      * 七声基础孔位；洞箫每个孔位按低音/中音/高音各自的实测孔位展开，缺资料的格不返回。
      */
@@ -3637,7 +3518,7 @@ public object FfiConverterTypeFingeringScope: FfiConverterRustBuffer<FingeringSc
  */
 
 enum class HoleMark {
-
+    
     /**
      * 闭孔（按住）。
      */
@@ -3680,7 +3561,7 @@ public object FfiConverterTypeHoleMark: FfiConverterRustBuffer<HoleMark> {
  */
 
 enum class InstrumentKind {
-
+    
     /**
      * 弦乐器。
      */
@@ -3719,7 +3600,7 @@ public object FfiConverterTypeInstrumentKind: FfiConverterRustBuffer<InstrumentK
  */
 
 enum class ModeKind {
-
+    
     /**
      * 宫调式。
      */
@@ -3778,7 +3659,7 @@ public object FfiConverterTypeModeKind: FfiConverterRustBuffer<ModeKind> {
  */
 
 enum class SignalState {
-
+    
     /**
      * 无可信信号。
      */
@@ -3825,7 +3706,7 @@ public object FfiConverterTypeSignalState: FfiConverterRustBuffer<SignalState> {
  */
 
 enum class SolfegeSystem {
-
+    
     /**
      * 固定 Do（C=do）。
      */
@@ -3872,7 +3753,7 @@ public object FfiConverterTypeSolfegeSystem: FfiConverterRustBuffer<SolfegeSyste
  */
 
 enum class TickAccent {
-
+    
     /**
      * 重拍。
      */
@@ -3915,7 +3796,7 @@ public object FfiConverterTypeTickAccent: FfiConverterRustBuffer<TickAccent> {
  */
 
 enum class WindRegister {
-
+    
     /**
      * 缓吹（低音）。
      */
@@ -4135,62 +4016,6 @@ public object FfiConverterSequenceFloat: FfiConverterRustBuffer<List<kotlin.Floa
         buf.putInt(value.size)
         value.iterator().forEach {
             FfiConverterFloat.write(it, buf)
-        }
-    }
-}
-
-
-
-
-/**
- * @suppress
- */
-public object FfiConverterSequenceTypeFingeringChart: FfiConverterRustBuffer<List<FingeringChart>> {
-    override fun read(buf: ByteBuffer): List<FingeringChart> {
-        val len = buf.getInt()
-        return List<FingeringChart>(len) {
-            FfiConverterTypeFingeringChart.read(buf)
-        }
-    }
-
-    override fun allocationSize(value: List<FingeringChart>): ULong {
-        val sizeForLength = 4UL
-        val sizeForItems = value.map { FfiConverterTypeFingeringChart.allocationSize(it) }.sum()
-        return sizeForLength + sizeForItems
-    }
-
-    override fun write(value: List<FingeringChart>, buf: ByteBuffer) {
-        buf.putInt(value.size)
-        value.iterator().forEach {
-            FfiConverterTypeFingeringChart.write(it, buf)
-        }
-    }
-}
-
-
-
-
-/**
- * @suppress
- */
-public object FfiConverterSequenceTypeFingeringNote: FfiConverterRustBuffer<List<FingeringNote>> {
-    override fun read(buf: ByteBuffer): List<FingeringNote> {
-        val len = buf.getInt()
-        return List<FingeringNote>(len) {
-            FfiConverterTypeFingeringNote.read(buf)
-        }
-    }
-
-    override fun allocationSize(value: List<FingeringNote>): ULong {
-        val sizeForLength = 4UL
-        val sizeForItems = value.map { FfiConverterTypeFingeringNote.allocationSize(it) }.sum()
-        return sizeForLength + sizeForItems
-    }
-
-    override fun write(value: List<FingeringNote>, buf: ByteBuffer) {
-        buf.putInt(value.size)
-        value.iterator().forEach {
-            FfiConverterTypeFingeringNote.write(it, buf)
         }
     }
 }
@@ -4512,22 +4337,7 @@ public object FfiConverterSequenceTypeTickAccent: FfiConverterRustBuffer<List<Ti
 }
     )
     }
-
-
-        /**
-         * 列出某管乐器的全部指法表（频率按 A4=440，唱名按各调性首调简谱）。
-         *
-         * 旧版三档筒音视图（作 5 / 作 1 / 作 2），数据由 [`wind_fingering_chart`] 派生，
-         * 孔制取该调性的默认孔制。保留给 Android / macOS 面板，新面板请用 [`wind_fingering_chart`]。
-         */ fun `listFingeringCharts`(`instrumentId`: kotlin.String): List<FingeringChart> {
-            return FfiConverterSequenceTypeFingeringChart.lift(
-    uniffiRustCall() { _status ->
-    UniffiLib.INSTANCE.uniffi_tunar_core_fn_func_list_fingering_charts(
-        FfiConverterString.lower(`instrumentId`),_status)
-}
-    )
-    }
-
+    
 
         /**
          * 列出全部乐器。
@@ -4539,7 +4349,7 @@ public object FfiConverterSequenceTypeTickAccent: FfiConverterRustBuffer<List<Ti
 }
     )
     }
-
+    
 
         /**
          * 列出某弦乐器的全部定弦（频率按 A4=440，唱名按乐器习惯调简谱）。
@@ -4551,7 +4361,7 @@ public object FfiConverterSequenceTypeTickAccent: FfiConverterRustBuffer<List<Ti
 }
     )
     }
-
+    
 
         /**
          * 列出某管乐器的全部型号（调性/尺寸 × 孔制）。
@@ -4565,7 +4375,7 @@ public object FfiConverterSequenceTypeTickAccent: FfiConverterRustBuffer<List<Ti
 }
     )
     }
-
+    
 
         /**
          * 任意 MIDI 音的唱名（按唱名体系与调式；乐器面板弦/孔唱名随用户配置重算用）。
@@ -4577,7 +4387,7 @@ public object FfiConverterSequenceTypeTickAccent: FfiConverterRustBuffer<List<Ti
 }
     )
     }
-
+    
 
         /**
          * 某型号在指定筒音唱名级与范围下的孔位指法表。
@@ -4592,6 +4402,6 @@ public object FfiConverterSequenceTypeTickAccent: FfiConverterRustBuffer<List<Ti
 }
     )
     }
-
+    
 
 

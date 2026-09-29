@@ -104,21 +104,48 @@ classes are detected, otherwise an em dash. Quiet state dims the row.
 
 ### 4.5 Instrument controls
 
-Instrument cards show icon and name. Tuning, key, and tube-note selectors are exactly
-48 dp/pt high, 16 dp/pt radius, 16 dp/pt horizontal padding, one line with ellipsis,
-and an 8 dp icon/text gap. Narrow layouts wrap the group, never text inside a control.
-String pills show number, note, and solfège; wind charts highlight the current row.
+The instrument switcher is six equal-width tiles with no scrolling: 56 dp/pt high,
+14 radius, a 24 line-art glyph above an 11 name. The current tile has a 12% `accent` fill,
+a 1.5 accent outline, and accent glyph and text; other tiles use `bg/surface` with
+`line/subtle`.
 
-Dongxiao adopts the new component first: G/F keys, eight holes by default, and a
-six-hole switch. Its diatonic main chart keeps seven base-fingering rows; chromatic
-detail independently keeps 12. Both use Low/Middle/High range columns, each carrying the
-pattern measured for that range; cells the charts do not cover are visually blank
-and non-tappable.
-Zhudi and shakuhachi keep their existing wind lists and do not inherit the following components.
+Tuning, key, and model dropdowns and segmented controls are 48 dp/pt high, capsule
+shaped, with 14–16 dp/pt horizontal padding, one line with ellipsis, and a 6–8 dp
+icon/text gap. Narrow layouts wrap the group; text never wraps inside a control and no
+control is squeezed. The selected segment is solid `accent` with `bg/canvas` text. The
+auto-string toggle is a capsule of the same size: solid `accent` with a waveform icon
+when on, `bg/surface` with a finger icon when off. Every press scales to 0.96 for 120 ms.
 
-The view shows exactly one complete large vertical dongxiao on the left as its major
-visual. Three columns sit on the right: **Low (soft breath)**,
-**Middle (overblown)**, and **High (forceful breath)**.
+String buttons are 14-radius cards with a round string-number badge, a bold note, and
+small solfège. The current string has a 1.5 `accent` outline and 14% `accent` fill; an
+in-tune string switches to `tune/in` and its badge becomes a check.
+
+**Instrument line art** (guitar and ukulele headstocks, guqin, zhudi, dongxiao,
+shakuhachi) is single-color line drawing in the same stroke language as the switcher
+glyphs: outlines around 50% `ink/primary`, guides (frets, hui, dashed leaders) around 16%,
+no fills, no realism, no shadows. The current string is drawn in accent (`tune/in` when in
+tune), about 1.5–2 dp thicker, with a 20% halo of the same color; other strings stay thin.
+Back holes and the dizi membrane hole use the dedicated `tune/near` color.
+
+- Headstocks sit centered with the string buttons on both sides. A thin dashed leader
+  joins each button to its peg; buttons follow their pegs vertically and are spread evenly
+  when they would overlap. The guitar has 6-in-line and 3+3 outlines; the ukulele is 2+2.
+- The guqin lies horizontally below the seven string buttons and above the dial, scaled
+  to the width, with string numbers at the tail end.
+
+**Wind table**: shared by the zhudi, dongxiao, and shakuhachi. The dongxiao has G/F keys
+with eight holes by default and a six-hole switch; the zhudi has a single six-hole system;
+the shakuhachi has five holes. The diatonic main chart keeps seven base-fingering rows (the
+basic-scale rows for the shakuhachi) and chromatic detail independently keeps 12. All use
+three range columns (Low/Middle/High for the zhudi and dongxiao, otsu/kan/daikan for the
+shakuhachi), each carrying the pattern measured for that range; cells the charts do not
+cover are visually blank and non-tappable. The shakuhachi shows neither the solfège-drag
+hint nor the 12-tone entry.
+
+The view shows exactly one complete large vertical instrument drawing on the left as
+its major visual. For the dongxiao and zhudi three columns sit on the right:
+**Low (soft breath)**, **Middle (overblown)**, and **High (forceful breath)**; for the
+shakuhachi they are **otsu / kan / daikan**.
 Fingerings, notes, and frequencies for chart-uncovered cells must not be synthesized by
 copying Low holes or adding octave/fifth offsets.
 
@@ -269,7 +296,7 @@ o'clock (the in-tune, zero-cent datum) while three concentric echo arcs spread o
 | Aurora | Canvas radial gradient | `RadialGradient` + `TimelineView` |
 | Needle | fast spring | 50 ms ease-out |
 | General sheet | `ModalBottomSheet` | `.sheet` |
-| Dongxiao chromatic detail | full-screen dialog | iOS full-screen; macOS large `.sheet` |
+| Wind chromatic detail | full-screen dialog | iOS full-screen; macOS large `.sheet` |
 | Haptics | Compose feedback | UIKit/AppKit adapter |
 
 Android reference implementations live under `ui/theme`, `ui/common`, `ui/tuner`, and

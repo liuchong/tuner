@@ -1,70 +1,54 @@
 import SwiftUI
 
-/// 乐器面板（design-system §6.6）：卡片行乐器选择 + 弦选择器/指法列表 + 目标读数与表盘成组。
+/// 乐器面板（design-system §6.6）：乐器切换条 + 型号控件 + 乐器图示 + 目标读数与表盘成组。
 struct InstrumentView: View {
     @Environment(\.lumen) private var palette
     @StateObject private var vm = InstrumentViewModel()
 
     @State private var animatedCents: Float = 0
+    @State private var appliedLaunchOverride = false
 
     var body: some View {
         AuroraBackground(tuneCents: vm.centsToTarget) {
-            VStack(spacing: 0) {
-                // 乐器选择卡片行
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: Lumen.Spacing.sm) {
-                        ForEach(vm.instruments, id: \.id) { inst in
-                            let selected = inst.id == vm.instrumentId
-                            Button { vm.selectInstrument(inst.id) } label: {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "music.note")
-                                        .font(.system(size: 12))
-                                    Text(inst.displayName)
-                                        .font(Lumen.label)
-                                        .lineLimit(1)
-                                }
-                                .foregroundStyle(selected ? palette.accent : palette.inkPrimary)
-                                .padding(.horizontal, 14)
-                                .frame(height: 48)
-                                .background(
-                                    selected ? palette.accent.opacity(0.10) : palette.bgSurface,
-                                    in: RoundedRectangle(cornerRadius: 16)
-                                )
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .stroke(selected ? palette.accent : palette.lineSubtle, lineWidth: 1.5)
-                                )
-                            }
-                        }
-                    }
+            GeometryReader { geometry in
+                VStack(spacing: Lumen.Spacing.md) {
+                    InstrumentSwitcher(
+                        instruments: vm.instruments,
+                        selectedId: vm.instrumentId,
+                        onSelect: vm.selectInstrument
+                    )
+
+                    controlRow
+
+                    figureArea
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .layoutPriority(1)
+
+                    TargetReadout(
+                        targetName: readoutTarget,
+                        placeholder: vm.kind == .wind ? "按指法吹奏" : "自动识别",
+                        cents: vm.centsToTarget
+                    )
+
+                    HaloDial(
+                        cents: vm.centsToTarget != nil ? animatedCents : nil,
+                        clarity: 1
+                    )
+                    .frame(height: dialHeight(total: geometry.size.height))
+                    .opacity(vm.centsToTarget == nil ? 1 : 0.35 + Double(vm.displayStrength) * 0.65)
                 }
-
-                // 控制区（弦乐：定弦+模式；管乐：型号+筒音转轮+指法表）
-                // 管乐指法表是本页主体，优先于留白拿到剩余高度
-                controlSection
-                    .layoutPriority(1)
-
-                Spacer(minLength: 0)
-
-                // 目标读数行（与表盘组成视觉组；高度固定，有/无信号同构不跳动）
-                targetReadout
-
-                // 表盘区（圆心不放文字；读数在其上方，与本表盘成组）
-                HaloDial(
-                    cents: vm.centsToTarget != nil ? animatedCents : nil,
-                    clarity: 1
-                )
-                .frame(height: dialHeight)
-                .opacity(vm.centsToTarget == nil ? 1 : 0.35 + Double(vm.displayStrength) * 0.65)
-
-                Spacer(minLength: 0)
-
-                StatusChip(visible: vm.centsToTarget == nil)
-                    .animation(.easeInOut(duration: 0.2), value: vm.centsToTarget == nil)
+                .padding(.horizontal, Lumen.Spacing.xl - 4)
+                .padding(.top, Lumen.Spacing.sm)
+                .padding(.bottom, Lumen.Spacing.xs)
             }
-            .padding(Lumen.Spacing.page)
         }
-        .onAppear { vm.startCapture() }
+        .onAppear {
+            if !appliedLaunchOverride, let id = LaunchOverrides.initialInstrument {
+                appliedLaunchOverride = true
+                vm.selectInstrument(id)
+            }
+            vm.startCapture()
+        }
         .onDisappear { vm.releaseCapture() }
         .onChange(of: vm.centsToTarget) { _, newValue in
             withAnimation(.easeOut(duration: NeedlePresentation.followDuration)) {
@@ -73,58 +57,86 @@ struct InstrumentView: View {
         }
     }
 
-    /// 管乐面板内容更密，但进入十二音详情不会改变主页面表盘尺寸。
-    private var dialHeight: CGFloat {
-        guard vm.kind == .wind else { return 240 }
-        return 176
+    /// 表盘随屏高伸缩；管乐指法表更高，表盘让出一部分空间。
+    private func dialHeight(total: CGFloat) -> CGFloat {
+        let share: CGFloat = vm.kind == .wind ? 0.21 : 0.25
+        return min(max(total * share, 132), 220)
+    }
+
+    /// 有信号显示实时目标；无信号时手动锁定的弦仍给出目标，自动模式显示占位。
+    private var readoutTarget: String? {
+        if let name = vm.targetNoteName { return name }
+        guard vm.kind == .string, let index = vm.selectedStringIndex else { return nil }
+        return vm.strings[safe: index]?.noteName
     }
 
     @ViewBuilder
-    private var controlSection: some View {
+    private var controlRow: some View {
         if vm.kind == .string {
-            VStack(spacing: Lumen.Spacing.sm) {
-                ViewThatFits(in: .horizontal) {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: Lumen.Spacing.sm) {
+                    tuningMenu
+                    Spacer(minLength: 0)
+                    headstockPicker
+                    AutoModeToggle(mode: vm.mode, onSelect: vm.selectMode)
+                }
+                VStack(alignment: .leading, spacing: Lumen.Spacing.sm) {
                     HStack(spacing: Lumen.Spacing.sm) {
                         tuningMenu
-                        Spacer(minLength: Lumen.Spacing.sm)
-                        modePicker
+                        Spacer(minLength: 0)
+                        AutoModeToggle(mode: vm.mode, onSelect: vm.selectMode)
                     }
-                    VStack(alignment: .leading, spacing: Lumen.Spacing.sm) {
-                        tuningMenu
-                        modePicker
-                    }
+                    headstockPicker
                 }
-                // 弦按钮横排
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: Lumen.Spacing.sm) {
-                        ForEach(vm.strings) { s in
-                            StringButton(item: s) { vm.selectString(s.index - 1) }
-                        }
+            }
+        } else {
+            WindVariantControls(vm: vm)
+        }
+    }
+
+    @ViewBuilder
+    private var figureArea: some View {
+        if vm.kind == .string {
+            switch vm.stringFigure {
+            case .guqin:
+                GuqinPanel(vm: vm, ink: palette.figureInk)
+            case .headstock, .ukuleleHeadstock:
+                if let layout = HeadstockLayout.layout(for: vm.stringFigure) {
+                    HeadstockPanel(
+                        layout: layout,
+                        strings: vm.strings,
+                        selectedIndex: vm.selectedStringIndex,
+                        ink: palette.figureInk,
+                        buttonSize: CGSize(width: 78, height: 50),
+                        onSelect: vm.selectString
+                    ) { item in
+                        PegButton(
+                            item: item,
+                            selected: vm.selectedStringIndex == item.index - 1
+                        ) { vm.selectString(item.index - 1) }
                     }
+                    .animation(.easeInOut(duration: 0.2), value: vm.stringFigure)
                 }
+            case .none:
+                EmptyView()
             }
         } else {
             WindFingeringPanel(vm: vm)
         }
     }
 
-    private var modePicker: some View {
-        HStack(spacing: 0) {
-            ForEach([SelectionMode.auto, SelectionMode.manual], id: \.self) { m in
-                let selected = vm.mode == m
-                Button { vm.selectMode(m) } label: {
-                    Text(m == .auto ? "自动" : "手动")
-                        .font(Lumen.label)
-                        .lineLimit(1)
-                        .foregroundStyle(selected ? palette.bgCanvas : palette.inkPrimary)
-                        .padding(.horizontal, 14)
-                        .frame(height: 48)
-                        .background(selected ? palette.accent : palette.bgSurface)
-                }
-            }
+    @ViewBuilder
+    private var headstockPicker: some View {
+        if case .headstock(let style) = vm.stringFigure {
+            LumenSegmented(
+                options: HeadstockStyle.allCases,
+                selected: style,
+                title: \.displayName,
+                accessibilityTitle: \.accessibilityName,
+                onSelect: vm.selectHeadstockStyle
+            )
+            .accessibilityLabel("琴头样式")
         }
-        .clipShape(Capsule())
-        .overlay(Capsule().stroke(palette.lineSubtle, lineWidth: 1))
     }
 
     private var tuningMenu: some View {
@@ -135,35 +147,115 @@ struct InstrumentView: View {
         } label: {
             RoundedControlLabel(title: vm.tuningName)
         }
+        .accessibilityLabel("定弦，\(vm.tuningName)")
     }
+}
 
-    @ViewBuilder
-    private var targetReadout: some View {
-        let targetName = vm.targetNoteName
-            ?? (vm.kind == .string ? vm.strings[safe: vm.manualIndex]?.noteName : nil)
-        HStack {
-            if let targetName {
-                Text("目标 \(targetName.replacingOccurrences(of: "#", with: "♯"))")
-                    .font(Lumen.readoutSolfege)
-                    .fontWeight(.bold)
-                    .foregroundStyle(
-                        vm.centsToTarget.map { Lumen.tuneColor(of: $0, palette) }
-                            ?? palette.inkSecondary
+extension Lumen.Palette {
+    /// 乐器线稿配色：主描边弱于正文，琴弦与孔位用墨色，命中与调准沿用语义色。
+    var figureInk: FigureInk {
+        FigureInk(
+            line: inkSecondary.opacity(0.7),
+            lineFaint: inkFaint.opacity(0.55),
+            ink: inkPrimary,
+            inkFaint: inkSecondary.opacity(0.65),
+            surface: bgSurfaceEnd,
+            accent: accent,
+            tuneIn: tuneIn,
+            back: tuneNear
+        )
+    }
+}
+
+// MARK: - 乐器切换条
+
+/// 六种乐器等宽平铺，不需要横向滚动；每个乐器一枚线稿图标。
+struct InstrumentSwitcher: View {
+    @Environment(\.lumen) private var palette
+    let instruments: [Instrument]
+    let selectedId: String
+    let onSelect: (String) -> Void
+
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(instruments, id: \.id) { inst in
+                let selected = inst.id == selectedId
+                Button { onSelect(inst.id) } label: {
+                    VStack(spacing: 3) {
+                        InstrumentGlyph(
+                            instrumentId: inst.id,
+                            color: selected ? palette.accent : palette.inkSecondary
+                        )
+                        .frame(width: 24, height: 24)
+                        Text(inst.displayName)
+                            .font(.system(size: 11, weight: selected ? .semibold : .medium))
+                            .foregroundStyle(selected ? palette.accent : palette.inkPrimary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 56)
+                    .background(
+                        selected ? palette.accent.opacity(0.12) : palette.bgSurface,
+                        in: RoundedRectangle(cornerRadius: 14)
                     )
-                Text(vm.centsToTarget.map { String(format: "%+.1f cents", $0) } ?? "—")
-                    .font(Lumen.readoutValue)
-                    .foregroundStyle(
-                        vm.centsToTarget.map { Lumen.tuneColor(of: $0, palette) }
-                            ?? palette.inkSecondary
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(selected ? palette.accent : palette.lineSubtle, lineWidth: selected ? 1.5 : 1)
                     )
-            } else {
-                Text("目标 · —")
-                    .font(Lumen.readoutSolfege)
-                    .foregroundStyle(palette.inkFaint)
+                    .contentShape(RoundedRectangle(cornerRadius: 14))
+                }
+                .buttonStyle(PressScaleButtonStyle())
+                .accessibilityLabel(inst.displayName)
+                .accessibilityAddTraits(selected ? .isSelected : [])
             }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.bottom, Lumen.Spacing.sm)
+    }
+}
+
+/// 按下轻微缩放，给平铺按钮一个物理反馈。
+struct PressScaleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.96 : 1)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+    }
+}
+
+// MARK: - 通用控件
+
+/// 48pt 高的胶囊分段选择（design-system §6.6）。
+struct LumenSegmented<Option: Hashable>: View {
+    @Environment(\.lumen) private var palette
+    let options: [Option]
+    let selected: Option
+    let title: (Option) -> String
+    var accessibilityTitle: ((Option) -> String)?
+    let onSelect: (Option) -> Void
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(options, id: \.self) { option in
+                let isSelected = option == selected
+                Button { onSelect(option) } label: {
+                    Text(title(option))
+                        .font(Lumen.label)
+                        .lineLimit(1)
+                        .fixedSize()
+                        .foregroundStyle(isSelected ? palette.bgCanvas : palette.inkPrimary)
+                        .padding(.horizontal, 12)
+                        .frame(height: 48)
+                        .background(isSelected ? palette.accent : palette.bgSurface)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(accessibilityTitle?(option) ?? title(option))
+                .accessibilityAddTraits(isSelected ? .isSelected : [])
+            }
+        }
+        .clipShape(Capsule())
+        .overlay(Capsule().stroke(palette.lineSubtle, lineWidth: 1))
+        .animation(.easeInOut(duration: 0.15), value: selected)
     }
 }
 
@@ -179,7 +271,8 @@ struct RoundedControlLabel: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
             Image(systemName: "chevron.down")
-                .font(.caption2)
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(palette.inkSecondary)
         }
         .foregroundStyle(palette.inkPrimary)
         .padding(.horizontal, 16)
@@ -189,63 +282,238 @@ struct RoundedControlLabel: View {
     }
 }
 
-/// 单个琴弦按钮（design-system §6.3 药丸）。
-struct StringButton: View {
+/// 自动选弦开关：点亮即自动识别最近的弦；点任意弦进入手动锁定，开关随之熄灭，再点回到自动。
+struct AutoModeToggle: View {
     @Environment(\.lumen) private var palette
-    var item: StringItemUi
-    var onClick: () -> Void
+    let mode: SelectionMode
+    let onSelect: (SelectionMode) -> Void
 
     var body: some View {
-        let borderColor: Color = item.inTune ? palette.tuneIn
-            : item.active ? palette.accent : palette.lineSubtle
-        let containerColor: Color = item.inTune ? palette.tuneIn.opacity(0.12)
-            : item.active ? palette.accent.opacity(0.10) : palette.bgSurface
-        Button(action: onClick) {
-            VStack(spacing: 2) {
-                HStack(spacing: 2) {
-                    Text("\(item.index)")
-                        .font(Lumen.caption)
-                        .foregroundStyle(palette.inkSecondary)
-                    if item.inTune {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundStyle(palette.tuneIn)
-                    }
-                }
-                Text(item.noteName.replacingOccurrences(of: "#", with: "♯"))
+        let isAuto = mode == .auto
+        Button { onSelect(isAuto ? .manual : .auto) } label: {
+            HStack(spacing: 6) {
+                Image(systemName: isAuto ? "waveform" : "hand.point.up.left")
+                    .font(.system(size: 13, weight: .semibold))
+                Text(isAuto ? "自动" : "手动")
                     .font(Lumen.label)
-                    .fontWeight(.bold)
-                    .foregroundStyle(palette.inkPrimary)
-                Text(item.solfege)
-                    .font(Lumen.caption)
-                    .foregroundStyle(palette.inkSecondary)
+                    .fixedSize()
             }
+            .foregroundStyle(isAuto ? palette.bgCanvas : palette.inkPrimary)
             .padding(.horizontal, 14)
-            .padding(.vertical, 8)
-            .background(
-                LinearGradient(
-                    colors: [palette.bgSurface, palette.bgSurfaceEnd],
-                    startPoint: .top, endPoint: .bottom
-                ),
-                in: RoundedRectangle(cornerRadius: 24)
-            )
-            .background(containerColor, in: RoundedRectangle(cornerRadius: 24))
-            .overlay(
-                RoundedRectangle(cornerRadius: 24).stroke(borderColor, lineWidth: 1.5)
-            )
-            .overlay(alignment: .top) {
-                palette.highlightInner
-                    .frame(height: 1)
-                    .padding(.horizontal, 12)
-            }
+            .frame(height: 48)
+            .background(isAuto ? palette.accent : palette.bgSurface, in: Capsule())
+            .overlay(Capsule().stroke(isAuto ? palette.accent : palette.lineSubtle, lineWidth: 1))
+            .contentShape(Capsule())
         }
-        .scaleEffect(1.0)
-        .accessibilityLabel("\(item.index) 弦 \(item.noteName)，\(item.inTune ? "已调准" : "未调准")")
+        .buttonStyle(PressScaleButtonStyle())
+        .animation(.easeInOut(duration: 0.15), value: isAuto)
+        .accessibilityLabel("自动选弦")
+        .accessibilityValue(isAuto ? "开，自动识别最近的弦" : "关，手动锁定选中的弦")
+        .accessibilityAddTraits(.isToggle)
     }
 }
 
-extension Array {
-    subscript(safe index: Int) -> Element? {
-        indices.contains(index) ? self[index] : nil
+/// 目标读数（与表盘成组）：左侧目标音名，右侧音分偏差；无信号时右侧提示发声。高度固定不跳动。
+struct TargetReadout: View {
+    @Environment(\.lumen) private var palette
+    let targetName: String?
+    let placeholder: String
+    let cents: Float?
+
+    var body: some View {
+        let color = cents.map { Lumen.tuneColor(of: $0, palette) } ?? palette.inkSecondary
+        HStack(alignment: .center, spacing: Lumen.Spacing.md) {
+            VStack(alignment: .leading, spacing: 0) {
+                Text("目标")
+                    .font(Lumen.caption)
+                    .foregroundStyle(palette.inkFaint)
+                if let targetName {
+                    Text(targetName.replacingOccurrences(of: "#", with: "♯"))
+                        .font(.system(size: 28, weight: .bold).monospacedDigit())
+                        .foregroundStyle(color)
+                        .contentTransition(.numericText())
+                } else {
+                    Text(placeholder)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(palette.inkSecondary)
+                        .frame(height: 34, alignment: .leading)
+                }
+            }
+            Spacer(minLength: 0)
+            if let cents {
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text(String(format: "%+.1f", cents))
+                        .font(.system(size: 28, weight: .semibold).monospacedDigit())
+                        .contentTransition(.numericText(value: Double(cents)))
+                    Text("cents")
+                        .font(Lumen.caption)
+                        .foregroundStyle(palette.inkSecondary)
+                }
+                .foregroundStyle(color)
+                .transition(.opacity)
+            } else {
+                HStack(spacing: 6) {
+                    Image(systemName: "mic")
+                        .font(.system(size: 12, weight: .medium))
+                    Text("请发声")
+                        .font(Lumen.caption)
+                }
+                .foregroundStyle(palette.inkSecondary)
+                .padding(.horizontal, 14)
+                .frame(height: 32)
+                .background(palette.bgSurface, in: Capsule())
+                .overlay(Capsule().stroke(palette.lineSubtle, lineWidth: 1))
+                .transition(.opacity)
+            }
+        }
+        .frame(height: 52)
+        .animation(.easeInOut(duration: 0.2), value: cents == nil)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+// MARK: - 弦按钮
+
+private struct StringButtonColors {
+    let border: Color
+    let fill: Color
+    let number: Color
+
+    init(item: StringItemUi, selected: Bool, palette: Lumen.Palette) {
+        if item.inTune && (item.active || selected) {
+            border = palette.tuneIn
+            fill = palette.tuneIn.opacity(0.14)
+            number = palette.tuneIn
+        } else if item.active || selected {
+            border = palette.accent
+            fill = palette.accent.opacity(0.14)
+            number = palette.accent
+        } else {
+            border = palette.lineSubtle
+            fill = palette.bgSurface
+            number = palette.inkSecondary
+        }
+    }
+}
+
+/// 琴头两侧的音高按钮：弦号徽标 + 音名 + 唱名。
+struct PegButton: View {
+    @Environment(\.lumen) private var palette
+    let item: StringItemUi
+    let selected: Bool
+    let onClick: () -> Void
+
+    var body: some View {
+        let colors = StringButtonColors(item: item, selected: selected, palette: palette)
+        Button(action: onClick) {
+            HStack(spacing: 7) {
+                ZStack {
+                    Circle().stroke(colors.number, lineWidth: 1.2)
+                    if item.inTune {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 9, weight: .bold))
+                    } else {
+                        Text("\(item.index)")
+                            .font(.system(size: 11, weight: .semibold).monospacedDigit())
+                    }
+                }
+                .foregroundStyle(colors.number)
+                .frame(width: 20, height: 20)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(item.noteName.replacingOccurrences(of: "#", with: "♯"))
+                        .font(.system(size: 16, weight: .bold).monospacedDigit())
+                        .foregroundStyle(palette.inkPrimary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                    Text(item.solfege)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(palette.inkSecondary)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(.leading, 9)
+            .padding(.trailing, 6)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(colors.fill, in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(colors.border, lineWidth: 1.5))
+            .contentShape(RoundedRectangle(cornerRadius: 14))
+        }
+        .buttonStyle(PressScaleButtonStyle())
+        .accessibilityLabel("\(item.index) 弦 \(item.noteName)，唱名 \(item.solfege)")
+        .accessibilityValue(item.inTune ? "已调准" : (item.active || selected ? "当前弦" : "未选中"))
+    }
+}
+
+/// 古琴一排七弦的音高按钮：竖排弦号 / 音名 / 唱名。
+struct StringButton: View {
+    @Environment(\.lumen) private var palette
+    let item: StringItemUi
+    let selected: Bool
+    let onClick: () -> Void
+
+    var body: some View {
+        let colors = StringButtonColors(item: item, selected: selected, palette: palette)
+        Button(action: onClick) {
+            VStack(spacing: 1) {
+                Group {
+                    if item.inTune {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 9, weight: .bold))
+                    } else {
+                        Text("\(item.index)")
+                            .font(.system(size: 10, weight: .semibold).monospacedDigit())
+                    }
+                }
+                .foregroundStyle(colors.number)
+                .frame(height: 12)
+                Text(item.noteName.replacingOccurrences(of: "#", with: "♯"))
+                    .font(.system(size: 15, weight: .bold).monospacedDigit())
+                    .foregroundStyle(palette.inkPrimary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                Text(item.solfege)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(palette.inkSecondary)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 60)
+            .background(colors.fill, in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(colors.border, lineWidth: 1.5))
+            .contentShape(RoundedRectangle(cornerRadius: 14))
+        }
+        .buttonStyle(PressScaleButtonStyle())
+        .accessibilityLabel("\(item.index) 弦 \(item.noteName)，唱名 \(item.solfege)")
+        .accessibilityValue(item.inTune ? "已调准" : (item.active || selected ? "当前弦" : "未选中"))
+    }
+}
+
+/// 古琴：七弦按钮一排，下方琴面线稿与按钮双向联动。
+private struct GuqinPanel: View {
+    @ObservedObject var vm: InstrumentViewModel
+    let ink: FigureInk
+
+    var body: some View {
+        VStack(spacing: Lumen.Spacing.lg) {
+            HStack(spacing: 5) {
+                ForEach(vm.strings) { item in
+                    StringButton(
+                        item: item,
+                        selected: vm.selectedStringIndex == item.index - 1
+                    ) { vm.selectString(item.index - 1) }
+                }
+            }
+            GuqinFigure(
+                strings: vm.strings,
+                selectedIndex: vm.selectedStringIndex,
+                ink: ink,
+                onSelect: { index in
+                    guard vm.selectedStringIndex != index else { return }
+                    TunarHaptics.shared.tick()
+                    vm.selectString(index)
+                }
+            )
+            .aspectRatio(GuqinGeometry.design.width / GuqinGeometry.design.height, contentMode: .fit)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
     }
 }

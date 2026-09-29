@@ -36,7 +36,10 @@ MAC_UNIVERSAL="$CORE/target/apple-universal/release/libtunar_core.a"
 }
 mkdir -p "$(dirname "$MAC_UNIVERSAL")"
 lipo -create "$MAC_ARM_A" "$MAC_X64_A" -output "$MAC_UNIVERSAL"
-lipo "$MAC_UNIVERSAL" -verify_arch arm64 x86_64
+# Xcode 27 的 lipo 每次 -verify_arch 只接受一个架构。
+for arch in arm64 x86_64; do
+    lipo "$MAC_UNIVERSAL" -verify_arch "$arch"
+done
 
 echo ">> 3/5 生成 UniFFI Swift 绑定 → $GEN"
 rm -rf "$GEN"
