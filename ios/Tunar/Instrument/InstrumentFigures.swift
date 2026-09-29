@@ -418,7 +418,53 @@ struct HeadstockFigure: View {
     }
 }
 
-/// 琴头 + 两侧音高按钮：按钮与弦轴同高，淡线连到对应旋钮。
+/// 同侧按钮的纵向中心：尽量贴近各自弦轴高度（`ideal`），相邻中心至少相隔 `spacing`。
+/// 会相撞的按钮合并成簇并以簇内理想高度均值居中；整体限制在 `minY...maxY`，
+/// 空间不足时均匀压缩间距。返回值与 `ideal` 顺序一致。
+func spreadCenters(_ ideal: [CGFloat], spacing: CGFloat, minY: CGFloat, maxY: CGFloat) -> [CGFloat] {
+    let n = ideal.count
+    guard n > 0 else { return [] }
+    let step = n > 1 ? max(0, min(spacing, (maxY - minY) / CGFloat(n - 1))) : 0
+    let order = ideal.indices.sorted { ideal[$0] < ideal[$1] }
+
+    var clusters: [(count: Int, sum: CGFloat)] = []
+    func top(_ c: (count: Int, sum: CGFloat)) -> CGFloat {
+        c.sum / CGFloat(c.count) - CGFloat(c.count - 1) * step / 2
+    }
+    for index in order {
+        clusters.append((1, ideal[index]))
+        while clusters.count >= 2 {
+            let upper = clusters[clusters.count - 2]
+            let lower = clusters[clusters.count - 1]
+            if top(upper) + CGFloat(upper.count) * step <= top(lower) { break }
+            clusters.removeLast()
+            clusters[clusters.count - 1] = (upper.count + lower.count, upper.sum + lower.sum)
+        }
+    }
+
+    var sorted: [CGFloat] = []
+    sorted.reserveCapacity(n)
+    for cluster in clusters {
+        for j in 0..<cluster.count { sorted.append(top(cluster) + CGFloat(j) * step) }
+    }
+    for i in 0..<n {
+        sorted[i] = max(sorted[i], i == 0 ? minY : sorted[i - 1] + step)
+    }
+    for i in stride(from: n - 1, through: 0, by: -1) {
+        sorted[i] = min(sorted[i], i == n - 1 ? maxY : sorted[i + 1] - step)
+    }
+
+    var result = [CGFloat](repeating: 0, count: n)
+    for (rank, index) in order.enumerated() { result[index] = sorted[rank] }
+    return result
+}
+
+/// 选中按钮最上层，其次是自动识别到的弦；重叠时不会被相邻按钮遮住。
+func headstockButtonZIndex(selected: Bool, active: Bool) -> Double {
+    selected ? 2 : (active ? 1 : 0)
+}
+
+/// 琴头 + 两侧音高按钮：按钮尽量与弦轴同高且互不重叠，淡线连到对应旋钮。
 struct HeadstockPanel<StringButtonView: View>: View {
     let layout: HeadstockLayout
     let strings: [StringItemUi]
@@ -446,9 +492,10 @@ struct HeadstockPanel<StringButtonView: View>: View {
                 size.width - buttonSize.width / 2,
                 t.point(HeadstockLayout.design.width, 0).x + gap + buttonSize.width / 2
             )
+            let ys = buttonYs(t: t, height: size.height)
 
             ZStack(alignment: .topLeading) {
-                guides(t: t, leftX: leftX, rightX: rightX)
+                guides(t: t, leftX: leftX, rightX: rightX, ys: ys)
                 HeadstockFigure(
                     layout: layout,
                     strings: strings,
@@ -465,24 +512,40 @@ struct HeadstockPanel<StringButtonView: View>: View {
                             .frame(width: buttonSize.width, height: buttonSize.height)
                             .position(
                                 x: peg.buttonSide == .left ? leftX : rightX,
-                                y: buttonY(peg, t: t, height: size.height)
+                                y: ys[peg.stringNumber] ?? t.point(peg.post).y
                             )
+                            .zIndex(headstockButtonZIndex(
+                                selected: selectedIndex == peg.stringNumber - 1,
+                                active: item.active
+                            ))
                     }
                 }
             }
         }
     }
 
-    private func buttonY(_ peg: HeadstockPeg, t: FigureTransform, height: CGFloat) -> CGFloat {
-        min(max(t.point(peg.post).y, buttonSize.height / 2), height - buttonSize.height / 2)
+    /// 弦号 → 按钮中心 y；左右两列各自排开。
+    private func buttonYs(t: FigureTransform, height: CGFloat) -> [Int: CGFloat] {
+        var result: [Int: CGFloat] = [:]
+        for side in [HeadstockSide.left, .right] {
+            let pegs = layout.pegs.filter { $0.buttonSide == side }
+            let ys = spreadCenters(
+                pegs.map { t.point($0.post).y },
+                spacing: buttonSize.height + 4,
+                minY: buttonSize.height / 2,
+                maxY: max(height - buttonSize.height / 2, buttonSize.height / 2)
+            )
+            for (peg, y) in zip(pegs, ys) { result[peg.stringNumber] = y }
+        }
+        return result
     }
 
-    private func guides(t: FigureTransform, leftX: CGFloat, rightX: CGFloat) -> some View {
+    private func guides(t: FigureTransform, leftX: CGFloat, rightX: CGFloat, ys: [Int: CGFloat]) -> some View {
         Canvas { ctx, size in
             for peg in layout.pegs {
                 guard let item = strings[safe: peg.stringNumber - 1] else { continue }
                 let state = FigureStringState(item: item, selected: selectedIndex == peg.stringNumber - 1)
-                let y = buttonY(peg, t: t, height: size.height)
+                let y = ys[peg.stringNumber] ?? t.point(peg.post).y
                 let startX = peg.buttonSide == .left
                     ? leftX + buttonSize.width / 2
                     : rightX - buttonSize.width / 2

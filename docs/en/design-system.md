@@ -128,8 +128,10 @@ tune), about 1.5–2 dp thicker, with a 20% halo of the same color; other string
 Back holes and the dizi membrane hole use the dedicated `tune/near` color.
 
 - Headstocks sit centered with the string buttons on both sides. A thin dashed leader
-  joins each button to its peg; buttons follow their pegs vertically and are spread evenly
-  when they would overlap. The guitar has 6-in-line and 3+3 outlines; the ukulele is 2+2.
+  joins each button to its peg; buttons follow their pegs vertically. Colliding buttons on
+  one side are spread evenly around the mean of their peg heights (pitch = button height +
+  4 dp/pt, compressed evenly only when space runs out). The selected button stacks on top,
+  then the auto-detected string. The guitar has 6-in-line and 3+3 outlines; the ukulele is 2+2.
 - The guqin lies horizontally below the seven string buttons and above the dial, scaled
   to the width, with string numbers at the tail end.
 

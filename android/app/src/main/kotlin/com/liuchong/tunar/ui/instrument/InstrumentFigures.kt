@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.liuchong.tunar.ui.theme.LumenColors
 import uniffi.tunar_core.HoleMark
 import kotlin.math.abs
@@ -303,6 +304,59 @@ internal class HeadstockLayout(
 }
 
 /**
+ * 同侧按钮的纵向中心：尽量贴近各自弦轴高度（[ideal]），相邻中心至少相隔 [spacing]。
+ * 会相撞的按钮合并成簇并以簇内理想高度均值居中；整体限制在 [minY, maxY]，
+ * 空间不足时均匀压缩间距。返回值与 [ideal] 顺序一致。
+ */
+internal fun spreadCenters(ideal: List<Float>, spacing: Float, minY: Float, maxY: Float): List<Float> {
+    val n = ideal.size
+    if (n == 0) return emptyList()
+    val step = if (n > 1) min(spacing, (maxY - minY) / (n - 1)).coerceAtLeast(0f) else 0f
+    val order = ideal.indices.sortedBy { ideal[it] }
+
+    class Cluster(var count: Int, var sum: Float) {
+        val top get() = sum / count - (count - 1) * step / 2f
+    }
+    val clusters = ArrayList<Cluster>(n)
+    for (index in order) {
+        clusters += Cluster(1, ideal[index])
+        while (clusters.size >= 2) {
+            val upper = clusters[clusters.size - 2]
+            val lower = clusters.last()
+            if (upper.top + upper.count * step <= lower.top) break
+            upper.count += lower.count
+            upper.sum += lower.sum
+            clusters.removeAt(clusters.size - 1)
+        }
+    }
+
+    val sorted = FloatArray(n)
+    var k = 0
+    for (cluster in clusters) {
+        repeat(cluster.count) { sorted[k++] = cluster.top + it * step }
+    }
+    for (i in 0 until n) {
+        val floor = if (i == 0) minY else sorted[i - 1] + step
+        sorted[i] = max(sorted[i], floor)
+    }
+    for (i in n - 1 downTo 0) {
+        val ceiling = if (i == n - 1) maxY else sorted[i + 1] - step
+        sorted[i] = min(sorted[i], ceiling)
+    }
+
+    val result = FloatArray(n)
+    order.forEachIndexed { rank, index -> result[index] = sorted[rank] }
+    return result.toList()
+}
+
+/** 选中按钮最上层，其次是自动识别到的弦；重叠时不会被相邻按钮遮住。 */
+internal fun buttonZIndex(selected: Boolean, active: Boolean): Float = when {
+    selected -> 2f
+    active -> 1f
+    else -> 0f
+}
+
+/**
  * 琴头 + 两侧音高按钮：按钮与弦轴同高，淡线连到对应旋钮；点中弦轴、旋钮或琴弦即选中该弦。
  */
 @Composable
@@ -335,8 +389,18 @@ internal fun HeadstockPanel(
             widthPx - buttonW / 2f,
             t.point(HeadstockLayout.DESIGN.width, 0f).x + gapPx + buttonW / 2f,
         )
-        fun buttonY(peg: HeadstockPeg) =
-            t.point(peg.post).y.coerceIn(buttonH / 2f, max(heightPx - buttonH / 2f, buttonH / 2f))
+        val buttonYs = HashMap<Int, Float>(layout.pegs.size)
+        HeadstockSide.entries.forEach { side ->
+            val pegs = layout.pegs.filter { it.buttonSide == side }
+            val ys = spreadCenters(
+                ideal = pegs.map { t.point(it.post).y },
+                spacing = buttonH + with(density) { 4.dp.toPx() },
+                minY = buttonH / 2f,
+                maxY = max(heightPx - buttonH / 2f, buttonH / 2f),
+            )
+            pegs.forEachIndexed { i, peg -> buttonYs[peg.stringNumber] = ys[i] }
+        }
+        fun buttonY(peg: HeadstockPeg) = buttonYs.getValue(peg.stringNumber)
 
         Canvas(
             modifier = Modifier
@@ -382,9 +446,11 @@ internal fun HeadstockPanel(
         layout.pegs.forEach { peg ->
             val item = strings.getOrNull(peg.stringNumber - 1) ?: return@forEach
             val cx = if (peg.buttonSide == HeadstockSide.LEFT) leftX else rightX
+            val y = buttonY(peg)
             Box(
                 modifier = Modifier
-                    .offset { IntOffset((cx - buttonW / 2f).roundToInt(), (buttonY(peg) - buttonH / 2f).roundToInt()) }
+                    .zIndex(buttonZIndex(selected = selectedIndex == peg.stringNumber - 1, active = item.active))
+                    .offset { IntOffset((cx - buttonW / 2f).roundToInt(), (y - buttonH / 2f).roundToInt()) }
                     .size(buttonWidth, buttonHeight),
             ) { button(item) }
         }
