@@ -44,8 +44,8 @@ From top to bottom the page shows the instrument switcher, the model-control row
 instrument figure, the target readout, and the dial (2026-09-29).
 
 - **Instrument switcher**: the six instruments (guitar, ukulele, guqin, zhudi, dongxiao,
-  shakuhachi) are equal-width tiles on one row with no horizontal scrolling. Each tile is
-  56 dp/pt high with a line-art glyph in the same style as the instrument figure above the
+  shakuhachi) are square tiles on one row, justified to both edges with no horizontal
+  scrolling. Each tile is 48 × 48 dp/pt with a line-art glyph in the same style as the instrument figure above the
   name. The selected tile uses an accent outline, a light accent fill, and accent glyph and
   text; tiles scale slightly on press.
 - **Model-control row**: strings show a tuning dropdown, a headstock segmented control

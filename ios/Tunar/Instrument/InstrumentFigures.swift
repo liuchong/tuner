@@ -1088,17 +1088,17 @@ struct InstrumentGlyph: View {
             p.addEllipse(in: CGRect(x: 10.4, y: 13.1, width: 3.2, height: 3.2))
             line(&p, (9.8, 19.6), (14.2, 19.6))
         case "ukulele":
+            // 整体约为吉他的 0.78 倍、与吉他同一底线，一眼能看出是小一号的琴；尺寸小，省去琴码免得糊成一团。
             body(&p, segments: [
-                [(12, 22.4), (15, 22.4), (16.4, 21), (16.4, 19.2)],
-                [(16.4, 19.2), (16.4, 17.6), (15.3, 17.3), (15.3, 16.2)],
-                [(15.3, 16.2), (15.3, 15.2), (15.9, 15), (15.9, 14.1)],
-                [(15.9, 14.1), (15.9, 12.9), (14.5, 12.2), (13, 12.2)],
+                [(12, 22.4), (14.34, 22.4), (15.43, 21.31), (15.43, 19.9)],
+                [(15.43, 19.9), (15.43, 18.66), (14.57, 18.42), (14.57, 17.56)],
+                [(14.57, 17.56), (14.57, 16.78), (15.04, 16.63), (15.04, 15.93)],
+                [(15.04, 15.93), (15.04, 14.99), (13.95, 14.44), (12.78, 14.44)],
             ])
-            line(&p, (11, 12.2), (11, 7.4))
-            line(&p, (13, 12.2), (13, 7.4))
-            p.addRoundedRect(in: CGRect(x: 10.3, y: 4.2, width: 3.4, height: 3.2), cornerSize: CGSize(width: 1, height: 1))
-            p.addEllipse(in: CGRect(x: 10.7, y: 14.5, width: 2.6, height: 2.6))
-            line(&p, (10.5, 19.9), (13.5, 19.9))
+            line(&p, (11.22, 14.44), (11.22, 10.7))
+            line(&p, (12.78, 14.44), (12.78, 10.7))
+            p.addRoundedRect(in: CGRect(x: 10.67, y: 8.2, width: 2.65, height: 2.5), cornerSize: CGSize(width: 0.8, height: 0.8))
+            p.addEllipse(in: CGRect(x: 10.99, y: 16.24, width: 2.03, height: 2.03))
         case "guqin":
             p.move(to: CGPoint(x: 2, y: 10))
             p.addLine(to: CGPoint(x: 19, y: 8.5))
@@ -1177,9 +1177,9 @@ struct InstrumentGlyph: View {
                 dot(15.4, y, 0.55)
             }
         case "ukulele":
-            for y in [5.1, 6.5] as [CGFloat] {
-                dot(8.9, y, 0.6)
-                dot(15.1, y, 0.6)
+            for y in [8.91, 10.0] as [CGFloat] {
+                dot(9.58, y, 0.5)
+                dot(14.42, y, 0.5)
             }
         case "zhudi":
             dot(16.6, 7.4)

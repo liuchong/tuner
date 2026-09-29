@@ -104,8 +104,8 @@ classes are detected, otherwise an em dash. Quiet state dims the row.
 
 ### 4.5 Instrument controls
 
-The instrument switcher is six equal-width tiles with no scrolling: 56 dp/pt high,
-14 radius, a 24 line-art glyph above an 11 name. The current tile has a 12% `accent` fill,
+The instrument switcher is six 48 × 48 dp/pt square tiles, justified to both edges
+with even gaps and no scrolling: 14 radius, a 22 line-art glyph above a 10 name. The current tile has a 12% `accent` fill,
 a 1.5 accent outline, and accent glyph and text; other tiles use `bg/surface` with
 `line/subtle`.
 
@@ -114,7 +114,9 @@ shaped, with 14–16 dp/pt horizontal padding, one line with ellipsis, and a 6�
 icon/text gap. String controls (tuning, headstock style, auto-string) always share one
 row: on narrow screens segments use 8 dp/pt padding, the auto toggle drops its icon, and
 the tuning dropdown takes the remaining width with ellipsis; text never wraps inside a
-control. The two headstock segments are equal width (the wider one) with centered text. The selected segment is solid `accent` with `bg/canvas` text. The
+control. The two headstock segments are equal width (the wider one) with centered text,
+and the gap to the tuning dropdown on the left equals the gap to the auto toggle on the
+right. The selected segment is solid `accent` with `bg/canvas` text. The
 auto-string toggle is a capsule of the same size: solid `accent` with a waveform icon
 when on, `bg/surface` with a finger icon when off. Every press scales to 0.96 for 120 ms.
 
@@ -124,7 +126,8 @@ in-tune string switches to `tune/in` and its badge becomes a check.
 
 Switcher glyphs are 24 × 24 upright front views: the guitar has a narrow waist, larger
 lower bout, long neck, and three peg dots per side; the ukulele has a plump body, short
-neck, and two peg dots per side; both show a sound hole and a bridge line.
+neck, and two peg dots per side, drawn about 0.78× the guitar's size on the same
+baseline; the guitar shows a sound hole and a bridge line, the ukulele only a sound hole.
 
 **Instrument line art** (guitar and ukulele headstocks, guqin, zhudi, dongxiao,
 shakuhachi) is single-color line drawing in the same stroke language as the switcher

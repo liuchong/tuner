@@ -982,22 +982,22 @@ private fun DesignPath.glyphShape(id: String) {
             moveTo(9.8f, 19.6f); lineTo(14.2f, 19.6f)
         }
         "ukulele" -> {
+            // 整体约为吉他的 0.78 倍、与吉他同一底线，一眼能看出是小一号的琴；尺寸小，省去琴码免得糊成一团。
             moveTo(12f, 22.4f)
-            cubicTo(15f, 22.4f, 16.4f, 21f, 16.4f, 19.2f)
-            cubicTo(16.4f, 17.6f, 15.3f, 17.3f, 15.3f, 16.2f)
-            cubicTo(15.3f, 15.2f, 15.9f, 15f, 15.9f, 14.1f)
-            cubicTo(15.9f, 12.9f, 14.5f, 12.2f, 13f, 12.2f)
-            lineTo(11f, 12.2f)
-            cubicTo(9.5f, 12.2f, 8.1f, 12.9f, 8.1f, 14.1f)
-            cubicTo(8.1f, 15f, 8.7f, 15.2f, 8.7f, 16.2f)
-            cubicTo(8.7f, 17.3f, 7.6f, 17.6f, 7.6f, 19.2f)
-            cubicTo(7.6f, 21f, 9f, 22.4f, 12f, 22.4f)
+            cubicTo(14.34f, 22.4f, 15.43f, 21.31f, 15.43f, 19.9f)
+            cubicTo(15.43f, 18.66f, 14.57f, 18.42f, 14.57f, 17.56f)
+            cubicTo(14.57f, 16.78f, 15.04f, 16.63f, 15.04f, 15.93f)
+            cubicTo(15.04f, 14.99f, 13.95f, 14.44f, 12.78f, 14.44f)
+            lineTo(11.22f, 14.44f)
+            cubicTo(10.05f, 14.44f, 8.96f, 14.99f, 8.96f, 15.93f)
+            cubicTo(8.96f, 16.63f, 9.43f, 16.78f, 9.43f, 17.56f)
+            cubicTo(9.43f, 18.42f, 8.57f, 18.66f, 8.57f, 19.9f)
+            cubicTo(8.57f, 21.31f, 9.66f, 22.4f, 12f, 22.4f)
             close()
-            moveTo(11f, 12.2f); lineTo(11f, 7.4f)
-            moveTo(13f, 12.2f); lineTo(13f, 7.4f)
-            roundRect(10.3f, 4.2f, 3.4f, 3.2f, 1f)
-            oval(10.7f, 14.5f, 2.6f, 2.6f)
-            moveTo(10.5f, 19.9f); lineTo(13.5f, 19.9f)
+            moveTo(11.22f, 14.44f); lineTo(11.22f, 10.7f)
+            moveTo(12.78f, 14.44f); lineTo(12.78f, 10.7f)
+            roundRect(10.67f, 8.2f, 2.65f, 2.5f, 0.8f)
+            oval(10.99f, 16.24f, 2.03f, 2.03f)
         }
         "guqin" -> {
             moveTo(2f, 10f)
@@ -1037,7 +1037,7 @@ private fun DesignPath.glyphShape(id: String) {
 
 private fun glyphDots(id: String): List<Triple<Float, Float, Float>> = when (id) {
     "guitar" -> listOf(1.7f, 3f, 4.3f).flatMap { y -> listOf(Triple(8.6f, y, 0.55f), Triple(15.4f, y, 0.55f)) }
-    "ukulele" -> listOf(5.1f, 6.5f).flatMap { y -> listOf(Triple(8.9f, y, 0.6f), Triple(15.1f, y, 0.6f)) }
+    "ukulele" -> listOf(8.91f, 10f).flatMap { y -> listOf(Triple(9.58f, y, 0.5f), Triple(14.42f, y, 0.5f)) }
     "zhudi" -> listOf(Triple(16.6f, 7.4f, 0.9f)) +
         (0 until 3).map { Triple(12.6f - it * 1.9f, 11.4f + it * 1.9f, 0.75f) }
     "dongxiao" -> (0 until 4).map { Triple(12f, 8.5f + it * 3.2f, 0.8f) }

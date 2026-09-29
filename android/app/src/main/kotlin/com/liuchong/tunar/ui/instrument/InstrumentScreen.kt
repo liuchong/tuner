@@ -143,11 +143,13 @@ private fun readoutTarget(state: InstrumentUiState): String? =
 
 // region 切换条与控件
 
-/** 六种乐器等宽平铺，不需要横向滚动；每个乐器一枚线稿图标。 */
+private val SWITCHER_TILE = 48.dp
+
+/** 六种乐器方形平铺、两端对齐，不需要横向滚动；每个乐器一枚线稿图标。 */
 @Composable
 private fun InstrumentSwitcher(state: InstrumentUiState, onSelect: (String) -> Unit) {
     val colors = LocalLumenColors.current
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         state.instruments.forEach { inst ->
             val selected = inst.id == state.instrumentId
             PressableSurface(
@@ -156,8 +158,7 @@ private fun InstrumentSwitcher(state: InstrumentUiState, onSelect: (String) -> U
                 color = if (selected) colors.accent.copy(alpha = 0.12f) else colors.bgSurface,
                 border = BorderStroke(if (selected) 1.5.dp else 1.dp, if (selected) colors.accent else colors.lineSubtle),
                 modifier = Modifier
-                    .weight(1f)
-                    .height(56.dp)
+                    .size(SWITCHER_TILE)
                     .semantics {
                         this.selected = selected
                         contentDescription = inst.displayName
@@ -171,12 +172,13 @@ private fun InstrumentSwitcher(state: InstrumentUiState, onSelect: (String) -> U
                     InstrumentGlyph(
                         instrumentId = inst.id,
                         color = if (selected) colors.accent else colors.inkSecondary,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(22.dp),
                     )
-                    Spacer(modifier = Modifier.height(3.dp))
+                    Spacer(modifier = Modifier.height(1.dp))
                     Text(
                         inst.displayName,
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
+                        lineHeight = 12.sp,
                         fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
                         color = if (selected) colors.accent else colors.inkPrimary,
                         maxLines = 1,
@@ -224,9 +226,11 @@ private fun ControlRow(state: InstrumentUiState, vm: InstrumentViewModel) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Box(modifier = Modifier.weight(1f)) { tuning() }
+            val gap = if (compact) 6.dp else 8.dp
+            // fill = false 让定弦只占内容宽，剩余空间由 SpaceBetween 均分，琴头样式与两侧等距。
+            Box(modifier = Modifier.weight(1f, fill = false).padding(end = gap)) { tuning() }
             if (headstock != null) {
                 LumenSegmented(
                     options = HeadstockStyle.entries,
@@ -238,7 +242,12 @@ private fun ControlRow(state: InstrumentUiState, vm: InstrumentViewModel) {
                     equalWidths = true,
                 )
             }
-            AutoModeToggle(state.mode, vm::selectMode, showIcon = !compact)
+            AutoModeToggle(
+                state.mode,
+                vm::selectMode,
+                showIcon = !compact,
+                modifier = Modifier.padding(start = gap),
+            )
         }
     }
 }
@@ -377,7 +386,12 @@ private fun PillDropdown(
 
 /** 自动选弦开关：点亮即自动识别最近的弦；点任意弦进入手动锁定，开关随之熄灭，再点回到自动。 */
 @Composable
-private fun AutoModeToggle(mode: SelectionMode, onSelect: (SelectionMode) -> Unit, showIcon: Boolean = true) {
+private fun AutoModeToggle(
+    mode: SelectionMode,
+    onSelect: (SelectionMode) -> Unit,
+    showIcon: Boolean = true,
+    modifier: Modifier = Modifier,
+) {
     val colors = LocalLumenColors.current
     val isAuto = mode == SelectionMode.AUTO
     PressableSurface(
@@ -385,7 +399,7 @@ private fun AutoModeToggle(mode: SelectionMode, onSelect: (SelectionMode) -> Uni
         shape = CircleShape,
         color = if (isAuto) colors.accent else colors.bgSurface,
         border = BorderStroke(1.dp, if (isAuto) colors.accent else colors.lineSubtle),
-        modifier = Modifier
+        modifier = modifier
             .height(48.dp)
             .semantics {
                 role = Role.Switch

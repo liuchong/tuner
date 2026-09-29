@@ -78,12 +78,14 @@ struct InstrumentView: View {
                     tuningMenu
                     Spacer(minLength: 0)
                     headstockPicker(segmentPadding: 14)
+                    Spacer(minLength: 0)
                     AutoModeToggle(mode: vm.mode, onSelect: vm.selectMode)
                 }
                 HStack(spacing: 6) {
                     tuningMenu
                     Spacer(minLength: 0)
                     headstockPicker(segmentPadding: 8)
+                    Spacer(minLength: 0)
                     AutoModeToggle(mode: vm.mode, onSelect: vm.selectMode, showIcon: false)
                 }
             }
@@ -169,32 +171,34 @@ extension Lumen.Palette {
 
 // MARK: - 乐器切换条
 
-/// 六种乐器等宽平铺，不需要横向滚动；每个乐器一枚线稿图标。
+/// 六种乐器方形平铺、两端对齐，不需要横向滚动；每个乐器一枚线稿图标。
 struct InstrumentSwitcher: View {
     @Environment(\.lumen) private var palette
     let instruments: [Instrument]
     let selectedId: String
     let onSelect: (String) -> Void
 
+    private let tile: CGFloat = 48
+
     var body: some View {
-        HStack(spacing: 6) {
-            ForEach(instruments, id: \.id) { inst in
+        HStack(spacing: 0) {
+            ForEach(Array(instruments.enumerated()), id: \.element.id) { offset, inst in
+                if offset > 0 { Spacer(minLength: 4) }
                 let selected = inst.id == selectedId
                 Button { onSelect(inst.id) } label: {
-                    VStack(spacing: 3) {
+                    VStack(spacing: 1) {
                         InstrumentGlyph(
                             instrumentId: inst.id,
                             color: selected ? palette.accent : palette.inkSecondary
                         )
-                        .frame(width: 24, height: 24)
+                        .frame(width: 22, height: 22)
                         Text(inst.displayName)
-                            .font(.system(size: 11, weight: selected ? .semibold : .medium))
+                            .font(.system(size: 10, weight: selected ? .semibold : .medium))
                             .foregroundStyle(selected ? palette.accent : palette.inkPrimary)
                             .lineLimit(1)
                             .minimumScaleFactor(0.8)
                     }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 56)
+                    .frame(width: tile, height: tile)
                     .background(
                         selected ? palette.accent.opacity(0.12) : palette.bgSurface,
                         in: RoundedRectangle(cornerRadius: 14)
