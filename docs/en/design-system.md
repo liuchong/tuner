@@ -1,5 +1,9 @@
 # TUNAR design system — Aurora v4.1
 
+Future desktop hierarchy is proposed in [practice workspace](practice-workspace.md) §7:
+pitch for tuning, target traces for practice, and spectrum comparison for analysis. Current
+component rules remain unchanged; the proposal has no implementation or native visual acceptance.
+
 > Cross-platform source of truth for Android Compose and Apple SwiftUI. A UI
 > implementation that conflicts with this document is a defect.
 

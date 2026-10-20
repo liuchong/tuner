@@ -13,3 +13,9 @@
 | M8 | TUNAR / 吐呐 brand and bilingual documentation | Localized app name, upgrade-safe identifiers, complete English and Chinese documentation | ✅ Android/iOS builds and automated brand/document checks pass |
 | M9 | Integrated professional sound views | Live spectrum, pitch trace, waveform, and waterfall without recording/export | ✅ One FFT feeds musical/full spectra and waveform envelope; Android/iOS regressions and iOS simulator visual acceptance pass |
 | M10 | Native macOS 14+ app | Five complete sections, shared Rust core, desktop-responsive UI | ✅ Universal Apple Silicon/Intel core, macOS app build, and desktop tests pass |
+| M11 | Locked targets, full-precision cents traces, measurement sessions, and desktop tasks | [Practice workspace](practice-workspace.md) A1–A7, A11–A12 | Design documented; implementation and runtime acceptance not started |
+| M12 | Named snapshot comparison, selection statistics, local saving and export | [Practice workspace](practice-workspace.md) A5, A7–A10, A12 | Design documented; implementation and runtime acceptance not started |
+
+Fingering schools/alternates, reference timbres, and interval-ratio guides remain future candidates;
+see practice workspace §6 and §8. M11/M12 do not expand the current professional view's implemented
+scope of no recording, saving/playback/export, and start no automatic goal.

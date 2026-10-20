@@ -1,5 +1,9 @@
 # Native macOS 14+ app design and delivery specification
 
+The next desktop task layout is proposed in [practice workspace](practice-workspace.md) §7.
+It retains six sidebar sections and plans a window-owned measurement session. It does not change
+the current app described here or establish runtime acceptance.
+
 ## 1. Goal and boundaries
 
 The macOS app is TUNAR's native desktop client, not an enlarged iOS window. It provides

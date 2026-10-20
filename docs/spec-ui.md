@@ -1,5 +1,8 @@
 # spec-ui — 面板交互规格（Android / Compose，iOS/macOS / SwiftUI）
 
+后续设计：[练音、测量回看与桌面工作区](practice-workspace.md)。该提案尚未实现；本文现有
+冻结、历史与非目标约束继续生效，不能将提案中的记录、比较或导出入口当作已有功能。
+
 四个主面板 + 设置。导航：底部 NavigationBar（调音 / 乐器 / 频谱 / 节拍器 / 设置）。
 视觉与动效以 `docs/design-system.md`（「Aurora/极光」v3）为准，本文件只管**行为与交互逻辑**。
 

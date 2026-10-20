@@ -1,5 +1,9 @@
 # spec-ui — panel behavior (Android Compose / Apple SwiftUI)
 
+Future design: [practice, measurement review, and desktop workspace](practice-workspace.md).
+That proposal is not implemented. Existing freeze/history behavior and non-goals remain in force;
+its recording, comparison, and export controls must not be presented as available features.
+
 Five destinations: Tuner, Instruments, Spectrum, Metronome, and Settings. Visual and
 motion rules come from [design-system.md](design-system.md); this document defines
 behavior and interaction.
