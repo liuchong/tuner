@@ -16,3 +16,9 @@ macos/build/
 # 一律不入库。编译 iOS/macOS 前先跑 scripts/build-core-ios.sh 生成。
 # （UniFFI 生成的 Swift/Kotlin 绑定是文本、可 diff，仍然入库以便审查 FFI 合同变化）
 ios/TunarCore/tunar_core.xcframework/
+
+# Local verification evidence / machine-specific build logs
+docs/verification/practice-workspace/local/
+
+# Generated Android native libraries; regenerate together with UniFFI bindings
+android/core-binding/src/main/jniLibs/

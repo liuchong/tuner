@@ -7,3 +7,10 @@ interface PcmSource {
 
     fun stop()
 }
+
+/** 真实采集时间由采样计数提供；保留旧接口供测试替身和兼容源使用。 */
+interface PositionedPcmSource : PcmSource {
+    fun setFailureHandler(handler: () -> Unit) { }
+    fun startPositioned(onFrame: (FloatArray, ULong) -> Unit)
+    override fun start(onFrame: (FloatArray) -> Unit) = startPositioned { samples, _ -> onFrame(samples) }
+}

@@ -1,10 +1,10 @@
 # Practice, measurement review, and the desktop workspace
 
-Status: **design proposal; not implemented or runtime-accepted**. This change adds design only;
-it does not change the app, the UniFFI contract, or implemented behavior in existing specifications.
-Before implementation, complete the file-by-file construction plan and all tests. The current
-professional view still follows the non-goals in `spec-ui.md` §3; do not expose unfinished save,
-review, or export controls.
+Status: **P1/P2 implemented; automated tests and local native acceptance completed**.
+See the [verification report](practice-verification.md) for physical-device and accessibility gaps. The construction plan and
+single progress entry are [here](../practice-implementation.md). The delivered scope includes locked targets, sessions,
+review, comparison, statistics, measurement files, and desktop layout. Raw PCM recording and audio
+playback remain excluded. P3 remains future work.
 
 ## 1. User tasks and priorities
 
@@ -20,9 +20,9 @@ reference-tone timbres. These are product priorities, not implementation or acce
 this change. A recording studio, accompaniment player, score editor, and instrument-making
 simulator are outside scope.
 
-## 2. Current source snapshot and differences
+## 2. Pre-design baseline and differences
 
-Baseline commit: `fa20d55`. These are source observations, not current device verification. Graph
+Baseline commit: `fa20d55`. These are retained pre-design source observations, not the current implementation state. Graph
 tools were unavailable, so exact files and symbols were read directly; this is not an exhaustive
 repository audit.
 
@@ -38,7 +38,7 @@ repository audit.
 | `macos/TunarMac/Views/DesktopAnalysisView.swift:14` | View-owned history; metrics from the live VM | Resolve every review panel from one selected historical frame |
 | `core/src/reference.rs:26`, `list` | Reference tones for the current A4 and equal temperament | Keep current behavior; extend timbres and interval guides separately |
 
-Current flow:
+Pre-design flow:
 
 ```mermaid
 flowchart LR
@@ -50,7 +50,7 @@ flowchart LR
     Analysis --> History[View-owned history]
 ```
 
-Proposed flow; dashed nodes are additions:
+Implemented flow:
 
 ```mermaid
 flowchart LR
@@ -62,8 +62,6 @@ flowchart LR
     Cursor --> Views[Pitch / spectrum / level / fingering / trace]
     Session --> Snapshots[Named comparison snapshots]
     Session --> Export[Versioned measurements]
-    classDef planned stroke-dasharray: 4 4
-    class Session,Cursor,Snapshots,Export planned
 ```
 
 ## 3. Preview, detection, and locked targets
@@ -132,7 +130,7 @@ Show **Review 00:12.4**. If live input is also visible, label it **Current input
 
 P2 uses versioned UTF-8 JSON containing schema_version, configuration segments, original points,
 snapshots, and selections, without audio. Rust owns parsing/validation; native shells own file
-pickers and atomic writes. Reject unknown versions, truncation, non-finite values, oversized arrays,
+pickers and write-error feedback; encode fully before writing, with replacement atomicity determined by the system file provider. Reject unknown versions, truncation, non-finite values, oversized arrays,
 or invalid references without damaging the current session or guessing repairs.
 
 CSV exports the session or selection with segment_id, time_seconds, state, is_held, freq_hz,
@@ -239,23 +237,23 @@ Consider independent reference volume and sine/soft-harmonic timbres. Rust owns 
 waveform sample generation; native shells play samples. Preserve the current default; verify smooth
 switches, output failure, playback markers, interruption stops, and speaker leakage exclusion.
 
-## 9. Proposed modules and boundaries
+## 9. Implemented modules and boundaries
 
-These are **proposed additions, not exported APIs**. Update `spec-core.md` and generated bindings
-when implementing.
+These modules are implemented. Exact exported types and signatures are in the
+[construction contract](../practice-implementation.md#2-精确接口和状态); generated bindings and `spec-core.md` are synchronized.
 
-| Module / type | Proposed responsibility / entry points |
+| Module / type | Implemented responsibility / entry points |
 |---|---|
-| `core/src/practice.rs`, `PracticeSession` | Target resolution, state machine, bounded storage, statistics; `set_target`, `start`, `pause`, `finish`, `append`, `read_page`, `summarize` |
+| `core/src/practice.rs`, `PracticeSession` | Target resolution, state machine, bounded storage, statistics; `configure`, `lock_reference`, `lock_instrument`, `start`, `pause`, `finish`, `observe`, `read_page`, `summarize` |
 | `core/src/measurement_file.rs` | JSON/CSV codec, version/capacity validation, no platform file APIs |
-| `MeasurementPoint` | `id: u64`, `segment_id: u32`, `config_id: u32`, `sample_position: u64`, `sample_rate_hz: f64`, `frame: AnalysisFrame`, `target_hz: Option<f64>`, `reference_tone_active: bool` |
-| `PracticeConfigSnapshot` | Immutable A4, temperament, target mode/step/Hz, instrument/model/variant, tolerance, capture generation, axis definition |
-| `MeasurementSnapshot` | Independent frame/configuration copy that survives session clearing; never a ring-buffer pointer |
+| `PracticePoint` | `id: u64`, `segment_id: u32`, `config_id: u32`, `time_seconds: f64` (sample position/rate are in frame), `frame: AnalysisFrame`, `target_hz: Option<f64>`, `reference_active: bool` |
+| `PracticeConfig` / `PracticeSegment` | Immutable A4, temperament, target mode/step/Hz, instrument/model/variant, tolerance, capture generation, axis definition |
+| `PracticeSnapshot` | Independent frame/configuration copy that survives session clearing; never a ring-buffer pointer |
 | Apple window-scoped `PracticeWorkspaceModel` | UniFFI-only core access; session handle, display cursor, layout, file dialogs; one injected instance |
 | Android `PracticeWorkspaceViewModel` | One session in navigation scope; shared capture stream; native permissions/lifecycle |
 
-Add the two core modules and exports; add shared Apple/Android workspace models and panels;
-inject one workspace in macOS `DesktopRootView`. Keep short-term presentation caches separate from
+The two core modules and exports connect shared Apple/Android workspace models and panels;
+macOS `DesktopRootView` injects one workspace. Keep short-term presentation caches separate from
 measurement/statistics truth. Audio callbacks still only write to a preallocated ring. Append,
 encoding, statistics, and FFI pagination run on analysis/worker threads, not audio callbacks.
 
@@ -267,14 +265,16 @@ Design delivery:
 - [x] Data/memory limits, save semantics, ownership, and observable acceptance criteria.
 - [x] Bilingual design entry and future milestones.
 
-Implementation, not performed in this change:
+Implementation:
 
-- [ ] I1 Complete exact signatures, file-by-file construction snippets, and all tests before implementation.
-- [ ] I2 Core targets, sessions, statistics, snapshots, versioned files, and UniFFI.
-- [ ] I3 Three-platform session wiring, desktop task layout, and mobile review.
+- [x] I1 Complete exact signatures, file-by-file construction snippets, and all tests before implementation.
+- [x] I2 Core targets, sessions, statistics, snapshots, versioned files, and UniFFI.
+- [x] I3 Three-platform session wiring, desktop task layout, and mobile review.
 - [ ] I4 Separately scoped fingering variants and reference-timbre extensions.
 
-Acceptance, not executed in this change:
+Complete environment acceptance: composite items stay unchecked until all platforms and
+conditions have evidence. Executed automated/local native results are tracked in
+[the acceptance matrix](../../integration_test/practice_workspace.md).
 
 - [ ] A1 Lock D4; drift to D#4 and D5 without target jumps or folded errors; indicate off-scale needles.
 - [ ] A2 Distinguish synthetic +3/-7 cents on the same note; silence/Holding creates breaks.
@@ -292,5 +292,5 @@ Acceptance, not executed in this change:
   no note/needle overlap, complete target diagram, visible recording controls; native screenshots required.
 - [ ] A12 Exclude reference leakage from scores; verify denied permissions, failed input/file writes, and resume.
 
-Only the design delivery is complete. Implementation and runtime acceptance remain independent,
-unchecked states. This document starts no automatic goal.
+P1/P2 implementation and available local acceptance are complete. I4/P3 remains outside this
+change. Physical devices, OS interruptions and accessibility combinations remain pending.

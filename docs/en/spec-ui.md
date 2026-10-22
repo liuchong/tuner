@@ -1,8 +1,7 @@
 # spec-ui — panel behavior (Android Compose / Apple SwiftUI)
 
-Future design: [practice, measurement review, and desktop workspace](practice-workspace.md).
-That proposal is not implemented. Existing freeze/history behavior and non-goals remain in force;
-its recording, comparison, and export controls must not be presented as available features.
+Practice, measurement review, and desktop tasks are specified in [practice workspace](practice-workspace.md). P1/P2 source is implemented; current acceptance evidence is tracked in [implementation](practice-implementation.md).
+
 
 Five destinations: Tuner, Instruments, Spectrum, Metronome, and Settings. Visual and
 motion rules come from [design-system.md](design-system.md); this document defines
@@ -219,8 +218,7 @@ single-needle presentation. Native timers may not clear the target or needle.
   amplitude labels, and millisecond ticks. It is a live window, not a recording.
 - Pause freezes all three main views, peak hold, pitch trace, and waterfall. Resume
   begins a disconnected trace segment.
-- Non-goals: no recording, audio files, playback, timeline scrubbing, or export. No
-  disabled placeholder controls or public half-implemented API are exposed.
+- This professional live tool retains its local freeze controls. Saved measurement review, snapshots and export belong to the shared practice workspace; neither view records PCM or plays recorded audio.
 
 ## 4. Metronome
 
@@ -297,3 +295,12 @@ interruption degrade without a crash. Behavior changes update this file in Engli
   input keeps a retryable UI and never crashes.
 - See [macos-native.md](macos-native.md) for the complete state, fallback, and build
   contract.
+
+## Practice workspace
+
+- One window/navigation-scoped Rust session owns Live/Review, immutable configurations, snapshots and selection statistics. Returning to Live never resumes recording. Selecting a stored point pauses recording and synchronizes every readout/plot to that frame.
+- Lock a reference step or an instrument note/fingering; unlock returns to automatic targets. Cents retain their full precision and octave distance. Tolerance choices are ±2/5/10/20 cents.
+- Record controls remain visible above scrolling content. Mobile entries are on Tuner and Instrument; the original professional analysis tools remain accessible through the file menu. macOS Tuner and Analysis open the same workspace in different tasks.
+- Native JSON open/save and CSV export support all points or a chosen interval. Failed imports leave the current session intact. Files contain analysis frames and metadata, never PCM. File-provider write errors are surfaced; atomic replacement depends on the provider.
+- Up to eight named snapshots survive clearing the timeline. Compatible sample rates and wide-frequency grids may overlay as absolute dBFS or relative-to-peak dB. Statistics split at segment boundaries and exclude held/reference-tone frames; insufficient data is labelled without a score.
+- Backgrounding, leaving capture routes, and engine restarts pause recording. Resuming requires an explicit action. Permission denial offers settings/retry without deleting measurements.

@@ -4,9 +4,11 @@
 
 pub mod api;
 pub mod fingering;
+pub mod measurement_file;
 pub mod metronome;
 pub mod note;
 pub mod pitch;
+pub mod practice;
 pub mod reference;
 pub mod signal;
 pub mod smooth;

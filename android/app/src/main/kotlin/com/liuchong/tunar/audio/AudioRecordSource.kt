@@ -5,6 +5,7 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.os.Process
+import android.util.Log
 
 /**
  * AudioRecord 采集实现（spec-audio §1）：
@@ -15,15 +16,17 @@ class AudioRecordSource(
     private val sampleRate: Int = 44100,
     private val windowSize: Int = 2048,
     private val hopSize: Int = 1024,
-) : PcmSource {
+) : PositionedPcmSource {
 
     @Volatile
     private var running = false
     private var thread: Thread? = null
+    @Volatile private var failureHandler: (() -> Unit)? = null
+    override fun setFailureHandler(handler: () -> Unit) { failureHandler = handler }
 
     // 权限由调用方保证（运行时申请通过后才启动）
     @SuppressLint("MissingPermission")
-    override fun start(onFrame: (FloatArray) -> Unit) {
+    override fun startPositioned(onFrame: (FloatArray, ULong) -> Unit) {
         check(!running) { "AudioRecordSource 已在运行" }
         val minBuf = AudioRecord.getMinBufferSize(
             sampleRate,
@@ -37,7 +40,7 @@ class AudioRecordSource(
             AudioFormat.ENCODING_PCM_FLOAT,
             maxOf(minBuf, windowSize * 4),
         )
-        check(record.state == AudioRecord.STATE_INITIALIZED) { "AudioRecord 初始化失败" }
+        if (record.state != AudioRecord.STATE_INITIALIZED) { record.release(); error("AudioRecord 初始化失败") }
 
         running = true
         thread = Thread {
@@ -46,22 +49,29 @@ class AudioRecordSource(
             val window = FloatArray(windowSize)
             val hop = FloatArray(hopSize)
             var filled = 0
+            var position = 0uL
             try {
                 record.startRecording()
                 while (running) {
                     val n = record.read(hop, 0, hopSize, AudioRecord.READ_BLOCKING)
-                    if (n <= 0) continue
+                    if (n < 0) throw java.io.IOException("音频输入不可用：$n")
+                    if (n == 0) continue
                     // 滑动窗口：左移 n 个采样，填入新 hop
                     System.arraycopy(window, n, window, 0, windowSize - n)
                     System.arraycopy(hop, 0, window, windowSize - n, n)
-                    filled += n
+                    filled = minOf(windowSize, filled + n)
+                    position += n.toULong()
                     if (filled >= windowSize) {
                         // feed 同步消费（UniFFI marshal 会拷贝），下一 hop 才覆写，安全
-                        onFrame(window)
+                        onFrame(window, position)
                     }
                 }
+            } catch (error: Exception) {
+                Log.w("Tunar-Capture", "音频输入已停止", error)
+                failureHandler?.invoke()
             } finally {
-                record.stop()
+                running = false
+                runCatching { record.stop() }
                 record.release()
             }
         }.apply {

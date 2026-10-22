@@ -2,6 +2,8 @@ import SwiftUI
 
 /// 乐器面板（design-system §6.6）：乐器切换条 + 型号控件 + 乐器图示 + 目标读数与表盘成组。
 struct InstrumentView: View {
+    @EnvironmentObject private var practice: PracticeWorkspaceModel
+    @State private var showingPractice = false
     @Environment(\.lumen) private var palette
     @StateObject private var vm = InstrumentViewModel()
 
@@ -18,7 +20,17 @@ struct InstrumentView: View {
                         onSelect: vm.selectInstrument
                     )
 
-                    controlRow
+                    HStack {
+                        controlRow
+                        Button("设为目标 · 练音") {
+                            if vm.kind == .wind, let note = vm.scaleDiagramNote {
+                                practice.lockInstrument(midi: note.midi, instrumentId: vm.instrumentId, variantId: vm.variantId, fingeringId: note.id)
+                            } else if let item = vm.strings.first(where: { $0.index - 1 == vm.selectedStringIndex }) ?? vm.strings.first {
+                                practice.lockInstrument(midi: item.midi, instrumentId: vm.instrumentId, variantId: vm.tuningId, fingeringId: nil)
+                            }
+                            showingPractice = true
+                        }.font(.caption)
+                    }
 
                     figureArea
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -41,6 +53,12 @@ struct InstrumentView: View {
                 .padding(.top, Lumen.Spacing.sm)
                 .padding(.bottom, Lumen.Spacing.xs)
             }
+        }
+        .fullScreenCover(isPresented: $showingPractice) {
+            NavigationStack {
+                PracticeWorkspaceView(model: practice)
+                    .toolbar { ToolbarItem(placement: .cancellationAction) { Button("关闭") { showingPractice = false } } }
+            }.onDisappear { practice.stopReference() }
         }
         .onAppear {
             if !appliedLaunchOverride, let id = LaunchOverrides.initialInstrument {

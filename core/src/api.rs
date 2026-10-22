@@ -10,6 +10,7 @@ use crate::{
     fingering, metronome, note, pitch, reference, signal, smooth, solfege, spectrum, tools, tuning,
 };
 
+pub use crate::practice::*;
 pub use crate::signal::SignalState;
 
 // ============================ 枚举 ============================
@@ -294,7 +295,7 @@ pub struct TunarConfig {
 }
 
 /// 一次音高事件。
-#[derive(Debug, Clone, uniffi::Record)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, uniffi::Record)]
 pub struct TunarEvent {
     /// 平滑后频率（Hz）。
     pub freq_hz: f64,
@@ -317,7 +318,7 @@ pub struct TunarEvent {
 }
 
 /// 一个泛音/独立音（v4 新增）。
-#[derive(Debug, Clone, uniffi::Record)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, uniffi::Record)]
 pub struct Partial {
     /// 频率（Hz）。
     pub freq_hz: f64,
@@ -332,7 +333,7 @@ pub struct Partial {
 }
 
 /// 一次完整分析帧（v4 新增）：feed 事件 + 频谱 + 泛音 + 和弦。
-#[derive(Debug, Clone, uniffi::Record)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, uniffi::Record)]
 pub struct AnalysisFrame {
     /// 同 feed 语义（无效输入为 None）。
     pub tuner: Option<TunarEvent>,

@@ -1,8 +1,7 @@
 # TUNAR design system — Aurora v4.1
 
-Future desktop hierarchy is proposed in [practice workspace](practice-workspace.md) §7:
-pitch for tuning, target traces for practice, and spectrum comparison for analysis. Current
-component rules remain unchanged; the proposal has no implementation or native visual acceptance.
+Desktop task hierarchy is implemented in the shared [practice workspace](practice-workspace.md). Runtime visual evidence is tracked separately in the implementation report.
+
 
 > Cross-platform source of truth for Android Compose and Apple SwiftUI. A UI
 > implementation that conflicts with this document is a defect.
@@ -320,3 +319,7 @@ o'clock (the in-tune, zero-cent datum) while three concentric echo arcs spread o
 Android reference implementations live under `ui/theme`, `ui/common`, `ui/tuner`, and
 `ui/metronome`. Apple implementations must preserve the same behavior, not necessarily
 the same container layout.
+
+## Practice desktop hierarchy
+
+Pitch name, actual cents and target precede diagnostics. Tuning gives the readout priority; practice adds target-relative cents and a separate dBFS trace; analysis prioritizes spectral overlays and paired envelopes. At 1040pt content width the instrument/snapshot inspector moves beside the main panel, otherwise it stacks below. Controls remain above the scroll region; the window minimum is 800×600 and default is 1280×820. One needle clamps visually while numeric cents and edge arrows preserve out-of-range meaning. Space toggles recording, arrows step frames, Shift-arrows move one second; text editing and open sheets retain their native keys.

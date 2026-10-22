@@ -1,5 +1,10 @@
 import AVFoundation
 import Combine
+#if os(macOS)
+import AppKit
+#else
+import UIKit
+#endif
 
 func isUsableCaptureFormat(sampleRate: Double, channelCount: UInt32) -> Bool {
     sampleRate.isFinite && sampleRate > 0 && channelCount > 0
@@ -38,13 +43,14 @@ private final class AtomicInt: @unchecked Sendable {
 final class CaptureLifecycleGate: @unchecked Sendable {
     private let lock = NSLock()
     private var references = 0
+    private var enabled = true
     private var generation = 0
 
     /// 首个订阅者返回新启动令牌；后续共享订阅者不重复启动。
     func acquire() -> Int? {
         lock.lock()
         defer { lock.unlock() }
-        let needsStart = references == 0
+        let needsStart = references == 0 && enabled
         references += 1
         guard needsStart else { return nil }
         generation &+= 1
@@ -62,11 +68,27 @@ final class CaptureLifecycleGate: @unchecked Sendable {
         return true
     }
 
+    /// 保留订阅身份但停止硬件；恢复时生成新令牌。
+    func setEnabled(_ value: Bool) -> (stop: Bool, start: Int?) {
+        lock.lock(); defer { lock.unlock() }
+        guard enabled != value else { return (false, nil) }
+        enabled = value; generation &+= 1
+        return (references > 0 && !value, references > 0 && value ? generation : nil)
+    }
+
+    /// 重试不丢共享订阅；使旧资源和未提交启动失效。
+    func restart() -> Int? {
+        lock.lock(); defer { lock.unlock() }
+        guard enabled, references > 0 else { return nil }
+        generation &+= 1
+        return generation
+    }
+
     /// 令牌仍属于当前有效会话时，在同一把锁内原子提交启动结果。
     func commitIfCurrent(_ token: Int, _ body: () -> Void) -> Bool {
         lock.lock()
         defer { lock.unlock() }
-        guard references > 0, token == generation else { return false }
+        guard enabled, references > 0, token == generation else { return false }
         body()
         return true
     }
@@ -80,6 +102,8 @@ final class AudioFrameRing: @unchecked Sendable {
     private let capacity: Int
     private let window: UnsafeMutablePointer<Float>
     private let slots: UnsafeMutablePointer<Float>
+    private let positions: UnsafeMutablePointer<UInt64>
+    private var totalSamples: UInt64 = 0
     private let published = AtomicInt(0)
     private let consumed = AtomicInt(0)
     private var writeIndex = 0
@@ -92,6 +116,8 @@ final class AudioFrameRing: @unchecked Sendable {
         self.hopSize = hopSize
         self.capacity = capacity
         window = .allocate(capacity: windowSize)
+        positions = .allocate(capacity: capacity)
+        positions.initialize(repeating: 0, count: capacity)
         slots = .allocate(capacity: windowSize * capacity)
         window.initialize(repeating: 0, count: windowSize)
         slots.initialize(repeating: 0, count: windowSize * capacity)
@@ -101,6 +127,7 @@ final class AudioFrameRing: @unchecked Sendable {
     func push(_ samples: UnsafePointer<Float>, count: Int) {
         guard count > 0 else { return }
         for sampleIndex in 0..<count {
+            totalSamples &+= 1
             window[writeIndex] = samples[sampleIndex]
             writeIndex += 1
             if writeIndex == windowSize { writeIndex = 0 }
@@ -123,13 +150,17 @@ final class AudioFrameRing: @unchecked Sendable {
 
     /// 消费线程调用；数组构造发生在工作线程，不在音频回调。
     @discardableResult
-    func consume(_ body: ([Float]) -> Void) -> Bool {
+    func consume(_ body: ([Float]) -> Void) -> Bool { consumeStamped { samples, _ in body(samples) } }
+
+    /// 时间戳随槽位发布，满载丢帧后不压缩音频时间。
+    @discardableResult
+    func consumeStamped(_ body: ([Float], UInt64) -> Void) -> Bool {
         let readSequence = consumed.loadRelaxed()
         let writeSequence = published.loadAcquire()
         guard readSequence < writeSequence else { return false }
         let slotIndex = readSequence % capacity
         let start = slots.advanced(by: slotIndex * windowSize)
-        body(Array(UnsafeBufferPointer(start: start, count: windowSize)))
+        body(Array(UnsafeBufferPointer(start: start, count: windowSize)), positions[slotIndex])
         consumed.storeRelease(readSequence + 1)
         return true
     }
@@ -144,10 +175,13 @@ final class AudioFrameRing: @unchecked Sendable {
         for index in 0..<windowSize {
             destination[index] = window[(writeIndex + index) % windowSize]
         }
+        positions[slotIndex] = totalSamples
         published.storeRelease(writeSequence + 1)
     }
 
     deinit {
+        positions.deinitialize(count: capacity)
+        positions.deallocate()
         window.deinitialize(count: windowSize)
         slots.deinitialize(count: windowSize * capacity)
         window.deallocate()
@@ -162,9 +196,14 @@ private final class AnalysisWorker: @unchecked Sendable {
     private let engineLock = NSLock()
     private let engine: PitchEngine
     private let queue = DispatchQueue(label: "com.liuchong.tuner.audio-analysis")
-    private let onFrame: @Sendable (AnalysisFrame) -> Void
+    private let onFrame: @Sendable (PracticeCaptureFrame) -> Void
+    private var referenceTail = 0
+    private var activeConfig: TunarConfig
+    private let generation: UInt64
 
-    init(config: TunarConfig, onFrame: @escaping @Sendable (AnalysisFrame) -> Void) {
+    init(config: TunarConfig, generation: UInt64, onFrame: @escaping @Sendable (PracticeCaptureFrame) -> Void) {
+        self.activeConfig = config
+        self.generation = generation
         ring = AudioFrameRing(
             windowSize: 2_048,
             hopSize: Int(config.frameHopSamples),
@@ -178,10 +217,16 @@ private final class AnalysisWorker: @unchecked Sendable {
         running.storeRelease(1)
         queue.async { [self] in
             while running.loadAcquire() == 1 {
-                var result: AnalysisFrame?
-                let consumed = ring.consume { samples in
+                var result: PracticeCaptureFrame?
+                let consumed = ring.consumeStamped { samples, position in
                     engineLock.lock()
-                    result = engine.analyze(pcm: samples)
+                    var frame = engine.analyze(pcm: samples)
+                    frame.samplePosition = position
+                    let reference = ReferenceToneActivity.shared.isActive
+                    let affected = reference || referenceTail > 0
+                    // 覆盖输入窗及最多4个待分析槽，停止播放后留出保守余响保护。
+                    referenceTail = reference ? 8 : max(0, referenceTail - 1)
+                    result = PracticeCaptureFrame(frame: frame, config: activeConfig, generation: generation, referenceActive: affected)
                     engineLock.unlock()
                 }
                 if let result {
@@ -195,6 +240,10 @@ private final class AnalysisWorker: @unchecked Sendable {
 
     func applyConfig(_ config: TunarConfig) {
         engineLock.lock()
+        var applied = config
+        applied.sampleRate = activeConfig.sampleRate
+        applied.frameHopSamples = activeConfig.frameHopSamples
+        activeConfig = applied
         engine.setA4(hz: config.a4Hz)
         engine.setSolfege(system: config.solfege, key: config.key)
         engine.setNoiseGate(dbfs: config.noiseGateDbfs)
@@ -241,15 +290,52 @@ final class CaptureHub: ObservableObject, @unchecked Sendable {
     @Published private(set) var running = false
     @Published private(set) var startFailed = false
     let events = PassthroughSubject<AnalysisFrame, Never>()
+    let measurements = PassthroughSubject<PracticeCaptureFrame, Never>()
 
     private let lifecycle = CaptureLifecycleGate()
     private var worker: AnalysisWorker?
     private var audioEngine: AVAudioEngine?
     private(set) var config: TunarConfig
     private let audioQueue = DispatchQueue(label: "com.liuchong.tuner.audio-setup")
+    private var activityObservers = Set<AnyCancellable>()
 
     private init() {
         config = defaultTunarConfig()
+        #if os(macOS)
+        let inactive = NSApplication.didResignActiveNotification
+        let active = NSApplication.didBecomeActiveNotification
+        #else
+        let inactive = UIApplication.willResignActiveNotification
+        let active = UIApplication.didBecomeActiveNotification
+        #endif
+        NotificationCenter.default.publisher(for: inactive).receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.setEnabled(false) }.store(in: &activityObservers)
+        NotificationCenter.default.publisher(for: active).receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.setEnabled(true) }.store(in: &activityObservers)
+        NotificationCenter.default.publisher(for: .AVAudioEngineConfigurationChange).receive(on: DispatchQueue.main)
+            .sink { [weak self] notification in
+                guard let self, let engine = notification.object as? AVAudioEngine,
+                      engine === self.audioEngine, !engine.isRunning else { return }
+                self.retryCapture()
+            }.store(in: &activityObservers)
+        #if os(iOS)
+        NotificationCenter.default.publisher(for: AVAudioSession.interruptionNotification).receive(on: DispatchQueue.main)
+            .sink { [weak self] notification in
+                let type = (notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt).flatMap(AVAudioSession.InterruptionType.init(rawValue:))
+                if type == .began { self?.setEnabled(false) }
+                else if type == .ended {
+                    Task { @MainActor [weak self] in
+                        if UIApplication.shared.applicationState == .active { self?.setEnabled(true) }
+                    }
+                }
+            }.store(in: &activityObservers)
+        #endif
+    }
+
+    private func setEnabled(_ value: Bool) {
+        let change = lifecycle.setEnabled(value)
+        if change.stop { stopLocked() }
+        if let token = change.start { startLocked(token: token, initialConfig: config) }
     }
 
     func acquire() {
@@ -262,6 +348,14 @@ final class CaptureHub: ObservableObject, @unchecked Sendable {
 
     func release() {
         if lifecycle.release() { stopLocked() }
+    }
+
+    /// 保留所有页面的订阅，显式重建一次硬件。
+    func retryCapture() {
+        guard let token = lifecycle.restart() else { return }
+        stopLocked()
+        startFailed = false
+        startLocked(token: token, initialConfig: config)
     }
 
     /// 设置变更即时下发（无需重启采集）。
@@ -318,8 +412,9 @@ final class CaptureHub: ObservableObject, @unchecked Sendable {
             key: initialConfig.key,
             temperament: initialConfig.temperament
         )
-        let analysisWorker = AnalysisWorker(config: actualConfig) { [weak self] frame in
-            self?.events.send(frame)
+        let analysisWorker = AnalysisWorker(config: actualConfig, generation: UInt64(token)) { [weak self] packet in
+            self?.events.send(packet.frame)
+            self?.measurements.send(packet)
         }
         let ring = analysisWorker.ring
 

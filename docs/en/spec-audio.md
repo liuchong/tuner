@@ -83,7 +83,7 @@ causes a quiet start failure and session release, followed by retry on the next 
   universal macOS slice, and adds it to the same XCFramework. Both architectures export
   the identical UniFFI contract.
 - The microphone stops when the window is inactive or the final capture section leaves.
-  Background capture, manual device routing, recording, and export are not supported.
+  Background capture, manual device routing and PCM recording are not supported. Analysis measurements may be exported by the practice workspace.
 
 ## 6. Change log
 
@@ -91,3 +91,13 @@ causes a quiet start failure and session release, followed by retry on the next 
 - 2026-07-28: twelve cross-platform synthesized metronome timbres.
 - 2026-07-30: documentation localized under the TUNAR / 吐呐 brand; technical audio
   behavior is unchanged.
+
+## Measurement delivery
+
+The existing analysis worker publishes a frame with the configuration used under the same engine lock and its capture generation. The practice worker serializes state/codec/statistics outside the audio callback. No second FFT or capture stream is added. Reference-tone output is marked and excluded from playing statistics. Configuration and capture discontinuities create segments; stale generations are rejected.
+
+Capture snapshots carry the cumulative number of samples actually read. Apple ring slots retain this position even when full slots drop a snapshot; Android reports the accumulated read count, including short reads. Native delivery replaces only the frame timestamp, never pitch or statistics. Trace/statistics do not bridge intervals longer than 0.25 seconds.
+
+Reference-output markers conservatively cover eight subsequent analysis windows after playback stops, protecting against buffered windows and the input-window tail. Those windows reduce coverage instead of producing a practice score.
+
+Capture retry restarts hardware while retaining shared subscription identities. Asynchronous Android read failures clear running state and pause measurement; retries do not depend on the reference count reaching zero. Apple hardware-format changes and iOS interruptions invalidate the startup generation and rebuild the capture engine. Recording remains paused after recovery.

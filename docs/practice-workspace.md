@@ -1,8 +1,9 @@
 # 练音、测量回看与桌面工作区设计
 
-状态：**设计提案，尚未实现或运行验收**。本轮仅增加设计，不改变当前应用、UniFFI 合同或
-现有规格的已实现行为。本文规定下一版的产品方向；开始实现前按本方案补齐逐文件施工手册和
-测试。当前专业分析仍遵守 `spec-ui.md` §3 的非目标约束，不得提前放出保存、回看或导出入口。
+状态：**P1/P2 已实现，自动测试与本机原生验收完成**；真机与无障碍环境缺口见
+[验收报告](verification/practice-workspace/report.md)。精确施工与唯一进度入口见
+[施工手册](practice-implementation.md)。本次实现目标音锁定、测量会话、回看、比较、统计、
+保存导出及桌面布局；仍不保存原始 PCM、不提供音频回放。P3 保持后续候选。
 
 ## 1. 用户目标与取舍
 
@@ -16,9 +17,9 @@
 本地保存与导出；P3 指法变体、音程比例参考和参考音音色。P1/P2 是产品次序，不是本轮
 实现或验收批次。暂不扩展成录音棚、伴奏播放器、乐谱编辑器或乐器制造模拟器。
 
-## 2. 当前实现快照与差异
+## 2. 设计前基线与差异
 
-基线提交 `fa20d55`，以下是源代码事实，不代表本轮真机验证。代码图谱工具未连接，按精确
+基线提交 `fa20d55`，以下保留设计前的源代码事实，不代表实现后的当前状态。代码图谱工具未连接，按精确
 文件和符号直接查读；未据此作全仓库穷尽性结论。
 
 | 现有入口 / 符号 | 当前责任 | 设计差异 |
@@ -33,7 +34,7 @@
 | `macos/TunarMac/Views/DesktopAnalysisView.swift:14` | 页面持有历史，摘要读取当前 VM | 历史游标选中后，所有测量面板读取同一历史帧 |
 | `core/src/reference.rs:26`，`list` | 当前 A4 与平均律的参考音列表 | 保持当前能力；音色与音程参考另行扩展 |
 
-当前关系：
+设计前关系：
 
 ```mermaid
 flowchart LR
@@ -45,7 +46,7 @@ flowchart LR
     Analysis --> History[页面级展示历史]
 ```
 
-目标关系（虚线节点为计划新增）：
+已实现关系：
 
 ```mermaid
 flowchart LR
@@ -57,8 +58,6 @@ flowchart LR
     Cursor --> Views[音准 / 频谱 / 电平 / 指法 / 轨迹]
     Session --> Snapshots[命名比较快照]
     Session --> Export[版本化测量数据]
-    classDef planned stroke-dasharray: 4 4
-    class Session,Cursor,Snapshots,Export planned
 ```
 
 ## 3. 目标音：预览、自动识别和锁定
@@ -117,7 +116,7 @@ Review 的音名、Hz、音分、电平、指法、频谱与峰值必须来自**
 ### 4.3 保存与导出
 
 P2 采用版本化 UTF-8 JSON 测量文件；包含 schema_version、配置段、原始测量点、快照与选区，
-不含音频。Rust 负责格式解析 / 校验，原生层负责文件选择与原子写入。未知版本、截断、
+不含音频。Rust 负责格式解析 / 校验，原生层负责文件选择与写入错误反馈；先编码完整内容，替换原子性由系统文件提供者决定。未知版本、截断、
 非有限数字、超容量数组或无效引用拒绝导入并保留当前会话；不猜测修复。
 
 CSV 导出全会话或选区：segment_id、time_seconds、state、is_held、freq_hz、target_hz、
@@ -211,19 +210,20 @@ P3 指法按实际音高与指法变体分离：乐器族、尺寸 / 调性、�
 
 ## 9. 后续模块与接口边界
 
-以下均为**拟新增**，不是已导出的 API；接口实施时同步 `spec-core.md` 附录及生成绑定。
+以下模块已实现。精确导出方法与字段见[施工手册 §2](practice-implementation.md#2-精确接口和状态)，
+`spec-core.md` 与生成绑定已同步；表内名称以实际实现为准。
 
-| 模块 / 类型 | 拟定责任与入口 |
+| 模块 / 类型 | 已实现责任与入口 |
 |---|---|
-| `core/src/practice.rs`，`PracticeSession` | 目标解析、记录状态机、有界存储、选区统计；拟定 `set_target`、`start`、`pause`、`finish`、`append`、`read_page`、`summarize` |
+| `core/src/practice.rs`，`PracticeSession` | 目标解析、记录状态机、有界存储、选区统计；`configure`、`lock_reference`、`lock_instrument`、`start`、`pause`、`finish`、`observe`、`read_page`、`summarize` |
 | `core/src/measurement_file.rs` | 版本化 JSON / CSV 编解码与容量校验，禁止平台文件 API |
-| `MeasurementPoint` | `id: u64`、`segment_id: u32`、`config_id: u32`、`sample_position: u64`、`sample_rate_hz: f64`、`frame: AnalysisFrame`、`target_hz: Option<f64>`、`reference_tone_active: bool` |
-| `PracticeConfigSnapshot` | A4、律制、目标模式 / 步序 / Hz、乐器 / 型号 / 变体、容差、采集代次和轴定义；历史不可变 |
-| `MeasurementSnapshot` | 独立保存所选帧与配置，即使清空会话仍可用；不引用环形缓冲地址 |
+| `PracticePoint` | `id: u64`、`segment_id: u32`、`config_id: u32`、`time_seconds: f64`（采样位置/采样率在 frame 内）、`frame: AnalysisFrame`、`target_hz: Option<f64>`、`reference_active: bool` |
+| `PracticeConfig` / `PracticeSegment` | A4、律制、目标模式 / 步序 / Hz、乐器 / 型号 / 变体、容差、采集代次和轴定义；历史不可变 |
+| `PracticeSnapshot` | 独立保存所选帧与配置，即使清空会话仍可用；不引用环形缓冲地址 |
 | Apple 窗口级 `PracticeWorkspaceModel` | 只经 UniFFI 调用 core；拥有会话句柄、显示游标、布局与文件对话框；切页注入同一实例 |
 | Android `PracticeWorkspaceViewModel` | 导航作用域内同一会话；接收共享采集流，权限与生命周期仍由原生负责 |
 
-目标树：在现有 `core/src/` 增加上述两个模块及 API 导出；在 Apple 共享源码与 Android
+实现树：在现有 `core/src/` 增加上述两个模块及 API 导出；在 Apple 共享源码与 Android
 `ui/` 增加练音工作区模型和面板；macOS `DesktopRootView` 注入同一工作区而非每页各建。
 现有展示缓存继续服务短时实时图，不能成为测量存储或统计真值。实时回调仍只写预分配
 环形缓冲；会话追加、文件编码、统计、FFI 分页都在分析 / 工作线程，不在音频回调执行。
@@ -236,14 +236,16 @@ P3 指法按实际音高与指法变体分离：乐器族、尺寸 / 调性、�
 - [x] 数据与内存边界、保存语义、责任划分与可观察验收项。
 - [x] 中英双语设计入口及后续里程碑。
 
-实现清单（本轮均未施工）：
+实现清单：
 
-- [ ] I1 按本文补齐精确方法签名、逐文件施工片段与全部测试用例，再统一实现。
-- [ ] I2 core 目标解析、会话记录、统计、快照、版本化文件及 UniFFI。
-- [ ] I3 三端共享会话接线、桌面任务布局与移动回看。
+- [x] I1 按本文补齐精确方法签名、逐文件施工片段与全部测试用例，再统一实现。
+- [x] I2 core 目标解析、会话记录、统计、快照、版本化文件及 UniFFI。
+- [x] I3 三端共享会话接线、桌面任务布局与移动回看。
 - [ ] I4 指法变体、参考音色等后续扩展按各自范围设计并实现。
 
-验收清单（本轮均未执行，不以设计完成代替）：
+完整环境验收清单：下列复合项只有全部平台与环境均有证据才勾选。
+自动测试和已执行的桌面/模拟器结果见[逐项记录](../integration_test/practice_workspace.md)；
+未勾选不表示功能未实现。
 
 - [ ] A1 锁定 D4 输入逐渐偏至 D#4 及 D5，目标不跳；数值不折叠，指针越界可辨。
 - [ ] A2 同音级 +3 / -7 cents 的合成输入产生不同轨迹；静音 / Holding 为断点，非长音。
@@ -259,4 +261,5 @@ P3 指法按实际音高与指法变体分离：乐器族、尺寸 / 调性、�
   音名不压指针、目标图完整、记录控制可见；原生真机 / 桌面截图逐项验收。
 - [ ] A12 参考音泄漏不计成绩；权限拒绝、输入失败、文件写入失败和后台返回保留清晰状态。
 
-本文只完成设计交付；I / A 清单是未来实现与运行证据的独立状态，不启动自动目标。
+P1/P2 的实现与可运行环境验收已交付；I4/P3 不属于本轮范围。真机、系统中断和
+辅助功能组合仍保留待验状态，不以桌面或合成输入结果代替。

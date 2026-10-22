@@ -78,6 +78,7 @@ import java.util.Locale
 /** 乐器面板（spec-ui §2）：乐器切换条 + 型号控件 + 乐器图示 + 目标读数与表盘成组。 */
 @Composable
 fun InstrumentScreen(
+    onPractice: (Int, String, String, Int?) -> Unit = { _, _, _, _ -> },
     viewModel: InstrumentViewModel = run {
         val context = LocalContext.current.applicationContext
         viewModel(initializer = {
@@ -110,6 +111,16 @@ fun InstrumentScreen(
             ) {
                 InstrumentSwitcher(state, viewModel::selectInstrument)
                 ControlRow(state, viewModel)
+                androidx.compose.material3.TextButton(onClick = {
+                    if (state.kind == InstrumentKind.WIND) {
+                        val note = state.notes.firstOrNull { it.fingeringId == state.mainPreviewFingeringId }
+                            ?: state.notes.firstOrNull { it.active } ?: state.notes.firstOrNull()
+                        note?.let { onPractice(it.midi, state.instrumentId, state.variantId, it.fingeringId) }
+                    } else {
+                        val note = state.strings.getOrNull(state.selectedStringIndex ?: 0)
+                        note?.let { onPractice(it.midi, state.instrumentId, state.tuningId, null) }
+                    }
+                }) { Text("设为目标 · 练音") }
                 Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
                     FigureArea(state, viewModel)
                 }

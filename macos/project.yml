@@ -9,6 +9,7 @@ targets:
     platform: macOS
     sources:
       - TunarMac
+      - path: ../ios/Tunar/Practice
       - path: ../ios/TunarCore/Sources/TunarCore/tunar_core.swift
       - path: ../ios/Tunar/Bridge/EngineBridge.swift
       - path: ../ios/Tunar/Bridge/TickSounds.swift
@@ -53,6 +54,7 @@ targets:
     platform: macOS
     sources:
       - TunarMacTests
+      - path: ../ios/TunarTests/PracticeWorkspaceTests.swift
     dependencies:
       - target: TunarMac
     settings:

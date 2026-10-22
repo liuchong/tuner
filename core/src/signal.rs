@@ -8,7 +8,7 @@ use crate::pitch;
 pub const GATE_HYSTERESIS_DB: f32 = 3.0;
 
 /// 输入信号状态。
-#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize, uniffi::Enum)]
 pub enum SignalState {
     /// 无可信信号。
     Quiet,

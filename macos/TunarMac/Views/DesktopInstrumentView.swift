@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct DesktopInstrumentView: View {
+    var onPractice: (Int32, String, String, Int32?) -> Void = { _, _, _, _ in }
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var vm = InstrumentViewModel()
     @StateObject private var access = MacMicrophoneAccess()
@@ -13,6 +14,13 @@ struct DesktopInstrumentView: View {
                         .font(.largeTitle.bold())
                     Text("定弦和指法来自共享 Rust 预设")
                         .foregroundStyle(.secondary)
+                    Button("设为练习目标，打开练音") {
+                        if vm.kind == .wind, let note = vm.scaleDiagramNote {
+                            onPractice(note.midi, vm.instrumentId, vm.variantId, note.id)
+                        } else if let item = vm.strings.first(where: { $0.index - 1 == vm.selectedStringIndex }) ?? vm.strings.first {
+                            onPractice(item.midi, vm.instrumentId, vm.tuningId, nil)
+                        }
+                    }.buttonStyle(.borderedProminent)
                     MicrophoneStatusBanner(access: access, onRetry: retryCapture)
                     MacCard {
                         VStack(alignment: .leading, spacing: 14) {
@@ -56,10 +64,7 @@ struct DesktopInstrumentView: View {
 
     private func retryCapture() {
         guard scenePhase == .active else { return }
-        vm.releaseCapture()
-        access.request {
-            vm.startCapture()
-        }
+        access.request { vm.startCapture(); CaptureHub.shared.retryCapture() }
     }
 
     @ViewBuilder

@@ -2,6 +2,9 @@ import SwiftUI
 
 struct DesktopRootView: View {
     @State private var selection = DesktopSection.defaultSelection
+    @StateObject private var practice = PracticeWorkspaceModel()
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var pendingTask: PracticeTask?
 
     var body: some View {
         NavigationSplitView {
@@ -17,13 +20,15 @@ struct DesktopRootView: View {
             Group {
                 switch selection {
                 case .tuner:
-                    DesktopTunerView {
-                        selection = DesktopNavigation.openAnalysis(from: selection)
-                    }
+                    DesktopPracticeWorkspace(model: practice)
                 case .instruments:
-                    DesktopInstrumentView()
+                    DesktopInstrumentView(onPractice: { midi, instrument, variant, fingering in
+                        practice.lockInstrument(midi: midi, instrumentId: instrument, variantId: variant, fingeringId: fingering)
+                        pendingTask = .practice
+                        selection = .tuner
+                    })
                 case .analysis:
-                    DesktopAnalysisView()
+                    DesktopPracticeWorkspace(model: practice)
                 case .metronome:
                     DesktopMetronomeView()
                 case .tools:
@@ -37,5 +42,18 @@ struct DesktopRootView: View {
             .animation(.easeInOut(duration: 0.15), value: selection)
         }
         .tint(MacTheme.accent)
+        .onAppear { practice.task = .tune; updateCapture() }
+        .onChange(of: selection) { _, value in
+            if let pendingTask { practice.task = pendingTask; self.pendingTask = nil }
+            else if value == .tuner { practice.task = .tune }
+            else if value == .analysis { practice.task = .analyze }
+            updateCapture()
+        }
+        .onChange(of: scenePhase) { _, _ in updateCapture() }
+        .onDisappear { practice.suspend() }
+    }
+    private func updateCapture() {
+        if scenePhase == .active && [.tuner, .instruments, .analysis].contains(selection) { practice.requestCapture() }
+        else { practice.suspend() }
     }
 }

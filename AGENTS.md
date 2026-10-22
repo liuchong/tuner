@@ -15,7 +15,7 @@ iOS target/scheme `Tunar`、Bundle ID `com.liuchong.tunar*`、UniFFI 绑定 `tun
 core/            Rust crate `tunar-core`：全部业务逻辑（DSP/唱名/预设/节拍引擎），UniFFI 导出
 android/         Android App（Kotlin + Jetpack Compose）
   app/           UI 与音频桥接
-  core-binding/  UniFFI Kotlin 绑定 + 各 ABI .so
+  core-binding/  UniFFI Kotlin 文本绑定 + 本机生成的各 ABI .so（不入库）
   design/        图标源文件（SVG，几何唯一来源 icon-mark.svg），
                  用 scripts/generate-icons.sh 重新生成三端全部图标资源
 ios/             iOS SwiftUI App + UniFFI Swift 绑定

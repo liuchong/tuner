@@ -1,7 +1,7 @@
 # 吐呐 / TUNAR 设计系统 —「Aurora / 极光」v4.1
 
-后续桌面信息层级提案见[练音工作区](practice-workspace.md) §7：调音突出音准、练音突出
-目标轨迹、分析突出频谱比较。当前组件规则不变；提案尚未实现或完成原生视觉验收。
+桌面任务层级接入共享[练音工作区](practice-workspace.md)，运行与视觉证据在施工验收记录中单独列出。
+
 
 > 跨平台设计圣经。Android（Compose）与后续 iOS/macOS（SwiftUI）共用同一套设计 token 与组件规格。
 > 修改 UI 前必读；实现与本文档不一致视为缺陷（见 .agents/rules/docs-sync.md）。
@@ -319,3 +319,7 @@ macOS 使用 200–240pt 侧栏承载六项（移动端五个 tab 加「小工�
 | 触觉 | `performHapticFeedback` | iOS `UIImpactFeedbackGenerator`；macOS 静默适配 |
 
 Android 落点：`ui/theme/Theme.kt`（`TunarTheme`）、`ui/common/AuroraBackground.kt`、`ui/tuner/TunerDial.kt`、`ui/tuner/PitchRibbon.kt`、`ui/tuner/KeySelectorSheet.kt`、`ui/metronome/Pendulum.kt`、`ui/common/StatusChip.kt`、`ui/common/Haptics.kt`。
+
+## 桌面练音层级
+
+音名、真实音分和目标先于诊断信息。调音突出读数；练音加入目标音分轨迹与独立dBFS轨迹；分析突出频谱叠加和双包络。内容宽度达到1040pt时乐器/快照检查器并排，否则纵向折叠。控制区固定在滚动区上方，窗口最小800×600，默认1280×820。单指针仅视觉限幅，数字和边界箭头保留超量程含义。空格控制记录，左右逐点，Shift左右移动一秒；文本输入和系统sheet保留原生按键。

@@ -111,6 +111,7 @@ fun noteNameText(noteName: String) = buildAnnotatedString {
 @OptIn(ExperimentalMaterial3Api::class)
 fun TunerScreen(
     onOpenSpectrum: () -> Unit = {},
+    onOpenPractice: () -> Unit = {},
     viewModel: TunerViewModel = viewModel(initializer = {
         TunerViewModel(stream = CaptureHub)
     }),
@@ -372,6 +373,7 @@ fun TunerScreen(
                     // 区间距加权分散（design-system §5 填充率纪律，避免底部堆空）
                     Spacer(modifier = Modifier.weight(1f))
 
+                    androidx.compose.material3.TextButton(onClick = onOpenPractice) { Text("打开练音工作区") }
                     // 频谱分析带（真实 FFT 数据，加高到 ~18-20% 屏高）
                     SpectrumBand(
                         spectrumDb = state.displaySpectrumDb,

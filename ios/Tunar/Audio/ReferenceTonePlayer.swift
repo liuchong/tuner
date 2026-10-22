@@ -40,6 +40,7 @@ final class ReferenceTonePlayer: ReferenceTonePlaying {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) { [weak self] in
             guard let self, token == self.changeToken else { return }
             self.playerNode.stop()
+            ReferenceToneActivity.shared.set(self, active: false)
         }
     }
 
@@ -66,11 +67,15 @@ final class ReferenceTonePlayer: ReferenceTonePlaying {
             playerNode.scheduleBuffer(buffer, at: nil, options: .loops)
             playerNode.volume = 0
             playerNode.play()
+            ReferenceToneActivity.shared.set(self, active: true)
             fade(to: gain, token: changeToken)
         } catch {
+            ReferenceToneActivity.shared.set(self, active: false)
             playerNode.stop()
         }
     }
+
+    deinit { ReferenceToneActivity.shared.set(self, active: false) }
 
     private func fade(to target: Float, token: Int) {
         let start = playerNode.volume

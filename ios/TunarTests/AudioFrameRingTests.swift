@@ -2,6 +2,18 @@ import XCTest
 @testable import Tunar
 
 final class AudioFrameRingTests: XCTestCase {
+    func testDroppedWindowsDoNotCompressCaptureTime() {
+        let ring = AudioFrameRing(windowSize: 8, hopSize: 4, capacity: 1)
+        let first = Array(repeating: Float(0.1), count: 16)
+        first.withUnsafeBufferPointer { ring.push($0.baseAddress!, count: $0.count) }
+        var positions: [UInt64] = []
+        XCTAssertTrue(ring.consumeStamped { _, position in positions.append(position) })
+        let next = Array(repeating: Float(0.1), count: 4)
+        next.withUnsafeBufferPointer { ring.push($0.baseAddress!, count: $0.count) }
+        XCTAssertTrue(ring.consumeStamped { _, position in positions.append(position) })
+        XCTAssertEqual(positions, [8, 20])
+    }
+
     func testProducesOverlappingPreallocatedWindows() {
         let ring = AudioFrameRing(windowSize: 2_048, hopSize: 1_024, capacity: 4)
         let samples = (0..<3_072).map(Float.init)

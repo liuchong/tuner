@@ -14,6 +14,21 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.ComponentActivity
+import androidx.core.content.ContextCompat
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
+import com.liuchong.tunar.audio.AudioTrackReferenceTonePlayer
+import com.liuchong.tunar.ui.practice.PracticeWorkspaceViewModel
+import com.liuchong.tunar.ui.practice.PracticeWorkspaceScreen
+import com.liuchong.tunar.ui.practice.PracticePresentation
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -49,6 +64,21 @@ fun AppNav() {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
+    val context = LocalContext.current
+    val practice: PracticeWorkspaceViewModel = viewModel(viewModelStoreOwner = context as ComponentActivity)
+    val player = remember { AudioTrackReferenceTonePlayer(context.applicationContext) }
+    DisposableEffect(practice) {
+        practice.setPlayer(player)
+        onDispose { practice.suspend() }
+    }
+    fun updateCapture() {
+        com.liuchong.tunar.audio.CaptureHub.setEnabled(PracticePresentation.isCaptureRoute(currentRoute))
+        if (PracticePresentation.isCaptureRoute(currentRoute) && ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) practice.acquire()
+        else practice.suspend()
+    }
+    LaunchedEffect(currentRoute) { updateCapture() }
+    LifecycleEventEffect(Lifecycle.Event.ON_START) { updateCapture() }
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { practice.suspend(); com.liuchong.tunar.audio.CaptureHub.setEnabled(false) }
     val colors = LocalLumenColors.current
     Scaffold(
         bottomBar = {
@@ -66,7 +96,7 @@ fun AppNav() {
                             indicatorColor = colors.accent.copy(alpha = 0.12f),
                         ),
                         selected = currentRoute == tab.route ||
-                            (tab == AppTab.SETTINGS && currentRoute == TOOLS_ROUTE),
+                            (tab == AppTab.SETTINGS && currentRoute == TOOLS_ROUTE) || (tab == AppTab.TUNER && currentRoute == "practice"),
                         onClick = {
                             navController.navigate(tab.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
@@ -89,13 +119,19 @@ fun AppNav() {
             modifier = Modifier.padding(innerPadding),
         ) {
             composable(AppTab.TUNER.route) {
-                TunerScreen(onOpenSpectrum = {
+                TunerScreen(onOpenPractice = { navController.navigate("practice") { launchSingleTop = true } }, onOpenSpectrum = {
                     navController.navigate(AppTab.SPECTRUM.route) {
                         launchSingleTop = true
                     }
                 })
             }
-            composable(AppTab.INSTRUMENT.route) { InstrumentScreen() }
+            composable(AppTab.INSTRUMENT.route) { InstrumentScreen(onPractice = { midi, instrument, variant, fingering ->
+                practice.lockInstrument(midi, instrument, variant, fingering)
+                navController.navigate("practice") { launchSingleTop = true }
+            }) }
+            composable("practice") { PracticeWorkspaceScreen(practice, onBack = { navController.popBackStack() }, onAnalysis = {
+                navController.navigate(AppTab.SPECTRUM.route) { launchSingleTop = true }
+            }) }
             composable(AppTab.SPECTRUM.route) { ProfessionalSpectrumScreen() }
             composable(AppTab.METRONOME.route) { MetronomeScreen() }
             composable(AppTab.SETTINGS.route) {

@@ -767,17 +767,77 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // For large crates we prevent `MethodTooLargeException` (see #2340)
-// N.B. the name of the extension is very misleading, since it is 
-// rather `InterfaceTooLargeException`, caused by too many methods 
+// N.B. the name of the extension is very misleading, since it is
+// rather `InterfaceTooLargeException`, caused by too many methods
 // in the interface for large crates.
 //
 // By splitting the otherwise huge interface into two parts
-// * UniffiLib 
+// * UniffiLib
 // * IntegrityCheckingUniffiLib (this)
 // we allow for ~2x as many methods in the UniffiLib interface.
-// 
-// The `ffi_uniffi_contract_version` method and all checksum methods are put 
+//
+// The `ffi_uniffi_contract_version` method and all checksum methods are put
 // into `IntegrityCheckingUniffiLib` and these methods are called only once,
 // when the library is loaded.
 internal interface IntegrityCheckingUniffiLib : Library {
@@ -814,6 +874,62 @@ fun uniffi_tunar_core_checksum_method_metronome_stop(
 ): Short
 fun uniffi_tunar_core_checksum_method_metronome_tap(
 ): Short
+fun uniffi_tunar_core_checksum_method_practicesession_add_snapshot(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_clear(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_comparison(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_config(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_configure(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_display_config(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_display_point(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_export_csv(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_export_json(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_finish(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_import_json(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_live_trace(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_lock_instrument(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_lock_reference(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_observe(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_pause(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_read_page(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_remove_snapshot(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_return_to_live(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_select_point(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_set_baseline(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_snapshots(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_start(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_status(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_summarize(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_target_frequency(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_trace_page(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_unlock_target(
+): Short
 fun uniffi_tunar_core_checksum_method_tunarengine_analyze(
 ): Short
 fun uniffi_tunar_core_checksum_method_tunarengine_feed(
@@ -830,6 +946,8 @@ fun uniffi_tunar_core_checksum_method_tunarengine_set_temperament(
 ): Short
 fun uniffi_tunar_core_checksum_constructor_metronome_new(
 ): Short
+fun uniffi_tunar_core_checksum_constructor_practicesession_new(
+): Short
 fun uniffi_tunar_core_checksum_constructor_tunarengine_new(
 ): Short
 fun ffi_tunar_core_uniffi_contract_version(
@@ -844,8 +962,8 @@ internal interface UniffiLib : Library {
         internal val INSTANCE: UniffiLib by lazy {
             val componentName = "tunar_core"
             // For large crates we prevent `MethodTooLargeException` (see #2340)
-            // N.B. the name of the extension is very misleading, since it is 
-            // rather `InterfaceTooLargeException`, caused by too many methods 
+            // N.B. the name of the extension is very misleading, since it is
+            // rather `InterfaceTooLargeException`, caused by too many methods
             // in the interface for large crates.
             //
             // By splitting the otherwise huge interface into two parts
@@ -853,7 +971,7 @@ internal interface UniffiLib : Library {
             // * IntegrityCheckingUniffiLib
             // And all checksum methods are put into `IntegrityCheckingUniffiLib`
             // we allow for ~2x as many methods in the UniffiLib interface.
-            // 
+            //
             // Thus we first load the library with `loadIndirect` as `IntegrityCheckingUniffiLib`
             // so that we can (optionally!) call `uniffiCheckApiChecksums`...
             loadIndirect<IntegrityCheckingUniffiLib>(componentName)
@@ -868,12 +986,12 @@ internal interface UniffiLib : Library {
             // to trigger this issue, the performance impact is negligible, running on
             // a macOS M1 machine the `loadIndirect` call takes ~50ms.
             val lib = loadIndirect<UniffiLib>(componentName)
-            // No need to check the contract version and checksums, since 
+            // No need to check the contract version and checksums, since
             // we already did that with `IntegrityCheckingUniffiLib` above.
             // Loading of library with integrity check done.
             lib
         }
-        
+
         // The Cleaner for the whole library
         internal val CLEANER: UniffiCleaner by lazy {
             UniffiCleaner.create()
@@ -881,71 +999,133 @@ internal interface UniffiLib : Library {
     }
 
     // FFI functions
-    fun uniffi_tunar_core_fn_clone_metronome(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_tunar_core_fn_clone_metronome(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
 ): Pointer
-fun uniffi_tunar_core_fn_free_metronome(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_free_metronome(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
 ): Unit
-fun uniffi_tunar_core_fn_constructor_metronome_new(`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_constructor_metronome_new(`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
 ): Pointer
-fun uniffi_tunar_core_fn_method_metronome_is_running(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_method_metronome_is_running(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
 ): Byte
-fun uniffi_tunar_core_fn_method_metronome_render(`ptr`: Pointer,`frames`: Int,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_method_metronome_render(`ptr`: Pointer,`frames`: Int,uniffi_out_err: UniffiRustCallStatus,
 ): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_method_metronome_set_accents(`ptr`: Pointer,`accents`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_method_metronome_set_accents(`ptr`: Pointer,`accents`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
 ): Unit
-fun uniffi_tunar_core_fn_method_metronome_set_bpm(`ptr`: Pointer,`bpm`: Double,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_method_metronome_set_bpm(`ptr`: Pointer,`bpm`: Double,uniffi_out_err: UniffiRustCallStatus,
 ): Unit
-fun uniffi_tunar_core_fn_method_metronome_set_click_samples(`ptr`: Pointer,`accent`: RustBuffer.ByValue,`normal`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_method_metronome_set_click_samples(`ptr`: Pointer,`accent`: RustBuffer.ByValue,`normal`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
 ): Unit
-fun uniffi_tunar_core_fn_method_metronome_set_time_signature(`ptr`: Pointer,`beats`: Byte,`unit`: Byte,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_method_metronome_set_time_signature(`ptr`: Pointer,`beats`: Byte,`unit`: Byte,uniffi_out_err: UniffiRustCallStatus,
 ): Unit
-fun uniffi_tunar_core_fn_method_metronome_start(`ptr`: Pointer,`atSample`: Long,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_method_metronome_start(`ptr`: Pointer,`atSample`: Long,uniffi_out_err: UniffiRustCallStatus,
 ): Unit
-fun uniffi_tunar_core_fn_method_metronome_stop(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_method_metronome_stop(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
 ): Unit
-fun uniffi_tunar_core_fn_method_metronome_tap(`ptr`: Pointer,`timestampSamples`: Long,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_method_metronome_tap(`ptr`: Pointer,`timestampSamples`: Long,uniffi_out_err: UniffiRustCallStatus,
 ): Double
-fun uniffi_tunar_core_fn_clone_tunarengine(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_clone_practicesession(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
 ): Pointer
-fun uniffi_tunar_core_fn_free_tunarengine(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_free_practicesession(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
 ): Unit
-fun uniffi_tunar_core_fn_constructor_tunarengine_new(`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_constructor_practicesession_new(uniffi_out_err: UniffiRustCallStatus,
 ): Pointer
-fun uniffi_tunar_core_fn_method_tunarengine_analyze(`ptr`: Pointer,`pcm`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_method_practicesession_add_snapshot(`ptr`: Pointer,`name`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
 ): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_method_tunarengine_feed(`ptr`: Pointer,`pcm`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
-): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_method_tunarengine_list_reference_tones(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
-): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_method_tunarengine_set_a4(`ptr`: Pointer,`hz`: Double,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_method_practicesession_clear(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
 ): Unit
-fun uniffi_tunar_core_fn_method_tunarengine_set_noise_gate(`ptr`: Pointer,`dbfs`: Float,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_method_practicesession_comparison(`ptr`: Pointer,`normalized`: Byte,`wide`: Byte,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_practicesession_config(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_practicesession_configure(`ptr`: Pointer,`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
 ): Unit
-fun uniffi_tunar_core_fn_method_tunarengine_set_solfege(`ptr`: Pointer,`system`: RustBuffer.ByValue,`key`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_method_practicesession_display_config(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_practicesession_display_point(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_practicesession_export_csv(`ptr`: Pointer,`startId`: RustBuffer.ByValue,`endId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_practicesession_export_json(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_practicesession_finish(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
 ): Unit
-fun uniffi_tunar_core_fn_method_tunarengine_set_temperament(`ptr`: Pointer,`divisions`: Byte,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_method_practicesession_import_json(`ptr`: Pointer,`contents`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
 ): Unit
-fun uniffi_tunar_core_fn_func_cents_between(`freqHz`: Double,`targetHz`: Double,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_method_practicesession_live_trace(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
 ): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_func_list_instruments(uniffi_out_err: UniffiRustCallStatus, 
-): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_func_list_tool_tones(uniffi_out_err: UniffiRustCallStatus, 
-): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_func_list_tunings(`instrumentId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
-): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_func_list_wind_variants(`instrumentId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
-): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_func_solfege_for_midi(`system`: RustBuffer.ByValue,`key`: RustBuffer.ByValue,`midi`: Int,uniffi_out_err: UniffiRustCallStatus, 
-): RustBuffer.ByValue
-fun uniffi_tunar_core_fn_func_wind_fingering_chart(`variantId`: RustBuffer.ByValue,`tongyinDegree`: Byte,`scope`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
-): RustBuffer.ByValue
-fun ffi_tunar_core_rustbuffer_alloc(`size`: Long,uniffi_out_err: UniffiRustCallStatus, 
-): RustBuffer.ByValue
-fun ffi_tunar_core_rustbuffer_from_bytes(`bytes`: ForeignBytes.ByValue,uniffi_out_err: UniffiRustCallStatus, 
-): RustBuffer.ByValue
-fun ffi_tunar_core_rustbuffer_free(`buf`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_method_practicesession_lock_instrument(`ptr`: Pointer,`midi`: Int,`instrumentId`: RustBuffer.ByValue,`variantId`: RustBuffer.ByValue,`fingeringId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
 ): Unit
-fun ffi_tunar_core_rustbuffer_reserve(`buf`: RustBuffer.ByValue,`additional`: Long,uniffi_out_err: UniffiRustCallStatus, 
+fun uniffi_tunar_core_fn_method_practicesession_lock_reference(`ptr`: Pointer,`step`: Int,uniffi_out_err: UniffiRustCallStatus,
+): Unit
+fun uniffi_tunar_core_fn_method_practicesession_observe(`ptr`: Pointer,`frame`: RustBuffer.ByValue,`generation`: Long,`a4Hz`: Double,`temperament`: Byte,`referenceActive`: Byte,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_practicesession_pause(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): Unit
+fun uniffi_tunar_core_fn_method_practicesession_read_page(`ptr`: Pointer,`offset`: Int,`limit`: Int,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_practicesession_remove_snapshot(`ptr`: Pointer,`id`: Int,uniffi_out_err: UniffiRustCallStatus,
+): Unit
+fun uniffi_tunar_core_fn_method_practicesession_return_to_live(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): Unit
+fun uniffi_tunar_core_fn_method_practicesession_select_point(`ptr`: Pointer,`id`: Long,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_practicesession_set_baseline(`ptr`: Pointer,`id`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+): Unit
+fun uniffi_tunar_core_fn_method_practicesession_snapshots(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_practicesession_start(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): Unit
+fun uniffi_tunar_core_fn_method_practicesession_status(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_practicesession_summarize(`ptr`: Pointer,`startId`: Long,`endId`: Long,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_practicesession_target_frequency(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_practicesession_trace_page(`ptr`: Pointer,`offset`: Int,`limit`: Int,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_practicesession_unlock_target(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): Unit
+fun uniffi_tunar_core_fn_clone_tunarengine(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): Pointer
+fun uniffi_tunar_core_fn_free_tunarengine(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): Unit
+fun uniffi_tunar_core_fn_constructor_tunarengine_new(`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+): Pointer
+fun uniffi_tunar_core_fn_method_tunarengine_analyze(`ptr`: Pointer,`pcm`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_tunarengine_feed(`ptr`: Pointer,`pcm`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_tunarengine_list_reference_tones(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_tunarengine_set_a4(`ptr`: Pointer,`hz`: Double,uniffi_out_err: UniffiRustCallStatus,
+): Unit
+fun uniffi_tunar_core_fn_method_tunarengine_set_noise_gate(`ptr`: Pointer,`dbfs`: Float,uniffi_out_err: UniffiRustCallStatus,
+): Unit
+fun uniffi_tunar_core_fn_method_tunarengine_set_solfege(`ptr`: Pointer,`system`: RustBuffer.ByValue,`key`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+): Unit
+fun uniffi_tunar_core_fn_method_tunarengine_set_temperament(`ptr`: Pointer,`divisions`: Byte,uniffi_out_err: UniffiRustCallStatus,
+): Unit
+fun uniffi_tunar_core_fn_func_cents_between(`freqHz`: Double,`targetHz`: Double,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_func_list_instruments(uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_func_list_tool_tones(uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_func_list_tunings(`instrumentId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_func_list_wind_variants(`instrumentId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_func_solfege_for_midi(`system`: RustBuffer.ByValue,`key`: RustBuffer.ByValue,`midi`: Int,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_func_wind_fingering_chart(`variantId`: RustBuffer.ByValue,`tongyinDegree`: Byte,`scope`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun ffi_tunar_core_rustbuffer_alloc(`size`: Long,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun ffi_tunar_core_rustbuffer_from_bytes(`bytes`: ForeignBytes.ByValue,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun ffi_tunar_core_rustbuffer_free(`buf`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+): Unit
+fun ffi_tunar_core_rustbuffer_reserve(`buf`: RustBuffer.ByValue,`additional`: Long,uniffi_out_err: UniffiRustCallStatus,
 ): RustBuffer.ByValue
 fun ffi_tunar_core_rust_future_poll_u8(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -953,7 +1133,7 @@ fun ffi_tunar_core_rust_future_cancel_u8(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_u8(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_u8(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+fun ffi_tunar_core_rust_future_complete_u8(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
 ): Byte
 fun ffi_tunar_core_rust_future_poll_i8(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -961,7 +1141,7 @@ fun ffi_tunar_core_rust_future_cancel_i8(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_i8(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_i8(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+fun ffi_tunar_core_rust_future_complete_i8(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
 ): Byte
 fun ffi_tunar_core_rust_future_poll_u16(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -969,7 +1149,7 @@ fun ffi_tunar_core_rust_future_cancel_u16(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_u16(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_u16(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+fun ffi_tunar_core_rust_future_complete_u16(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
 ): Short
 fun ffi_tunar_core_rust_future_poll_i16(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -977,7 +1157,7 @@ fun ffi_tunar_core_rust_future_cancel_i16(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_i16(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_i16(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+fun ffi_tunar_core_rust_future_complete_i16(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
 ): Short
 fun ffi_tunar_core_rust_future_poll_u32(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -985,7 +1165,7 @@ fun ffi_tunar_core_rust_future_cancel_u32(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_u32(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_u32(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+fun ffi_tunar_core_rust_future_complete_u32(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
 ): Int
 fun ffi_tunar_core_rust_future_poll_i32(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -993,7 +1173,7 @@ fun ffi_tunar_core_rust_future_cancel_i32(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_i32(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_i32(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+fun ffi_tunar_core_rust_future_complete_i32(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
 ): Int
 fun ffi_tunar_core_rust_future_poll_u64(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -1001,7 +1181,7 @@ fun ffi_tunar_core_rust_future_cancel_u64(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_u64(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_u64(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+fun ffi_tunar_core_rust_future_complete_u64(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
 ): Long
 fun ffi_tunar_core_rust_future_poll_i64(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -1009,7 +1189,7 @@ fun ffi_tunar_core_rust_future_cancel_i64(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_i64(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_i64(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+fun ffi_tunar_core_rust_future_complete_i64(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
 ): Long
 fun ffi_tunar_core_rust_future_poll_f32(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -1017,7 +1197,7 @@ fun ffi_tunar_core_rust_future_cancel_f32(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_f32(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_f32(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+fun ffi_tunar_core_rust_future_complete_f32(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
 ): Float
 fun ffi_tunar_core_rust_future_poll_f64(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -1025,7 +1205,7 @@ fun ffi_tunar_core_rust_future_cancel_f64(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_f64(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_f64(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+fun ffi_tunar_core_rust_future_complete_f64(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
 ): Double
 fun ffi_tunar_core_rust_future_poll_pointer(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -1033,7 +1213,7 @@ fun ffi_tunar_core_rust_future_cancel_pointer(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_pointer(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_pointer(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+fun ffi_tunar_core_rust_future_complete_pointer(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
 ): Pointer
 fun ffi_tunar_core_rust_future_poll_rust_buffer(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -1041,7 +1221,7 @@ fun ffi_tunar_core_rust_future_cancel_rust_buffer(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_rust_buffer(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_rust_buffer(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+fun ffi_tunar_core_rust_future_complete_rust_buffer(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
 ): RustBuffer.ByValue
 fun ffi_tunar_core_rust_future_poll_void(`handle`: Long,`callback`: UniffiRustFutureContinuationCallback,`callbackData`: Long,
 ): Unit
@@ -1049,7 +1229,7 @@ fun ffi_tunar_core_rust_future_cancel_void(`handle`: Long,
 ): Unit
 fun ffi_tunar_core_rust_future_free_void(`handle`: Long,
 ): Unit
-fun ffi_tunar_core_rust_future_complete_void(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
+fun ffi_tunar_core_rust_future_complete_void(`handle`: Long,uniffi_out_err: UniffiRustCallStatus,
 ): Unit
 
 }
@@ -1113,6 +1293,90 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_tunar_core_checksum_method_metronome_tap() != 40551.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_add_snapshot() != 14881.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_clear() != 23711.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_comparison() != 51485.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_config() != 40791.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_configure() != 38890.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_display_config() != 15154.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_display_point() != 46218.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_export_csv() != 59508.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_export_json() != 53486.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_finish() != 65516.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_import_json() != 5661.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_live_trace() != 12679.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_lock_instrument() != 47019.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_lock_reference() != 31947.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_observe() != 18376.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_pause() != 64223.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_read_page() != 55731.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_remove_snapshot() != 37362.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_return_to_live() != 50349.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_select_point() != 16569.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_set_baseline() != 1908.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_snapshots() != 20932.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_start() != 18588.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_status() != 26242.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_summarize() != 20610.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_target_frequency() != 31765.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_trace_page() != 20625.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_unlock_target() != 7933.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_tunar_core_checksum_method_tunarengine_analyze() != 43185.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1135,6 +1399,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_tunar_core_checksum_constructor_metronome_new() != 55463.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_constructor_practicesession_new() != 50981.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_tunar_core_checksum_constructor_tunarengine_new() != 37281.toShort()) {
@@ -1212,7 +1479,7 @@ inline fun <T : Disposable?, R> T.use(block: (T) -> R) =
         }
     }
 
-/** 
+/**
  * Used to instantiate an interface without an actual pointer, for fakes in tests, mostly.
  *
  * @suppress
@@ -1604,53 +1871,53 @@ public object FfiConverterString: FfiConverter<String, RustBuffer.ByValue> {
  * 节拍器（UniFFI 对象）。
  */
 public interface MetronomeInterface {
-    
+
     /**
      * 是否运行中。
      */
     fun `isRunning`(): kotlin.Boolean
-    
+
     /**
      * 渲染 `frames` 个采样（含精确混入的 tick 音色），返回 PCM 与 tick 事件。
      * UniFFI 边界允许分配（marshal 开销主导）；引擎内核零分配。
      */
     fun `render`(`frames`: kotlin.UInt): RenderFrame
-    
+
     /**
      * 设置每拍重音型。
      */
     fun `setAccents`(`accents`: List<TickAccent>)
-    
+
     /**
      * 设置 BPM（30–250），下一采样生效。
      */
     fun `setBpm`(`bpm`: kotlin.Double)
-    
+
     /**
      * 注入重拍/弱拍音色（由原生层提供；传空则恢复内置合成音色）。
      */
     fun `setClickSamples`(`accent`: List<kotlin.Float>, `normal`: List<kotlin.Float>)
-    
+
     /**
      * 设置拍号。
      */
     fun `setTimeSignature`(`beats`: kotlin.UByte, `unit`: kotlin.UByte)
-    
+
     /**
      * 从 `at_sample` 开始运行。
      */
     fun `start`(`atSample`: kotlin.ULong)
-    
+
     /**
      * 停止。
      */
     fun `stop`()
-    
+
     /**
      * tap tempo：输入 tap 的采样时间戳，返回当前 BPM。
      */
     fun `tap`(`timestampSamples`: kotlin.ULong): kotlin.Double
-    
+
     companion object
 }
 
@@ -1749,7 +2016,7 @@ open class Metronome: Disposable, AutoCloseable, MetronomeInterface
         }
     }
 
-    
+
     /**
      * 是否运行中。
      */override fun `isRunning`(): kotlin.Boolean {
@@ -1762,9 +2029,9 @@ open class Metronome: Disposable, AutoCloseable, MetronomeInterface
     }
     )
     }
-    
 
-    
+
+
     /**
      * 渲染 `frames` 个采样（含精确混入的 tick 音色），返回 PCM 与 tick 事件。
      * UniFFI 边界允许分配（marshal 开销主导）；引擎内核零分配。
@@ -1778,93 +2045,93 @@ open class Metronome: Disposable, AutoCloseable, MetronomeInterface
     }
     )
     }
-    
 
-    
+
+
     /**
      * 设置每拍重音型。
      */override fun `setAccents`(`accents`: List<TickAccent>)
-        = 
+        =
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_metronome_set_accents(
         it, FfiConverterSequenceTypeTickAccent.lower(`accents`),_status)
 }
     }
-    
-    
 
-    
+
+
+
     /**
      * 设置 BPM（30–250），下一采样生效。
      */override fun `setBpm`(`bpm`: kotlin.Double)
-        = 
+        =
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_metronome_set_bpm(
         it, FfiConverterDouble.lower(`bpm`),_status)
 }
     }
-    
-    
 
-    
+
+
+
     /**
      * 注入重拍/弱拍音色（由原生层提供；传空则恢复内置合成音色）。
      */override fun `setClickSamples`(`accent`: List<kotlin.Float>, `normal`: List<kotlin.Float>)
-        = 
+        =
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_metronome_set_click_samples(
         it, FfiConverterSequenceFloat.lower(`accent`),FfiConverterSequenceFloat.lower(`normal`),_status)
 }
     }
-    
-    
 
-    
+
+
+
     /**
      * 设置拍号。
      */override fun `setTimeSignature`(`beats`: kotlin.UByte, `unit`: kotlin.UByte)
-        = 
+        =
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_metronome_set_time_signature(
         it, FfiConverterUByte.lower(`beats`),FfiConverterUByte.lower(`unit`),_status)
 }
     }
-    
-    
 
-    
+
+
+
     /**
      * 从 `at_sample` 开始运行。
      */override fun `start`(`atSample`: kotlin.ULong)
-        = 
+        =
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_metronome_start(
         it, FfiConverterULong.lower(`atSample`),_status)
 }
     }
-    
-    
 
-    
+
+
+
     /**
      * 停止。
      */override fun `stop`()
-        = 
+        =
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_metronome_stop(
         it, _status)
 }
     }
-    
-    
 
-    
+
+
+
     /**
      * tap tempo：输入 tap 的采样时间戳，返回当前 BPM。
      */override fun `tap`(`timestampSamples`: kotlin.ULong): kotlin.Double {
@@ -1877,14 +2144,14 @@ open class Metronome: Disposable, AutoCloseable, MetronomeInterface
     }
     )
     }
-    
 
-    
 
-    
-    
+
+
+
+
     companion object
-    
+
 }
 
 /**
@@ -2015,45 +2282,842 @@ public object FfiConverterTypeMetronome: FfiConverter<Metronome, Pointer> {
 
 
 /**
+ * 通过UniFFI共享的测量所有者；仅在分析或工作队列上追加、统计和编码。
+ */
+public interface PracticeSessionInterface {
+
+    /**
+     * 保存当前显示帧为独立命名快照。
+     */
+    fun `addSnapshot`(`name`: kotlin.String): PracticeSnapshot
+
+    /**
+     * 清空会话，保留独立命名快照。
+     */
+    fun `clear`()
+
+    /**
+     * 返回兼容频率网格的两条曲线。
+     */
+    fun `comparison`(`normalized`: kotlin.Boolean, `wide`: kotlin.Boolean): PracticeComparison
+
+    /**
+     * 当前配置副本。
+     */
+    fun `config`(): PracticeConfig
+
+    /**
+     * 原子设置目标和容差；历史不可变。
+     */
+    fun `configure`(`config`: PracticeConfig)
+
+    /**
+     * 当前显示点的原始配置。
+     */
+    fun `displayConfig`(): PracticeConfig
+
+    /**
+     * 唯一显示帧；历史游标优先。
+     */
+    fun `displayPoint`(): PracticePoint?
+
+    /**
+     * 导出所选点区间的标量CSV；空值不填0。
+     */
+    fun `exportCsv`(`startId`: kotlin.ULong?, `endId`: kotlin.ULong?): kotlin.String
+
+    /**
+     * 编码完整测量文件。
+     */
+    fun `exportJson`(): kotlin.String
+
+    /**
+     * 完成本次记录并保留所有点。
+     */
+    fun `finish`()
+
+    /**
+     * 完整校验成功后原子替换当前会话。
+     */
+    fun `importJson`(`contents`: kotlin.String)
+
+    /**
+     * 实时短轨迹，历史点独立保存。
+     */
+    fun `liveTrace`(): List<PracticeTracePoint>
+
+    /**
+     * 锁定乐器音；频率换算统一在core。
+     */
+    fun `lockInstrument`(`midi`: kotlin.Int, `instrumentId`: kotlin.String, `variantId`: kotlin.String, `fingeringId`: kotlin.Int?)
+
+    /**
+     * 锁定当前平均律参考步序。
+     */
+    fun `lockReference`(`step`: kotlin.Int)
+
+    /**
+     * 输入一次真实分析结果；不重新采集、不重新FFT。
+     */
+    fun `observe`(`frame`: AnalysisFrame, `generation`: kotlin.ULong, `a4Hz`: kotlin.Double, `temperament`: kotlin.UByte, `referenceActive`: kotlin.Boolean): PracticePoint
+
+    /**
+     * 仅暂停记录，原生麦克风由原生层独立管理。
+     */
+    fun `pause`()
+
+    /**
+     * 有界完整点分页。
+     */
+    fun `readPage`(`offset`: kotlin.UInt, `limit`: kotlin.UInt): List<PracticePoint>
+
+    /**
+     * 删除指定快照；其他数据保持。
+     */
+    fun `removeSnapshot`(`id`: kotlin.UInt)
+
+    /**
+     * 返回实时但不恢复记录。
+     */
+    fun `returnToLive`()
+
+    /**
+     * 选择历史点，自动暂停记录。
+     */
+    fun `selectPoint`(`id`: kotlin.ULong): PracticePoint
+
+    /**
+     * 设置或隐藏比较基准。
+     */
+    fun `setBaseline`(`id`: kotlin.UInt?)
+
+    /**
+     * 独立快照列表。
+     */
+    fun `snapshots`(): List<PracticeSnapshot>
+
+    /**
+     * 开始或继续记录；完成后需先清空开始下一次。
+     */
+    fun `start`()
+
+    /**
+     * 小型状态，适于每帧发布。
+     */
+    fun `status`(): PracticeStatus
+
+    /**
+     * 分连续配置段统计，不跨中断补值。
+     */
+    fun `summarize`(`startId`: kotlin.ULong, `endId`: kotlin.ULong): List<PracticeSummary>
+
+    /**
+     * 无信号时也可取得锁定目标的Hz。
+     */
+    fun `targetFrequency`(): kotlin.Double?
+
+    /**
+     * 有界绘图标量分页，不拷贝频谱与包络。
+     */
+    fun `tracePage`(`offset`: kotlin.UInt, `limit`: kotlin.UInt): List<PracticeTracePoint>
+
+    /**
+     * 取消目标锁定。
+     */
+    fun `unlockTarget`()
+
+    companion object
+}
+
+/**
+ * 通过UniFFI共享的测量所有者；仅在分析或工作队列上追加、统计和编码。
+ */
+open class PracticeSession: Disposable, AutoCloseable, PracticeSessionInterface
+{
+
+    constructor(pointer: Pointer) {
+        this.pointer = pointer
+        this.cleanable = UniffiLib.CLEANER.register(this, UniffiCleanAction(pointer))
+    }
+
+    /**
+     * This constructor can be used to instantiate a fake object. Only used for tests. Any
+     * attempt to actually use an object constructed this way will fail as there is no
+     * connected Rust object.
+     */
+    @Suppress("UNUSED_PARAMETER")
+    constructor(noPointer: NoPointer) {
+        this.pointer = null
+        this.cleanable = UniffiLib.CLEANER.register(this, UniffiCleanAction(pointer))
+    }
+    /**
+     * 创建独立有界会话。
+     */
+    constructor() :
+        this(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_constructor_practicesession_new(
+        _status)
+}
+    )
+
+    protected val pointer: Pointer?
+    protected val cleanable: UniffiCleaner.Cleanable
+
+    private val wasDestroyed = AtomicBoolean(false)
+    private val callCounter = AtomicLong(1)
+
+    override fun destroy() {
+        // Only allow a single call to this method.
+        // TODO: maybe we should log a warning if called more than once?
+        if (this.wasDestroyed.compareAndSet(false, true)) {
+            // This decrement always matches the initial count of 1 given at creation time.
+            if (this.callCounter.decrementAndGet() == 0L) {
+                cleanable.clean()
+            }
+        }
+    }
+
+    @Synchronized
+    override fun close() {
+        this.destroy()
+    }
+
+    internal inline fun <R> callWithPointer(block: (ptr: Pointer) -> R): R {
+        // Check and increment the call counter, to keep the object alive.
+        // This needs a compare-and-set retry loop in case of concurrent updates.
+        do {
+            val c = this.callCounter.get()
+            if (c == 0L) {
+                throw IllegalStateException("${this.javaClass.simpleName} object has already been destroyed")
+            }
+            if (c == Long.MAX_VALUE) {
+                throw IllegalStateException("${this.javaClass.simpleName} call counter would overflow")
+            }
+        } while (! this.callCounter.compareAndSet(c, c + 1L))
+        // Now we can safely do the method call without the pointer being freed concurrently.
+        try {
+            return block(this.uniffiClonePointer())
+        } finally {
+            // This decrement always matches the increment we performed above.
+            if (this.callCounter.decrementAndGet() == 0L) {
+                cleanable.clean()
+            }
+        }
+    }
+
+    // Use a static inner class instead of a closure so as not to accidentally
+    // capture `this` as part of the cleanable's action.
+    private class UniffiCleanAction(private val pointer: Pointer?) : Runnable {
+        override fun run() {
+            pointer?.let { ptr ->
+                uniffiRustCall { status ->
+                    UniffiLib.INSTANCE.uniffi_tunar_core_fn_free_practicesession(ptr, status)
+                }
+            }
+        }
+    }
+
+    fun uniffiClonePointer(): Pointer {
+        return uniffiRustCall() { status ->
+            UniffiLib.INSTANCE.uniffi_tunar_core_fn_clone_practicesession(pointer!!, status)
+        }
+    }
+
+
+    /**
+     * 保存当前显示帧为独立命名快照。
+     */
+    @Throws(PracticeException::class)override fun `addSnapshot`(`name`: kotlin.String): PracticeSnapshot {
+            return FfiConverterTypePracticeSnapshot.lift(
+    callWithPointer {
+    uniffiRustCallWithError(PracticeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_add_snapshot(
+        it, FfiConverterString.lower(`name`),_status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 清空会话，保留独立命名快照。
+     */override fun `clear`()
+        =
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_clear(
+        it, _status)
+}
+    }
+
+
+
+
+    /**
+     * 返回兼容频率网格的两条曲线。
+     */
+    @Throws(PracticeException::class)override fun `comparison`(`normalized`: kotlin.Boolean, `wide`: kotlin.Boolean): PracticeComparison {
+            return FfiConverterTypePracticeComparison.lift(
+    callWithPointer {
+    uniffiRustCallWithError(PracticeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_comparison(
+        it, FfiConverterBoolean.lower(`normalized`),FfiConverterBoolean.lower(`wide`),_status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 当前配置副本。
+     */override fun `config`(): PracticeConfig {
+            return FfiConverterTypePracticeConfig.lift(
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_config(
+        it, _status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 原子设置目标和容差；历史不可变。
+     */
+    @Throws(PracticeException::class)override fun `configure`(`config`: PracticeConfig)
+        =
+    callWithPointer {
+    uniffiRustCallWithError(PracticeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_configure(
+        it, FfiConverterTypePracticeConfig.lower(`config`),_status)
+}
+    }
+
+
+
+
+    /**
+     * 当前显示点的原始配置。
+     */override fun `displayConfig`(): PracticeConfig {
+            return FfiConverterTypePracticeConfig.lift(
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_display_config(
+        it, _status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 唯一显示帧；历史游标优先。
+     */override fun `displayPoint`(): PracticePoint? {
+            return FfiConverterOptionalTypePracticePoint.lift(
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_display_point(
+        it, _status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 导出所选点区间的标量CSV；空值不填0。
+     */
+    @Throws(PracticeException::class)override fun `exportCsv`(`startId`: kotlin.ULong?, `endId`: kotlin.ULong?): kotlin.String {
+            return FfiConverterString.lift(
+    callWithPointer {
+    uniffiRustCallWithError(PracticeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_export_csv(
+        it, FfiConverterOptionalULong.lower(`startId`),FfiConverterOptionalULong.lower(`endId`),_status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 编码完整测量文件。
+     */
+    @Throws(PracticeException::class)override fun `exportJson`(): kotlin.String {
+            return FfiConverterString.lift(
+    callWithPointer {
+    uniffiRustCallWithError(PracticeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_export_json(
+        it, _status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 完成本次记录并保留所有点。
+     */override fun `finish`()
+        =
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_finish(
+        it, _status)
+}
+    }
+
+
+
+
+    /**
+     * 完整校验成功后原子替换当前会话。
+     */
+    @Throws(PracticeException::class)override fun `importJson`(`contents`: kotlin.String)
+        =
+    callWithPointer {
+    uniffiRustCallWithError(PracticeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_import_json(
+        it, FfiConverterString.lower(`contents`),_status)
+}
+    }
+
+
+
+
+    /**
+     * 实时短轨迹，历史点独立保存。
+     */override fun `liveTrace`(): List<PracticeTracePoint> {
+            return FfiConverterSequenceTypePracticeTracePoint.lift(
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_live_trace(
+        it, _status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 锁定乐器音；频率换算统一在core。
+     */
+    @Throws(PracticeException::class)override fun `lockInstrument`(`midi`: kotlin.Int, `instrumentId`: kotlin.String, `variantId`: kotlin.String, `fingeringId`: kotlin.Int?)
+        =
+    callWithPointer {
+    uniffiRustCallWithError(PracticeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_lock_instrument(
+        it, FfiConverterInt.lower(`midi`),FfiConverterString.lower(`instrumentId`),FfiConverterString.lower(`variantId`),FfiConverterOptionalInt.lower(`fingeringId`),_status)
+}
+    }
+
+
+
+
+    /**
+     * 锁定当前平均律参考步序。
+     */
+    @Throws(PracticeException::class)override fun `lockReference`(`step`: kotlin.Int)
+        =
+    callWithPointer {
+    uniffiRustCallWithError(PracticeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_lock_reference(
+        it, FfiConverterInt.lower(`step`),_status)
+}
+    }
+
+
+
+
+    /**
+     * 输入一次真实分析结果；不重新采集、不重新FFT。
+     */
+    @Throws(PracticeException::class)override fun `observe`(`frame`: AnalysisFrame, `generation`: kotlin.ULong, `a4Hz`: kotlin.Double, `temperament`: kotlin.UByte, `referenceActive`: kotlin.Boolean): PracticePoint {
+            return FfiConverterTypePracticePoint.lift(
+    callWithPointer {
+    uniffiRustCallWithError(PracticeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_observe(
+        it, FfiConverterTypeAnalysisFrame.lower(`frame`),FfiConverterULong.lower(`generation`),FfiConverterDouble.lower(`a4Hz`),FfiConverterUByte.lower(`temperament`),FfiConverterBoolean.lower(`referenceActive`),_status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 仅暂停记录，原生麦克风由原生层独立管理。
+     */override fun `pause`()
+        =
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_pause(
+        it, _status)
+}
+    }
+
+
+
+
+    /**
+     * 有界完整点分页。
+     */override fun `readPage`(`offset`: kotlin.UInt, `limit`: kotlin.UInt): List<PracticePoint> {
+            return FfiConverterSequenceTypePracticePoint.lift(
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_read_page(
+        it, FfiConverterUInt.lower(`offset`),FfiConverterUInt.lower(`limit`),_status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 删除指定快照；其他数据保持。
+     */override fun `removeSnapshot`(`id`: kotlin.UInt)
+        =
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_remove_snapshot(
+        it, FfiConverterUInt.lower(`id`),_status)
+}
+    }
+
+
+
+
+    /**
+     * 返回实时但不恢复记录。
+     */override fun `returnToLive`()
+        =
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_return_to_live(
+        it, _status)
+}
+    }
+
+
+
+
+    /**
+     * 选择历史点，自动暂停记录。
+     */
+    @Throws(PracticeException::class)override fun `selectPoint`(`id`: kotlin.ULong): PracticePoint {
+            return FfiConverterTypePracticePoint.lift(
+    callWithPointer {
+    uniffiRustCallWithError(PracticeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_select_point(
+        it, FfiConverterULong.lower(`id`),_status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 设置或隐藏比较基准。
+     */
+    @Throws(PracticeException::class)override fun `setBaseline`(`id`: kotlin.UInt?)
+        =
+    callWithPointer {
+    uniffiRustCallWithError(PracticeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_set_baseline(
+        it, FfiConverterOptionalUInt.lower(`id`),_status)
+}
+    }
+
+
+
+
+    /**
+     * 独立快照列表。
+     */override fun `snapshots`(): List<PracticeSnapshot> {
+            return FfiConverterSequenceTypePracticeSnapshot.lift(
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_snapshots(
+        it, _status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 开始或继续记录；完成后需先清空开始下一次。
+     */override fun `start`()
+        =
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_start(
+        it, _status)
+}
+    }
+
+
+
+
+    /**
+     * 小型状态，适于每帧发布。
+     */override fun `status`(): PracticeStatus {
+            return FfiConverterTypePracticeStatus.lift(
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_status(
+        it, _status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 分连续配置段统计，不跨中断补值。
+     */override fun `summarize`(`startId`: kotlin.ULong, `endId`: kotlin.ULong): List<PracticeSummary> {
+            return FfiConverterSequenceTypePracticeSummary.lift(
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_summarize(
+        it, FfiConverterULong.lower(`startId`),FfiConverterULong.lower(`endId`),_status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 无信号时也可取得锁定目标的Hz。
+     */override fun `targetFrequency`(): kotlin.Double? {
+            return FfiConverterOptionalDouble.lift(
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_target_frequency(
+        it, _status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 有界绘图标量分页，不拷贝频谱与包络。
+     */override fun `tracePage`(`offset`: kotlin.UInt, `limit`: kotlin.UInt): List<PracticeTracePoint> {
+            return FfiConverterSequenceTypePracticeTracePoint.lift(
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_trace_page(
+        it, FfiConverterUInt.lower(`offset`),FfiConverterUInt.lower(`limit`),_status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 取消目标锁定。
+     */override fun `unlockTarget`()
+        =
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_unlock_target(
+        it, _status)
+}
+    }
+
+
+
+
+
+
+
+    companion object
+
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePracticeSession: FfiConverter<PracticeSession, Pointer> {
+
+    override fun lower(value: PracticeSession): Pointer {
+        return value.uniffiClonePointer()
+    }
+
+    override fun lift(value: Pointer): PracticeSession {
+        return PracticeSession(value)
+    }
+
+    override fun read(buf: ByteBuffer): PracticeSession {
+        // The Rust code always writes pointers as 8 bytes, and will
+        // fail to compile if they don't fit.
+        return lift(Pointer(buf.getLong()))
+    }
+
+    override fun allocationSize(value: PracticeSession) = 8UL
+
+    override fun write(value: PracticeSession, buf: ByteBuffer) {
+        // The Rust code always expects pointers written as 8 bytes,
+        // and will fail to compile if they don't fit.
+        buf.putLong(Pointer.nativeValue(lower(value)))
+    }
+}
+
+
+// This template implements a class for working with a Rust struct via a Pointer/Arc<T>
+// to the live Rust struct on the other side of the FFI.
+//
+// Each instance implements core operations for working with the Rust `Arc<T>` and the
+// Kotlin Pointer to work with the live Rust struct on the other side of the FFI.
+//
+// There's some subtlety here, because we have to be careful not to operate on a Rust
+// struct after it has been dropped, and because we must expose a public API for freeing
+// theq Kotlin wrapper object in lieu of reliable finalizers. The core requirements are:
+//
+//   * Each instance holds an opaque pointer to the underlying Rust struct.
+//     Method calls need to read this pointer from the object's state and pass it in to
+//     the Rust FFI.
+//
+//   * When an instance is no longer needed, its pointer should be passed to a
+//     special destructor function provided by the Rust FFI, which will drop the
+//     underlying Rust struct.
+//
+//   * Given an instance, calling code is expected to call the special
+//     `destroy` method in order to free it after use, either by calling it explicitly
+//     or by using a higher-level helper like the `use` method. Failing to do so risks
+//     leaking the underlying Rust struct.
+//
+//   * We can't assume that calling code will do the right thing, and must be prepared
+//     to handle Kotlin method calls executing concurrently with or even after a call to
+//     `destroy`, and to handle multiple (possibly concurrent!) calls to `destroy`.
+//
+//   * We must never allow Rust code to operate on the underlying Rust struct after
+//     the destructor has been called, and must never call the destructor more than once.
+//     Doing so may trigger memory unsafety.
+//
+//   * To mitigate many of the risks of leaking memory and use-after-free unsafety, a `Cleaner`
+//     is implemented to call the destructor when the Kotlin object becomes unreachable.
+//     This is done in a background thread. This is not a panacea, and client code should be aware that
+//      1. the thread may starve if some there are objects that have poorly performing
+//     `drop` methods or do significant work in their `drop` methods.
+//      2. the thread is shared across the whole library. This can be tuned by using `android_cleaner = true`,
+//         or `android = true` in the [`kotlin` section of the `uniffi.toml` file](https://mozilla.github.io/uniffi-rs/kotlin/configuration.html).
+//
+// If we try to implement this with mutual exclusion on access to the pointer, there is the
+// possibility of a race between a method call and a concurrent call to `destroy`:
+//
+//    * Thread A starts a method call, reads the value of the pointer, but is interrupted
+//      before it can pass the pointer over the FFI to Rust.
+//    * Thread B calls `destroy` and frees the underlying Rust struct.
+//    * Thread A resumes, passing the already-read pointer value to Rust and triggering
+//      a use-after-free.
+//
+// One possible solution would be to use a `ReadWriteLock`, with each method call taking
+// a read lock (and thus allowed to run concurrently) and the special `destroy` method
+// taking a write lock (and thus blocking on live method calls). However, we aim not to
+// generate methods with any hidden blocking semantics, and a `destroy` method that might
+// block if called incorrectly seems to meet that bar.
+//
+// So, we achieve our goals by giving each instance an associated `AtomicLong` counter to track
+// the number of in-flight method calls, and an `AtomicBoolean` flag to indicate whether `destroy`
+// has been called. These are updated according to the following rules:
+//
+//    * The initial value of the counter is 1, indicating a live object with no in-flight calls.
+//      The initial value for the flag is false.
+//
+//    * At the start of each method call, we atomically check the counter.
+//      If it is 0 then the underlying Rust struct has already been destroyed and the call is aborted.
+//      If it is nonzero them we atomically increment it by 1 and proceed with the method call.
+//
+//    * At the end of each method call, we atomically decrement and check the counter.
+//      If it has reached zero then we destroy the underlying Rust struct.
+//
+//    * When `destroy` is called, we atomically flip the flag from false to true.
+//      If the flag was already true we silently fail.
+//      Otherwise we atomically decrement and check the counter.
+//      If it has reached zero then we destroy the underlying Rust struct.
+//
+// Astute readers may observe that this all sounds very similar to the way that Rust's `Arc<T>` works,
+// and indeed it is, with the addition of a flag to guard against multiple calls to `destroy`.
+//
+// The overall effect is that the underlying Rust struct is destroyed only when `destroy` has been
+// called *and* all in-flight method calls have completed, avoiding violating any of the expectations
+// of the underlying Rust code.
+//
+// This makes a cleaner a better alternative to _not_ calling `destroy()` as
+// and when the object is finished with, but the abstraction is not perfect: if the Rust object's `drop`
+// method is slow, and/or there are many objects to cleanup, and it's on a low end Android device, then the cleaner
+// thread may be starved, and the app will leak memory.
+//
+// In this case, `destroy`ing manually may be a better solution.
+//
+// The cleaner can live side by side with the manual calling of `destroy`. In the order of responsiveness, uniffi objects
+// with Rust peers are reclaimed:
+//
+// 1. By calling the `destroy` method of the object, which calls `rustObject.free()`. If that doesn't happen:
+// 2. When the object becomes unreachable, AND the Cleaner thread gets to call `rustObject.free()`. If the thread is starved then:
+// 3. The memory is reclaimed when the process terminates.
+//
+// [1] https://stackoverflow.com/questions/24376768/can-java-finalize-an-object-when-it-is-still-in-scope/24380219
+//
+
+
+/**
  * 调音器引擎（UniFFI 对象）。
  */
 public interface TunarEngineInterface {
-    
+
     /**
      * 完整分析帧：feed 事件 + 频谱 + 泛音 + 和弦（v4 新增，UniFFI 边界允许分配）。
      */
     fun `analyze`(`pcm`: List<kotlin.Float>): AnalysisFrame
-    
+
     /**
      * 输入一帧单声道 PCM（f32 [-1,1]，长度 ≥ 2048），返回音高事件；无效输入返回 None。
      */
     fun `feed`(`pcm`: List<kotlin.Float>): TunarEvent?
-    
+
     /**
      * 列出当前 A4 与平均律在 80–1500Hz 内的全部固定音高。
      */
     fun `listReferenceTones`(): List<ReferenceTone>
-    
+
     /**
      * 设置 A4 校准（收敛到 415–466Hz）。
      */
     fun `setA4`(`hz`: kotlin.Double)
-    
+
     /**
      * 设置噪声门限（dBFS）。
      */
     fun `setNoiseGate`(`dbfs`: kotlin.Float)
-    
+
     /**
      * 设置唱名体系与调式。
      */
     fun `setSolfege`(`system`: SolfegeSystem, `key`: KeyMode)
-    
+
     /**
      * 设置律制（N ∈ {12,19,24,31}；非法值忽略）。
      */
     fun `setTemperament`(`divisions`: kotlin.UByte)
-    
+
     companion object
 }
 
@@ -2152,7 +3216,7 @@ open class TunarEngine: Disposable, AutoCloseable, TunarEngineInterface
         }
     }
 
-    
+
     /**
      * 完整分析帧：feed 事件 + 频谱 + 泛音 + 和弦（v4 新增，UniFFI 边界允许分配）。
      */override fun `analyze`(`pcm`: List<kotlin.Float>): AnalysisFrame {
@@ -2165,9 +3229,9 @@ open class TunarEngine: Disposable, AutoCloseable, TunarEngineInterface
     }
     )
     }
-    
 
-    
+
+
     /**
      * 输入一帧单声道 PCM（f32 [-1,1]，长度 ≥ 2048），返回音高事件；无效输入返回 None。
      */override fun `feed`(`pcm`: List<kotlin.Float>): TunarEvent? {
@@ -2180,9 +3244,9 @@ open class TunarEngine: Disposable, AutoCloseable, TunarEngineInterface
     }
     )
     }
-    
 
-    
+
+
     /**
      * 列出当前 A4 与平均律在 80–1500Hz 内的全部固定音高。
      */override fun `listReferenceTones`(): List<ReferenceTone> {
@@ -2195,70 +3259,70 @@ open class TunarEngine: Disposable, AutoCloseable, TunarEngineInterface
     }
     )
     }
-    
 
-    
+
+
     /**
      * 设置 A4 校准（收敛到 415–466Hz）。
      */override fun `setA4`(`hz`: kotlin.Double)
-        = 
+        =
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_set_a4(
         it, FfiConverterDouble.lower(`hz`),_status)
 }
     }
-    
-    
 
-    
+
+
+
     /**
      * 设置噪声门限（dBFS）。
      */override fun `setNoiseGate`(`dbfs`: kotlin.Float)
-        = 
+        =
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_set_noise_gate(
         it, FfiConverterFloat.lower(`dbfs`),_status)
 }
     }
-    
-    
 
-    
+
+
+
     /**
      * 设置唱名体系与调式。
      */override fun `setSolfege`(`system`: SolfegeSystem, `key`: KeyMode)
-        = 
+        =
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_set_solfege(
         it, FfiConverterTypeSolfegeSystem.lower(`system`),FfiConverterTypeKeyMode.lower(`key`),_status)
 }
     }
-    
-    
 
-    
+
+
+
     /**
      * 设置律制（N ∈ {12,19,24,31}；非法值忽略）。
      */override fun `setTemperament`(`divisions`: kotlin.UByte)
-        = 
+        =
     callWithPointer {
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_set_temperament(
         it, FfiConverterUByte.lower(`divisions`),_status)
 }
     }
-    
-    
 
-    
 
-    
-    
+
+
+
+
+
     companion object
-    
+
 }
 
 /**
@@ -2298,61 +3362,61 @@ data class AnalysisFrame (
     /**
      * 同 feed 语义（无效输入为 None）。
      */
-    var `tuner`: TunarEvent?, 
+    var `tuner`: TunarEvent?,
     /**
      * 64 bin 对数轴 60–2400Hz 幅值（dBFS -80~0）。
      */
-    var `spectrumDb`: List<kotlin.Float>, 
+    var `spectrumDb`: List<kotlin.Float>,
     /**
      * 128 bin 对数轴 20Hz–wide_spectrum_max_hz 幅值（dBFS -80~0）。
      */
-    var `wideSpectrumDb`: List<kotlin.Float>, 
+    var `wideSpectrumDb`: List<kotlin.Float>,
     /**
      * 全频段实际频率上限（min(20kHz, sample_rate/2)）。
      */
-    var `wideSpectrumMaxHz`: kotlin.Double, 
+    var `wideSpectrumMaxHz`: kotlin.Double,
     /**
      * 当前分析窗口 256 列最小值包络。
      */
-    var `waveformMin`: List<kotlin.Float>, 
+    var `waveformMin`: List<kotlin.Float>,
     /**
      * 当前分析窗口 256 列最大值包络。
      */
-    var `waveformMax`: List<kotlin.Float>, 
+    var `waveformMax`: List<kotlin.Float>,
     /**
      * 当前帧末端相对引擎启动时的采样位置。
      */
-    var `samplePosition`: kotlin.ULong, 
+    var `samplePosition`: kotlin.ULong,
     /**
      * 实际分析采样率。
      */
-    var `sampleRateHz`: kotlin.Double, 
+    var `sampleRateHz`: kotlin.Double,
     /**
      * 泛音列（≤8，按幅值降序）。
      */
-    var `partials`: List<Partial>, 
+    var `partials`: List<Partial>,
     /**
      * 和弦名（如 "Cmaj"），无则为 None。
      */
-    var `chord`: kotlin.String?, 
+    var `chord`: kotlin.String?,
     /**
      * 输入信号状态。
      */
-    var `signalState`: SignalState, 
+    var `signalState`: SignalState,
     /**
      * 当前分析窗口的 RMS 电平（dBFS）。
      */
-    var `inputLevelDbfs`: kotlin.Float, 
+    var `inputLevelDbfs`: kotlin.Float,
     /**
      * 读数显示强度（0~1）。
      */
-    var `displayStrength`: kotlin.Float, 
+    var `displayStrength`: kotlin.Float,
     /**
      * 当前读数是否来自断音保持。
      */
     var `isHeld`: kotlin.Boolean
 ) {
-    
+
     companion object
 }
 
@@ -2423,17 +3487,17 @@ data class Instrument (
     /**
      * 乐器 id："guitar" | "ukulele" | "zhudi" | "dongxiao" | "shakuhachi" | "guqin"。
      */
-    var `id`: kotlin.String, 
+    var `id`: kotlin.String,
     /**
      * 中文显示名。
      */
-    var `displayName`: kotlin.String, 
+    var `displayName`: kotlin.String,
     /**
      * 类别。
      */
     var `kind`: InstrumentKind
 ) {
-    
+
     companion object
 }
 
@@ -2471,13 +3535,13 @@ data class KeyMode (
     /**
      * 主音 pitch class（0-11，C=0）。
      */
-    var `tonicPc`: kotlin.UByte, 
+    var `tonicPc`: kotlin.UByte,
     /**
      * 调式类别。
      */
     var `mode`: ModeKind
 ) {
-    
+
     companion object
 }
 
@@ -2512,25 +3576,25 @@ data class MetronomeConfig (
     /**
      * 采样率（Hz）。
      */
-    var `sampleRate`: kotlin.Double, 
+    var `sampleRate`: kotlin.Double,
     /**
      * BPM（30–250，浮点）。
      */
-    var `bpm`: kotlin.Double, 
+    var `bpm`: kotlin.Double,
     /**
      * 每小节拍数（1–12）。
      */
-    var `beatsPerBar`: kotlin.UByte, 
+    var `beatsPerBar`: kotlin.UByte,
     /**
      * 拍单位（2|4|8）。
      */
-    var `beatUnit`: kotlin.UByte, 
+    var `beatUnit`: kotlin.UByte,
     /**
      * 每拍重音型（长度 = beats_per_bar）。
      */
     var `accents`: List<TickAccent>
 ) {
-    
+
     companion object
 }
 
@@ -2574,25 +3638,25 @@ data class Partial (
     /**
      * 频率（Hz）。
      */
-    var `freqHz`: kotlin.Double, 
+    var `freqHz`: kotlin.Double,
     /**
      * 幅值（dBFS）。
      */
-    var `magnitudeDb`: kotlin.Float, 
+    var `magnitudeDb`: kotlin.Float,
     /**
      * 泛音序号：0=独立音；1=基频；2,3,4…=基频泛音。
      */
-    var `harmonicIndex`: kotlin.UByte, 
+    var `harmonicIndex`: kotlin.UByte,
     /**
      * 独立音时的 12-TET 音名。
      */
-    var `noteName`: kotlin.String, 
+    var `noteName`: kotlin.String,
     /**
      * 独立音时相对最近 12-TET 音的 cents。
      */
     var `centsOff`: kotlin.Double
 ) {
-    
+
     companion object
 }
 
@@ -2630,31 +3694,646 @@ public object FfiConverterTypePartial: FfiConverterRustBuffer<Partial> {
 
 
 /**
+ * 可叠加的频谱；真实测量桶，无额外FFT。
+ */
+data class PracticeComparison (
+    /**
+     * 当前曲线。
+     */
+    var `current`: List<kotlin.Float>,
+    /**
+     * 基准曲线。
+     */
+    var `reference`: List<kotlin.Float>,
+    /**
+     * 是否相对峰值归一化。
+     */
+    var `normalized`: kotlin.Boolean
+) {
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePracticeComparison: FfiConverterRustBuffer<PracticeComparison> {
+    override fun read(buf: ByteBuffer): PracticeComparison {
+        return PracticeComparison(
+            FfiConverterSequenceFloat.read(buf),
+            FfiConverterSequenceFloat.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PracticeComparison) = (
+            FfiConverterSequenceFloat.allocationSize(value.`current`) +
+            FfiConverterSequenceFloat.allocationSize(value.`reference`) +
+            FfiConverterBoolean.allocationSize(value.`normalized`)
+    )
+
+    override fun write(value: PracticeComparison, buf: ByteBuffer) {
+            FfiConverterSequenceFloat.write(value.`current`, buf)
+            FfiConverterSequenceFloat.write(value.`reference`, buf)
+            FfiConverterBoolean.write(value.`normalized`, buf)
+    }
+}
+
+
+
+/**
+ * 不可变保存到配置段的目标与演奏上下文。
+ */
+data class PracticeConfig (
+    /**
+     * A4基准，415–466Hz。
+     */
+    var `a4Hz`: kotlin.Double,
+    /**
+     * 平均律等分数。
+     */
+    var `temperament`: kotlin.UByte,
+    /**
+     * 锁定参考音步序。
+     */
+    var `targetStep`: kotlin.Int?,
+    /**
+     * 锁定乐器音级，频率随A4变化。
+     */
+    var `targetMidi`: kotlin.Int?,
+    /**
+     * 锁定绝对Hz。
+     */
+    var `targetHz`: kotlin.Double?,
+    /**
+     * 目标显示名。
+     */
+    var `targetName`: kotlin.String,
+    /**
+     * 乐器身份。
+     */
+    var `instrumentId`: kotlin.String,
+    /**
+     * 型号身份。
+     */
+    var `variantId`: kotlin.String,
+    /**
+     * 指法身份，仅用于示范，不推断实际按法。
+     */
+    var `fingeringId`: kotlin.Int?,
+    /**
+     * 准音容差。
+     */
+    var `toleranceCents`: kotlin.Double
+) {
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePracticeConfig: FfiConverterRustBuffer<PracticeConfig> {
+    override fun read(buf: ByteBuffer): PracticeConfig {
+        return PracticeConfig(
+            FfiConverterDouble.read(buf),
+            FfiConverterUByte.read(buf),
+            FfiConverterOptionalInt.read(buf),
+            FfiConverterOptionalInt.read(buf),
+            FfiConverterOptionalDouble.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterOptionalInt.read(buf),
+            FfiConverterDouble.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PracticeConfig) = (
+            FfiConverterDouble.allocationSize(value.`a4Hz`) +
+            FfiConverterUByte.allocationSize(value.`temperament`) +
+            FfiConverterOptionalInt.allocationSize(value.`targetStep`) +
+            FfiConverterOptionalInt.allocationSize(value.`targetMidi`) +
+            FfiConverterOptionalDouble.allocationSize(value.`targetHz`) +
+            FfiConverterString.allocationSize(value.`targetName`) +
+            FfiConverterString.allocationSize(value.`instrumentId`) +
+            FfiConverterString.allocationSize(value.`variantId`) +
+            FfiConverterOptionalInt.allocationSize(value.`fingeringId`) +
+            FfiConverterDouble.allocationSize(value.`toleranceCents`)
+    )
+
+    override fun write(value: PracticeConfig, buf: ByteBuffer) {
+            FfiConverterDouble.write(value.`a4Hz`, buf)
+            FfiConverterUByte.write(value.`temperament`, buf)
+            FfiConverterOptionalInt.write(value.`targetStep`, buf)
+            FfiConverterOptionalInt.write(value.`targetMidi`, buf)
+            FfiConverterOptionalDouble.write(value.`targetHz`, buf)
+            FfiConverterString.write(value.`targetName`, buf)
+            FfiConverterString.write(value.`instrumentId`, buf)
+            FfiConverterString.write(value.`variantId`, buf)
+            FfiConverterOptionalInt.write(value.`fingeringId`, buf)
+            FfiConverterDouble.write(value.`toleranceCents`, buf)
+    }
+}
+
+
+
+/**
+ * 同一分析帧的完整测量快照。
+ */
+data class PracticePoint (
+    /**
+     * 会话内递增身份。
+     */
+    var `id`: kotlin.ULong,
+    /**
+     * 连续采集段。
+     */
+    var `segmentId`: kotlin.UInt,
+    /**
+     * 配置段引用。
+     */
+    var `configId`: kotlin.UInt,
+    /**
+     * 会话音频时间。
+     */
+    var `timeSeconds`: kotlin.Double,
+    /**
+     * 原始分析数据，不含PCM。
+     */
+    var `frame`: AnalysisFrame,
+    /**
+     * 该点的目标频率。
+     */
+    var `targetHz`: kotlin.Double?,
+    /**
+     * 相对目标的真实音分，不折叠。
+     */
+    var `cents`: kotlin.Double?,
+    /**
+     * 当时目标音名。
+     */
+    var `targetName`: kotlin.String,
+    /**
+     * 输出参考音标记。
+     */
+    var `referenceActive`: kotlin.Boolean,
+    /**
+     * 可用于演奏统计的真实追踪点。
+     */
+    var `valid`: kotlin.Boolean
+) {
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePracticePoint: FfiConverterRustBuffer<PracticePoint> {
+    override fun read(buf: ByteBuffer): PracticePoint {
+        return PracticePoint(
+            FfiConverterULong.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterDouble.read(buf),
+            FfiConverterTypeAnalysisFrame.read(buf),
+            FfiConverterOptionalDouble.read(buf),
+            FfiConverterOptionalDouble.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PracticePoint) = (
+            FfiConverterULong.allocationSize(value.`id`) +
+            FfiConverterUInt.allocationSize(value.`segmentId`) +
+            FfiConverterUInt.allocationSize(value.`configId`) +
+            FfiConverterDouble.allocationSize(value.`timeSeconds`) +
+            FfiConverterTypeAnalysisFrame.allocationSize(value.`frame`) +
+            FfiConverterOptionalDouble.allocationSize(value.`targetHz`) +
+            FfiConverterOptionalDouble.allocationSize(value.`cents`) +
+            FfiConverterString.allocationSize(value.`targetName`) +
+            FfiConverterBoolean.allocationSize(value.`referenceActive`) +
+            FfiConverterBoolean.allocationSize(value.`valid`)
+    )
+
+    override fun write(value: PracticePoint, buf: ByteBuffer) {
+            FfiConverterULong.write(value.`id`, buf)
+            FfiConverterUInt.write(value.`segmentId`, buf)
+            FfiConverterUInt.write(value.`configId`, buf)
+            FfiConverterDouble.write(value.`timeSeconds`, buf)
+            FfiConverterTypeAnalysisFrame.write(value.`frame`, buf)
+            FfiConverterOptionalDouble.write(value.`targetHz`, buf)
+            FfiConverterOptionalDouble.write(value.`cents`, buf)
+            FfiConverterString.write(value.`targetName`, buf)
+            FfiConverterBoolean.write(value.`referenceActive`, buf)
+            FfiConverterBoolean.write(value.`valid`, buf)
+    }
+}
+
+
+
+/**
+ * 配置与引擎代次组成的不可变采集段。
+ */
+data class PracticeSegment (
+    /**
+     * 段身份。
+     */
+    var `id`: kotlin.UInt,
+    /**
+     * 配置身份。
+     */
+    var `configId`: kotlin.UInt,
+    /**
+     * 采集重启代次。
+     */
+    var `generation`: kotlin.ULong,
+    /**
+     * 当时配置。
+     */
+    var `config`: PracticeConfig
+) {
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePracticeSegment: FfiConverterRustBuffer<PracticeSegment> {
+    override fun read(buf: ByteBuffer): PracticeSegment {
+        return PracticeSegment(
+            FfiConverterUInt.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterTypePracticeConfig.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PracticeSegment) = (
+            FfiConverterUInt.allocationSize(value.`id`) +
+            FfiConverterUInt.allocationSize(value.`configId`) +
+            FfiConverterULong.allocationSize(value.`generation`) +
+            FfiConverterTypePracticeConfig.allocationSize(value.`config`)
+    )
+
+    override fun write(value: PracticeSegment, buf: ByteBuffer) {
+            FfiConverterUInt.write(value.`id`, buf)
+            FfiConverterUInt.write(value.`configId`, buf)
+            FfiConverterULong.write(value.`generation`, buf)
+            FfiConverterTypePracticeConfig.write(value.`config`, buf)
+    }
+}
+
+
+
+/**
+ * 独立命名比较样本。
+ */
+data class PracticeSnapshot (
+    /**
+     * 样本身份。
+     */
+    var `id`: kotlin.UInt,
+    /**
+     * 名称。
+     */
+    var `name`: kotlin.String,
+    /**
+     * 独立原始点。
+     */
+    var `point`: PracticePoint,
+    /**
+     * 独立配置。
+     */
+    var `config`: PracticeConfig
+) {
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePracticeSnapshot: FfiConverterRustBuffer<PracticeSnapshot> {
+    override fun read(buf: ByteBuffer): PracticeSnapshot {
+        return PracticeSnapshot(
+            FfiConverterUInt.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterTypePracticePoint.read(buf),
+            FfiConverterTypePracticeConfig.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PracticeSnapshot) = (
+            FfiConverterUInt.allocationSize(value.`id`) +
+            FfiConverterString.allocationSize(value.`name`) +
+            FfiConverterTypePracticePoint.allocationSize(value.`point`) +
+            FfiConverterTypePracticeConfig.allocationSize(value.`config`)
+    )
+
+    override fun write(value: PracticeSnapshot, buf: ByteBuffer) {
+            FfiConverterUInt.write(value.`id`, buf)
+            FfiConverterString.write(value.`name`, buf)
+            FfiConverterTypePracticePoint.write(value.`point`, buf)
+            FfiConverterTypePracticeConfig.write(value.`config`, buf)
+    }
+}
+
+
+
+/**
+ * 用于原生界面的小型状态。
+ */
+data class PracticeStatus (
+    /**
+     * 记录状态。
+     */
+    var `state`: PracticeRecordingState,
+    /**
+     * 记录点数。
+     */
+    var `count`: kotlin.UInt,
+    /**
+     * 回看身份；空为实时。
+     */
+    var `reviewId`: kotlin.ULong?,
+    /**
+     * 暂停或失败原因。
+     */
+    var `reason`: kotlin.String,
+    /**
+     * 已保存JSON载荷预算。
+     */
+    var `payloadBytes`: kotlin.ULong,
+    /**
+     * 命名样本数。
+     */
+    var `snapshotCount`: kotlin.UInt,
+    /**
+     * 当前比较基准。
+     */
+    var `baselineId`: kotlin.UInt?,
+    /**
+     * 保存选区的起点。
+     */
+    var `selectionStartId`: kotlin.ULong?,
+    /**
+     * 保存选区的终点。
+     */
+    var `selectionEndId`: kotlin.ULong?
+) {
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePracticeStatus: FfiConverterRustBuffer<PracticeStatus> {
+    override fun read(buf: ByteBuffer): PracticeStatus {
+        return PracticeStatus(
+            FfiConverterTypePracticeRecordingState.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterOptionalUInt.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PracticeStatus) = (
+            FfiConverterTypePracticeRecordingState.allocationSize(value.`state`) +
+            FfiConverterUInt.allocationSize(value.`count`) +
+            FfiConverterOptionalULong.allocationSize(value.`reviewId`) +
+            FfiConverterString.allocationSize(value.`reason`) +
+            FfiConverterULong.allocationSize(value.`payloadBytes`) +
+            FfiConverterUInt.allocationSize(value.`snapshotCount`) +
+            FfiConverterOptionalUInt.allocationSize(value.`baselineId`) +
+            FfiConverterOptionalULong.allocationSize(value.`selectionStartId`) +
+            FfiConverterOptionalULong.allocationSize(value.`selectionEndId`)
+    )
+
+    override fun write(value: PracticeStatus, buf: ByteBuffer) {
+            FfiConverterTypePracticeRecordingState.write(value.`state`, buf)
+            FfiConverterUInt.write(value.`count`, buf)
+            FfiConverterOptionalULong.write(value.`reviewId`, buf)
+            FfiConverterString.write(value.`reason`, buf)
+            FfiConverterULong.write(value.`payloadBytes`, buf)
+            FfiConverterUInt.write(value.`snapshotCount`, buf)
+            FfiConverterOptionalUInt.write(value.`baselineId`, buf)
+            FfiConverterOptionalULong.write(value.`selectionStartId`, buf)
+            FfiConverterOptionalULong.write(value.`selectionEndId`, buf)
+    }
+}
+
+
+
+/**
+ * 单一配置段的时间加权统计。
+ */
+data class PracticeSummary (
+    /**
+     * 连续段。
+     */
+    var `segmentId`: kotlin.UInt,
+    /**
+     * 选中开始秒。
+     */
+    var `startTime`: kotlin.Double,
+    /**
+     * 选中结束秒。
+     */
+    var `endTime`: kotlin.Double,
+    /**
+     * 有效覆盖秒数。
+     */
+    var `validSeconds`: kotlin.Double,
+    /**
+     * 有效覆盖率。
+     */
+    var `coverage`: kotlin.Double,
+    /**
+     * 时间加权中位数。
+     */
+    var `medianCents`: kotlin.Double?,
+    /**
+     * 时间加权P10。
+     */
+    var `lowCents`: kotlin.Double?,
+    /**
+     * 时间加权P90。
+     */
+    var `highCents`: kotlin.Double?,
+    /**
+     * 有效时间内准音率。
+     */
+    var `accuracy`: kotlin.Double?,
+    /**
+     * 不足1秒或5点。
+     */
+    var `insufficient`: kotlin.Boolean
+) {
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePracticeSummary: FfiConverterRustBuffer<PracticeSummary> {
+    override fun read(buf: ByteBuffer): PracticeSummary {
+        return PracticeSummary(
+            FfiConverterUInt.read(buf),
+            FfiConverterDouble.read(buf),
+            FfiConverterDouble.read(buf),
+            FfiConverterDouble.read(buf),
+            FfiConverterDouble.read(buf),
+            FfiConverterOptionalDouble.read(buf),
+            FfiConverterOptionalDouble.read(buf),
+            FfiConverterOptionalDouble.read(buf),
+            FfiConverterOptionalDouble.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PracticeSummary) = (
+            FfiConverterUInt.allocationSize(value.`segmentId`) +
+            FfiConverterDouble.allocationSize(value.`startTime`) +
+            FfiConverterDouble.allocationSize(value.`endTime`) +
+            FfiConverterDouble.allocationSize(value.`validSeconds`) +
+            FfiConverterDouble.allocationSize(value.`coverage`) +
+            FfiConverterOptionalDouble.allocationSize(value.`medianCents`) +
+            FfiConverterOptionalDouble.allocationSize(value.`lowCents`) +
+            FfiConverterOptionalDouble.allocationSize(value.`highCents`) +
+            FfiConverterOptionalDouble.allocationSize(value.`accuracy`) +
+            FfiConverterBoolean.allocationSize(value.`insufficient`)
+    )
+
+    override fun write(value: PracticeSummary, buf: ByteBuffer) {
+            FfiConverterUInt.write(value.`segmentId`, buf)
+            FfiConverterDouble.write(value.`startTime`, buf)
+            FfiConverterDouble.write(value.`endTime`, buf)
+            FfiConverterDouble.write(value.`validSeconds`, buf)
+            FfiConverterDouble.write(value.`coverage`, buf)
+            FfiConverterOptionalDouble.write(value.`medianCents`, buf)
+            FfiConverterOptionalDouble.write(value.`lowCents`, buf)
+            FfiConverterOptionalDouble.write(value.`highCents`, buf)
+            FfiConverterOptionalDouble.write(value.`accuracy`, buf)
+            FfiConverterBoolean.write(value.`insufficient`, buf)
+    }
+}
+
+
+
+/**
+ * 仅传输给时间轴的标量。
+ */
+data class PracticeTracePoint (
+    /**
+     * 原测量身份。
+     */
+    var `id`: kotlin.ULong,
+    /**
+     * 连续段。
+     */
+    var `segmentId`: kotlin.UInt,
+    /**
+     * 配置段。
+     */
+    var `configId`: kotlin.UInt,
+    /**
+     * 秒。
+     */
+    var `timeSeconds`: kotlin.Double,
+    /**
+     * 原精度音分。
+     */
+    var `cents`: kotlin.Double?,
+    /**
+     * 输入dBFS。
+     */
+    var `inputDbfs`: kotlin.Float,
+    /**
+     * 有效演奏点。
+     */
+    var `valid`: kotlin.Boolean
+) {
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePracticeTracePoint: FfiConverterRustBuffer<PracticeTracePoint> {
+    override fun read(buf: ByteBuffer): PracticeTracePoint {
+        return PracticeTracePoint(
+            FfiConverterULong.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterDouble.read(buf),
+            FfiConverterOptionalDouble.read(buf),
+            FfiConverterFloat.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PracticeTracePoint) = (
+            FfiConverterULong.allocationSize(value.`id`) +
+            FfiConverterUInt.allocationSize(value.`segmentId`) +
+            FfiConverterUInt.allocationSize(value.`configId`) +
+            FfiConverterDouble.allocationSize(value.`timeSeconds`) +
+            FfiConverterOptionalDouble.allocationSize(value.`cents`) +
+            FfiConverterFloat.allocationSize(value.`inputDbfs`) +
+            FfiConverterBoolean.allocationSize(value.`valid`)
+    )
+
+    override fun write(value: PracticeTracePoint, buf: ByteBuffer) {
+            FfiConverterULong.write(value.`id`, buf)
+            FfiConverterUInt.write(value.`segmentId`, buf)
+            FfiConverterUInt.write(value.`configId`, buf)
+            FfiConverterDouble.write(value.`timeSeconds`, buf)
+            FfiConverterOptionalDouble.write(value.`cents`, buf)
+            FfiConverterFloat.write(value.`inputDbfs`, buf)
+            FfiConverterBoolean.write(value.`valid`, buf)
+    }
+}
+
+
+
+/**
  * 当前平均律中的一个可播放固定音高。
  */
 data class ReferenceTone (
     /**
      * 相对 A4 的平均律步数。
      */
-    var `stepFromA4`: kotlin.Int, 
+    var `stepFromA4`: kotlin.Int,
     /**
      * 固定频率（Hz）。
      */
-    var `frequencyHz`: kotlin.Double, 
+    var `frequencyHz`: kotlin.Double,
     /**
      * 平均律等分数。
      */
-    var `temperament`: kotlin.UByte, 
+    var `temperament`: kotlin.UByte,
     /**
      * 最近的 12 平均律音名。
      */
-    var `noteName`: kotlin.String, 
+    var `noteName`: kotlin.String,
     /**
      * 相对该音名的音分差。
      */
     var `centsFromNote`: kotlin.Double
 ) {
-    
+
     companion object
 }
 
@@ -2698,13 +4377,13 @@ data class RenderFrame (
     /**
      * PCM（含混入的 tick 音色）。
      */
-    var `samples`: List<kotlin.Float>, 
+    var `samples`: List<kotlin.Float>,
     /**
      * 本区间内的 tick 事件。
      */
     var `ticks`: List<TickInfo>
 ) {
-    
+
     companion object
 }
 
@@ -2739,25 +4418,25 @@ data class StringSpec (
     /**
      * 弦号（从 1 开始，含义见 spec-instruments）。
      */
-    var `index`: kotlin.UInt, 
+    var `index`: kotlin.UInt,
     /**
      * 音名（如 "E2"）。
      */
-    var `noteName`: kotlin.String, 
+    var `noteName`: kotlin.String,
     /**
      * MIDI 音高（随 A4 换算/唱名重算的基准）。
      */
-    var `midi`: kotlin.Int, 
+    var `midi`: kotlin.Int,
     /**
      * 目标频率（Hz，按当前 A4 校准换算；全局接口按 A4=440）。
      */
-    var `freqHz`: kotlin.Double, 
+    var `freqHz`: kotlin.Double,
     /**
      * 唱名（按乐器习惯调的首调简谱）。
      */
     var `solfege`: kotlin.String
 ) {
-    
+
     companion object
 }
 
@@ -2801,17 +4480,17 @@ data class TickInfo (
     /**
      * 相对本次 render 缓冲起点的采样偏移。
      */
-    var `sampleOffset`: kotlin.ULong, 
+    var `sampleOffset`: kotlin.ULong,
     /**
      * 小节内第几拍（0 起）。
      */
-    var `beatIndex`: kotlin.UInt, 
+    var `beatIndex`: kotlin.UInt,
     /**
      * 重音型。
      */
     var `accent`: TickAccent
 ) {
-    
+
     companion object
 }
 
@@ -2849,17 +4528,17 @@ data class TongyinOption (
     /**
      * 半音级 0–11（筒音 = 宫音 + degree 半音）。7=作5、0=作1、2=作2。
      */
-    var `degree`: kotlin.UByte, 
+    var `degree`: kotlin.UByte,
     /**
      * 该级的首调简谱唱名（"5"、"#4" 等）。
      */
-    var `solfege`: kotlin.String, 
+    var `solfege`: kotlin.String,
     /**
      * 是否为该孔制的常用指法。
      */
     var `common`: kotlin.Boolean
 ) {
-    
+
     companion object
 }
 
@@ -2897,21 +4576,21 @@ data class ToolTone (
     /**
      * 稳定 id，如 "anti_motion_sickness"。
      */
-    var `id`: kotlin.String, 
+    var `id`: kotlin.String,
     /**
      * 显示名，如 "防晕车"。
      */
-    var `displayName`: kotlin.String, 
+    var `displayName`: kotlin.String,
     /**
      * 一行说明，如 "100Hz 纯正弦波"。
      */
-    var `summary`: kotlin.String, 
+    var `summary`: kotlin.String,
     /**
      * 正弦波频率（Hz）。
      */
     var `frequencyHz`: kotlin.Double
 ) {
-    
+
     companion object
 }
 
@@ -2952,33 +4631,33 @@ data class TunarConfig (
     /**
      * 采样率（Hz）。
      */
-    var `sampleRate`: kotlin.Double, 
+    var `sampleRate`: kotlin.Double,
     /**
      * 相邻分析帧之间推进的采样数（默认 1024）。
      */
-    var `frameHopSamples`: kotlin.UInt, 
+    var `frameHopSamples`: kotlin.UInt,
     /**
      * A4 校准（415–466Hz）。
      */
-    var `a4Hz`: kotlin.Double, 
+    var `a4Hz`: kotlin.Double,
     /**
      * 噪声门限（dBFS，默认 -45）。
      */
-    var `noiseGateDbfs`: kotlin.Float, 
+    var `noiseGateDbfs`: kotlin.Float,
     /**
      * 唱名体系。
      */
-    var `solfege`: SolfegeSystem, 
+    var `solfege`: SolfegeSystem,
     /**
      * 调式。
      */
-    var `key`: KeyMode, 
+    var `key`: KeyMode,
     /**
      * N 平均律（12/19/24/31，默认 12；v4 新增）。
      */
     var `temperament`: kotlin.UByte
 ) {
-    
+
     companion object
 }
 
@@ -3028,41 +4707,41 @@ data class TunarEvent (
     /**
      * 平滑后频率（Hz）。
      */
-    var `freqHz`: kotlin.Double, 
+    var `freqHz`: kotlin.Double,
     /**
      * 音名（如 "A4"）。
      */
-    var `noteName`: kotlin.String, 
+    var `noteName`: kotlin.String,
     /**
      * 最近 MIDI 音。
      */
-    var `midi`: kotlin.Int, 
+    var `midi`: kotlin.Int,
     /**
      * 音分偏差 [-50, +50)。
      */
-    var `centsOff`: kotlin.Double, 
+    var `centsOff`: kotlin.Double,
     /**
      * 检测置信度（0-1）。
      */
-    var `clarity`: kotlin.Float, 
+    var `clarity`: kotlin.Float,
     /**
      * 唱名（按 config 唱名体系）。
      */
-    var `solfege`: kotlin.String, 
+    var `solfege`: kotlin.String,
     /**
      * 当前律制 N（v4 新增）。
      */
-    var `temperament`: kotlin.UByte, 
+    var `temperament`: kotlin.UByte,
     /**
      * 最近步序 k（A4 为参考）。
      */
-    var `temperamentStep`: kotlin.Int, 
+    var `temperamentStep`: kotlin.Int,
     /**
      * 律制音分偏差 [-600/N, +600/N)。
      */
     var `temperamentCents`: kotlin.Double
 ) {
-    
+
     companion object
 }
 
@@ -3118,17 +4797,17 @@ data class Tuning (
     /**
      * 定弦 id（如 "standard"、"drop_d"）。
      */
-    var `id`: kotlin.String, 
+    var `id`: kotlin.String,
     /**
      * 中文显示名。
      */
-    var `displayName`: kotlin.String, 
+    var `displayName`: kotlin.String,
     /**
      * 各弦（按弦号 1..=N 顺序）。
      */
     var `strings`: List<StringSpec>
 ) {
-    
+
     companion object
 }
 
@@ -3166,45 +4845,45 @@ data class WindChart (
     /**
      * 型号 id。
      */
-    var `variantId`: kotlin.String, 
+    var `variantId`: kotlin.String,
     /**
      * 型号显示名（如 "G调洞箫 · 8孔"）。
      */
-    var `variantName`: kotlin.String, 
+    var `variantName`: kotlin.String,
     /**
      * 当前筒音级 0–11。
      */
-    var `tongyinDegree`: kotlin.UByte, 
+    var `tongyinDegree`: kotlin.UByte,
     /**
      * 当前筒音唱名（"5" 等）。
      */
-    var `tongyinSolfege`: kotlin.String, 
+    var `tongyinSolfege`: kotlin.String,
     /**
      * 宫音 pitch class。
      */
-    var `tonicPc`: kotlin.UByte, 
+    var `tonicPc`: kotlin.UByte,
     /**
      * 宫音音名（不含八度，如 "G"）。
      */
-    var `tonicName`: kotlin.String, 
+    var `tonicName`: kotlin.String,
     /**
      * 面板标题（如 "筒音作5 · G宫"）。
      */
-    var `keyDisplay`: kotlin.String, 
+    var `keyDisplay`: kotlin.String,
     /**
      * 孔数（固定音阶类为 0）。
      */
-    var `holeCount`: kotlin.UByte, 
+    var `holeCount`: kotlin.UByte,
     /**
      * 背孔数。
      */
-    var `backHoleCount`: kotlin.UByte, 
+    var `backHoleCount`: kotlin.UByte,
     /**
      * 音阶（升序；筒音在首位，UI 可按需倒序显示）。
      */
     var `notes`: List<WindFingering>
 ) {
-    
+
     companion object
 }
 
@@ -3263,61 +4942,61 @@ data class WindFingering (
     /**
      * 同一张表内唯一的稳定 id。
      */
-    var `fingeringId`: kotlin.Int, 
+    var `fingeringId`: kotlin.Int,
     /**
      * 当前音高相对筒音低音的半音数；不同指法可能产生同一音高。
      */
-    var `semitones`: kotlin.Int, 
+    var `semitones`: kotlin.Int,
     /**
      * 决定孔位组合的基础半音（洞箫为 0–11）。
      */
-    var `baseSemitones`: kotlin.Int, 
+    var `baseSemitones`: kotlin.Int,
     /**
      * 低音、中音或高音。
      */
-    var `register`: WindRegister, 
+    var `register`: WindRegister,
     /**
      * 指法名（如 "开第一二三孔"、"闭第二五六七孔·超吹"）。
      */
-    var `label`: kotlin.String, 
+    var `label`: kotlin.String,
     /**
      * 孔位组合，索引 0 = 第一孔（最下），末位 = 最上/背孔；固定音阶类为空。
      */
-    var `holes`: List<HoleMark>, 
+    var `holes`: List<HoleMark>,
     /**
      * 指法展示分组：顺指或叉指/半孔。
      */
-    var `fingeringKind`: FingeringKind, 
+    var `fingeringKind`: FingeringKind,
     /**
      * 最上方开孔的孔序索引（0 = 第一孔）；全闭/无孔位为 `None`。
      */
-    var `anchorHole`: kotlin.UByte?, 
+    var `anchorHole`: kotlin.UByte?,
     /**
      * 音名。
      */
-    var `noteName`: kotlin.String, 
+    var `noteName`: kotlin.String,
     /**
      * MIDI 音高。
      */
-    var `midi`: kotlin.Int, 
+    var `midi`: kotlin.Int,
     /**
      * 目标频率（Hz，按 A4=440 换算）。
      */
-    var `freqHz`: kotlin.Double, 
+    var `freqHz`: kotlin.Double,
     /**
      * 唱名（按当前筒音级推出的宫音，首调简谱）。
      */
-    var `solfege`: kotlin.String, 
+    var `solfege`: kotlin.String,
     /**
      * 是否为当前调宫调式七声的正声（否则为偏音）。
      */
-    var `inScale`: kotlin.Boolean, 
+    var `inScale`: kotlin.Boolean,
     /**
      * 是否不是低音区。
      */
     var `overblown`: kotlin.Boolean
 ) {
-    
+
     companion object
 }
 
@@ -3388,57 +5067,57 @@ data class WindVariant (
     /**
      * 型号 id（如 "g_xiao_x8"、"shaku_1_8"）。
      */
-    var `id`: kotlin.String, 
+    var `id`: kotlin.String,
     /**
      * 完整显示名（如 "G调洞箫 · 8孔"）。
      */
-    var `displayName`: kotlin.String, 
+    var `displayName`: kotlin.String,
     /**
      * 调性/尺寸 id（同调性的不同孔制共享，如 "g_xiao"）。
      */
-    var `keyId`: kotlin.String, 
+    var `keyId`: kotlin.String,
     /**
      * 调性/尺寸显示名（如 "G调洞箫"）。
      */
-    var `keyName`: kotlin.String, 
+    var `keyName`: kotlin.String,
     /**
      * 孔制显示名（如 "8孔"；固定音阶类为空串）。
      */
-    var `holeSystemName`: kotlin.String, 
+    var `holeSystemName`: kotlin.String,
     /**
      * 孔数（固定音阶类为 0）。
      */
-    var `holeCount`: kotlin.UByte, 
+    var `holeCount`: kotlin.UByte,
     /**
      * 末尾若干孔位于背面（拇指孔）。
      */
-    var `backHoleCount`: kotlin.UByte, 
+    var `backHoleCount`: kotlin.UByte,
     /**
      * 筒音 MIDI。
      */
-    var `fundamentalMidi`: kotlin.Int, 
+    var `fundamentalMidi`: kotlin.Int,
     /**
      * 筒音音名。
      */
-    var `fundamentalNoteName`: kotlin.String, 
+    var `fundamentalNoteName`: kotlin.String,
     /**
      * 是否支持筒音唱名转调（孔制类支持 12 级）。
      */
-    var `supportsTongyin`: kotlin.Boolean, 
+    var `supportsTongyin`: kotlin.Boolean,
     /**
      * 是否支持十二音全表展开。
      */
-    var `supportsChromatic`: kotlin.Boolean, 
+    var `supportsChromatic`: kotlin.Boolean,
     /**
      * 12 档筒音唱名（升序 degree 0–11；固定音阶类为空）。
      */
-    var `tongyinOptions`: List<TongyinOption>, 
+    var `tongyinOptions`: List<TongyinOption>,
     /**
      * 默认筒音级（孔制类为作 5）。
      */
     var `defaultTongyinDegree`: kotlin.UByte
 ) {
-    
+
     companion object
 }
 
@@ -3504,7 +5183,7 @@ public object FfiConverterTypeWindVariant: FfiConverterRustBuffer<WindVariant> {
  */
 
 enum class FingeringKind {
-    
+
     /**
      * 顺指：从下往上连续开孔（含全闭筒音与全开）。
      */
@@ -3543,7 +5222,7 @@ public object FfiConverterTypeFingeringKind: FfiConverterRustBuffer<FingeringKin
  */
 
 enum class FingeringScope {
-    
+
     /**
      * 七声基础孔位；洞箫每个孔位按低音/中音/高音各自的实测孔位展开，缺资料的格不返回。
      */
@@ -3582,7 +5261,7 @@ public object FfiConverterTypeFingeringScope: FfiConverterRustBuffer<FingeringSc
  */
 
 enum class HoleMark {
-    
+
     /**
      * 闭孔（按住）。
      */
@@ -3625,7 +5304,7 @@ public object FfiConverterTypeHoleMark: FfiConverterRustBuffer<HoleMark> {
  */
 
 enum class InstrumentKind {
-    
+
     /**
      * 弦乐器。
      */
@@ -3664,7 +5343,7 @@ public object FfiConverterTypeInstrumentKind: FfiConverterRustBuffer<InstrumentK
  */
 
 enum class ModeKind {
-    
+
     /**
      * 宫调式。
      */
@@ -3718,12 +5397,208 @@ public object FfiConverterTypeModeKind: FfiConverterRustBuffer<ModeKind> {
 
 
 
+
+
+/**
+ * 记录与显示的错误；错误不改变现有已保存数据。
+ */
+sealed class PracticeException: kotlin.Exception() {
+
+    /**
+     * 输入配置、测量帧或引用无效。
+     */
+    class InvalidInput(
+        ) : PracticeException() {
+        override val message
+            get() = ""
+    }
+
+    /**
+     * 文件结构或测量内容无效。
+     */
+    class InvalidFile(
+        ) : PracticeException() {
+        override val message
+            get() = ""
+    }
+
+    /**
+     * 文件版本不受支持。
+     */
+    class UnsupportedVersion(
+        ) : PracticeException() {
+        override val message
+            get() = ""
+    }
+
+    /**
+     * 容量上限。
+     */
+    class Capacity(
+        ) : PracticeException() {
+        override val message
+            get() = ""
+    }
+
+    /**
+     * 没有可用数据。
+     */
+    class NoData(
+        ) : PracticeException() {
+        override val message
+            get() = ""
+    }
+
+    /**
+     * 比较频谱的采集条件或坐标不兼容。
+     */
+    class IncompatibleGrid(
+        ) : PracticeException() {
+        override val message
+            get() = ""
+    }
+
+
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<PracticeException> {
+        override fun lift(error_buf: RustBuffer.ByValue): PracticeException = FfiConverterTypePracticeError.lift(error_buf)
+    }
+
+
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePracticeError : FfiConverterRustBuffer<PracticeException> {
+    override fun read(buf: ByteBuffer): PracticeException {
+
+
+        return when(buf.getInt()) {
+            1 -> PracticeException.InvalidInput()
+            2 -> PracticeException.InvalidFile()
+            3 -> PracticeException.UnsupportedVersion()
+            4 -> PracticeException.Capacity()
+            5 -> PracticeException.NoData()
+            6 -> PracticeException.IncompatibleGrid()
+            else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: PracticeException): ULong {
+        return when(value) {
+            is PracticeException.InvalidInput -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is PracticeException.InvalidFile -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is PracticeException.UnsupportedVersion -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is PracticeException.Capacity -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is PracticeException.NoData -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is PracticeException.IncompatibleGrid -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+        }
+    }
+
+    override fun write(value: PracticeException, buf: ByteBuffer) {
+        when(value) {
+            is PracticeException.InvalidInput -> {
+                buf.putInt(1)
+                Unit
+            }
+            is PracticeException.InvalidFile -> {
+                buf.putInt(2)
+                Unit
+            }
+            is PracticeException.UnsupportedVersion -> {
+                buf.putInt(3)
+                Unit
+            }
+            is PracticeException.Capacity -> {
+                buf.putInt(4)
+                Unit
+            }
+            is PracticeException.NoData -> {
+                buf.putInt(5)
+                Unit
+            }
+            is PracticeException.IncompatibleGrid -> {
+                buf.putInt(6)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+
+}
+
+
+
+/**
+ * 记录状态与显示游标相互独立。
+ */
+
+enum class PracticeRecordingState {
+
+    /**
+     * 尚未记录。
+     */
+    IDLE,
+    /**
+     * 正在追加。
+     */
+    RECORDING,
+    /**
+     * 暂停追加。
+     */
+    PAUSED,
+    /**
+     * 完成本次记录。
+     */
+    COMPLETE;
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePracticeRecordingState: FfiConverterRustBuffer<PracticeRecordingState> {
+    override fun read(buf: ByteBuffer) = try {
+        PracticeRecordingState.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: PracticeRecordingState) = 4UL
+
+    override fun write(value: PracticeRecordingState, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
 /**
  * 输入信号状态。
  */
 
 enum class SignalState {
-    
+
     /**
      * 无可信信号。
      */
@@ -3770,7 +5645,7 @@ public object FfiConverterTypeSignalState: FfiConverterRustBuffer<SignalState> {
  */
 
 enum class SolfegeSystem {
-    
+
     /**
      * 固定 Do（C=do）。
      */
@@ -3817,7 +5692,7 @@ public object FfiConverterTypeSolfegeSystem: FfiConverterRustBuffer<SolfegeSyste
  */
 
 enum class TickAccent {
-    
+
     /**
      * 重拍。
      */
@@ -3860,7 +5735,7 @@ public object FfiConverterTypeTickAccent: FfiConverterRustBuffer<TickAccent> {
  */
 
 enum class WindRegister {
-    
+
     /**
      * 缓吹（低音）。
      */
@@ -3934,6 +5809,102 @@ public object FfiConverterOptionalUByte: FfiConverterRustBuffer<kotlin.UByte?> {
 /**
  * @suppress
  */
+public object FfiConverterOptionalUInt: FfiConverterRustBuffer<kotlin.UInt?> {
+    override fun read(buf: ByteBuffer): kotlin.UInt? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterUInt.read(buf)
+    }
+
+    override fun allocationSize(value: kotlin.UInt?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterUInt.allocationSize(value)
+        }
+    }
+
+    override fun write(value: kotlin.UInt?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterUInt.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalInt: FfiConverterRustBuffer<kotlin.Int?> {
+    override fun read(buf: ByteBuffer): kotlin.Int? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterInt.read(buf)
+    }
+
+    override fun allocationSize(value: kotlin.Int?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterInt.allocationSize(value)
+        }
+    }
+
+    override fun write(value: kotlin.Int?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterInt.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalULong: FfiConverterRustBuffer<kotlin.ULong?> {
+    override fun read(buf: ByteBuffer): kotlin.ULong? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterULong.read(buf)
+    }
+
+    override fun allocationSize(value: kotlin.ULong?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterULong.allocationSize(value)
+        }
+    }
+
+    override fun write(value: kotlin.ULong?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterULong.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterOptionalDouble: FfiConverterRustBuffer<kotlin.Double?> {
     override fun read(buf: ByteBuffer): kotlin.Double? {
         if (buf.get().toInt() == 0) {
@@ -3988,6 +5959,38 @@ public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?>
         } else {
             buf.put(1)
             FfiConverterString.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypePracticePoint: FfiConverterRustBuffer<PracticePoint?> {
+    override fun read(buf: ByteBuffer): PracticePoint? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypePracticePoint.read(buf)
+    }
+
+    override fun allocationSize(value: PracticePoint?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypePracticePoint.allocationSize(value)
+        }
+    }
+
+    override fun write(value: PracticePoint?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypePracticePoint.write(value, buf)
         }
     }
 }
@@ -4136,6 +6139,118 @@ public object FfiConverterSequenceTypePartial: FfiConverterRustBuffer<List<Parti
         buf.putInt(value.size)
         value.iterator().forEach {
             FfiConverterTypePartial.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypePracticePoint: FfiConverterRustBuffer<List<PracticePoint>> {
+    override fun read(buf: ByteBuffer): List<PracticePoint> {
+        val len = buf.getInt()
+        return List<PracticePoint>(len) {
+            FfiConverterTypePracticePoint.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<PracticePoint>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypePracticePoint.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<PracticePoint>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypePracticePoint.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypePracticeSnapshot: FfiConverterRustBuffer<List<PracticeSnapshot>> {
+    override fun read(buf: ByteBuffer): List<PracticeSnapshot> {
+        val len = buf.getInt()
+        return List<PracticeSnapshot>(len) {
+            FfiConverterTypePracticeSnapshot.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<PracticeSnapshot>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypePracticeSnapshot.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<PracticeSnapshot>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypePracticeSnapshot.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypePracticeSummary: FfiConverterRustBuffer<List<PracticeSummary>> {
+    override fun read(buf: ByteBuffer): List<PracticeSummary> {
+        val len = buf.getInt()
+        return List<PracticeSummary>(len) {
+            FfiConverterTypePracticeSummary.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<PracticeSummary>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypePracticeSummary.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<PracticeSummary>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypePracticeSummary.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypePracticeTracePoint: FfiConverterRustBuffer<List<PracticeTracePoint>> {
+    override fun read(buf: ByteBuffer): List<PracticeTracePoint> {
+        val len = buf.getInt()
+        return List<PracticeTracePoint>(len) {
+            FfiConverterTypePracticeTracePoint.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<PracticeTracePoint>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypePracticeTracePoint.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<PracticeTracePoint>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypePracticeTracePoint.write(it, buf)
         }
     }
 }
@@ -4429,7 +6544,7 @@ public object FfiConverterSequenceTypeTickAccent: FfiConverterRustBuffer<List<Ti
 }
     )
     }
-    
+
 
         /**
          * 列出全部乐器。
@@ -4441,7 +6556,7 @@ public object FfiConverterSequenceTypeTickAccent: FfiConverterRustBuffer<List<Ti
 }
     )
     }
-    
+
 
         /**
          * 列出小工具页的全部固定音频，按展示顺序。
@@ -4453,7 +6568,7 @@ public object FfiConverterSequenceTypeTickAccent: FfiConverterRustBuffer<List<Ti
 }
     )
     }
-    
+
 
         /**
          * 列出某弦乐器的全部定弦（频率按 A4=440，唱名按乐器习惯调简谱）。
@@ -4465,7 +6580,7 @@ public object FfiConverterSequenceTypeTickAccent: FfiConverterRustBuffer<List<Ti
 }
     )
     }
-    
+
 
         /**
          * 列出某管乐器的全部型号（调性/尺寸 × 孔制）。
@@ -4479,7 +6594,7 @@ public object FfiConverterSequenceTypeTickAccent: FfiConverterRustBuffer<List<Ti
 }
     )
     }
-    
+
 
         /**
          * 任意 MIDI 音的唱名（按唱名体系与调式；乐器面板弦/孔唱名随用户配置重算用）。
@@ -4491,7 +6606,7 @@ public object FfiConverterSequenceTypeTickAccent: FfiConverterRustBuffer<List<Ti
 }
     )
     }
-    
+
 
         /**
          * 某型号在指定筒音唱名级与范围下的孔位指法表。
@@ -4506,6 +6621,6 @@ public object FfiConverterSequenceTypeTickAccent: FfiConverterRustBuffer<List<Ti
 }
     )
     }
-    
+
 
 

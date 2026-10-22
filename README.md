@@ -33,6 +33,14 @@
 - Reference-tone generator for 12, 19, 24, and 31 equal divisions of the octave.
 - Pro temperament mode with configurable A4 calibration.
 
+**Practice workspace**
+
+- Locked targets and full-precision cents traces with a separate input-level timeline.
+- Bounded measurement sessions, synchronized frame review, eight named comparison samples and time-weighted selection statistics.
+- Versioned JSON save/open and scalar CSV export; no PCM recording or audio playback.
+- Native desktop tasks for tuning, practice and analysis, with a responsive inspector and keyboard navigation.
+- Verification status: [implementation and acceptance](docs/en/practice-implementation.md).
+
 **Instrument tuning**
 
 - Guitar, ukulele, and guqin tunings.
@@ -44,6 +52,8 @@
 - 30–250 BPM, tap tempo, time signatures, and per-beat accents.
 - Twelve common synthesized click sounds with separate strong/weak beat choices.
 - Sample-accurate scheduling and native background playback.
+
+Native binary libraries are generated locally and excluded from Git. Run the core build script before building a fresh checkout; generated Swift/Kotlin text bindings remain reviewable in Git.
 
 ## Architecture
 

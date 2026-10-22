@@ -11,6 +11,12 @@ import android.os.Process
 import kotlin.math.PI
 import kotlin.math.sin
 
+object ReferenceToneActivity {
+    private val players = java.util.concurrent.ConcurrentHashMap.newKeySet<Any>()
+    fun set(player: Any, active: Boolean) { if (active) players.add(player) else players.remove(player) }
+    val isActive: Boolean get() = players.isNotEmpty()
+}
+
 /** 固定音高播放器；频率值由 Rust core 提供。 */
 interface ReferenceTonePlayer : AutoCloseable {
     /** 播放或平滑切换到指定固定频率。 */
@@ -130,6 +136,7 @@ class AudioTrackReferenceTonePlayer internal constructor(
             if (!audioFocus.request(::stop)) return
             focusHeld = true
         }
+        ReferenceToneActivity.set(this, true)
         requestedFrequencyHz = frequencyHz
         ensureWorker()
     }
@@ -217,11 +224,13 @@ class AudioTrackReferenceTonePlayer internal constructor(
     }
 
     private fun workerFinished() {
+        ReferenceToneActivity.set(this, false)
         val restart = synchronized(lifecycleLock) {
             if (thread === Thread.currentThread()) thread = null
             !closed && requestedFrequencyHz > 0.0
         }
         if (restart) {
+            ReferenceToneActivity.set(this, true)
             ensureWorker()
         } else {
             abandonAudioFocus()

@@ -94,10 +94,7 @@ struct DesktopAnalysisView: View {
 
     private func retryCapture() {
         guard scenePhase == .active else { return }
-        vm.releaseCapture()
-        access.request {
-            vm.startCapture()
-        }
+        access.request { vm.startCapture(); CaptureHub.shared.retryCapture() }
     }
 
     private var header: some View {

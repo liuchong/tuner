@@ -2,6 +2,21 @@ import XCTest
 @testable import Tunar
 
 final class CaptureLifecycleGateTests: XCTestCase {
+    func testBackgroundInvalidatesHardwareButRetainsSubscriptions() {
+        let gate = CaptureLifecycleGate()
+        let original = gate.acquire()!
+        XCTAssertTrue(gate.setEnabled(false).stop)
+        XCTAssertFalse(gate.commitIfCurrent(original) {})
+        XCTAssertNil(gate.acquire())
+        let resumed = gate.setEnabled(true).start!
+        XCTAssertTrue(gate.commitIfCurrent(resumed) {})
+        let retried = gate.restart()!
+        XCTAssertFalse(gate.commitIfCurrent(resumed) {})
+        XCTAssertTrue(gate.commitIfCurrent(retried) {})
+        XCTAssertFalse(gate.release())
+        XCTAssertTrue(gate.release())
+    }
+
     func testExpiredStartCannotCommitAfterFinalRelease() {
         let gate = CaptureLifecycleGate()
 

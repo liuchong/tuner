@@ -3,6 +3,8 @@ import SwiftUI
 
 /// 通用调音面板（design-system v4 §5/§6）。
 struct TunerView: View {
+    @EnvironmentObject private var practice: PracticeWorkspaceModel
+    @State private var showingPractice = false
     @Environment(\.lumen) private var palette
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var vm = TunerViewModel()
@@ -62,6 +64,8 @@ struct TunerView: View {
                                 }
                             }
                             .frame(width: 54, height: 32)
+                            Spacer()
+                            Button("练音") { showingPractice = true }.font(.callout)
                             Spacer()
                             ProBadge(enabled: settings.proMode) {
                                 settings.proMode.toggle()
@@ -239,6 +243,12 @@ struct TunerView: View {
                     }
                 }
             }
+        }
+        .fullScreenCover(isPresented: $showingPractice) {
+            NavigationStack {
+                PracticeWorkspaceView(model: practice)
+                    .toolbar { ToolbarItem(placement: .cancellationAction) { Button("关闭") { showingPractice = false } } }
+            }.onDisappear { practice.stopReference() }
         }
         .onAppear {
             forkVm.refresh(settings.toTunarConfig())

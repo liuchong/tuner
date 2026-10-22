@@ -9,7 +9,7 @@ struct TunarMacApp: App {
             DesktopRootView()
                 .preferredColorScheme(settings.preferredColorScheme)
                 .onAppear { settings.applyToEngine() }
-                .frame(minWidth: 980, minHeight: 680)
+                .frame(minWidth: 800, minHeight: 600)
         }
         .defaultSize(width: 1_280, height: 820)
         .windowResizability(.contentMinSize)

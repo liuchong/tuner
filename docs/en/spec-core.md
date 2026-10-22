@@ -490,3 +490,11 @@ Tools-page audio such as anti-motion-sickness.
 Global queries and object methods are defined by the checked-in UniFFI surface. Any
 signature/type change first updates this appendix in English and `../spec-core.md` in
 Chinese, then regenerates all bindings; generated binding files are never hand-edited.
+
+## Practice session contract / 练音会话合同
+
+P1/P2 implementation follows [the construction plan](../practice-implementation.md).
+`PracticeSession` owns target resolution, bounded measurement history, cursor, snapshots, statistics,
+and versioned JSON/CSV. Native layers own capture, presentation and file dialogs only.
+The exact records and methods are listed in construction plan §2; all are exported through UniFFI.
+No raw PCM is stored, and no audio playback is promised by measurement files.

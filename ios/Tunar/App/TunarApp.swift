@@ -16,6 +16,8 @@ struct TunarApp: App {
 /// 底部 5 tab（design-system §6.8）
 struct RootTabView: View {
     @State private var selected = LaunchOverrides.initialTab
+    @StateObject private var practice = PracticeWorkspaceModel()
+    @Environment(\.scenePhase) private var scenePhase
     var body: some View {
         TabView(selection: $selected) {
             TunerView { selected = 2 }
@@ -30,6 +32,14 @@ struct RootTabView: View {
                 .tabItem { Label("设置", systemImage: "gearshape") }.tag(4)
         }
         .tint(Lumen.accent)
+        .environmentObject(practice)
+        .onAppear { updateCapture() }
+        .onChange(of: selected) { _, _ in updateCapture() }
+        .onChange(of: scenePhase) { _, _ in updateCapture() }
+        .onDisappear { practice.suspend() }
+    }
+    private func updateCapture() {
+        if scenePhase == .active && selected <= 2 { practice.requestCapture() } else { practice.suspend() }
     }
 }
 

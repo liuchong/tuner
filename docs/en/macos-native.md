@@ -1,8 +1,6 @@
 # Native macOS 14+ app design and delivery specification
 
-The next desktop task layout is proposed in [practice workspace](practice-workspace.md) §7.
-It retains six sidebar sections and plans a window-owned measurement session. It does not change
-the current app described here or establish runtime acceptance.
+The [practice workspace](practice-workspace.md) implements window-owned measurement sessions and the tuning/practice/analysis hierarchy while retaining six sidebar sections. Current verification is recorded in [implementation](practice-implementation.md).
 
 ## 1. Goal and boundaries
 
@@ -169,3 +167,7 @@ immediately.
   large sheet, shared capture with independent main/detail state, and no regression in
   the existing zhudi/shakuhachi paths.
 
+
+## Practice workspace integration
+
+The tuner and analysis sections now select tasks within one window-owned model, preserving measurement history, cursor and baselines across sidebar reconstruction. The instrument entry locks the previewed note without changing preview semantics. The minimum window is 800×600, default 1280×820; the inspector stacks below at narrow content widths. Original professional live tools remain available from the workspace file menu. Measurement JSON/CSV is supported separately from audio files.

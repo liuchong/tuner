@@ -86,6 +86,77 @@ class CaptureHubCoreTest {
     )
 
     @Test
+    fun `measurement packet retains actual capture position and configuration`() {
+        val engine = FakeEngine()
+        var callback: ((FloatArray, ULong) -> Unit)? = null
+        val source = object : PositionedPcmSource {
+            override fun startPositioned(onFrame: (FloatArray, ULong) -> Unit) { callback = onFrame }
+            override fun stop() { }
+        }
+        val hub = CaptureHubCore(PitchEngineFactory { engine }, { source }, TunarCore.defaultConfig())
+        hub.acquire()
+        val config = hub.config.value.copy(a4Hz = 442.0, temperament = 19u)
+        hub.applyConfig(config)
+        callback!!(FloatArray(2048), 8192uL)
+        assertEquals(8192uL, hub.measurements.value!!.frame.samplePosition)
+        assertEquals(config.copy(sampleRate = 48000.0), hub.measurements.value!!.config)
+        assertEquals(hub.measurements.value!!.frame.sampleRateHz, hub.measurements.value!!.config.sampleRate, 0.0)
+        val marker = Any()
+        ReferenceToneActivity.set(marker, true)
+        callback!!(FloatArray(2048), 9216uL)
+        ReferenceToneActivity.set(marker, false)
+        repeat(8) { callback!!(FloatArray(2048), (10240 + it * 1024).toULong()); assertTrue(hub.measurements.value!!.referenceActive) }
+        callback!!(FloatArray(2048), 20000uL)
+        assertFalse(hub.measurements.value!!.referenceActive)
+        hub.release()
+        callback!!(FloatArray(2048), 21024uL)
+        assertEquals(20000uL, hub.measurements.value!!.frame.samplePosition)
+    }
+
+    @Test
+    fun `background stops hardware while retaining references`() {
+        val engine = FakeEngine()
+        val source = FakeSource()
+        val hub = newHub(engine, source)
+        hub.acquire()
+        hub.setEnabled(false)
+        assertFalse(hub.running.value)
+        assertTrue(source.stopped)
+        hub.acquire()
+        assertFalse(hub.running.value)
+        hub.setEnabled(true)
+        assertTrue(hub.running.value)
+        hub.release()
+        assertTrue(hub.running.value)
+        hub.release()
+        assertFalse(hub.running.value)
+    }
+
+    @Test
+    fun `source failure cannot be overwritten by startup and retry retains references`() {
+        var starts = 0
+        val source = object : PositionedPcmSource {
+            var failure: (() -> Unit)? = null
+            override fun setFailureHandler(handler: () -> Unit) { failure = handler }
+            override fun startPositioned(onFrame: (FloatArray, ULong) -> Unit) {
+                starts++
+                if (starts == 1) failure!!()
+            }
+            override fun stop() { }
+        }
+        val hub = CaptureHubCore(PitchEngineFactory { FakeEngine() }, { source }, TunarCore.defaultConfig())
+        hub.acquire(); hub.acquire()
+        assertFalse(hub.running.value)
+        hub.retry()
+        assertEquals(2, starts)
+        assertTrue(hub.running.value)
+        hub.release()
+        assertTrue(hub.running.value)
+        hub.release()
+        assertFalse(hub.running.value)
+    }
+
+    @Test
     fun `acquire 启动采集 release 归零停止`() {
         val engine = FakeEngine()
         val source = FakeSource()
