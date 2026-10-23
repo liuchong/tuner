@@ -66,18 +66,7 @@ struct DesktopSettingsView: View {
                                 .disabled(settings.solfegeSystem == .fixedDo)
                             }
                             Divider()
-                            settingsRow(title: "噪声门限") {
-                                HStack {
-                                    Slider(
-                                        value: $settings.noiseGateDbfs,
-                                        in: -60 ... -30,
-                                        step: 1
-                                    )
-                                    Text(String(format: "%.0f dBFS", settings.noiseGateDbfs))
-                                        .monospacedDigit()
-                                        .frame(width: 88, alignment: .trailing)
-                                }
-                            }
+                            InputControlsView(settings: settings)
                             Divider()
                             settingsRow(title: "专业模式") {
                                 Toggle("启用律制选择和增强分析", isOn: $settings.proMode)

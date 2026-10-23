@@ -15,6 +15,7 @@ object ReferenceToneActivity {
     private val players = java.util.concurrent.ConcurrentHashMap.newKeySet<Any>()
     fun set(player: Any, active: Boolean) { if (active) players.add(player) else players.remove(player) }
     val isActive: Boolean get() = players.isNotEmpty()
+    fun stopAll(){players.toList().filterIsInstance<ReferenceTonePlayer>().forEach{it.stop()};MetronomeActivity.stopAll()}
 }
 
 /** 固定音高播放器；频率值由 Rust core 提供。 */
@@ -271,4 +272,12 @@ class AudioTrackReferenceTonePlayer internal constructor(
         const val FADE_SECONDS = 0.020
         const val MAX_GAIN = 0.65f
     }
+}
+
+/** 仅标记本机输出，不把整段跟拍判为无效。 */
+object MetronomeActivity {
+    private val players=java.util.concurrent.ConcurrentHashMap<Any,()->Unit>()
+    fun set(owner:Any,active:Boolean,stop:()->Unit={}){if(active)players[owner]=stop else players.remove(owner)}
+    val isActive:Boolean get()=players.isNotEmpty()
+    fun stopAll(){players.values.toList().forEach{it()}}
 }

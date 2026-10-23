@@ -12,6 +12,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.datastore.core.DataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import uniffi.tunar_core.*
 import uniffi.tunar_core.KeyMode
 import uniffi.tunar_core.ModeKind
 import uniffi.tunar_core.SolfegeSystem
@@ -30,6 +31,11 @@ data class AppSettings(
     val solfege: SolfegeSystem = SolfegeSystem.NUMBERED,
     val key: KeyMode = KeyMode(tonicPc = 0u, mode = ModeKind.MAJOR),
     val noiseGateDbfs: Float = -45f,
+    val inputGateMode:GateMode=GateMode.AUTO,
+    val inputProfile:InputProfile=InputProfile.GENERAL,
+    val inputResponse:ResponseMode=ResponseMode.BALANCED,
+    val inputHold:HoldMode=HoldMode.UNTIL_NEXT,
+    val inputHysteresis:Float=3f,
     val theme: ThemeMode = ThemeMode.SYSTEM,
     val hapticsEnabled: Boolean = true,
     /** 专业版模式（PRO 角标，与通用面板同源）。 */
@@ -37,6 +43,7 @@ data class AppSettings(
     /** 律制（12/19/24/31，PRO 开启时可见可调）。 */
     val temperament: Int = 12,
 ) {
+    val inputPolicy:InputPolicy get()=InputPolicy(inputGateMode,inputProfile,noiseGateDbfs,inputHysteresis,inputResponse,inputHold)
     /** 转为 core TunarConfig。 */
     fun toTunarConfig(sampleRate: Double = 44100.0): TunarConfig =
         TunarConfig(
@@ -58,6 +65,7 @@ interface SettingsRepository {
     suspend fun setSolfege(system: SolfegeSystem)
     suspend fun setKey(key: KeyMode)
     suspend fun setNoiseGate(dbfs: Float)
+    suspend fun setInputPolicy(policy:InputPolicy) { error("此设置仓库不支持输入策略") }
     suspend fun setTheme(theme: ThemeMode)
     suspend fun setHapticsEnabled(enabled: Boolean)
     suspend fun setProMode(enabled: Boolean)
@@ -66,8 +74,8 @@ interface SettingsRepository {
     companion object {
         const val A4_MIN = 415.0
         const val A4_MAX = 466.0
-        const val GATE_MIN = -60f
-        const val GATE_MAX = -30f
+        const val GATE_MIN = -80f
+        const val GATE_MAX = -12f
 
         /** 支持的律制（N 平均律）。 */
         val TEMPERAMENT_DIVISIONS = listOf(12, 19, 24, 31)
@@ -107,7 +115,13 @@ class DataStoreSettingsRepository(
 
     constructor(context: Context) : this(context.applicationContext.settingsDataStore)
 
+    private inline fun <reified T:Enum<T>> enumPreference(value:String?,fallback:T):T = enumValues<T>().firstOrNull{it.name==value}?:fallback
     private object Keys {
+        val INPUT_GATE=stringPreferencesKey("input_gate_mode")
+        val INPUT_PROFILE=stringPreferencesKey("input_profile")
+        val INPUT_RESPONSE=stringPreferencesKey("input_response")
+        val INPUT_HOLD=stringPreferencesKey("input_hold")
+        val INPUT_HYSTERESIS=floatPreferencesKey("input_hysteresis")
         val A4 = doublePreferencesKey("a4_hz")
         val SOLFEGE = stringPreferencesKey("solfege_system")
         val TONIC = intPreferencesKey("key_tonic_pc")
@@ -121,6 +135,11 @@ class DataStoreSettingsRepository(
 
     override val settings: Flow<AppSettings> = dataStore.data.map { p ->
         AppSettings(
+            inputGateMode=enumPreference(p[Keys.INPUT_GATE],if(p[Keys.GATE]!=null)GateMode.MANUAL else GateMode.AUTO),
+            inputProfile=enumPreference(p[Keys.INPUT_PROFILE],InputProfile.GENERAL),
+            inputResponse=enumPreference(p[Keys.INPUT_RESPONSE],ResponseMode.BALANCED),
+            inputHold=enumPreference(p[Keys.INPUT_HOLD],HoldMode.UNTIL_NEXT),
+            inputHysteresis=(p[Keys.INPUT_HYSTERESIS]?:3f).let{if(it.isFinite())it.coerceIn(3f,12f)else 3f},
             a4Hz = (p[Keys.A4] ?: 440.0).coerceIn(
                 SettingsRepository.A4_MIN, SettingsRepository.A4_MAX,
             ),
@@ -133,7 +152,7 @@ class DataStoreSettingsRepository(
                     ?.let { runCatching { ModeKind.valueOf(it) }.getOrNull() }
                     ?: ModeKind.MAJOR,
             ),
-            noiseGateDbfs = (p[Keys.GATE] ?: -45f).coerceIn(
+            noiseGateDbfs = (p[Keys.GATE]?.takeIf{it.isFinite()} ?: -45f).coerceIn(
                 SettingsRepository.GATE_MIN, SettingsRepository.GATE_MAX,
             ),
             theme = p[Keys.THEME]
@@ -166,7 +185,18 @@ class DataStoreSettingsRepository(
 
     override suspend fun setNoiseGate(dbfs: Float) {
         dataStore.edit {
-            it[Keys.GATE] = dbfs.coerceIn(SettingsRepository.GATE_MIN, SettingsRepository.GATE_MAX)
+            it[Keys.GATE] = if(dbfs.isFinite())dbfs.coerceIn(SettingsRepository.GATE_MIN, SettingsRepository.GATE_MAX)else -45f
+            it[Keys.INPUT_GATE]=GateMode.MANUAL.name
+        }
+    }
+
+    override suspend fun setInputPolicy(policy:InputPolicy){
+        require(policy.manualOpenDbfs.isFinite()&&policy.manualHysteresisDb.isFinite())
+        dataStore.edit {
+            it[Keys.GATE]=policy.manualOpenDbfs.coerceIn(SettingsRepository.GATE_MIN,SettingsRepository.GATE_MAX)
+            it[Keys.INPUT_GATE]=policy.gateMode.name;it[Keys.INPUT_PROFILE]=policy.profile.name
+            it[Keys.INPUT_RESPONSE]=policy.response.name;it[Keys.INPUT_HOLD]=policy.hold.name
+            it[Keys.INPUT_HYSTERESIS]=policy.manualHysteresisDb.coerceIn(3f,12f)
         }
     }
 

@@ -536,3 +536,12 @@ P1/P2实现遵循[施工手册](practice-implementation.md)。`PracticeSession`�
 有界测量历史、唯一游标、独立快照、时间加权统计、版本化JSON及CSV。原生层只负责采集、
 展示和文件对话框。精确记录字段和方法见施工手册§2，全部经UniFFI导出。
 测量不保存原始PCM，不提供录音回放。
+
+M13输入策略已实现：新生产入口使用实际采样位置与音频时间确认，分离可信测量/显示，支持环境校准、保持与schema1/2兼容。旧analyze/feed保留兼容合同。精确状态、默认值、接口与进度见[施工手册](input-implementation.md)；结果与实机边界见[验收报告](verification/input-behavior/report.md)。
+
+
+## M13有效实现合同
+
+生产入口 `analyze_input(pcm, InputFrameContext)` 在 DSP 前接收真实帧末采样位置、采集代次及参考音/节拍活动。新默认 Auto/General/Balanced/UntilNext；未校准开启/关闭为 −45/−48 dBFS。Soft 为 −55/−58，Noisy 为 −35/−41；手动开启范围 −80…−12、差值3…12 dB。校准2秒按P80解析，持续音调需确认；不在演奏中自行训练背景。确认60ms、缺口100ms、近八度证据80ms，均使用音频时间。显示logHz响应40/80/140ms不改变raw测量、成绩或判定修订。
+
+UniFFI新增 `InputPolicy`、`ResolvedInputPolicy`、`InputDiagnostics`、`InputFrameContext`、`InputStatus`、`CalibrationStatus` 与枚举/错误；引擎导出 set/input_policy、begin_noise_calibration、confirm_noise_environment、cancel_noise_calibration、calibration_status、input_status、reset_input_context、presentation_frame。AnalysisFrame新增可空 input_diagnostics/measured_freq_hz；PracticeSession新增 presentation/set_input_available，PracticePresentation包含来源、显示音分、测量、前一条件结果、实时输入、保持年龄、停吹摘要。schema2写出并兼容读schema1；LegacySmoothed不回算为AcceptedRaw；CSV追加原始Hz、显示Hz、来源与诊断。

@@ -7,6 +7,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import uniffi.tunar_core.*
+import com.liuchong.tunar.corebinding.initialInputPolicy
 import uniffi.tunar_core.KeyMode
 import uniffi.tunar_core.ModeKind
 import uniffi.tunar_core.SolfegeSystem
@@ -20,6 +22,13 @@ private class FakeEngine : PitchEngine {
     var recordedGate = 0f
     var recordedTemperament = 0
     var closed = false
+    var policy = initialInputPolicy()
+    var context: InputFrameContext? = null
+    var onAnalyze: (() -> Unit)? = null
+    var calibrations = 0
+    override fun setInputPolicy(policy:InputPolicy){this.policy=policy}
+    override fun analyzeInput(pcm:List<Float>,context:InputFrameContext):AnalysisFrame{this.context=context;onAnalyze?.invoke();return analyze(pcm).copy(samplePosition=context.samplePosition)}
+    override fun beginNoiseCalibration(outputActive:Boolean){calibrations++}
 
     override fun feed(pcm: List<Float>): TunarEvent? = null
 
@@ -38,7 +47,8 @@ private class FakeEngine : PitchEngine {
         inputLevelDbfs = -120f,
         displayStrength = 0f,
         isHeld = false,
-    )
+            inputDiagnostics = null, measuredFreqHz = null
+        )
     override fun setA4(hz: Double) {
         recordedA4 = hz
     }
@@ -111,6 +121,28 @@ class CaptureHubCoreTest {
         hub.release()
         callback!!(FloatArray(2048), 21024uL)
         assertEquals(20000uL, hub.measurements.value!!.frame.samplePosition)
+    }
+
+    @Test
+    fun `production context precedes analysis and input policy survives restart`() {
+        val engine=FakeEngine();var deliver:((FloatArray,ULong)->Unit)?=null
+        val source=object:PositionedPcmSource {override fun startPositioned(onFrame:(FloatArray,ULong)->Unit){deliver=onFrame};override fun stop(){}}
+        val hub=CaptureHubCore(PitchEngineFactory{engine},{source},TunarCore.defaultConfig())
+        val policy=initialInputPolicy().copy(response=ResponseMode.STEADY,hold=HoldMode.SECONDS15)
+        hub.applyInputPolicy(policy);hub.acquire();assertEquals(policy,engine.policy)
+        hub.requestCalibration();deliver!!(FloatArray(2048),8192uL)
+        assertEquals(1,engine.calibrations);assertEquals(8192uL,engine.context!!.samplePosition)
+        hub.setEnabled(false);assertFalse(hub.inputStatus.value.available);hub.setEnabled(true)
+        assertEquals(policy,engine.policy);hub.release()
+    }
+
+    @Test
+    fun `a stopped capture cannot publish a frame that was being analyzed`() {
+        val engine=FakeEngine();var callback:((FloatArray,ULong)->Unit)?=null
+        val source=object:PositionedPcmSource {override fun startPositioned(onFrame:(FloatArray,ULong)->Unit){callback=onFrame};override fun stop(){}}
+        val hub=CaptureHubCore(PitchEngineFactory{engine},{source},TunarCore.defaultConfig())
+        hub.acquire();engine.onAnalyze={hub.setEnabled(false)};callback!!(FloatArray(2048),8192uL)
+        assertFalse(hub.running.value);assertFalse(hub.inputStatus.value.available);assertTrue(hub.measurements.value==null)
     }
 
     @Test
@@ -196,8 +228,10 @@ class CaptureHubCoreTest {
         assertEquals(442.0, engine.recordedA4, 1e-9)
         assertEquals(SolfegeSystem.CHINESE, engine.solfege)
         assertEquals(ModeKind.GONG, engine.key?.mode)
-        assertEquals(-45f, engine.recordedGate, 1e-6f)
+        assertEquals(0f, engine.recordedGate, 1e-6f) // Unchanged compatibility config must not switch Auto to Manual.
+        hub.applyConfig(config.copy(noiseGateDbfs=-52f))
+        assertEquals(-52f,engine.recordedGate,1e-6f)
         assertEquals(19, engine.recordedTemperament)
-        assertEquals(config, hub.config.value)
+        assertEquals(config.copy(noiseGateDbfs=-52f), hub.config.value)
     }
 }

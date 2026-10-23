@@ -67,7 +67,8 @@ class FakeStream(config: TunarConfig = TunarCore.defaultConfig()) : TunarEventSt
                 inputLevelDbfs = if (ev == null) -120f else -24f,
                 displayStrength = displayStrength,
                 isHeld = isHeld,
-            ),
+            inputDiagnostics = null, measuredFreqHz = null
+        ),
         )
     }
 }
@@ -183,7 +184,8 @@ class TunerViewModelTest {
                 inputLevelDbfs = -18f,
                 displayStrength = 1f,
                 isHeld = false,
-            ),
+            inputDiagnostics = null, measuredFreqHz = null
+        ),
         )
         val s = vm.uiState.value
         assertTrue(s.signal is TunerSignal.Active)
@@ -222,7 +224,8 @@ class TunerViewModelTest {
                 inputLevelDbfs = -75f,
                 displayStrength = 1f,
                 isHeld = true,
-            ),
+            inputDiagnostics = null, measuredFreqHz = null
+        ),
         )
         assertTrue(vm.uiState.value.signal is TunerSignal.Active)
         assertEquals(64, vm.uiState.value.spectrumDb.size)

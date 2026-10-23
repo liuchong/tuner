@@ -22,3 +22,6 @@ docs/verification/practice-workspace/local/
 
 # Generated Android native libraries; regenerate together with UniFFI bindings
 android/core-binding/src/main/jniLibs/
+
+# Input-policy validation local logs and result bundles
+docs/verification/input-behavior/local/

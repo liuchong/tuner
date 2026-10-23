@@ -26,6 +26,7 @@ data class PracticeUiState(
     val config: PracticeConfig,
     val displayConfig: PracticeConfig,
     val point: PracticePoint? = null,
+    val presentation: uniffi.tunar_core.PracticePresentation? = null,
     val trace: List<PracticeTracePoint> = emptyList(),
     val liveTrace: List<PracticeTracePoint> = emptyList(),
     val snapshots: List<PracticeSnapshot> = emptyList(),
@@ -68,17 +69,18 @@ class PracticeWorkspaceViewModel : ViewModel() {
         viewModelScope.launch(dispatcher) {
             CaptureHub.running.collect { running ->
                 _state.value = _state.value.copy(captureRunning = running)
-                if (!running && session.status().state == PracticeRecordingState.RECORDING) command(full = false) { session.pause() }
+                command(full = false) { session.setInputAvailable(running) }
             }
         }
         viewModelScope.launch(dispatcher) {
             CaptureHub.measurements.collect { packet ->
-                if (packet != null) command(full = false) {
+                if (packet != null && CaptureHub.running.value) command(full = false) {
                     session.observe(packet.frame, packet.generation, packet.config.a4Hz,
                         packet.config.temperament, packet.referenceActive)
                 }
             }
         }
+        viewModelScope.launch(dispatcher) { CaptureHub.calibrationRequests.collect { command(full=false) { player?.stop();_state.value=_state.value.copy(referencePlaying=false);session.pause() } } }
     }
     private fun command(full: Boolean = true, action: () -> Unit) {
         try { action(); refresh(full) }
@@ -97,12 +99,13 @@ class PracticeWorkspaceViewModel : ViewModel() {
             try { comparison = session.comparison(old.normalized, old.wide) }
             catch (_: Exception) { compareError = "采样率或频率范围不同，不能直接叠加" }
         }
+        val presentation = session.presentation()
         val config = session.config()
         val changed = old.config.a4Hz != config.a4Hz || old.config.temperament != config.temperament ||
             old.config.targetStep != config.targetStep || old.config.targetMidi != config.targetMidi || old.config.targetHz != config.targetHz
         if (changed) player?.stop()
         _state.value = old.copy(status = status, config = config, displayConfig = session.displayConfig(),
-            point = session.displayPoint(), trace = if (reset) page else old.trace + page,
+            presentation = presentation, point = presentation.measurement, trace = if (reset) page else old.trace + page,
             liveTrace = session.liveTrace(), snapshots = if (full) session.snapshots() else old.snapshots,
             comparison = comparison, comparisonError = compareError, targetFrequency = session.targetFrequency(),
             referencePlaying = if (changed) false else old.referencePlaying,

@@ -15,7 +15,7 @@
 | M10 | macOS 14+ 原生应用 | 五个完整入口、共享 Rust core、桌面自适应布局 | ✅ Apple Silicon/Intel 通用核心、macOS 应用构建与桌面测试通过 |
 | M11 | 目标音锁定、真实音分轨迹、测量会话与桌面任务布局 | [练音工作区](practice-workspace.md) A1–A7、A11–A12 | 已实现；自动测试和本机原生验收通过，真机/环境缺口见[报告](verification/practice-workspace/report.md) |
 | M12 | 命名快照比较、选区统计、本地保存与导出 | [练音工作区](practice-workspace.md) A5、A7–A10、A12 | 已实现；自动测试和本机原生验收通过，真机/环境缺口见[报告](verification/practice-workspace/report.md) |
-| M13 | 环境门限、可信测量/显示分离、断音保持与诊断 | [真实环境输入设计](input-behavior.md) A1–A12 | 设计提案；未实现、未调参验收 |
+| M13 | 环境门限、可信测量/显示分离、断音保持与诊断 | [真实环境输入设计](input-behavior.md) A1–A12 | 已实现；374项自动测试及本机原生验收通过，实机矩阵边界见[报告](verification/input-behavior/report.md) |
 
 指法流派 / 替代变体、参考音音色与音程比例参考为后续候选，边界见练音工作区 §6、§8。
 M11/M12提供分析测量保存/回看/导出，不含PCM录音或音频回放；不启动自动目标。

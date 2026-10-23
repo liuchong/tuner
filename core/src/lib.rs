@@ -4,6 +4,7 @@
 
 pub mod api;
 pub mod fingering;
+pub mod input_policy;
 pub mod measurement_file;
 pub mod metronome;
 pub mod note;

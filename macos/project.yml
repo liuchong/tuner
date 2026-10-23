@@ -55,6 +55,7 @@ targets:
     sources:
       - TunarMacTests
       - path: ../ios/TunarTests/PracticeWorkspaceTests.swift
+      - path: ../ios/TunarTests/InputPolicySettingsTests.swift
     dependencies:
       - target: TunarMac
     settings:

@@ -85,16 +85,7 @@ struct SettingsView: View {
                     }
                 }
 
-                SectionView(title: "识别") {
-                    SettingRow("灵敏度", footnote: "噪声门限，越高越不易误触发") {
-                        Text(String(format: "%.0f dBFS", settings.noiseGateDbfs))
-                            .font(Lumen.readoutValue.monospacedDigit())
-                            .foregroundStyle(palette.accent)
-                    }
-                    Slider(value: $settings.noiseGateDbfs, in: -60 ... -30)
-                        .tint(palette.accent)
-                        .accessibilityLabel("灵敏度")
-                }
+                SectionView(title: "识别") { InputControlsView(settings:settings) }
 
                 SectionView(title: "专业版") {
                     Toggle(isOn: $settings.proMode) {

@@ -1,7 +1,8 @@
 # 真实环境下的输入判定、响应与断音保持设计
 
-状态：**设计提案，未实现、未调参验收**。基线 `c5670a1`，master；设计开始时工作区干净。
-本轮只交付产品行为、初始参数、接口边界与验收计划，不改变已发布行为，不启动 goal。
+实施合同见[施工手册](input-implementation.md)。M13生产链使用`analyze_input`、音频时间确认、独立可信测量与显示响应；旧兼容入口保留，验收结果另记。
+状态：**三端实现与可执行自动/本机验收完成**。结果和实机缺口见[验收报告](verification/input-behavior/report.md)。精化合同与唯一进度见[施工手册](input-implementation.md)。基线 `c5670a1`，master；设计开始时工作区干净。
+本轮按已授权范围实现三端；先写齐测试和全部实现，最后统一验收，不启动 goal。
 这是[练音工作区](practice-workspace.md)的后续设计；原验收报告不证明本文新参数有效。
 
 ## 1. 用户目标与当前差异
@@ -58,7 +59,7 @@ clarity、候选评分、FFT窗、跳变保护等由core策略控制，第一版
 
 ## 3. 按环境定门限与初始参数
 
-**下表为工程起点，不是行业标准或已经验证的最佳值。** 实测矩阵通过前不得提升为默认发布合同。
+**下表为已实现并经自动合同验证的工程初始值，不是行业标准或最佳值。** 真实乐器/房间调参矩阵仍待实测。
 
 ### 3.1 环境测量
 
@@ -155,7 +156,7 @@ A4   −7.2 cents       上次测量 · 1.3秒前
 输入与响应：通用 · 均衡 · 保留到下次发声   [测一下环境]
 ```
 
-## 6. 实现合同与文件映射（拟新增，未导出）
+## 6. 实现合同与文件映射
 
 业务只在Rust。原生只做采集时钟/输出活动/设备身份、权限、文件和渲染；不各自实现计时、门限和保持策略。
 实际音频回调继续只写预分配环；以下状态与文件操作在分析/工作队列运行，不新增第二条FFT。
@@ -163,7 +164,7 @@ A4   −7.2 cents       上次测量 · 1.3秒前
 新增 `core/src/input_policy.rs`：
 
 ```rust
-// 均为拟定UniFFI枚举/Record，枚举为无载荷变体。
+// 已导出的UniFFI枚举/Record；枚举为无载荷变体。
 GateMode = Auto | Manual
 InputProfile = Soft | General | Noisy
 ResponseMode = Fast | Balanced | Steady
@@ -175,12 +176,16 @@ InputPolicy { gate_mode: GateMode=Auto, profile: InputProfile=General,
 // 其他阈值由策略版本1从上表解析，不单独变成可随意组合的用户参数。
 InputReason = None | BelowGate | NoPeriodicPitch | AmbiguousPitch | Acquiring | Calibrating |
   Dropout | Clipped | OutputContaminated | InputUnavailable
-InputDiagnostics { reason: InputReason, noise_floor_dbfs: Option<f32>,
-  open_dbfs: f32, close_dbfs: f32, clarity: Option<f32>,
-  clipped_fraction: f32, policy_revision: u32, calibration_revision: u32 }
+ResolvedInputPolicy { policy_version: u32, gate_mode: GateMode, profile: InputProfile,
+  manual_open_dbfs: f32, manual_hysteresis_db: f32, noise_floor_dbfs: Option<f32>,
+  open_dbfs: f32, close_dbfs: f32, policy_revision: u32, calibration_revision: u32 }
+InputDiagnostics { reason: InputReason, clarity: Option<f32>, clipped_fraction: f32,
+  policy: ResolvedInputPolicy, metronome_risk: bool, response: ResponseMode, hold: HoldMode }
 CalibrationState = Idle | Measuring | NeedsQuietConfirmation | Ready | Failed
 CalibrationStatus { state: CalibrationState, floor_dbfs: Option<f32>,
   elapsed_seconds: f64, reason: String }
+InputStatus { available: bool, input_level_dbfs: f32, diagnostics: Option<InputDiagnostics>,
+  calibration: CalibrationStatus, output_active: bool }
 ```
 
 策略版本固定初始参数定义；判定字段或环境校准生效时revision递增并切测量配置段。
@@ -196,7 +201,7 @@ response/hold只改变呈现，不切测量段、不改变接入计时或有效�
 错误为InvalidPolicy / InvalidFrame / OutputActive / NoCalibration；采集中断、数据不足等异步失败从status返回。
 新增`analyze_input(pcm: Vec<f32>, context: InputFrameContext) -> Result<AnalysisFrame, InputPolicyError>`，
 其中`InputFrameContext { sample_position: u64, capture_generation: u64, reference_active: bool, metronome_active: bool }`
-由CaptureHub在分析前提供真实帧末位置与输出保护状态；旧`analyze`保留，以引擎累计hop构造兼容上下文。
+由CaptureHub在分析前提供真实帧末位置与输出保护状态；旧`analyze`保留原有两帧确认及平滑兼容行为，生产采集统一使用新入口。
 同代次时间倒退/重复拒绝且不改变状态，丢窗间隔超过1.5hop重置确认链；代次变化重置校准和滤波。
 `reset_input_context()`由原生输入中断worker调用，使未完成校准失败并清理瞬态状态；不会清会话历史。
 时间判定必须用传入位置，不能等引擎用内部hop判完后才在原生覆盖时间戳。
@@ -205,7 +210,7 @@ response/hold只改变呈现，不切测量段、不改变接入计时或有效�
 `AnalysisFrame`新增可选`input_diagnostics`与`measured_freq_hz`；后者是周期/谐波选择后、显示平滑前的可信值，
 不是PCM，也不是未经甄别的单帧候选。旧`tuner.freq_hz`保留平滑显示语义，原生不得把两者混为一谈。
 `PracticeSession`新增`presentation() -> PracticePresentation`，输出`source: Live|Held|Review`、
-`measurement: Option<PracticePoint>`、`live_input: Option<LiveInput>`（`LiveInput { input_level_dbfs: f32, diagnostics: InputDiagnostics }`）、
+`display_cents: Option<f64>`、`measurement: Option<PracticePoint>`、`previous_measurement: Option<PracticePoint>`、`live_input: Option<LiveInput>`（`LiveInput { input_level_dbfs: f32, diagnostics: InputDiagnostics }`）、
 `held_age_seconds: Option<f64>`及可选`NoteSummary { median_cents, low_cents, high_cents, valid_seconds }`。
 复用最多两份完整帧/配置的有界缓存与300ms标量环；UI不持有第二套保持业务。保持帧引用其原配置，实时状态独立。
 主数字Hz/音分来自同一可信测量，指针另用显示平滑值，不能一项用原值一项用平滑值却声称二者严格相等。
@@ -227,7 +232,7 @@ schema2标`AcceptedRaw`并保存新字段；导出CSV保留既有列，追加`me
 | D7 | Apple `Practice/PracticeWorkspaceModel.swift:60,78` / `PracticeWorkspaceView.swift:144`；`Tuner/TunerViewModel.swift`；`Instrument/InstrumentViewModel.swift` | 只消费core呈现；桌面共享同组检查器，手机设置入口；明确实时图与保持图来源 | Q5/Q6/Q7，A6/A7/A12 |
 | D8 | Android `audio/CaptureHub.kt:86`、`android/core-binding/src/main/kotlin/com/liuchong/tunar/corebinding/TunarCore.kt`、`data/SettingsRepository.kt:32`、`ui/settings/Settings{ViewModel,Screen}.kt` | 对应策略桥接/偏好迁移/校准入口，与Apple同源 | Q7/Q8，A9/A11/A12 |
 | D9 | Android `ui/practice/PracticeWorkspaceViewModel.kt:88`、`PracticeWorkspaceScreen.kt:148`；`ui/tuner/TunerViewModel.kt`；`ui/instrument/InstrumentViewModel.kt` | 消费presentation，显示来源/年龄/实时电平；旧页面不自造保持计时 | Q5/Q6，A6/A7/A12 |
-| D10 | 两份`build-core-*`脚本、生成Swift/Kotlin绑定、现有spec-core/audio/ui/design-system中英版本 | 实现时同步ABI、有效规格和错误合同；本提案不先改写现行默认参数 | Q8，A10/A11/A12 |
+| D10 | 两份`build-core-*`脚本、生成Swift/Kotlin绑定、现有spec-core/audio/ui/design-system中英版本 | 实现时同步ABI、有效规格和错误合同；新默认与旧入口兼容行为分别列明 | Q8，A10/A11/A12 |
 
 以上是产品/接口设计；候选排序的数值权重需由同一固定信号集离线比较确定，不能在原生UI拍脑袋填入。
 不预选一个尚未验证的评分公式，不把固定8候选解释为已经采用完整pYIN或离线Viterbi。
@@ -255,18 +260,18 @@ flowchart LR
   I --> L[单列实时电平与原因]
 ```
 
-## 7. 后续施工与验收
+## 7. 施工与验收
 
 本轮完成：
 - [x] 现状/需求/参数/状态/布局/接口/文件映射与证据边界设计。
 - [x] 双语入口和后续里程碑；本轮只校验文档，不运行应用回归冒充新行为验证。
 
 后续施工：
-- [ ] C1 固定候选排序信号集，完成D1–D5详细实现与全部自动用例的源码；候选排序先写对比用例但不运行。
-- [ ] C2 写齐D6–D10原生/迁移/三端接线及验收步骤；所有实现写齐前不执行测试。
+- [x] C1 固定候选排序信号集，完成D1–D5详细实现与全部自动用例的源码；候选排序先写对比用例但不运行。
+- [x] C2 写齐D6–D10原生/迁移/三端接线及验收步骤；所有实现写齐前不执行测试。
 - [ ] C3 全量实现后集中测试、参数对比及实机验收；再决定发布默认值并同步现行规格。
 
-以下全部**待执行**。单元/集成/E2E分层调度与逐例计时，沿用现有报告机制；种子固定，时间由采样推进。
+自动合同和可用本机原生操作已执行；逐项结果见[integration_test](../integration_test/input_behavior.md)，物理矩阵缺口保留。单元/集成/E2E分层调度与逐例计时，沿用现有报告机制；种子固定，时间由采样推进。
 
 | 验收 | 输入与操作 | 可观察通过标准 |
 |---|---|---|
@@ -290,3 +295,5 @@ flowchart LR
 [Aalto基频教材](https://speechprocessingbook.aalto.fi/representations/fundamental-frequency-f0/)说明基频/泛音和缺失基频的区别，支持不按最高峰认音。
 
 文献提供机制依据，不提供本产品的最优默认值、实机性能或任意噪声分离保证。
+
+本轮可执行验收共374项通过；C3中的完整物理矩阵仍未齐，不以本机测试代替。实现/交付进度以[唯一施工手册](input-implementation.md)为准。

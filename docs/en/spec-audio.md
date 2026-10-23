@@ -96,8 +96,17 @@ causes a quiet start failure and session release, followed by retry on the next 
 
 The existing analysis worker publishes a frame with the configuration used under the same engine lock and its capture generation. The practice worker serializes state/codec/statistics outside the audio callback. No second FFT or capture stream is added. Reference-tone output is marked and excluded from playing statistics. Configuration and capture discontinuities create segments; stale generations are rejected.
 
-Capture snapshots carry the cumulative number of samples actually read. Apple ring slots retain this position even when full slots drop a snapshot; Android reports the accumulated read count, including short reads. Native delivery replaces only the frame timestamp, never pitch or statistics. Trace/statistics do not bridge intervals longer than 0.25 seconds.
+Capture snapshots carry the cumulative number of samples actually read. Apple ring slots retain this position even when full slots drop a snapshot; Android reports the accumulated read count, including short reads. Production capture supplies the real window-end position before DSP; it never patches time after state decisions or computes native pitch/statistics. Trace/statistics do not bridge intervals longer than 0.25 seconds.
 
 Reference-output markers conservatively cover eight subsequent analysis windows after playback stops, protecting against buffered windows and the input-window tail. Those windows reduce coverage instead of producing a practice score.
 
 Capture retry restarts hardware while retaining shared subscription identities. Asynchronous Android read failures clear running state and pause measurement; retries do not depend on the reference count reaching zero. Apple hardware-format changes and iOS interruptions invalidate the startup generation and rebuild the capture engine. Recording remains paused after recovery.
+
+M13 input policy is implemented. The new production entry separates accepted measurement from display, uses actual capture positions and audio-time confirmation, supports environment calibration/retention and schema1/2 compatibility. Legacy analyze/feed retain their compatibility contract. Exact state, defaults, API and delivery progress: [input implementation](../input-implementation.md). See the [validation report](input-verification.md) for results and physical-device gaps.
+
+
+## M13 effective implementation contract
+
+CaptureHub keeps one actual capture stream: measurements carries the current window, events carries the coherent full-frame presentation cached by the core, and InputStatus remains live. Retention must never mix old Hz with a new spectrum. Calibration in settings/workspace acquires a shared capture lease, stops reference/metronome output, waits for core output protection, and pauses recording without automatic resume. Cancellation, navigation, backgrounding and input reconstruction release ownership; input changes invalidate calibration. Reference output/tails are excluded from scores. Speaker metronome use displays a risk hint and recommends headphones; no echo cancellation is claimed.
+
+Apple analysis uses 16 fixed slots to absorb multi-hop hardware batches and drops bounded startup backlog without compressing sample time. Main-queue delivery checks capture generation so a stopped callback cannot restore live availability. Input recovery updates the message without resuming recording.

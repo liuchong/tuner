@@ -2,6 +2,16 @@ import XCTest
 @testable import Tunar
 
 final class AudioFrameRingTests: XCTestCase {
+    func testLargeHardwareBatchPreservesEveryHop() {
+        let ring=AudioFrameRing(windowSize:2048,hopSize:1024,capacity:16)
+        let samples=Array(repeating:Float(0.1),count:10000)
+        samples.withUnsafeBufferPointer { ring.push($0.baseAddress!,count:$0.count) }
+        var positions:[UInt64]=[]
+        while ring.consumeStamped({_,position in positions.append(position)}) {}
+        XCTAssertEqual(positions,(2...9).map{UInt64($0*1024)})
+        XCTAssertEqual(ring.maximumBatchSize,10000)
+    }
+
     func testDroppedWindowsDoNotCompressCaptureTime() {
         let ring = AudioFrameRing(windowSize: 8, hopSize: 4, capacity: 1)
         let first = Array(repeating: Float(0.1), count: 16)

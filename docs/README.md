@@ -14,7 +14,7 @@ changes that alter behavior must update both versions in the same commit.
 | Aurora design system | [design-system](en/design-system.md) | [design-system](design-system.md) |
 | Native macOS app | [macos-native](en/macos-native.md) | [macos-native](macos-native.md) |
 | Practice workspace | [practice-workspace](en/practice-workspace.md) | [练音工作区](practice-workspace.md) |
-| Real-world input proposal | [Input behavior](en/input-behavior.md) | [真实环境输入设计](input-behavior.md) |
+| Real-world input behavior | [Input behavior](en/input-behavior.md) | [真实环境输入设计](input-behavior.md) |
 | Roadmap | [roadmap](en/roadmap.md) | [roadmap](roadmap.md) |
 
 Brand rule: the product is **TUNAR** in English and **吐呐** in Simplified Chinese.
@@ -25,3 +25,6 @@ bindings `tunar_core`) have been fully migrated to the TUNAR brand. Feature name
 - 练音施工与验收：[简体中文](practice-implementation.md) · [English](en/practice-implementation.md)
 
 - 练音验收报告：[简体中文](verification/practice-workspace/report.md) · [English](en/practice-verification.md)
+
+- 输入施工与验收： [简体中文](input-implementation.md) · [English](en/input-implementation.md)
+- 输入验收报告： [简体中文](verification/input-behavior/report.md) · [English](en/input-verification.md)

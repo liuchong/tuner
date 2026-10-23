@@ -12,11 +12,13 @@
 		111264414D5C29DA7505EF74 /* TickSounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111764272440E2D82E23D155 /* TickSounds.swift */; };
 		15C1EA0C8CA86809FF1A4A8C /* AudioCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00EBE164801BB927370CA691 /* AudioCapture.swift */; };
 		1610F774959188D4D20BA82A /* MacMicrophoneAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1249667A6D8EF8089BB9F4A6 /* MacMicrophoneAccess.swift */; };
+		180BF4F48588282F7DCE305E /* InputControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 553D5ECEA52F06174174B708 /* InputControlsView.swift */; };
 		22F4B35D14079C0A1AAD5349 /* EngineBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0A5A1A39D51D374FFF0A6E /* EngineBridge.swift */; };
 		258CED65DED3979ADCAE4DF6 /* DesktopRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0BC7D6689A712981C3DF1B /* DesktopRootView.swift */; };
 		2C4C9BB10B0EE295036AD8B7 /* InstrumentFigures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E57C1EDD65CE5DE3CE7C04 /* InstrumentFigures.swift */; };
 		304EF5BAF8515F09E7C6A57D /* DesktopContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5EFD350A1DA088B6762DC2A /* DesktopContractTests.swift */; };
 		3D5EDE6D3359673BB46DB26F /* TunarAtomics.c in Sources */ = {isa = PBXBuildFile; fileRef = 5E5B5633F1461E82F5F59544 /* TunarAtomics.c */; };
+		43A5BCDB8E4959281951D957 /* InputPolicySettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36778408BC4BD07E6822003A /* InputPolicySettingsTests.swift */; };
 		4D5F686EA9CFCE95D1E1BB77 /* MacInstrumentViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A6B32307B713194E88D08C8 /* MacInstrumentViewModelTests.swift */; };
 		5ADD482661ABBFA94C4AE913 /* MacTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC422E6CCE4898EE3E39C533 /* MacTheme.swift */; };
 		685FB72A638026ADAD2E7A84 /* MetronomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FD7692A5A9F66EFFEB7E69 /* MetronomeViewModel.swift */; };
@@ -75,6 +77,7 @@
 		31B2DF42221BB5832AB0DE94 /* DesktopToolsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopToolsView.swift; sourceTree = "<group>"; };
 		3238EB221E2B93827B2CAE5A /* TuningForkViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TuningForkViewModel.swift; sourceTree = "<group>"; };
 		3274087226E07B989F4E027A /* ReferenceTonePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferenceTonePlayer.swift; sourceTree = "<group>"; };
+		36778408BC4BD07E6822003A /* InputPolicySettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputPolicySettingsTests.swift; sourceTree = "<group>"; };
 		37E65C7B9ECC17F96F0E5F6A /* PracticeWorkspaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeWorkspaceTests.swift; sourceTree = "<group>"; };
 		40FD7692A5A9F66EFFEB7E69 /* MetronomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetronomeViewModel.swift; sourceTree = "<group>"; };
 		42E57C1EDD65CE5DE3CE7C04 /* InstrumentFigures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstrumentFigures.swift; sourceTree = "<group>"; };
@@ -82,6 +85,7 @@
 		47EAAAAA64733076BB819662 /* PracticeWorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeWorkspaceView.swift; sourceTree = "<group>"; };
 		4BB9CDA8C5D7B18EABED39D5 /* TunarMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TunarMac.entitlements; sourceTree = "<group>"; };
 		5225C1890A1D18D4E9A2CAAD /* TunarAtomics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TunarAtomics.h; sourceTree = "<group>"; };
+		553D5ECEA52F06174174B708 /* InputControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputControlsView.swift; sourceTree = "<group>"; };
 		55E1D09A67D95CACD8147AD3 /* DesktopAnalysisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopAnalysisView.swift; sourceTree = "<group>"; };
 		5E5B5633F1461E82F5F59544 /* TunarAtomics.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = TunarAtomics.c; sourceTree = "<group>"; };
 		5F99E069110F230FE06EDE52 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
@@ -191,6 +195,7 @@
 		57E88ED71B24F3B75EE21E40 /* Practice */ = {
 			isa = PBXGroup;
 			children = (
+				553D5ECEA52F06174174B708 /* InputControlsView.swift */,
 				1A523F31E37642028A3D8106 /* PracticeWorkspaceModel.swift */,
 				47EAAAAA64733076BB819662 /* PracticeWorkspaceView.swift */,
 			);
@@ -201,6 +206,7 @@
 		5D174D14FF96EF2B3AE5FBCE /* TunarTests */ = {
 			isa = PBXGroup;
 			children = (
+				36778408BC4BD07E6822003A /* InputPolicySettingsTests.swift */,
 				37E65C7B9ECC17F96F0E5F6A /* PracticeWorkspaceTests.swift */,
 			);
 			name = TunarTests;
@@ -441,6 +447,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				304EF5BAF8515F09E7C6A57D /* DesktopContractTests.swift in Sources */,
+				43A5BCDB8E4959281951D957 /* InputPolicySettingsTests.swift in Sources */,
 				8EDBEDE4E6266EE2064F22B9 /* MacAudioAndAnalysisTests.swift in Sources */,
 				4D5F686EA9CFCE95D1E1BB77 /* MacInstrumentViewModelTests.swift in Sources */,
 				E81A930FBCA3EC3D52BC3B28 /* PracticeWorkspaceTests.swift in Sources */,
@@ -463,6 +470,7 @@
 				FC74E9C6C5878ACA36325C78 /* DesktopTunerView.swift in Sources */,
 				22F4B35D14079C0A1AAD5349 /* EngineBridge.swift in Sources */,
 				AE7D28415C0F3AAD0C118DF4 /* Haptics.swift in Sources */,
+				180BF4F48588282F7DCE305E /* InputControlsView.swift in Sources */,
 				2C4C9BB10B0EE295036AD8B7 /* InstrumentFigures.swift in Sources */,
 				B6631996D7BD707113D1505D /* InstrumentViewModel.swift in Sources */,
 				1610F774959188D4D20BA82A /* MacMicrophoneAccess.swift in Sources */,

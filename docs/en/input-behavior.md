@@ -1,6 +1,7 @@
 # Real-world input decisions, response and stopped-note retention
 
-Status: **design proposal; not implemented or empirically tuned**. Baseline `c5670a1`, master; clean at design start. This change delivers behavior, starting parameters, interfaces and acceptance plans. It changes no runtime defaults and starts no goal. It extends the [practice workspace](practice-workspace.md); its previous verification report does not validate these new settings.
+Implementation contract: [construction ledger](../input-implementation.md). M13 uses the production `analyze_input` path with audio-time confirmation, separate raw measurements and display response. Validation results are recorded separately.
+Status: **implemented across all three platforms; executable automated/local native checks completed**. Results and physical gaps are in the [report](input-verification.md). See the [construction contract](../input-implementation.md). Baseline `c5670a1`, master; clean at design start. This authorized change implements the policy across all three platforms, completing test sources and implementation before unified verification. No goal is started. It extends the [practice workspace](practice-workspace.md); its previous verification report does not validate these new settings.
 
 ## 1. Goals and verified baseline
 
@@ -48,7 +49,7 @@ Advanced settings initially expose only manual open threshold−80…−12 dBFS,
 
 ## 3. Initial policies
 
-**Engineering starting points, not standards or validated production defaults.** Publish only after the acceptance matrix passes.
+**Implemented engineering defaults with automated contract checks, not standards or proven optimal values.** The physical instrument/room tuning matrix remains open.
 
 ### 3.1 Background measurement
 
@@ -122,11 +123,11 @@ Keep pitch and trace prominent. Near the reading, show Live/Uncertain/Last measu
 
 The desktop inspector gets an Input and response group containing the three choices and background action, with manual numbers under Advanced. Narrow windows use the same details sheet; mobile opens a matching settings page without filling the home screen with sliders. The live meter marks background/open/close lines and explains weak input, clipping or unclear pitch. Not every failure should say “play louder”.
 
-## 6. Proposed implementation contract
+## 6. Implementation contract
 
 All decisions remain in Rust. Native code supplies capture/output context, permissions, local preferences/files and rendering. Keep callback rings preallocated and all new work on analysis/worker queues; do not add a second FFT.
 
-New `core/src/input_policy.rs` defines the following proposed UniFFI enums/records (not exported yet):
+New `core/src/input_policy.rs` defines the following exported UniFFI enums/records:
 
 ```rust
 GateMode = Auto | Manual
@@ -138,17 +139,21 @@ InputPolicy { gate_mode: GateMode=Auto, profile: InputProfile=General,
   response: ResponseMode=Balanced, hold: HoldMode=UntilNext }
 InputReason = None | BelowGate | NoPeriodicPitch | AmbiguousPitch | Acquiring | Calibrating |
   Dropout | Clipped | OutputContaminated | InputUnavailable
-InputDiagnostics { reason: InputReason, noise_floor_dbfs: Option<f32>,
-  open_dbfs: f32, close_dbfs: f32, clarity: Option<f32>,
-  clipped_fraction: f32, policy_revision: u32, calibration_revision: u32 }
+ResolvedInputPolicy { policy_version: u32, gate_mode: GateMode, profile: InputProfile,
+  manual_open_dbfs: f32, manual_hysteresis_db: f32, noise_floor_dbfs: Option<f32>,
+  open_dbfs: f32, close_dbfs: f32, policy_revision: u32, calibration_revision: u32 }
+InputDiagnostics { reason: InputReason, clarity: Option<f32>, clipped_fraction: f32,
+  policy: ResolvedInputPolicy, metronome_risk: bool, response: ResponseMode, hold: HoldMode }
 CalibrationState = Idle | Measuring | NeedsQuietConfirmation | Ready | Failed
 CalibrationStatus { state: CalibrationState, floor_dbfs: Option<f32>,
   elapsed_seconds: f64, reason: String }
+InputStatus { available: bool, input_level_dbfs: f32, diagnostics: Option<InputDiagnostics>,
+  calibration: CalibrationStatus, output_active: bool }
 ```
 
 Manual threshold/hysteresis must be finite and within the ranges above. Policy version 1 resolves other settings from the tables; decision/calibration revisions increment on effective changes and split measurement configuration segments. Response/hold are presentation-only: they neither split measurement segments nor alter acquisition/validity. Persist user choices, but retain environment estimates only in the current capture context. An existing legacy gate key migrates to Manual with its original value; new users start Auto with the uncalibrated fallback.
 
-Proposed `TunarEngine` worker methods:
+`TunarEngine` worker methods:
 
 ```rust
 set_input_policy(policy: InputPolicy) -> Result<(), InputPolicyError>
@@ -163,15 +168,15 @@ InputFrameContext { sample_position: u64, capture_generation: u64,
   reference_active: bool, metronome_active: bool }
 ```
 
-Errors are InvalidPolicy/InvalidFrame/OutputActive/NoCalibration; asynchronous calibration failures appear in status. CaptureHub passes the real frame-end position before analysis, not by overwriting the timestamp afterward. Reject repeated/backward positions in one generation atomically; a gap over 1.5hop resets confirmation. Generation/input reset invalidates calibration and transient filters without deleting session history. The YIN energy pre-gate must use resolved T_off instead of the old fixed T_on−3 assumption. Legacy `analyze` builds a compatible context from accumulated hops; legacy `set_noise_gate` explicitly selects Manual, avoiding two competing gates.
+Errors are InvalidPolicy/InvalidFrame/OutputActive/NoCalibration; asynchronous calibration failures appear in status. CaptureHub passes the real frame-end position before analysis, not by overwriting the timestamp afterward. Reject repeated/backward positions in one generation atomically; a gap over 1.5hop resets confirmation. Generation/input reset invalidates calibration and transient filters without deleting session history. The YIN energy pre-gate must use resolved T_off instead of the old fixed T_on−3 assumption. Legacy `analyze` retains its two-frame/smoothing compatibility contract; production capture always uses the new entry point; legacy `set_noise_gate` explicitly selects Manual, avoiding two competing gates.
 
-`AnalysisFrame` gains optional `input_diagnostics` and `measured_freq_hz`: a qualified periodic/harmonic estimate before display smoothing, not PCM or an unqualified candidate. Legacy `tuner.freq_hz` retains display semantics. Add `PracticeSession::presentation() -> PracticePresentation` with source Live/Held/Review, optional coherent PracticePoint, optional `LiveInput { input_level_dbfs, diagnostics }`, optional held age and optional `NoteSummary { median_cents, low_cents, high_cents, valid_seconds }`. Bound storage to two full frame/configuration copies and a 300 ms scalar ring. A native view must not implement another retention timer.
+`AnalysisFrame` gains optional `input_diagnostics` and `measured_freq_hz`: a qualified periodic/harmonic estimate before display smoothing, not PCM or an unqualified candidate. Legacy `tuner.freq_hz` retains display semantics. Add `PracticeSession::presentation() -> PracticePresentation` with source Live/Held/Review, optional display cents, coherent PracticePoint and previous-condition result, optional `LiveInput { input_level_dbfs, diagnostics }`, optional held age and optional `NoteSummary { median_cents, low_cents, high_cents, valid_seconds }`. Bound storage to two full frame/configuration copies and a 300 ms scalar ring. A native view must not implement another retention timer.
 
 Main numeric Hz/cents use one trusted measurement; the pointer uses display smoothing. Do not falsely claim raw numeric cents and a smoothed pointer are identical. Main tuner/instrument views use the same core presentation policy; explicitly live professional tools remain clearly labeled live.
 
 JSON schema 2 stores decision-policy fields, resolved thresholds/revisions and measurement basis in configuration segments. Response/hold remain independent presentation preferences without changing historical measurements. Read schema 1 as `LegacySmoothed` without inventing lost raw frequencies or recomputing old scores. New schema 2 uses `AcceptedRaw`; preserve existing CSV columns and append measurement_basis/measured_freq_hz/display_freq_hz/quality_reason. New metadata counts toward the 32MiB budget and strict validation.
 
-The exact baseline file/symbol/line map D1–D10 is in [Chinese §6](../input-behavior.md#6-实现合同与文件映射拟新增未导出). It covers input_policy/lib, pitch, signal/smooth, api, practice/codec, both CaptureHub/engine adapters/settings, both main tuner/instrument/workspace models/views, generated bindings and bilingual specifications. Existing published defaults stay unchanged by this proposal. Candidate-ranking weights must be compared on the fixed signal set rather than invented in the native UI;8 candidates does not mean full pYIN/offline Viterbi is adopted.
+The exact baseline file/symbol/line map D1–D10 is in [Chinese §6](../input-behavior.md#6-实现合同与文件映射). It covers input_policy/lib, pitch, signal/smooth, api, practice/codec, both CaptureHub/engine adapters/settings, both main tuner/instrument/workspace models/views, generated bindings and bilingual specifications. New defaults and legacy compatibility are documented separately. Candidate-ranking weights must be compared on the fixed signal set rather than invented in the native UI;8 candidates does not mean full pYIN/offline Viterbi is adopted.
 
 Proposed flow:
 
@@ -193,11 +198,11 @@ flowchart LR
 
 - [x] Baseline, requirements, policies, state/layout, interfaces, file map and evidence boundaries designed.
 - [x] Bilingual entry/milestone; documentation checks only, with no claim that application tests validate the new behavior.
-- [ ] C1 Fix the candidate-ranking signal set; write D1–D5 implementation details and all test sources before running them.
-- [ ] C2 Write all D6–D10 native/migration/wiring code and acceptance sources before execution.
+- [x] C1 Fix the candidate-ranking signal set; write D1–D5 implementation details and all test sources before running them.
+- [x] C2 Write all D6–D10 native/migration/wiring code and acceptance sources before execution.
 - [ ] C3 After full implementation, run unified tests, parameter comparisons and physical-device acceptance; then adopt validated defaults in current specifications.
 
-All A1–A12 are **unexecuted**. Unit/integration/E2E layers and exact-case timings reuse existing reporting; random seeds are fixed and logical time advances through samples.
+Automated contracts and available local native actions were executed; [per-item results](../../integration_test/input_behavior.md) keep the physical gaps explicit. Unit/integration/E2E layers and exact-case timings reuse existing reporting; random seeds are fixed and logical time advances through samples.
 
 | Acceptance | Inputs/actions | Required observations |
 |---|---|---|
@@ -219,3 +224,5 @@ All A1–A12 are **unexecuted**. Unit/integration/E2E layers and exact-case timi
 [aubio's official pitch interface](https://aubio.org/doc/latest/pitch_8h_source.html) separates silence, YIN tolerance and confidence, supporting separate policy layers rather than one magic sensitivity number. The [pYIN paper](https://webspace.eecs.qmul.ac.uk/s.e.dixon/pub/2014/MauchDixon-PYIN-ICASSP2014.pdf) explains why smoothing a single discarded-candidate output can lose the correct interpretation; it supports retaining candidate evidence, not adoption of its code/decoder. [Aalto's fundamental-frequency material](https://speechprocessingbook.aalto.fi/representations/fundamental-frequency-f 0/) explains harmonics and missing fundamentals, supporting avoidance of largest-peak pitch selection.
 
 These sources support mechanisms, not this product's optimal parameter values, real-device performance or arbitrary-noise separation guarantees.
+
+This delivery passes 374 executable checks. The full physical matrix in C3 remains open; local tests do not replace it. The [construction ledger](../input-implementation.md) is the sole implementation/delivery checklist.

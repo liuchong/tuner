@@ -28,6 +28,9 @@ import com.liuchong.tunar.ui.instrument.WindTubeFigure
 import com.liuchong.tunar.ui.theme.LocalLumenColors
 import uniffi.tunar_core.*
 import java.util.Locale
+import kotlinx.coroutines.launch
+import com.liuchong.tunar.data.DataStoreSettingsRepository
+import com.liuchong.tunar.data.AppSettings
 
 private fun number(value: Double?, suffix: String = "", digits: Int = 1): String =
     value?.let { String.format(Locale.ROOT, "%.${digits}f%s", it, suffix) } ?: "—"
@@ -36,7 +39,13 @@ private fun number(value: Double?, suffix: String = "", digits: Int = 1): String
 @Composable
 fun PracticeWorkspaceScreen(model: PracticeWorkspaceViewModel, onBack: () -> Unit, onAnalysis: () -> Unit) {
     val state by model.state.collectAsStateWithLifecycle()
-    val resolver = LocalContext.current.contentResolver
+    val context = LocalContext.current
+    val resolver = context.contentResolver
+    val settingsRepository = remember(context) { DataStoreSettingsRepository(context) }
+    val settings by settingsRepository.settings.collectAsStateWithLifecycle(initialValue = AppSettings())
+    val scope = rememberCoroutineScope()
+    val inputStatus by CaptureHub.inputStatus.collectAsStateWithLifecycle()
+    LaunchedEffect(settings.inputPolicy) { CaptureHub.applyInputPolicy(settings.inputPolicy) }
     var exportCsv by remember { mutableStateOf(false) }
     var exportSelected by remember { mutableStateOf(false) }
     val saveJson = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
@@ -46,6 +55,7 @@ fun PracticeWorkspaceScreen(model: PracticeWorkspaceViewModel, onBack: () -> Uni
         uri?.let { model.exportFile(resolver, it, exportCsv, exportSelected) }
     }
     val open = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let { model.importFile(resolver, it) } }
+    var showInputControls by remember { mutableStateOf(false) }
     var displayRange by remember { mutableDoubleStateOf(50.0) }
     var clear by remember { mutableStateOf(false) }
     var fileMenu by remember { mutableStateOf(false) }
@@ -69,6 +79,7 @@ fun PracticeWorkspaceScreen(model: PracticeWorkspaceViewModel, onBack: () -> Uni
         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf("调音", "练音", "分析").forEach { task -> FilterChip(selected = state.task == task, onClick = { model.task(task) }, label = { Text(task) }) }
         }
+        LiveInputStatus(inputStatus, compact=true)
         SessionControls(state, model)
         state.fileMessage?.let { Text(it, style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(horizontal = 16.dp)) }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -83,6 +94,8 @@ fun PracticeWorkspaceScreen(model: PracticeWorkspaceViewModel, onBack: () -> Uni
                 listOf(50.0, 100.0).forEach { range -> FilterChip(selected = displayRange == range, onClick = { displayRange = range }, label = { Text("量程 ±${range.toInt()}¢") }) }
             }
             PitchReadout(state, displayRange)
+            TextButton(onClick={showInputControls=!showInputControls}) {Text(if(showInputControls) "收起输入设置" else "输入与响应设置") }
+            if(showInputControls) PracticeCard("输入设置") { CaptureInputControls(settings.inputPolicy, { policy -> scope.launch { settingsRepository.setInputPolicy(policy) } }, model::pause) }
             if (state.task == "练音") {
                 val trace = if (state.status.reviewId == null) state.liveTrace else state.trace
                 PracticeCard("音准轨迹 · cents / 秒") { TracePlot(trace, state.displayConfig.toleranceCents, state.point?.timeSeconds, false, displayRange) }
@@ -148,19 +161,26 @@ private fun TargetControls(state: PracticeUiState, model: PracticeWorkspaceViewM
 private fun PitchReadout(state: PracticeUiState, range: Double) {
     val point = state.point
     val cents = point?.cents
+    val presentation = state.presentation
+    val displayCents = presentation?.displayCents ?: cents
     val accent = MaterialTheme.colorScheme.primary
-    PracticeCard(if (state.status.reviewId == null) "实时读数" else "历史读数 · 使用当时配置") {
+    PracticeCard(when(presentation?.source) { PresentationSource.HELD -> "上次测量 · ${presentation.heldAgeSeconds?.let { number(it, "秒前") } ?: "上次输入"}"; PresentationSource.REVIEW -> "历史读数 · 使用当时配置"; else -> "实时读数" }) {
         Text(point?.targetName?.ifEmpty { "等待信号" } ?: "等待信号", style = if (state.task == "分析") MaterialTheme.typography.headlineMedium else MaterialTheme.typography.displayLarge)
-        Text("${number(cents, " ¢", 2)} · ${number(point?.frame?.tuner?.freqHz, " Hz", 2)}", style = MaterialTheme.typography.headlineSmall)
+        Text("${number(cents, " ¢", 2)} · ${number(point?.frame?.measuredFreqHz ?: point?.frame?.tuner?.freqHz, " Hz", 2)}", style = MaterialTheme.typography.headlineSmall)
         if (state.task != "分析") Canvas(Modifier.fillMaxWidth().height(44.dp).semantics { contentDescription = "真实偏差 ${number(cents)} 音分，表盘显示范围正负${range.toInt()}音分" }) {
             val y = size.height / 2
             drawLine(Color.Gray, Offset(0f, y), Offset(size.width, y), 1.dp.toPx())
             drawLine(Color.Gray, Offset(size.width / 2, 0f), Offset(size.width / 2, size.height), 1.dp.toPx())
-            cents?.let { val x = ((it.coerceIn(-range, range) + range) / (range * 2) * size.width).toFloat(); drawCircle(accent, 5.dp.toPx(), Offset(x, y)) }
+            displayCents?.let { val x = ((it.coerceIn(-range, range) + range) / (range * 2) * size.width).toFloat(); drawCircle(accent, 5.dp.toPx(), Offset(x, y)) }
         }
         if (cents != null && kotlin.math.abs(cents) > range) Text(if (cents < 0) "← 偏低，超出表盘范围" else "偏高，超出表盘范围 →")
         Text("输入 ${number(point?.frame?.inputLevelDbfs?.toDouble(), " dBFS")} · A4 ${number(state.displayConfig.a4Hz, " Hz")} · ${state.displayConfig.temperament}平均律", style = MaterialTheme.typography.bodySmall)
-        if (point?.frame?.isHeld == true) Text("保持帧 · 不计入演奏统计")
+        if (presentation?.source == PresentationSource.HELD) {
+            Text("保持结果 · 不计入演奏统计")
+            val summary=presentation.summary
+            Text(if(summary==null) "短音，未形成摘要" else "停吹前摘要 · 中位 ${number(summary.medianCents,"¢")} · P10/P90 ${number(summary.lowCents)} / ${number(summary.highCents)}¢ · 有效 ${number(summary.validSeconds,"秒")}")
+        }
+        presentation?.previousMeasurement?.let { Text("前一条件结果 · ${it.targetName} · ${number(it.frame.measuredFreqHz ?: it.frame.tuner?.freqHz," Hz")} · ${number(it.cents,"¢")}",style=MaterialTheme.typography.bodySmall) }
         if (point?.referenceActive == true) Text("参考音影响区间 · 不计入演奏统计")
     }
 }

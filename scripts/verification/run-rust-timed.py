@@ -6,7 +6,7 @@ parser=argparse.ArgumentParser()
 parser.add_argument('--output',required=True)
 parser.add_argument('--layer',choices=['unit','integration'],required=True)
 args=parser.parse_args()
-selector=['--lib'] if args.layer=='unit' else ['--test','pro_tuner_features','--test','practice_workflow']
+selector=['--lib'] if args.layer=='unit' else ['--test','pro_tuner_features','--test','practice_workflow','--test','input_workflow']
 build=subprocess.run(['cargo','test','-j','2','--no-run','--message-format=json',*selector],text=True,capture_output=True)
 if build.returncode:
  print(build.stderr);raise SystemExit(build.returncode)

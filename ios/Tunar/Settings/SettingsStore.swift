@@ -32,7 +32,7 @@ final class SettingsStore: ObservableObject {
         didSet { save("keyMode", keyMode.index); applyToEngine() }
     }
     @Published var noiseGateDbfs: Double {
-        didSet { save("noiseGateDbfs", noiseGateDbfs); applyToEngine() }
+        didSet { save("noiseGateDbfs", noiseGateDbfs);gateMode = .manual; applyToEngine() }
     }
     @Published var themeMode: ThemeMode {
         didSet { save("themeMode", themeMode.rawValue); objectWillChange.send() }
@@ -45,10 +45,27 @@ final class SettingsStore: ObservableObject {
         didSet { save("temperament", temperament); applyToEngine() }
     }
 
-    private let defaults = UserDefaults.standard
+    @Published var gateMode: GateMode { didSet { save("input.gateMode", InputPolicyChoices.gates.firstIndex(of:gateMode) ?? 0);applyToEngine() } }
+    @Published var inputProfile: InputProfile { didSet { save("input.profile",InputPolicyChoices.profiles.firstIndex(of:inputProfile) ?? 1);applyToEngine() } }
+    @Published var responseMode: ResponseMode { didSet { save("input.response",InputPolicyChoices.responses.firstIndex(of:responseMode) ?? 1);applyToEngine() } }
+    @Published var holdMode: HoldMode { didSet { save("input.hold",InputPolicyChoices.holds.firstIndex(of:holdMode) ?? 3);applyToEngine() } }
+    @Published var gateHysteresisDb: Double { didSet {save("input.hysteresis",gateHysteresisDb);applyToEngine()} }
+    private let defaults: UserDefaults
+    private let synchronizeEngine: Bool
+    var inputPolicy: InputPolicy {InputPolicy(gateMode:gateMode,profile:inputProfile,manualOpenDbfs:Float(noiseGateDbfs),manualHysteresisDb:Float(gateHysteresisDb),response:responseMode,hold:holdMode)}
+    func restoreInputDefaults(){noiseGateDbfs = -45;gateHysteresisDb=3;inputProfile = .general;responseMode = .balanced;holdMode = .untilNext;gateMode = .auto}
 
-    private init() {
-        let d = UserDefaults.standard
+
+    init(defaults: UserDefaults = .standard, synchronizeEngine: Bool = true) {
+        self.defaults=defaults;self.synchronizeEngine=synchronizeEngine
+        let d = defaults
+        func choice<T>(_ key:String,_ values:[T],_ fallback:Int)->T {let index=d.object(forKey:key) as? Int ?? fallback;return values.indices.contains(index) ? values[index] : values[fallback]}
+        gateMode=choice("input.gateMode",InputPolicyChoices.gates,d.object(forKey:"noiseGateDbfs") == nil ? 0 : 1)
+        inputProfile=choice("input.profile",InputPolicyChoices.profiles,1)
+        responseMode=choice("input.response",InputPolicyChoices.responses,1)
+        holdMode=choice("input.hold",InputPolicyChoices.holds,3)
+        gateHysteresisDb=d.object(forKey:"input.hysteresis") as? Double ?? 3
+
         a4Hz = d.object(forKey: "a4Hz") as? Double ?? 440.0
         solfegeSystem = SolfegeSystem.from(index: d.object(forKey: "solfegeSystem") as? Int ?? 2)
         keyTonicPc = d.object(forKey: "keyTonicPc") as? Int ?? 0
@@ -102,7 +119,9 @@ final class SettingsStore: ObservableObject {
 
     /// 应用设置到运行中的引擎（即时生效）。
     func applyToEngine() {
+        guard synchronizeEngine else{return}
         CaptureHub.shared.applyConfig(toTunarConfig())
+        CaptureHub.shared.applyInputPolicy(inputPolicy)
     }
 }
 

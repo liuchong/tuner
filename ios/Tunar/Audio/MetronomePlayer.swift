@@ -26,12 +26,13 @@ final class MetronomePlayer: ObservableObject, @unchecked Sendable {
     func start(engine renderEngine: MetronomeEngine) {
         guard !isPlaying else { return }
         isPlaying = true
+        ReferenceToneActivity.shared.setMetronome(self, active:true) { [weak self] in self?.stop() }
         self.renderEngine = renderEngine
         #if os(iOS)
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
             try AVAudioSession.sharedInstance().setActive(true)
-        } catch { return }
+        } catch { stop(); return }
         #endif
 
         let av = AVAudioEngine()
@@ -39,7 +40,7 @@ final class MetronomePlayer: ObservableObject, @unchecked Sendable {
         let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1)!
         av.attach(node)
         av.connect(node, to: av.mainMixerNode, format: format)
-        do { try av.start() } catch { isPlaying = false; return }
+        do { try av.start() } catch { stop(); return }
         node.play()
         engine = av
         player = node
@@ -98,6 +99,7 @@ final class MetronomePlayer: ObservableObject, @unchecked Sendable {
     }
 
     func stop() {
+        ReferenceToneActivity.shared.setMetronome(self, active:false) {}
         isPlaying = false
         timer?.cancel()
         timer = nil

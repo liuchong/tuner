@@ -72,13 +72,13 @@ fun AppNav() {
         onDispose { practice.suspend() }
     }
     fun updateCapture() {
-        com.liuchong.tunar.audio.CaptureHub.setEnabled(PracticePresentation.isCaptureRoute(currentRoute))
+        com.liuchong.tunar.audio.CaptureHub.setRouteEnabled(PracticePresentation.isCaptureRoute(currentRoute))
         if (PracticePresentation.isCaptureRoute(currentRoute) && ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) practice.acquire()
         else practice.suspend()
     }
     LaunchedEffect(currentRoute) { updateCapture() }
-    LifecycleEventEffect(Lifecycle.Event.ON_START) { updateCapture() }
-    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { practice.suspend(); com.liuchong.tunar.audio.CaptureHub.setEnabled(false) }
+    LifecycleEventEffect(Lifecycle.Event.ON_START) { com.liuchong.tunar.audio.CaptureHub.setForeground(true);updateCapture() }
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { practice.suspend(); com.liuchong.tunar.audio.CaptureHub.setForeground(false) }
     val colors = LocalLumenColors.current
     Scaffold(
         bottomBar = {

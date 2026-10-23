@@ -7,6 +7,9 @@ import com.liuchong.tunar.corebinding.TunarCore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import uniffi.tunar_core.*
+import com.liuchong.tunar.corebinding.emptyInputStatus
+import com.liuchong.tunar.corebinding.initialInputPolicy
 import uniffi.tunar_core.AnalysisFrame
 import uniffi.tunar_core.TunarConfig
 
@@ -15,6 +18,7 @@ data class PracticeCaptureFrame(val frame: AnalysisFrame, val config: TunarConfi
 
 interface TunarConfigSink {
     fun applyConfig(config: TunarConfig)
+    fun applyInputPolicy(policy: InputPolicy) = Unit
 }
 
 /**
@@ -41,6 +45,11 @@ class CaptureHubCore(
     val measurements: StateFlow<PracticeCaptureFrame?> = _measurements.asStateFlow()
     @Volatile private var generation = 0L
     private val analysisLock = Any()
+    private val _inputStatus=MutableStateFlow(emptyInputStatus())
+    val inputStatus:StateFlow<InputStatus> = _inputStatus.asStateFlow()
+    private var inputPolicy=initialInputPolicy()
+    private var calibrationRequested=false
+    private var fallbackPosition=0uL
     private var refs = 0
     private var enabled = true
     private var referenceTail = 0
@@ -72,16 +81,23 @@ class CaptureHubCore(
     @Synchronized
     override fun applyConfig(config: TunarConfig) {
         synchronized(analysisLock) {
+        val gateChanged=_config.value.noiseGateDbfs != config.noiseGateDbfs
         _config.value = config
         // 引擎运行中：配置与分析帧上下文原子一致。
         engine?.let { e ->
             e.setA4(config.a4Hz)
             e.setSolfege(config.solfege, config.key)
-            e.setNoiseGate(config.noiseGateDbfs)
+            if(gateChanged)e.setNoiseGate(config.noiseGateDbfs)
             e.setTemperament(config.temperament.toInt())
         }
         }
     }
+
+    override fun applyInputPolicy(policy:InputPolicy){synchronized(analysisLock){inputPolicy=policy;try{engine?.setInputPolicy(policy)}catch(e:Exception){inputFailure("输入设置未生效，请恢复默认后重试")}}}
+    fun requestCalibration(){synchronized(analysisLock){calibrationRequested=true;val old=_inputStatus.value;_inputStatus.value=old.copy(calibration=old.calibration.copy(state=CalibrationState.MEASURING,elapsedSeconds=0.0,reason="正在停止播放，等待输入及输出保护结束…"))}}
+    fun confirmCalibration(){synchronized(analysisLock){try{engine?.confirmNoiseEnvironment()}catch(e:Exception){inputFailure("没有待确认的环境测量，请重测")}}}
+    fun cancelCalibration(){synchronized(analysisLock){calibrationRequested=false;engine?.cancelNoiseCalibration();engine?.let{_inputStatus.value=it.inputStatus()}}}
+    private fun inputFailure(message:String){val old=_inputStatus.value;_inputStatus.value=old.copy(calibration=old.calibration.copy(state=CalibrationState.FAILED,reason=message));calibrationRequested=false}
 
     private fun startLocked() {
         generation += 1L
@@ -90,19 +106,29 @@ class CaptureHubCore(
         val bootConfig = _config.value
         val eng = engineFactory.create(bootConfig)
         val src = sourceFactory()
+        fallbackPosition=0uL
         try {
+            eng.setInputPolicy(inputPolicy)
             // 音频读线程：analyze（音高+频谱+泛音）→ tryEmit 语义（赋值非阻塞）
             val deliver: (FloatArray, ULong?) -> Unit = { frame, position ->
                 synchronized(analysisLock) {
                     if (captureGeneration == generation) {
                         val config = _config.value
-                        val analyzed = eng.analyze(frame.asList())
-                        val result = if (position == null) analyzed else analyzed.copy(samplePosition = position)
                         val reference = ReferenceToneActivity.isActive
                         val affected = reference || referenceTail > 0
                         referenceTail = if (reference) 8 else maxOf(0, referenceTail - 1)
-                        _events.value = result
-                        _measurements.value = PracticeCaptureFrame(result, config.copy(sampleRate = result.sampleRateHz, frameHopSamples = bootConfig.frameHopSamples), captureGeneration.toULong(), affected)
+                        fallbackPosition+=bootConfig.frameHopSamples.toULong()
+                        val context=InputFrameContext(position?:fallbackPosition,captureGeneration.toULong(),affected,MetronomeActivity.isActive)
+                        try {
+                            if(calibrationRequested && !eng.inputStatus().outputActive && !affected && !context.metronomeActive){eng.beginNoiseCalibration(false);calibrationRequested=false}
+                            val result=eng.analyzeInput(frame.asList(),context)
+                            if(captureGeneration==generation) {
+                            val display=eng.presentationFrame() ?: if(result.inputDiagnostics!=null)result.copy(tuner=null,isHeld=false)else result
+                            _events.value=display
+                            _measurements.value=PracticeCaptureFrame(result,config.copy(sampleRate=result.sampleRateHz,frameHopSamples=bootConfig.frameHopSamples),captureGeneration.toULong(),affected)
+                            _inputStatus.value=eng.inputStatus().let { current -> if(calibrationRequested)current.copy(calibration=current.calibration.copy(state=CalibrationState.MEASURING,reason="正在停止播放，等待输入及输出保护结束…")) else current }
+                            }
+                        }catch(e:Exception){if(captureGeneration==generation)inputFailure("输入时钟或环境操作失败，请重试输入；已有记录保留")}
                     }
                 }
             }
@@ -110,7 +136,7 @@ class CaptureHubCore(
             source = src
             _running.value = true
             if (src is PositionedPcmSource) {
-                src.setFailureHandler { if (generation == captureGeneration) _running.value = false }
+                src.setFailureHandler { if (generation == captureGeneration) { _running.value = false;_inputStatus.value=_inputStatus.value.copy(available=false);inputFailure("音频输入已中断，请重试") } }
                 src.startPositioned { frame, position -> deliver(frame, position) }
             } else src.start { frame -> deliver(frame, null) }
         } catch (e: Exception) {
@@ -120,16 +146,19 @@ class CaptureHubCore(
             eng.close()
             engine = null; source = null
             _running.value = false
+            inputFailure("麦克风启动失败，请检查权限或输入设备后重试")
         }
     }
 
     private fun stopLocked() {
+        calibrationRequested=false
         generation += 1L
         source?.stop()
         source = null
         engine?.close()
         engine = null
         _running.value = false
+        _inputStatus.value=_inputStatus.value.copy(available=false,outputActive=false,calibration=CalibrationStatus(CalibrationState.IDLE,null,0.0,"输入已变化，请重新测环境"))
     }
 
     private companion object {
@@ -147,7 +176,20 @@ object CaptureHub : TunarEventStream, TunarConfigSink {
         initialConfig = TunarCore.defaultConfig(),
     )
 
-    fun setEnabled(value: Boolean) = impl.setEnabled(value)
+    private var foreground=true
+    private var routeEnabled=true
+    private var calibrationLease=false
+    private fun refreshEnabled(){impl.setEnabled(foreground&&(routeEnabled||calibrationLease))}
+    fun setEnabled(value:Boolean){routeEnabled=value;refreshEnabled()}
+    fun setRouteEnabled(value:Boolean){routeEnabled=value;refreshEnabled()}
+    fun setForeground(value:Boolean){foreground=value;if(!value){endCalibrationCapture()};refreshEnabled()}
+    val inputStatus get()=impl.inputStatus
+    val calibrationRequests=kotlinx.coroutines.flow.MutableSharedFlow<Unit>(extraBufferCapacity=1)
+    fun beginCalibration(){if(!foreground)return;calibrationRequests.tryEmit(Unit);ReferenceToneActivity.stopAll();if(!calibrationLease){calibrationLease=true;refreshEnabled();impl.acquire()}else if(!impl.running.value){impl.retry()};impl.requestCalibration()}
+    fun confirmCalibration()=impl.confirmCalibration()
+    fun cancelCalibration()=impl.cancelCalibration()
+    fun endCalibrationCapture(){if(calibrationLease){calibrationLease=false;impl.cancelCalibration();impl.release();refreshEnabled()}}
+    override fun applyInputPolicy(policy:InputPolicy)=impl.applyInputPolicy(policy)
     fun retry() = impl.retry()
     val measurements get() = impl.measurements
     override val events get() = impl.events

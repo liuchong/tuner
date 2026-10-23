@@ -182,18 +182,8 @@ fun SettingsScreen(
             }
         }
 
-        // 灵敏度（噪声门限 -60 ~ -30 dBFS）
-        Section(title = "灵敏度（噪声门限）") {
-            Slider(
-                value = s.noiseGateDbfs,
-                onValueChange = { viewModel.setNoiseGate(it) },
-                valueRange = -60f..-30f,
-            )
-            Text(
-                text = String.format(Locale.US, "%.0f dBFS（越高越不敏感）", s.noiseGateDbfs),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
+        Section(title="输入设置") {
+            com.liuchong.tunar.ui.practice.CaptureInputControls(s.inputPolicy,{viewModel.setInputPolicy(it)})
         }
 
         // 专业版模式（PRO 角标，与通用面板同源）

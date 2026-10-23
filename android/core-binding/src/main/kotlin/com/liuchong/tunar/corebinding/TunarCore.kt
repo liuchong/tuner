@@ -1,5 +1,7 @@
 package com.liuchong.tunar.corebinding
 
+import uniffi.tunar_core.*
+
 import uniffi.tunar_core.AnalysisFrame
 import uniffi.tunar_core.FingeringScope
 import uniffi.tunar_core.Instrument
@@ -30,6 +32,15 @@ interface PitchEngine : AutoCloseable {
 
     /** 完整分析帧：feed 事件 + 频谱 + 泛音 + 和弦（v4）。 */
     fun analyze(pcm: List<Float>): AnalysisFrame
+
+    fun analyzeInput(pcm: List<Float>, context: InputFrameContext): AnalysisFrame = analyze(pcm).copy(samplePosition=context.samplePosition)
+    fun setInputPolicy(policy: InputPolicy) = Unit
+    fun inputStatus(): InputStatus = emptyInputStatus()
+    fun presentationFrame(): AnalysisFrame? = null
+    fun beginNoiseCalibration(outputActive: Boolean): Unit = error("此引擎不支持环境测量")
+    fun confirmNoiseEnvironment(): Unit = error("没有待确认的环境测量")
+    fun cancelNoiseCalibration() = Unit
+    fun resetInputContext() = Unit
 
     /** 设置 A4 校准（415–466Hz）。 */
     fun setA4(hz: Double)
@@ -81,6 +92,14 @@ object TunarCore : TunarCoreApi {
 
             override fun feed(pcm: List<Float>): TunarEvent? = inner.feed(pcm)
             override fun analyze(pcm: List<Float>) = inner.analyze(pcm)
+            override fun analyzeInput(pcm:List<Float>,context:InputFrameContext)=inner.analyzeInput(pcm,context)
+            override fun setInputPolicy(policy:InputPolicy)=inner.setInputPolicy(policy)
+            override fun inputStatus()=inner.inputStatus()
+            override fun presentationFrame()=inner.presentationFrame()
+            override fun beginNoiseCalibration(outputActive:Boolean)=inner.beginNoiseCalibration(outputActive)
+            override fun confirmNoiseEnvironment()=inner.confirmNoiseEnvironment()
+            override fun cancelNoiseCalibration()=inner.cancelNoiseCalibration()
+            override fun resetInputContext()=inner.resetInputContext()
             override fun setA4(hz: Double) = inner.setA4(hz)
             override fun setSolfege(system: SolfegeSystem, key: KeyMode) =
                 inner.setSolfege(system, key)
@@ -138,3 +157,7 @@ object TunarCore : TunarCoreApi {
     fun createMetronome(config: MetronomeConfig): MetronomeEngine =
         uniffiMetronomeFactory.create(config)
 }
+
+/** 纯数据初始状态；JVM替身不需要加载JNI。 */
+fun emptyInputStatus()=InputStatus(false,-120f,null,CalibrationStatus(CalibrationState.IDLE,null,0.0,"尚未按环境测量"),false)
+fun initialInputPolicy()=InputPolicy(GateMode.AUTO,InputProfile.GENERAL,-45f,3f,ResponseMode.BALANCED,HoldMode.UNTIL_NEXT)

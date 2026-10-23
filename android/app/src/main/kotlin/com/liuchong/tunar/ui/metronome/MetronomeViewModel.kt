@@ -3,6 +3,7 @@ package com.liuchong.tunar.ui.metronome
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.liuchong.tunar.audio.MetronomeActivity
 import com.liuchong.tunar.audio.MetronomePlayer
 import com.liuchong.tunar.audio.TickEvent
 import com.liuchong.tunar.corebinding.MetronomeEngine
@@ -188,12 +189,14 @@ class MetronomeViewModel(
 
     fun play() {
         if (_uiState.value.playing) return
+        MetronomeActivity.set(this, true) { viewModelScope.launch { pause() } }
         engine?.start(0)
         engine?.let { player.startLoop(it) }
         _uiState.update { it.copy(playing = true, currentBeat = -1) }
     }
 
     fun pause() {
+        MetronomeActivity.set(this, false) {}
         if (!_uiState.value.playing) return
         player.stopLoop()
         engine?.stop()
@@ -201,6 +204,7 @@ class MetronomeViewModel(
     }
 
     override fun onCleared() {
+        MetronomeActivity.set(this, false) {}
         player.stopLoop()
         engine?.close()
         engine = null

@@ -84,6 +84,11 @@ final class CaptureLifecycleGate: @unchecked Sendable {
         return generation
     }
 
+    func isCurrent(_ token:Int)->Bool {
+        lock.lock();defer{lock.unlock()}
+        return enabled && references>0 && token==generation
+    }
+
     /// 令牌仍属于当前有效会话时，在同一把锁内原子提交启动结果。
     func commitIfCurrent(_ token: Int, _ body: () -> Void) -> Bool {
         lock.lock()
@@ -103,6 +108,8 @@ final class AudioFrameRing: @unchecked Sendable {
     private let window: UnsafeMutablePointer<Float>
     private let slots: UnsafeMutablePointer<Float>
     private let positions: UnsafeMutablePointer<UInt64>
+    private let largestPush=AtomicInt(0)
+    var maximumBatchSize:Int {largestPush.loadAcquire()}
     private var totalSamples: UInt64 = 0
     private let published = AtomicInt(0)
     private let consumed = AtomicInt(0)
@@ -126,6 +133,7 @@ final class AudioFrameRing: @unchecked Sendable {
     /// 满载时丢弃新快照，绝不等待消费者。
     func push(_ samples: UnsafePointer<Float>, count: Int) {
         guard count > 0 else { return }
+        if count > largestPush.loadRelaxed() {largestPush.storeRelease(count)}
         for sampleIndex in 0..<count {
             totalSamples &+= 1
             window[writeIndex] = samples[sampleIndex]
@@ -196,18 +204,23 @@ private final class AnalysisWorker: @unchecked Sendable {
     private let engineLock = NSLock()
     private let engine: PitchEngine
     private let queue = DispatchQueue(label: "com.liuchong.tuner.audio-analysis")
-    private let onFrame: @Sendable (PracticeCaptureFrame) -> Void
+    private let onFrame: @Sendable (PracticeCaptureFrame, AnalysisFrame?, InputStatus) -> Void
+    var onFailure:(@Sendable (String)->Void)?
+    private var calibrationRequested=false
+    #if DEBUG
+    private var previousPosition: UInt64?
+    #endif
     private var referenceTail = 0
     private var activeConfig: TunarConfig
     private let generation: UInt64
 
-    init(config: TunarConfig, generation: UInt64, onFrame: @escaping @Sendable (PracticeCaptureFrame) -> Void) {
+    init(config: TunarConfig, generation: UInt64, onFrame: @escaping @Sendable (PracticeCaptureFrame, AnalysisFrame?, InputStatus) -> Void) {
         self.activeConfig = config
         self.generation = generation
         ring = AudioFrameRing(
             windowSize: 2_048,
             hopSize: Int(config.frameHopSamples),
-            capacity: 4
+            capacity: 16
         )
         engine = UniffiFactories.pitch.create(config: config)
         self.onFrame = onFrame
@@ -216,21 +229,32 @@ private final class AnalysisWorker: @unchecked Sendable {
     func start() {
         running.storeRelease(1)
         queue.async { [self] in
+            // 丢弃启动期间积压的有限快照，首个分析窗口从当前输入开始。
+            for _ in 0..<16 { if !ring.consumeStamped({ _, _ in }) { break } }
             while running.loadAcquire() == 1 {
                 var result: PracticeCaptureFrame?
                 let consumed = ring.consumeStamped { samples, position in
                     engineLock.lock()
-                    var frame = engine.analyze(pcm: samples)
-                    frame.samplePosition = position
+                    #if DEBUG
+                    if previousPosition == nil {NSLog("TUNAR input batch: %ld samples; hop: %u",ring.maximumBatchSize,activeConfig.frameHopSamples)}
+                    if let previousPosition, position > previousPosition + UInt64(activeConfig.frameHopSamples) * 3 / 2 {
+                        NSLog("TUNAR input window gap: %llu samples; hop: %u; maximum input batch: %ld", position-previousPosition, activeConfig.frameHopSamples, ring.maximumBatchSize)
+                    }
+                    previousPosition=position
+                    #endif
                     let reference = ReferenceToneActivity.shared.isActive
                     let affected = reference || referenceTail > 0
-                    // 覆盖输入窗及最多4个待分析槽，停止播放后留出保守余响保护。
                     referenceTail = reference ? 8 : max(0, referenceTail - 1)
-                    result = PracticeCaptureFrame(frame: frame, config: activeConfig, generation: generation, referenceActive: affected)
+                    let context=InputFrameContext(samplePosition:position,captureGeneration:generation,referenceActive:affected,metronomeActive:ReferenceToneActivity.shared.metronomeActive)
+                    do {
+                        if calibrationRequested && !engine.inputStatus().outputActive && !affected && !context.metronomeActive { try engine.beginNoiseCalibration(outputActive:false);calibrationRequested=false }
+                        let frame=try engine.analyzeInput(pcm:samples,context:context)
+                        result = PracticeCaptureFrame(frame:frame,config:activeConfig,generation:generation,referenceActive:affected)
+                    } catch { calibrationRequested=false;onFailure?("输入时钟或环境操作失败，请重试输入；已有记录保留") }
                     engineLock.unlock()
                 }
                 if let result {
-                    onFrame(result)
+                    engineLock.lock();let display=engine.presentationFrame();let status=engine.inputStatus();engineLock.unlock();onFrame(result,display,status)
                 } else if !consumed {
                     Thread.sleep(forTimeInterval: 0.002)
                 }
@@ -243,14 +267,19 @@ private final class AnalysisWorker: @unchecked Sendable {
         var applied = config
         applied.sampleRate = activeConfig.sampleRate
         applied.frameHopSamples = activeConfig.frameHopSamples
+        let gateChanged=activeConfig.noiseGateDbfs != applied.noiseGateDbfs
         activeConfig = applied
         engine.setA4(hz: config.a4Hz)
         engine.setSolfege(system: config.solfege, key: config.key)
-        engine.setNoiseGate(dbfs: config.noiseGateDbfs)
+        if gateChanged {engine.setNoiseGate(dbfs: config.noiseGateDbfs)}
         engine.setTemperament(divisions: config.temperament)
         engineLock.unlock()
     }
 
+    func applyInputPolicy(_ policy:InputPolicy) {engineLock.lock();defer{engineLock.unlock()};do {try engine.setInputPolicy(policy)}catch{onFailure?("输入设置无效，请恢复默认后重试")}}
+    func requestCalibration(){engineLock.lock();calibrationRequested=true;engineLock.unlock()}
+    func confirmCalibration(){engineLock.lock();defer{engineLock.unlock()};do{try engine.confirmNoiseEnvironment()}catch{onFailure?("没有可采用的环境测量，请重新测量")}}
+    func cancelCalibration(){engineLock.lock();calibrationRequested=false;engine.cancelNoiseCalibration();engineLock.unlock()}
     func stop() {
         running.storeRelease(0)
     }
@@ -289,8 +318,13 @@ final class CaptureHub: ObservableObject, @unchecked Sendable {
 
     @Published private(set) var running = false
     @Published private(set) var startFailed = false
+    @Published private(set) var inputStatus=defaultInputStatus()
+    @Published private(set) var calibrationRequested=false
+    private var calibrationLease=false
+    private var inputPolicy=defaultInputPolicy()
     let events = PassthroughSubject<AnalysisFrame, Never>()
     let measurements = PassthroughSubject<PracticeCaptureFrame, Never>()
+    let calibrationRequests = PassthroughSubject<Void,Never>()
 
     private let lifecycle = CaptureLifecycleGate()
     private var worker: AnalysisWorker?
@@ -334,6 +368,7 @@ final class CaptureHub: ObservableObject, @unchecked Sendable {
 
     private func setEnabled(_ value: Bool) {
         let change = lifecycle.setEnabled(value)
+        if !value && calibrationLease {calibrationLease=false;_ = lifecycle.release()}
         if change.stop { stopLocked() }
         if let token = change.start { startLocked(token: token, initialConfig: config) }
     }
@@ -363,6 +398,17 @@ final class CaptureHub: ObservableObject, @unchecked Sendable {
         config = newConfig
         worker?.applyConfig(newConfig)
     }
+
+    func applyInputPolicy(_ policy:InputPolicy){inputPolicy=policy;worker?.applyInputPolicy(policy)}
+    @MainActor func beginCalibration(){
+        calibrationRequests.send(())
+        ReferenceToneActivity.shared.stopAll()
+        if !calibrationLease {calibrationLease=true;acquire()}else if startFailed {retryCapture()}
+        calibrationRequested=true;worker?.requestCalibration()
+    }
+    func confirmCalibration(){worker?.confirmCalibration()}
+    func cancelCalibration(){calibrationRequested=false;worker?.cancelCalibration()}
+    func endCalibrationCapture(){cancelCalibration();if calibrationLease {calibrationLease=false;release()}}
 
     private func startLocked(token: Int, initialConfig: TunarConfig) {
         audioQueue.async { [weak self] in
@@ -412,10 +458,23 @@ final class CaptureHub: ObservableObject, @unchecked Sendable {
             key: initialConfig.key,
             temperament: initialConfig.temperament
         )
-        let analysisWorker = AnalysisWorker(config: actualConfig, generation: UInt64(token)) { [weak self] packet in
-            self?.events.send(packet.frame)
-            self?.measurements.send(packet)
+        let analysisWorker = AnalysisWorker(config: actualConfig, generation: UInt64(token)) { [weak self] packet, display, status in
+            DispatchQueue.main.async { [weak self] in
+                guard let self, self.lifecycle.isCurrent(token) else {return}
+                var presented=display ?? packet.frame
+                if display == nil && packet.frame.inputDiagnostics != nil {presented.tuner=nil;presented.isHeld=false}
+                self.events.send(presented)
+                self.measurements.send(packet)
+                self.inputStatus=status
+                if status.calibration.state != .idle {self.calibrationRequested=false}
+            }
         }
+        analysisWorker.onFailure={ [weak self] message in DispatchQueue.main.async { [weak self] in
+            guard let self, self.lifecycle.isCurrent(token) else{return}
+            var status=self.inputStatus
+            status.calibration=CalibrationStatus(state:.failed,floorDbfs:status.calibration.floorDbfs,elapsedSeconds:0,reason:message)
+            self.inputStatus=status;self.calibrationRequested=false
+        } }
         let ring = analysisWorker.ring
 
         input.installTap(onBus: 0, bufferSize: 1_024, format: format) { buffer, _ in
@@ -448,6 +507,8 @@ final class CaptureHub: ObservableObject, @unchecked Sendable {
                         temperament: latest.temperament
                     )
                     pending.worker.applyConfig(committedConfig)
+                    pending.worker.applyInputPolicy(self.inputPolicy)
+                    if self.calibrationRequested {pending.worker.requestCalibration()}
                     pending.worker.start()
                     self.config = committedConfig
                     self.worker = pending.worker
@@ -471,11 +532,16 @@ final class CaptureHub: ObservableObject, @unchecked Sendable {
             _ = self.lifecycle.commitIfCurrent(token) {
                 self.running = false
                 self.startFailed = true
+                self.calibrationRequested=false
+                self.inputStatus.available=false
+                self.inputStatus.calibration=CalibrationStatus(state:.failed,floorDbfs:nil,elapsedSeconds:0,reason:"麦克风启动失败，请检查权限或输入设备，再重新测量")
             }
         }
     }
 
     private func stopLocked() {
+        var unavailable=inputStatus;unavailable.available=false;unavailable.outputActive=false;unavailable.calibration=CalibrationStatus(state:.idle,floorDbfs:nil,elapsedSeconds:0,reason:"输入已中断，请重新测环境");inputStatus=unavailable;calibrationRequested=false
+
         audioEngine?.inputNode.removeTap(onBus: 0)
         audioEngine?.stop()
         worker?.stop()

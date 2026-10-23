@@ -15,9 +15,16 @@ final class ReferenceToneActivity: @unchecked Sendable {
     static let shared = ReferenceToneActivity()
     private let lock = NSLock()
     private var players = Set<ObjectIdentifier>()
+    private var metronomes=[ObjectIdentifier: @Sendable () -> Void]()
+    private var stops=[ObjectIdentifier: @MainActor @Sendable () -> Void]()
+    func register(_ player: AnyObject, stop: @escaping @MainActor @Sendable () -> Void) {lock.lock();stops[ObjectIdentifier(player)]=stop;lock.unlock()}
+    func setMetronome(_ player:AnyObject, active:Bool, stop: @escaping @Sendable () -> Void) {lock.lock();if active {metronomes[ObjectIdentifier(player)]=stop}else{metronomes.removeValue(forKey:ObjectIdentifier(player))};lock.unlock()}
+    var metronomeActive:Bool {lock.lock();defer{lock.unlock()};return !metronomes.isEmpty}
+    @MainActor func stopAll() {lock.lock();let tones=Array(stops.values);let beats=Array(metronomes.values);lock.unlock();tones.forEach{$0()};beats.forEach{$0()}}
+
     func set(_ player: AnyObject, active: Bool) {
         lock.lock(); defer { lock.unlock() }
-        if active { players.insert(ObjectIdentifier(player)) } else { players.remove(ObjectIdentifier(player)) }
+        if active { players.insert(ObjectIdentifier(player)) } else { players.remove(ObjectIdentifier(player));stops.removeValue(forKey:ObjectIdentifier(player)) }
     }
     var isActive: Bool { lock.lock(); defer { lock.unlock() }; return !players.isEmpty }
 }
@@ -32,6 +39,7 @@ private struct PracticeUpdate: Sendable {
     let status: PracticeStatus
     let config: PracticeConfig
     let displayConfig: PracticeConfig
+    let presentation: PracticePresentation
     let point: PracticePoint?
     let trace: [PracticeTracePoint]
     let live: [PracticeTracePoint]
@@ -94,8 +102,9 @@ private final class PracticeWorkspaceWorker: @unchecked Sendable {
             do { comparison = try session.comparison(normalized: normalized, wide: wide) }
             catch { comparisonError = "比较条件不同或没有当前数据，不能叠加" }
         }
+        let presentation=session.presentation()
         let update = PracticeUpdate(status: status, config: session.config(), displayConfig: session.displayConfig(),
-            point: session.displayPoint(), trace: trace, live: session.liveTrace(), reset: reset,
+            presentation:presentation, point: presentation.measurement, trace: trace, live: session.liveTrace(), reset: reset,
             snapshots: full ? session.snapshots() : nil, comparison: comparison,
             comparisonError: comparisonError, targetFrequency: session.targetFrequency(), error: error, summaries: full ? status.selectionStartId.flatMap { start in status.selectionEndId.map { session.summarize(startId: start, endId: $0) } } ?? [] : nil)
         DispatchQueue.main.async { [self] in onUpdate?(update) }
@@ -108,6 +117,7 @@ final class PracticeWorkspaceModel: ObservableObject {
     @Published private(set) var status: PracticeStatus
     @Published private(set) var config: PracticeConfig
     @Published private(set) var displayConfig: PracticeConfig
+    @Published private(set) var presentation: PracticePresentation
     @Published private(set) var point: PracticePoint?
     @Published private(set) var trace: [PracticeTracePoint] = []
     @Published private(set) var liveTrace: [PracticeTracePoint] = []
@@ -131,7 +141,7 @@ final class PracticeWorkspaceModel: ObservableObject {
     init(session: PracticeSession = PracticeSession(), events: AnyPublisher<PracticeCaptureFrame, Never>? = nil,
          player: ReferenceTonePlaying = ReferenceTonePlayer()) {
         status = session.status(); config = session.config(); displayConfig = session.displayConfig()
-        point = session.displayPoint(); targetFrequency = session.targetFrequency()
+        let initialPresentation=session.presentation();presentation=initialPresentation;point = initialPresentation.measurement; targetFrequency = session.targetFrequency()
         self.usesSharedCapture = events == nil
         self.player = player
         worker = PracticeWorkspaceWorker(session: session)
@@ -142,10 +152,15 @@ final class PracticeWorkspaceModel: ObservableObject {
         if events == nil {
             CaptureHub.shared.$running.removeDuplicates().receive(on: DispatchQueue.main)
                 .sink { [weak self] running in
-                    guard let self, !running else { return }
-                    self.stopReference()
-                    self.worker.perform(full: false) { session in if session.status().state == .recording { session.pause() } }
+                    guard let self else {return}
+                    if !running {self.stopReference()}
+                    self.worker.perform(full:false){session in session.setInputAvailable(available:running)}
                 }.store(in: &cancellables)
+        }
+        if events == nil {
+            CaptureHub.shared.calibrationRequests.receive(on:DispatchQueue.main).sink { [weak self] _ in
+                guard let self else{return};self.stopReference();self.worker.perform {session in session.pause()}
+            }.store(in:&cancellables)
         }
         worker.perform { _ in }
     }
@@ -153,7 +168,7 @@ final class PracticeWorkspaceModel: ObservableObject {
     private func apply(_ update: PracticeUpdate) {
         let changed = config.a4Hz != update.config.a4Hz || config.temperament != update.config.temperament
             || config.targetStep != update.config.targetStep || config.targetMidi != update.config.targetMidi || config.targetHz != update.config.targetHz
-        status = update.status; config = update.config; displayConfig = update.displayConfig; point = update.point
+        status = update.status; config = update.config; displayConfig = update.displayConfig; presentation=update.presentation; point = update.point
         if update.reset { trace = update.trace } else { trace.append(contentsOf: update.trace) }
         liveTrace = update.live
         if let snapshots = update.snapshots { self.snapshots = snapshots }

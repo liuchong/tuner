@@ -18,11 +18,30 @@ private func coreWindFingeringChart(
 protocol PitchEngine {
     func feed(pcm: [Float]) -> TunarEvent?
     func analyze(pcm: [Float]) -> AnalysisFrame
+    func analyzeInput(pcm: [Float], context: InputFrameContext) throws -> AnalysisFrame
+    func setInputPolicy(_ policy: InputPolicy) throws
+    func inputStatus() -> InputStatus
+    func presentationFrame() -> AnalysisFrame?
+    func beginNoiseCalibration(outputActive: Bool) throws
+    func confirmNoiseEnvironment() throws
+    func cancelNoiseCalibration()
+    func resetInputContext()
     func listReferenceTones() -> [ReferenceTone]
     func setA4(hz: Double)
     func setSolfege(system: SolfegeSystem, key: KeyMode)
     func setNoiseGate(dbfs: Float)
     func setTemperament(divisions: UInt8)
+}
+
+extension PitchEngine {
+    func analyzeInput(pcm: [Float], context: InputFrameContext) throws -> AnalysisFrame { var frame=analyze(pcm:pcm);frame.samplePosition=context.samplePosition;return frame }
+    func setInputPolicy(_ policy: InputPolicy) throws { }
+    func inputStatus() -> InputStatus { defaultInputStatus() }
+    func presentationFrame() -> AnalysisFrame? { nil }
+    func beginNoiseCalibration(outputActive: Bool) throws { throw InputPolicyError.InvalidFrame }
+    func confirmNoiseEnvironment() throws { throw InputPolicyError.NoCalibration }
+    func cancelNoiseCalibration() { }
+    func resetInputContext() { }
 }
 
 protocol MetronomeEngine {
@@ -52,6 +71,14 @@ final class UniffiPitchEngine: PitchEngine {
     init(config: TunarConfig) { inner = TunarEngine(config: config) }
     func feed(pcm: [Float]) -> TunarEvent? { inner.feed(pcm: pcm) }
     func analyze(pcm: [Float]) -> AnalysisFrame { inner.analyze(pcm: pcm) }
+    func analyzeInput(pcm:[Float],context:InputFrameContext) throws -> AnalysisFrame {try inner.analyzeInput(pcm:pcm,context:context)}
+    func setInputPolicy(_ policy:InputPolicy) throws {try inner.setInputPolicy(policy:policy)}
+    func inputStatus()->InputStatus {inner.inputStatus()}
+    func presentationFrame()->AnalysisFrame? {inner.presentationFrame()}
+    func beginNoiseCalibration(outputActive:Bool) throws {try inner.beginNoiseCalibration(outputActive:outputActive)}
+    func confirmNoiseEnvironment() throws {try inner.confirmNoiseEnvironment()}
+    func cancelNoiseCalibration(){inner.cancelNoiseCalibration()}
+    func resetInputContext(){inner.resetInputContext()}
     func listReferenceTones() -> [ReferenceTone] { inner.listReferenceTones() }
     func setA4(hz: Double) { inner.setA4(hz: hz) }
     func setSolfege(system: SolfegeSystem, key: KeyMode) { inner.setSolfege(system: system, key: key) }

@@ -28,6 +28,8 @@ fn frame(ms: u64, cents: f64) -> AnalysisFrame {
         input_level_dbfs: -24.,
         display_strength: 1.,
         is_held: false,
+        input_diagnostics: None,
+        measured_freq_hz: None,
     }
 }
 fn push(s: &PracticeSession, ms: u64, cents: f64) -> PracticePoint {
@@ -410,6 +412,19 @@ fn measurement_file_restores_selection_and_unrecorded_target() {
     assert_eq!(reopened.status().selection_start_id, Some(points[2].id));
     assert_eq!(reopened.status().selection_end_id, Some(points[15].id));
     assert_eq!(reopened.display_config().target_step, Some(0));
+    reopened.select_point(points.last().unwrap().id).unwrap();
+    assert_eq!(reopened.display_config().target_step, Some(0));
+    reopened.return_to_live();
+    assert!(reopened.presentation().measurement.is_none());
+    assert_eq!(
+        reopened
+            .presentation()
+            .previous_measurement
+            .unwrap()
+            .target_hz,
+        Some(440.)
+    );
+    assert_eq!(reopened.config().target_step, Some(12));
 }
 
 #[test]
@@ -458,4 +473,43 @@ fn reopening_cannot_reset_the_existing_duration_budget() {
     PracticeSession::new()
         .import_json(reopened.export_json().unwrap())
         .unwrap();
+}
+
+#[test]
+fn stopped_note_summary_keeps_bias_and_requires_one_hundred_fifty_ms() {
+    let short = session();
+    for ms in [0, 50, 100] {
+        push(&short, ms, 20.);
+    }
+    let mut quiet = frame(120, 0.);
+    quiet.tuner = None;
+    quiet.signal_state = SignalState::Quiet;
+    short.observe(quiet, 1, 440., 12, false).unwrap();
+    assert!(short.presentation().summary.is_none());
+    let sustained = session();
+    for ms in (0..400).step_by(50) {
+        push(&sustained, ms, 20.);
+    }
+    push(&sustained, 400, 0.);
+    let mut quiet = frame(450, 0.);
+    quiet.tuner = None;
+    quiet.signal_state = SignalState::Quiet;
+    sustained.observe(quiet, 1, 440., 12, false).unwrap();
+    let summary = sustained.presentation().summary.unwrap();
+    assert!((summary.median_cents - 20.).abs() < 1e-6);
+    assert!(summary.valid_seconds >= 0.299);
+}
+
+#[test]
+fn input_recovery_clears_stale_interruption_text_without_resuming() {
+    let s = session();
+    s.set_input_available(false);
+    assert_eq!(s.status().state, PracticeRecordingState::Paused);
+    s.set_input_available(true);
+    assert_eq!(s.status().state, PracticeRecordingState::Paused);
+    assert!(s.status().reason.contains("恢复"));
+    s.set_input_available(false);
+    push(&s, 100, 0.);
+    assert!(s.status().reason.contains("恢复"));
+    assert_eq!(s.status().state, PracticeRecordingState::Paused);
 }

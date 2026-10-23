@@ -15,7 +15,7 @@
 | M10 | Native macOS 14+ app | Five complete sections, shared Rust core, desktop-responsive UI | ✅ Universal Apple Silicon/Intel core, macOS app build, and desktop tests pass |
 | M11 | Locked targets, full-precision cents traces, measurement sessions, and desktop tasks | [Practice workspace](practice-workspace.md) A1–A7, A11–A12 | Implemented; automated/local native checks pass; device/environment gaps in [report](practice-verification.md) |
 | M12 | Named snapshot comparison, selection statistics, local saving and export | [Practice workspace](practice-workspace.md) A5, A7–A10, A12 | Implemented; automated/local native checks pass; device/environment gaps in [report](practice-verification.md) |
-| M13 | Environment gates, separate measurement/display, retained results and diagnostics | [Input behavior](input-behavior.md) A1–A12 | Design proposal; not implemented or tuned |
+| M13 | Environment gates, separate measurement/display, retained results and diagnostics | [Input behavior](input-behavior.md) A1–A12 | Implemented; 374 automated tests and local native checks pass; physical acceptance gaps in the [report](input-verification.md) |
 
 Fingering schools/alternates, reference timbres, and interval-ratio guides remain future candidates;
 see practice workspace §6 and §8. M11/M12 add analysis-measurement saving/review/export without PCM recording or audio playback. No automatic goal is started.

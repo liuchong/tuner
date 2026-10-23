@@ -23,6 +23,7 @@ final class ReferenceTonePlayer: ReferenceTonePlaying {
     }
 
     func play(frequencyHz: Double) {
+        ReferenceToneActivity.shared.register(self) { [weak self] in self?.stop() }
         guard frequencyHz.isFinite, frequencyHz > 0 else { return }
         changeToken += 1
         let token = changeToken

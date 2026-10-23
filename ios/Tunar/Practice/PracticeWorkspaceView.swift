@@ -68,6 +68,14 @@ struct PracticeWorkspaceView: View {
                     }
                     .padding(.bottom, 4)
                 }
+                if model.presentation.source == .held, let summary=model.presentation.summary {
+                    Text("停吹前摘要：中位 \(summary.medianCents,specifier:"%.1f")c · 波动 \(summary.lowCents,specifier:"%.1f")…\(summary.highCents,specifier:"%.1f")c · 有效\(summary.validSeconds,specifier:"%.2f")秒").font(.caption).foregroundStyle(.secondary)
+                }
+                if model.presentation.source == .held && model.presentation.summary == nil {Text("短音，未形成摘要").font(.caption).foregroundStyle(.secondary)}
+                if let previous = model.presentation.previousMeasurement {
+                    Text("前一条件结果 · \(previous.targetName) · \(previous.frame.measuredFreqHz ?? previous.frame.tuner?.freqHz ?? 0,specifier:"%.2f") Hz · \(previous.cents ?? 0,specifier:"%.1f")c").font(.caption).foregroundStyle(.secondary)
+                }
+                LiveInputStatusView(status:hub.inputStatus,compact:true)
                 sessionControls
             }
             .padding(16)
@@ -144,13 +152,13 @@ struct PracticeWorkspaceView: View {
     private func pitchPanel(height: Double) -> some View {
         VStack(spacing: 12) {
             HStack {
-                Text(model.status.reviewId == nil ? "实时" : "回看 \(time(model.point?.timeSeconds ?? 0))")
+                Text(model.presentation.source == .held ? "上次测量 · \(model.presentation.heldAgeSeconds.map{String(format:"%.1f秒前",$0)} ?? "上次输入")" : model.status.reviewId == nil ? "实时" : "回看 \(time(model.point?.timeSeconds ?? 0))")
                 if model.point?.frame.isHeld == true { Text("保持 · 不计持续发声").foregroundStyle(.secondary) }
                 Spacer()
                 Text("A4 \(model.displayConfig.a4Hz, specifier: "%.1f") · \(model.displayConfig.temperament)-TET")
             }.font(.caption)
             if model.task != .analyze {
-                PracticeNeedle(cents: model.point?.cents, range: range, tolerance: model.displayConfig.toleranceCents).frame(height: height < 760 ? 42 : 64)
+                PracticeNeedle(cents: model.presentation.displayCents, range: range, tolerance: model.displayConfig.toleranceCents).frame(height: height < 760 ? 42 : 64)
             }
             HStack(alignment: .firstTextBaseline, spacing: 20) {
                 Text(model.point?.targetName.isEmpty == false ? model.point!.targetName : "—")
@@ -224,6 +232,7 @@ struct PracticeWorkspaceView: View {
 
     private var inspector: some View {
         VStack(alignment: .leading, spacing: 18) {
+            InputControlsView(onCalibrationStart:{model.pause()})
             Text("目标与条件").font(.title2)
             Button("选择参考音目标") { showInspector = false; showTarget = true }
             Button("取消锁定，自动识别") { model.unlock() }

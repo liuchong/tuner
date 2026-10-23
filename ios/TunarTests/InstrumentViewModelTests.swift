@@ -394,7 +394,8 @@ final class InstrumentViewModelTests: XCTestCase {
             signalState: .tracking,
             inputLevelDbfs: -24,
             displayStrength: 1,
-            isHeld: false
+            isHeld: false,
+            inputDiagnostics: nil, measuredFreqHz: nil
         )
     }
 }

@@ -39,7 +39,8 @@ final class TunerViewModelTests: XCTestCase {
             signalState: state ?? (ev == nil ? .quiet : .tracking),
             inputLevelDbfs: ev == nil ? -120 : -24,
             displayStrength: strength ?? (ev == nil ? 0 : 1),
-            isHeld: held
+            isHeld: held,
+            inputDiagnostics: nil, measuredFreqHz: nil
         )
     }
 

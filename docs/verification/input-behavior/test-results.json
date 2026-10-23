@@ -1,0 +1,2350 @@
+{
+  "baseline": "67ecbd6",
+  "source": "final implementation; delivered commit contains this report",
+  "date": "2026-10-23",
+  "timing_note": "Rust exact-case wall time includes process startup; XCTest result-bundle/JUnit durations; build/preparation excluded. Release performance reuses the same test ID and is not counted twice.",
+  "summary": {
+    "unit": {
+      "count": 155,
+      "seconds": 6.1242
+    },
+    "integration": {
+      "count": 23,
+      "seconds": 31.4894
+    },
+    "ios-xctest": {
+      "count": 76,
+      "seconds": 0.7752
+    },
+    "macos-xctest": {
+      "count": 26,
+      "seconds": 0.2499
+    },
+    "android-jvm": {
+      "count": 87,
+      "seconds": 0.341
+    },
+    "android-native": {
+      "count": 7,
+      "seconds": 11.602
+    }
+  },
+  "release_performance": {
+    "window_ms": [
+      1.095833,
+      0.992375,
+      0.9366249999999999,
+      1.036292,
+      1.002917,
+      1.053917,
+      1.038583,
+      1.036916,
+      1.017958,
+      0.9403750000000001,
+      1.01975,
+      1.07625,
+      0.98625,
+      1.012,
+      1.015666,
+      1.005417,
+      0.9710829999999999,
+      0.887625,
+      0.950875,
+      1.010583,
+      1.125708,
+      1.107667,
+      1.010417,
+      0.968417,
+      1.1090419999999999,
+      0.919833,
+      0.95575,
+      0.989792,
+      0.986083,
+      0.9764170000000001,
+      1.024208,
+      1.039833,
+      0.955666,
+      0.937708,
+      0.964792,
+      1.027125,
+      1.032125,
+      1.003583,
+      1.029042,
+      1.048834,
+      0.9405410000000001,
+      0.969917,
+      1.030708,
+      0.99875,
+      1.045708,
+      1.034875,
+      0.908291,
+      0.987,
+      0.948667,
+      0.955958,
+      0.983041,
+      1.009792,
+      0.9987920000000001,
+      0.970959,
+      1.099375,
+      0.94225,
+      0.938083,
+      0.9827919999999999,
+      1.057459,
+      0.9822500000000001,
+      0.983042,
+      1.008125,
+      0.9235,
+      0.95525
+    ],
+    "p50_ms": 0.9987920000000001,
+    "p95_ms": 1.099375,
+    "max_ms": 1.125708,
+    "hop_ms": 23.219954648526077
+  },
+  "tests": [
+    {
+      "layer": "unit",
+      "name": "api::tests::analyze_chord_c_major_and_single_tone",
+      "seconds": 0.1635538750000003,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::analyze_clamps_wide_spectrum_to_nyquist_and_sanitizes_waveform",
+      "seconds": 0.01088133400000002,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::analyze_partials_harmonics",
+      "seconds": 0.06608112500000018,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::analyze_performance_under_3x_feed",
+      "seconds": 0.9152669169999998,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::analyze_returns_wide_spectrum_waveform_and_monotonic_position",
+      "seconds": 0.04377504200000004,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::cents_between_basics",
+      "seconds": 0.007210374999999658,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::engine_set_temperament",
+      "seconds": 0.1265831249999998,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::list_all_instruments",
+      "seconds": 0.010489291999999928,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::list_tunings_guitar",
+      "seconds": 0.004442333000000076,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::list_tunings_guitar_solfege_habit_key",
+      "seconds": 0.0038062090000003934,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::list_tunings_guqin_solfege",
+      "seconds": 0.003541125000000811,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::list_wind_variants_dongxiao",
+      "seconds": 0.0032557500000001127,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::metronome_api_roundtrip",
+      "seconds": 0.0038251660000003795,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::midi_fields_consistent_with_freq_and_name",
+      "seconds": 0.0033773749999994607,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::solfege_for_midi_basics",
+      "seconds": 0.003364707999999439,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::tuner_engine_feed_synth",
+      "seconds": 0.11035191599999994,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::tuner_engine_setters",
+      "seconds": 0.10573554200000057,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::wind_fingering_chart_keeps_chromatic_stable_and_refilters_scale_by_tongyin",
+      "seconds": 0.004848916999999453,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::wind_fingering_chart_shakuhachi_ignores_tongyin_and_splits_octaves",
+      "seconds": 0.004159624999999778,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::wind_fingering_chart_uses_measured_patterns_for_each_register",
+      "seconds": 0.0035685839999999303,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "api::tests::zhudi_chart_expands_three_registers_with_dizi_fingerings",
+      "seconds": 0.004606625000000086,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "fingering::tests::dizi_uses_its_own_fork_and_overblow_patterns",
+      "seconds": 0.0051960000000006445,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "fingering::tests::dongxiao_defaults_to_eight_holes",
+      "seconds": 0.005311082999999606,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "fingering::tests::dongxiao_scale_offsets_follow_tongyin_and_cover_numbered_scale",
+      "seconds": 0.0061115000000002695,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "fingering::tests::eight_hole_labels",
+      "seconds": 0.010152209000000134,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "fingering::tests::eight_hole_scale_needs_no_half_hole",
+      "seconds": 0.005108875000000346,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "fingering::tests::fingering_lane_and_anchor_follow_hole_geometry",
+      "seconds": 0.004597917000000784,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "fingering::tests::gong_scale_membership",
+      "seconds": 0.004755083000000049,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "fingering::tests::hole_patterns_wellformed",
+      "seconds": 0.005050333999999879,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "fingering::tests::scale_offsets_ascending",
+      "seconds": 0.0037693750000000747,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "fingering::tests::shakuhachi_1_8_scale",
+      "seconds": 0.0056477500000005065,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "fingering::tests::shakuhachi_patterns_cover_every_scale_note",
+      "seconds": 0.004971124999999965,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "fingering::tests::six_hole_labels_match_legacy_names",
+      "seconds": 0.0051920829999998475,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "fingering::tests::tonic_pc_mapping",
+      "seconds": 0.004615582999999646,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "fingering::tests::unknown_wind_none",
+      "seconds": 0.00462045800000066,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "fingering::tests::upper_register_patterns_come_from_charts_and_leave_gaps_absent",
+      "seconds": 0.004826624999999751,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "fingering::tests::variant_counts_and_unique_ids",
+      "seconds": 0.007543000000000077,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "fingering::tests::variant_offsets_by_scope",
+      "seconds": 0.004528875000000099,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "fingering::tests::zhudi_fundamentals_sit_an_octave_above_same_key_xiao",
+      "seconds": 0.004552750000000216,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "input_policy::tests::calibration_rejects_an_environment_that_would_require_unsafe_high_gate",
+      "seconds": 0.005024209000000113,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "input_policy::tests::calibration_sampling_keeps_twenty_hz_with_non_divisible_hops",
+      "seconds": 0.004894334000000278,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "input_policy::tests::cancelled_and_output_blocked_calibration_preserve_context",
+      "seconds": 0.005067666999999609,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "input_policy::tests::clipping_and_discontinuous_calibration_preserve_previous_floor",
+      "seconds": 0.004545625000000442,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "input_policy::tests::clipping_is_not_accepted_and_metronome_is_not_blanket_rejected",
+      "seconds": 0.005652875000000002,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "input_policy::tests::confirmation_is_audio_time_and_dropouts_never_measure",
+      "seconds": 0.00475808299999958,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "input_policy::tests::duplicate_and_backward_contexts_do_not_mutate_state",
+      "seconds": 0.004858416000000254,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "input_policy::tests::generation_change_invalidates_noise_estimate",
+      "seconds": 0.004309582999999506,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "input_policy::tests::hold_visibility_is_independent_from_valid_time",
+      "seconds": 0.0037964159999992475,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "input_policy::tests::invalid_policy_is_atomic",
+      "seconds": 0.003666582999999335,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "input_policy::tests::manual_gate_continues_below_open_then_releases_below_close",
+      "seconds": 0.004563124999999779,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "input_policy::tests::octave_outlier_is_invalid_but_sustained_octave_is_accepted",
+      "seconds": 0.004209166999999958,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "input_policy::tests::persistent_tone_requires_explicit_environment_confirmation",
+      "seconds": 0.003968666999999648,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "input_policy::tests::production_time_contract_is_sample_rate_independent",
+      "seconds": 0.00427374999999941,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "input_policy::tests::profiles_resolve_separate_open_and_close_thresholds",
+      "seconds": 0.004047250000000169,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "input_policy::tests::quiet_calibration_uses_percentile_and_keeps_hysteresis",
+      "seconds": 0.005205874999999693,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "input_policy::tests::response_changes_do_not_change_decision_revision",
+      "seconds": 0.003824625000000026,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "input_policy::tests::silence_cannot_train_thresholds_during_ordinary_playing",
+      "seconds": 0.005626791000000075,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "metronome::tests::accent_pattern",
+      "seconds": 0.005085667000000349,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "metronome::tests::click_mixed_sample_accurately",
+      "seconds": 0.004510209000000209,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "metronome::tests::default_click_used_when_not_injected",
+      "seconds": 0.005856458000000231,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "metronome::tests::long_click_survives_small_render_chunks",
+      "seconds": 0.0058389170000001656,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "metronome::tests::long_click_tail_overlaps_next_tick",
+      "seconds": 0.005606667000000343,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "metronome::tests::set_bpm_immediate",
+      "seconds": 0.004061000000000092,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "metronome::tests::set_time_signature_immediate",
+      "seconds": 0.0033307919999998603,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "metronome::tests::stop_and_restart",
+      "seconds": 0.004366583000000368,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "metronome::tests::stop_clears_ringing_tail",
+      "seconds": 0.0036736250000002357,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "metronome::tests::tap_tempo_median",
+      "seconds": 0.003539167000000454,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "metronome::tests::tick_positions_sample_accurate_over_1000_ticks",
+      "seconds": 0.021324916000000194,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "metronome::tests::voice_pool_never_overflows",
+      "seconds": 0.01664274999999993,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "note::tests::a4_440_is_midi_69",
+      "seconds": 0.004110625000000034,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "note::tests::a4_442_calibration",
+      "seconds": 0.0073073329999999714,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "note::tests::analyze_roundtrip",
+      "seconds": 0.003490666000000253,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "note::tests::c4_middle_c",
+      "seconds": 0.0036520830000004167,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "note::tests::cents_boundary",
+      "seconds": 0.0036650830000004575,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "note::tests::enharmonic_names",
+      "seconds": 0.0037720840000003975,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "note::tests::invalid_freq",
+      "seconds": 0.004493584000000439,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "note::tests::temperament_19tet_step7",
+      "seconds": 0.0050149169999995635,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "note::tests::temperament_cents_range",
+      "seconds": 0.003542583000000654,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "note::tests::temperament_invalid_division",
+      "seconds": 0.0038583750000000805,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "pitch::tests::chirp_no_octave_jump",
+      "seconds": 0.6072590419999999,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "pitch::tests::clipped_signal_accurate",
+      "seconds": 0.04651583300000084,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "pitch::tests::detects_pure_frequencies",
+      "seconds": 0.1270349160000004,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "pitch::tests::noise_returns_none",
+      "seconds": 0.01005637500000045,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "pitch::tests::quiet_signal_gated",
+      "seconds": 0.0042125830000001585,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "pitch::tests::short_input_returns_none",
+      "seconds": 0.0035320829999996306,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "pitch::tests::silence_returns_none",
+      "seconds": 0.0035658750000004957,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "pitch::tests::strong_harmonics_no_subharmonic",
+      "seconds": 0.052619166000000384,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "pitch::tests::works_at_48k",
+      "seconds": 0.018802250000000242,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::auto_target_follows_selected_equal_temperament",
+      "seconds": 0.003630041000000084,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::bounded_storage_stops_without_overwriting",
+      "seconds": 0.0038039169999999345,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::capture_restart_pauses_and_does_not_join_time_axes",
+      "seconds": 0.0036345839999993856,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::cents_trace_retains_sub_semitone_precision",
+      "seconds": 0.0037195840000006086,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::constant_tone_statistics_use_valid_audio_time",
+      "seconds": 0.00511000000000017,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::csv_nulls_are_empty_and_free_text_is_formula_safe",
+      "seconds": 0.0033170000000000144,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::decimation_uses_audio_buckets_and_preserves_real_positions",
+      "seconds": 0.004227750000000086,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::duration_limit_preserves_the_completed_measurement",
+      "seconds": 0.0036741249999998615,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::failed_import_preserves_current_session",
+      "seconds": 0.0038397909999998703,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::forged_references_and_pitch_values_are_rejected",
+      "seconds": 0.004508707999999473,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::frame_validation_rejects_nan_and_wrong_lengths",
+      "seconds": 0.0038027910000000276,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::gaps_reduce_coverage_without_hiding_missing_measurements",
+      "seconds": 0.0057314160000006,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::historical_configuration_survives_current_settings",
+      "seconds": 0.003975792000000311,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::incompatible_spectrum_grids_are_rejected",
+      "seconds": 0.00425816700000059,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::incompatible_target_choices_are_rejected",
+      "seconds": 0.004083333000000522,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::input_recovery_clears_stale_interruption_text_without_resuming",
+      "seconds": 0.004317917000000726,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::instrument_target_uses_current_a4",
+      "seconds": 0.004893874999999603,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::invalid_configuration_is_atomic",
+      "seconds": 0.005352875000000701,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::json_round_trip_reopens_complete_historical_frames",
+      "seconds": 0.0064336250000005535,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::linear_tolerance_crossing_is_time_weighted",
+      "seconds": 0.00601933400000032,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::locked_target_does_not_fold_semitones_or_octaves",
+      "seconds": 0.005063209000000235,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::malformed_file_selection_is_rejected_atomically",
+      "seconds": 0.004908291999999648,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::measurement_file_restores_selection_and_unrecorded_target",
+      "seconds": 0.014912374999999756,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::normalized_comparison_removes_peak_level_explicitly",
+      "seconds": 0.00476604199999997,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::payload_budget_includes_file_metadata_and_array_separators",
+      "seconds": 0.005500249999999873,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::payload_limit_is_enforced_before_append",
+      "seconds": 0.0058515830000001046,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::production_capacity_remains_exportable_without_overwrite",
+      "seconds": 3.0569402089999995,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::quiet_and_held_frames_are_not_valid_trace_points",
+      "seconds": 0.004084208000000089,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::reference_tones_are_excluded_from_statistics",
+      "seconds": 0.005871041999998994,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::reopening_cannot_reset_the_existing_duration_budget",
+      "seconds": 0.006002207999999953,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::resume_inserts_segment_boundary",
+      "seconds": 0.004008000000000678,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::review_selects_one_complete_frame_and_pauses_recording",
+      "seconds": 0.004037166999999897,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::sampling_rate_change_ends_segment",
+      "seconds": 0.003587207999999009,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::short_selection_has_no_misleading_score",
+      "seconds": 0.003791250000000801,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::snapshot_count_and_name_are_bounded",
+      "seconds": 0.01016041699999981,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::snapshots_are_independent_of_session_clearing",
+      "seconds": 0.004076832999999169,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::stale_capture_cannot_mutate_configuration_or_history",
+      "seconds": 0.004637582999999168,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::stopped_note_summary_keeps_bias_and_requires_one_hundred_fifty_ms",
+      "seconds": 0.005558167000000225,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "practice::tests::unrecorded_display_and_snapshot_keep_their_original_configuration",
+      "seconds": 0.004386374999999276,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "reference::tests::every_supported_temperament_is_sorted_and_bounded",
+      "seconds": 0.0034862090000000734,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "signal::tests::holding_recovery_requires_two_frames_and_keeps_old_pitch_between_them",
+      "seconds": 0.0032614589999990784,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "signal::tests::loud_invalid_signal_never_creates_a_reading",
+      "seconds": 0.0032597910000013997,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "smooth::tests::ema_converges",
+      "seconds": 0.003628749999998959,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "smooth::tests::hysteresis_requires_two_frames",
+      "seconds": 0.003457582999999431,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "smooth::tests::impulse_rejected_by_median",
+      "seconds": 0.0031709580000001125,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "smooth::tests::none_passthrough",
+      "seconds": 0.0035228749999998143,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "smooth::tests::single_frame_blip_does_not_switch",
+      "seconds": 0.003285667000000103,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "solfege::tests::a_minor_la_based",
+      "seconds": 0.00310362499999961,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "solfege::tests::a_yu_pentatonic",
+      "seconds": 0.0031568340000003303,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "solfege::tests::c_gong_pentatonic",
+      "seconds": 0.0031589590000002943,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "solfege::tests::c_major",
+      "seconds": 0.003577915999999348,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "solfege::tests::enharmonic_equivalence",
+      "seconds": 0.0031983750000001976,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "solfege::tests::fixed_do_independent_of_key",
+      "seconds": 0.0034272080000015137,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "solfege::tests::pianyin_c_gong",
+      "seconds": 0.0028308749999990113,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "solfege::tests::shang_jue_zhi_modes",
+      "seconds": 0.0033752920000011954,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "spectrum::tests::chord_c_major",
+      "seconds": 0.004506707999999193,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "spectrum::tests::chord_single_tone_none",
+      "seconds": 0.0032122500000006937,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "spectrum::tests::chord_templates_exact_and_subset",
+      "seconds": 0.0035153339999993705,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "spectrum::tests::duplicate_partial_frequency_keeps_only_the_stronger_peak",
+      "seconds": 0.0033404160000003458,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "spectrum::tests::partials_harmonics_labeled",
+      "seconds": 0.004334499999998798,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "spectrum::tests::spectrum_peak_bin_at_440",
+      "seconds": 0.003911792000000247,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "tools::tests::anti_motion_sickness_is_a_100hz_sine",
+      "seconds": 0.0036618750000005917,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "tools::tests::ids_are_unique_and_frequencies_audible",
+      "seconds": 0.00311587499999888,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "tuning::tests::guitar_string_count_and_freqs",
+      "seconds": 0.003370958999999729,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "tuning::tests::guqin_freqs_and_a4_scaling",
+      "seconds": 0.00346358300000027,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "tuning::tests::ukulele_freqs",
+      "seconds": 0.0029452919999997107,
+      "status": "passed"
+    },
+    {
+      "layer": "unit",
+      "name": "tuning::tests::unknown_instrument_none",
+      "seconds": 0.0035623750000013388,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "locked_target_tracks_real_dsp_across_semitone_octave_and_a4_change",
+      "seconds": 6.373819791000001,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "real_dsp_measurement_review_and_file_round_trip",
+      "seconds": 1.3042816670000006,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "two_sessions_do_not_share_targets_or_history",
+      "seconds": 0.261998084,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "default_noise_gate_is_minus_45_dbfs",
+      "seconds": 0.0029862079999993796,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "gate_hysteresis_keeps_tracking_until_three_db_below_open_threshold",
+      "seconds": 0.04262533400000024,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "held_pitch_is_replaced_only_after_two_consecutive_valid_frames",
+      "seconds": 0.05809912500000003,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "holds_last_confirmed_pitch_indefinitely_at_full_strength",
+      "seconds": 0.34238637500000024,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "reference_tones_follow_temperament_calibration_and_range",
+      "seconds": 0.004375540999999927,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "requires_two_consecutive_valid_frames_before_showing_pitch",
+      "seconds": 0.03223833399999876,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "calibrated_fifty_and_sixty_hz_hum_stays_below_the_environment_gate",
+      "seconds": 2.1609032920000004,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "genuine_octave_change_is_not_pulled_back_to_the_target",
+      "seconds": 2.115325125,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "held_spectrum_and_pitch_share_the_original_measurement",
+      "seconds": 1.1629992080000005,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "input_loss_and_condition_changes_show_only_labelled_old_results",
+      "seconds": 1.1769690410000013,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "legacy_schema_one_is_labelled_without_recalculating",
+      "seconds": 0.40247958300000164,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "missing_fundamental_and_above_gate_random_noise_are_distinguished",
+      "seconds": 0.6193917500000019,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "name_hysteresis_keeps_cents_relative_to_the_visible_note",
+      "seconds": 1.7765103750000009,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "production_analysis_reports_per_window_cost",
+      "seconds": 1.1831648750000028,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "production_raw_measurement_is_independent_of_display_response",
+      "seconds": 8.21257675,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "real_harmonics_do_not_replace_the_fundamental",
+      "seconds": 1.2206391249999982,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "reference_output_and_calibration_never_add_valid_measurements",
+      "seconds": 0.6231634170000007,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "reopening_input_loss_and_expired_hold_do_not_fake_live",
+      "seconds": 0.6183052909999986,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "schema_rejects_incoherent_quality_and_resolved_thresholds",
+      "seconds": 0.7943111250000037,
+      "status": "passed"
+    },
+    {
+      "layer": "integration",
+      "name": "schema_two_restores_policy_basis_and_rejects_tampering",
+      "seconds": 0.999882250000006,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "AudioFrameRingTests/testDroppedWindowsDoNotCompressCaptureTime()",
+      "seconds": 0.0009660720825195312,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "AudioFrameRingTests/testDropsNewWindowInsteadOfBlockingWhenFull()",
+      "seconds": 0.0004780292510986328,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "AudioFrameRingTests/testLargeHardwareBatchPreservesEveryHop()",
+      "seconds": 0.0020869970321655273,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "AudioFrameRingTests/testProducesOverlappingPreallocatedWindows()",
+      "seconds": 0.0011240243911743164,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "CaptureFormatTests/testRejectsMissingHardwareInputFormatBeforeInstallingTap()",
+      "seconds": 0.00038301944732666016,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "CaptureLifecycleGateTests/testBackgroundInvalidatesHardwareButRetainsSubscriptions()",
+      "seconds": 0.00041794776916503906,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "CaptureLifecycleGateTests/testExpiredStartCannotCommitAfterFinalRelease()",
+      "seconds": 0.0007039308547973633,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "CaptureLifecycleGateTests/testSharedSubscribersOnlyStopAfterFinalRelease()",
+      "seconds": 0.0003420114517211914,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InputPolicySettingsTests/testFreshPreferencesUseAutomaticGeneralAndRetainUntilNext()",
+      "seconds": 0.0012810230255126953,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InputPolicySettingsTests/testLegacyGateMigratesToManualWithoutChangingValue()",
+      "seconds": 0.005375981330871582,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InstrumentViewModelTests/testDongxiaoDefaultsToEightHoleGKeyAndSol5()",
+      "seconds": 0.0015789270401000977,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InstrumentViewModelTests/testFingeringLayoutGroupsThreeRegistersAtEachCoreAnchor()",
+      "seconds": 0.0018290281295776367,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InstrumentViewModelTests/testGuitarHeadstockStyleDefaultsToInlineAndPersists()",
+      "seconds": 0.002631068229675293,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InstrumentViewModelTests/testHeadstockLayoutsMapEveryStringToOnePeg()",
+      "seconds": 0.0004678964614868164,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InstrumentViewModelTests/testHoleSystemSwitchKeepsKeyAndTongyinButChangesFingering()",
+      "seconds": 0.0014380216598510742,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InstrumentViewModelTests/testKeyAndHoleChangesRefreshBothListsWithoutDroppingReading()",
+      "seconds": 0.05340707302093506,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InstrumentViewModelTests/testKeySwitchKeepsHoleSystemAndTongyin()",
+      "seconds": 0.0016750097274780273,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InstrumentViewModelTests/testLargeDiagramDefaultsToFundamentalAndKeepsSeparatePreviews()",
+      "seconds": 0.001168966293334961,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InstrumentViewModelTests/testMainPageTunesScaleAndDetailTunesChromaticNotes()",
+      "seconds": 0.05118298530578613,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InstrumentViewModelTests/testScaleAndChromaticListsAlwaysCoexist()",
+      "seconds": 0.0009750127792358398,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InstrumentViewModelTests/testScaleUsesMeasuredPatternForEachRegister()",
+      "seconds": 0.0014410018920898438,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InstrumentViewModelTests/testShakuhachiUsesAnchoredChartSplitByOctaveWithoutTongyin()",
+      "seconds": 0.0005298852920532227,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InstrumentViewModelTests/testSolfegeColumnRefiltersScaleToCompleteOneThroughSevenAndKeepsChromaticStable()",
+      "seconds": 0.001526951789855957,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InstrumentViewModelTests/testSolfegeTransposeDoesNotMoveFingeringAnchors()",
+      "seconds": 0.0012049674987792969,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InstrumentViewModelTests/testTappingStringLocksManualAndInstrumentSwitchReturnsToAuto()",
+      "seconds": 0.0005990266799926758,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InstrumentViewModelTests/testTapWinsOverLiveDetectionAndSecondTapReturnsToIt()",
+      "seconds": 0.10417795181274414,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InstrumentViewModelTests/testTongyinChangeKeepsActiveHighlight()",
+      "seconds": 0.05184495449066162,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "InstrumentViewModelTests/testZhudiUsesThreeRegisterChartWithTongyin()",
+      "seconds": 0.0010480880737304688,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "MetronomeViewModelTests/testAccentCycle()",
+      "seconds": 0.003437042236328125,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "MetronomeViewModelTests/testBpmClampedAndForwarded()",
+      "seconds": 0.00235903263092041,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "MetronomeViewModelTests/testExistingPersistedSoundIdentifiersRemainCompatible()",
+      "seconds": 0.0012750625610351562,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "MetronomeViewModelTests/testSoundInjection()",
+      "seconds": 0.002501964569091797,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "MetronomeViewModelTests/testTapForwarding()",
+      "seconds": 0.0018590688705444336,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "MetronomeViewModelTests/testTimeSignatureResetsAccents()",
+      "seconds": 0.013164997100830078,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "MetronomeViewModelTests/testUnknownPersistedSoundsFallBackToDefaults()",
+      "seconds": 0.001399993896484375,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "PracticeWorkspaceTests/testBackgroundAnalysisPacketPublishesOnMainActor()",
+      "seconds": 0.008038043975830078,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "PracticeWorkspaceTests/testBackgroundRetainsHistoryWhileCaptureGenerationExpires()",
+      "seconds": 0.00041997432708740234,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "PracticeWorkspaceTests/testImportErrorPreservesMeasurementAndPublishesError()",
+      "seconds": 0.006258964538574219,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "PracticeWorkspaceTests/testImportRestoresSelectionStatisticsAndCurrentTarget()",
+      "seconds": 0.010374069213867188,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "PracticeWorkspaceTests/testNavigationSuspendsRecordingWithoutClearingHistory()",
+      "seconds": 0.0043070316314697266,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "PracticeWorkspaceTests/testProductionBridgeSeparatesRetainedFrameFromLiveInput()",
+      "seconds": 0.10595691204071045,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "PracticeWorkspaceTests/testRapidReviewCommandsUseSerializedCursor()",
+      "seconds": 0.016798019409179688,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "PracticeWorkspaceTests/testSharedSessionReviewDoesNotResumeRecording()",
+      "seconds": 0.005357980728149414,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "PracticeWorkspaceTests/testTargetLockUsesCoreAndKeepsPreviewIdentity()",
+      "seconds": 0.0030820369720458984,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "PracticeWorkspaceTests/testWorkspaceLayoutUsesContentWidth()",
+      "seconds": 0.0004780292510986328,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "SpectrumHistoryTests/testDefaultAddsNewestRowEverySecondFrameAndKeeps256Rows()",
+      "seconds": 0.00701904296875,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "SpectrumHistoryTests/testHoldingAndQuietCreatePitchTraceGapWithoutFakePoints()",
+      "seconds": 0.00044405460357666016,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "SpectrumHistoryTests/testPauseFreezesLivePeakAndWaterfallState()",
+      "seconds": 0.0004279613494873047,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "SpectrumHistoryTests/testPeakHoldOnlyMovesForStrongerSignalAndNeverDriftsDown()",
+      "seconds": 0.0006030797958374023,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "SpectrumHistoryTests/testProfessionalAnalysisFreezesWideWaveformAndTraceThenResumesNewSegment()",
+      "seconds": 0.00045692920684814453,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "SpectrumHistoryTests/testResetClearsOnlyPeakHoldAndPreservesLiveWaterfallAndPause()",
+      "seconds": 0.0003349781036376953,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "SpectrumHistoryTests/testWaterfallLinearlyInterpolatesMeasuredBinsIntoFinerDisplayColumns()",
+      "seconds": 0.0003260374069213867,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "SpectrumPresentationTests/testFrequencyDbAndTimeTicksCoverTheWholeScale()",
+      "seconds": 0.00046503543853759766,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "SpectrumPresentationTests/testHeatBandsCoverBackgroundThroughRedStrongSignal()",
+      "seconds": 0.0004850625991821289,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "SpectrumPresentationTests/testPitchDisplayBoundsCoverHistoryAndKeepAtLeastOneOctave()",
+      "seconds": 0.00032591819763183594,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "SpectrumPresentationTests/testSummaryKeepsSixMetricsAndUsesStrongestActualPeak()",
+      "seconds": 0.0003370046615600586,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "SpectrumPresentationTests/testSummaryUsesPlaceholdersWithoutTrustedPitchOrPeaks()",
+      "seconds": 0.0003980398178100586,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "SpectrumPresentationTests/testWideFrequencyTicksUseActualNyquistLimitAndLogSpacing()",
+      "seconds": 0.00036704540252685547,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "SpreadCentersTests/testCollidingButtonsCenterOnIdealMean()",
+      "seconds": 0.0004069805145263672,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "SpreadCentersTests/testCompressesEvenlyWhenShortOfSpace()",
+      "seconds": 0.0003279447555541992,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "SpreadCentersTests/testKeepsPegHeightsWhenRoomy()",
+      "seconds": 0.00039696693420410156,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "SpreadCentersTests/testPreservesInputOrderAndClampsToEdge()",
+      "seconds": 0.00040400028228759766,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "SpreadCentersTests/testSelectedButtonIsTopmost()",
+      "seconds": 0.00036907196044921875,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "TickSoundsTests/testAllWaveformsAreNonEmptyFiniteSafeAndDistinct()",
+      "seconds": 0.01526498794555664,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "TickSoundsTests/testDurationsMatchTheCrossPlatformParameterTable()",
+      "seconds": 0.007447957992553711,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "TickSoundsTests/testTwelveSoundsUseTheConfirmedCommonOrderAndLabels()",
+      "seconds": 0.0004858970642089844,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "ToolsViewModelTests/testCoreProvidesAntiMotionSicknessAt100Hz()",
+      "seconds": 0.0003679990768432617,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "ToolsViewModelTests/testStopIsIdempotentWhenIdle()",
+      "seconds": 0.0007699728012084961,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "ToolsViewModelTests/testToggleStartsAndStopsTone()",
+      "seconds": 0.00037097930908203125,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "TunerViewModelTests/testEventMapsToActive()",
+      "seconds": 0.05060899257659912,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "TunerViewModelTests/testHoldingAndQuietFollowCoreStateWithoutLocalTimeout()",
+      "seconds": 0.15269601345062256,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "TunerViewModelTests/testNeedlePresentationAlwaysUsesOnlyCurrentTarget()",
+      "seconds": 0.0005919933319091797,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "TunerViewModelTests/testNeedlePresentationClampsRangeAndUsesFastNonSpringDuration()",
+      "seconds": 0.00037992000579833984,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "TunerViewModelTests/testNullEventDoesNotChange()",
+      "seconds": 0.05244100093841553,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "TuningForkViewModelTests/testBackgroundStopsButKeepsSelectionForResume()",
+      "seconds": 0.0004680156707763672,
+      "status": "passed"
+    },
+    {
+      "layer": "ios-xctest",
+      "name": "TuningForkViewModelTests/testOpenToggleCloseAndRefresh()",
+      "seconds": 0.0004540681838989258,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "DesktopContractTests/testCaptureRunsOnlyWhileWindowIsActive()",
+      "seconds": 0.0006809234619140625,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "DesktopContractTests/testDesktopLayoutUsesDocumentedBreakpoint()",
+      "seconds": 0.00028002262115478516,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "DesktopContractTests/testSixDestinationsUseTunerAsDefault()",
+      "seconds": 0.0005499124526977539,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "DesktopContractTests/testSpectrumPreviewRoutesToSharedAnalysisDestination()",
+      "seconds": 0.00036597251892089844,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "InputPolicySettingsTests/testFreshPreferencesUseAutomaticGeneralAndRetainUntilNext()",
+      "seconds": 0.0014729499816894531,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "InputPolicySettingsTests/testLegacyGateMigratesToManualWithoutChangingValue()",
+      "seconds": 0.0021479129791259766,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "MacAudioAndAnalysisTests/testCaptureFailureOffersRetryOnlyAfterPermissionIsGranted()",
+      "seconds": 0.0004439353942871094,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "MacAudioAndAnalysisTests/testDesktopAnalysisPauseAndResetKeepTheirDocumentedBoundaries()",
+      "seconds": 0.0005539655685424805,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "MacAudioAndAnalysisTests/testLargeHardwareBatchPreservesEveryHop()",
+      "seconds": 0.0023690462112426758,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "MacAudioAndAnalysisTests/testMacCaptureAcceptsOnlyUsableInputFormats()",
+      "seconds": 0.0003050565719604492,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "MacAudioAndAnalysisTests/testMacCaptureRejectsExpiredAsynchronousStart()",
+      "seconds": 0.0003930330276489258,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "MacInstrumentViewModelTests/testDongxiaoOwnsFixedScaleAndChromaticLists()",
+      "seconds": 0.0023500919342041016,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "MacInstrumentViewModelTests/testHeadstockStyleSwitchesGuitarFigure()",
+      "seconds": 0.0017349720001220703,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "MacInstrumentViewModelTests/testMainAndDetailKeepIndependentDiagramPreviews()",
+      "seconds": 0.001392960548400879,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "MacInstrumentViewModelTests/testRowsGroupThreeRegistersAtCoreAnchors()",
+      "seconds": 0.0009618997573852539,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "MacInstrumentViewModelTests/testZhudiAndShakuhachiShareTheAnchoredChart()",
+      "seconds": 0.0009419918060302734,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "PracticeWorkspaceTests/testBackgroundAnalysisPacketPublishesOnMainActor()",
+      "seconds": 0.03396594524383545,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "PracticeWorkspaceTests/testBackgroundRetainsHistoryWhileCaptureGenerationExpires()",
+      "seconds": 0.0004329681396484375,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "PracticeWorkspaceTests/testImportErrorPreservesMeasurementAndPublishesError()",
+      "seconds": 0.007280945777893066,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "PracticeWorkspaceTests/testImportRestoresSelectionStatisticsAndCurrentTarget()",
+      "seconds": 0.010421991348266602,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "PracticeWorkspaceTests/testNavigationSuspendsRecordingWithoutClearingHistory()",
+      "seconds": 0.0047419071197509766,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "PracticeWorkspaceTests/testProductionBridgeSeparatesRetainedFrameFromLiveInput()",
+      "seconds": 0.11080396175384521,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "PracticeWorkspaceTests/testRapidReviewCommandsUseSerializedCursor()",
+      "seconds": 0.053257107734680176,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "PracticeWorkspaceTests/testSharedSessionReviewDoesNotResumeRecording()",
+      "seconds": 0.00792694091796875,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "PracticeWorkspaceTests/testTargetLockUsesCoreAndKeepsPreviewIdentity()",
+      "seconds": 0.0037900209426879883,
+      "status": "passed"
+    },
+    {
+      "layer": "macos-xctest",
+      "name": "PracticeWorkspaceTests/testWorkspaceLayoutUsesContentWidth()",
+      "seconds": 0.00036203861236572266,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.tuner.TunerViewModelTest.分析帧映射频谱泛音和弦状态",
+      "seconds": 0.003,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.tuner.TunerViewModelTest.onCleared 释放采集",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.tuner.TunerViewModelTest.无效帧（null 事件）不改变状态",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.tuner.TunerViewModelTest.授权后接入采集，事件映射为 Active 状态",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.tuner.TunerViewModelTest.保持与清空完全服从 core 状态，不使用本地超时",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.practice.PracticePresentationTest.measurementTimeDisplaysTenthsWithoutWrappingMinutes",
+      "seconds": 0.002,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.practice.PracticePresentationTest.onlyCaptureDestinationsKeepPracticeActive",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.tools.ToolsViewModelTest.切换工具直接换频率，不先停止",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.tools.ToolsViewModelTest.离开页面停止播放，未播放时不重复停止",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.tools.ToolsViewModelTest.点击防晕车播放 100Hz，再次点击停止",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.audio.ReferenceTonePlayerTest.音频焦点丢失后淡出并释放播放资源",
+      "seconds": 0.004,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.audio.ReferenceTonePlayerTest.构造和停止静置播放器不会创建音轨或写静音",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.audio.ReferenceTonePlayerTest.第一次播放才创建音轨且关闭后释放",
+      "seconds": 0.003,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.audio.ReferenceTonePlayerTest.播放淡入后峰值接近零点六五且不削波",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.data.InputPreferencesTest.newInstallHasAutomaticGeneralPreferences",
+      "seconds": 0.116,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.data.InputPreferencesTest.legacyGateMigratesAndPresentationChoicesRoundTrip",
+      "seconds": 0.047,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.tuner.TuningForkViewModelTest.关闭浮窗继续播放且快捷按钮可停止和恢复上次音高",
+      "seconds": 0.002,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.tuner.TuningForkViewModelTest.打开浮窗使用当前 core 配置的固定音高表且不接管采集",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.tuner.TuningForkViewModelTest.同一音再次点击停止，切换音高调用平滑播放器",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.tuner.TuningForkViewModelTest.后台停止播放但保留选择，配置变化清除失效选择并刷新列表",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.metronome.MetronomeViewModelTest.重音圆点循环 重拍-普通-静音",
+      "seconds": 0.003,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.metronome.MetronomeViewModelTest.tap tempo 转发采样时间戳并更新 BPM",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.metronome.MetronomeViewModelTest.未知音色保存值安全回退默认值",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.metronome.MetronomeViewModelTest.BPM 钳制在 30-250 并即时下发引擎",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.metronome.MetronomeViewModelTest.状态从 SavedStateHandle 恢复",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.metronome.MetronomeViewModelTest.播放停止驱动引擎与播放器，tick 事件更新闪拍",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.metronome.MetronomeViewModelTest.音色选择注入引擎",
+      "seconds": 0.002,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.metronome.MetronomeViewModelTest.拍号切换重置重音型为默认并下发",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.audio.CaptureHubCoreTest.measurement packet retains actual capture position and configuration",
+      "seconds": 0.024,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.audio.CaptureHubCoreTest.applyConfig 对运行中引擎即时下发",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.audio.CaptureHubCoreTest.background stops hardware while retaining references",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.audio.CaptureHubCoreTest.production context precedes analysis and input policy survives restart",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.audio.CaptureHubCoreTest.a stopped capture cannot publish a frame that was being analyzed",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.audio.CaptureHubCoreTest.source failure cannot be overwritten by startup and retry retains references",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.audio.CaptureHubCoreTest.acquire 启动采集 release 归零停止",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.settings.SettingsViewModelTest.设置变更即时下发引擎",
+      "seconds": 0.003,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.settings.SettingsViewModelTest.PRO 与律制设置下发引擎",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.settings.SettingsViewModelTest.A4 越界钳制后下发",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.settings.SettingsViewModelTest.初始设置即下发引擎配置",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.metronome.TickSoundsTest.音色时长与双端参数表一致",
+      "seconds": 0.009,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.metronome.TickSoundsTest.十二种音色按常用程度排序且标签一致",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.metronome.TickSoundsTest.全部音色波形非空有限不削波且互不相同",
+      "seconds": 0.011,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.InstrumentViewModelTest.洞箫换唱名重筛完整七声且保持十二音详情稳定",
+      "seconds": 0.021,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.InstrumentViewModelTest.G调默认作五可连续滑到筒音作二",
+      "seconds": 0.002,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.InstrumentViewModelTest.洞箫默认八孔并按低中高三音区各自的实测孔位展开",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.InstrumentViewModelTest.手动模式锁定选中弦",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.InstrumentViewModelTest.点弦进入手动锁定，换乐器回到自动",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.InstrumentViewModelTest.音区列名按乐器区分且行锚定到孔心",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.InstrumentViewModelTest.唱名拖动越过整档连续结算且松手吸附最近档",
+      "seconds": 0.003,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.InstrumentViewModelTest.竹笛走型号指法表：三音区、可转调、有十二音详情",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.InstrumentViewModelTest.琴头每根弦恰好对应一个弦轴",
+      "seconds": 0.003,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.InstrumentViewModelTest.预设唱名不随全局配置变化",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.InstrumentViewModelTest.洞箫切换调与孔制刷新两张表并保留调音状态",
+      "seconds": 0.002,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.InstrumentViewModelTest.洞箫点选优先于实时采音且再点一次回到实时",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.InstrumentViewModelTest.尺八按五声分乙甲两音区且不提供转调与十二音",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.InstrumentViewModelTest.音区列自动居中按趋势夹在合法位移内",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.InstrumentViewModelTest.初始化加载乐器列表与默认吉他定弦",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.InstrumentViewModelTest.自动模式识别最接近的弦并高亮，准音打勾",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.InstrumentViewModelTest.吉他琴头默认六联排、切换后持久化，尤克里里固定四弦琴头",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.InstrumentViewModelTest.选择状态写入 SavedStateHandle",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.InstrumentViewModelTest.保持与清空服从 core 的统一信号状态",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.spectrum.SpectrumHistoryTest.重置只清空峰值保持并保留实时瀑布和暂停状态",
+      "seconds": 0.002,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.spectrum.SpectrumHistoryTest.暂停后实时曲线峰值线和瀑布图同时冻结",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.spectrum.SpectrumHistoryTest.保持和静音只切断音高轨迹不伪造新点",
+      "seconds": 0.002,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.spectrum.SpectrumHistoryTest.重复频率仍生成唯一列表行标识",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.spectrum.SpectrumHistoryTest.默认每两帧写入最新一行且最多保留二百五十六行",
+      "seconds": 0.005,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.spectrum.SpectrumHistoryTest.瀑布图把真实频谱桶线性插值为更细显示列",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.spectrum.SpectrumHistoryTest.专业分析同时冻结全频波形与音高轨迹并在恢复后断开连线",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.spectrum.SpectrumHistoryTest.峰值保持只被更强信号刷新不会随时间下沉",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.spectrum.SpectrumPresentationTest.摘要保留六项关键读数并取最强实际峰",
+      "seconds": 0.002,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.spectrum.SpectrumPresentationTest.热力颜色等级从背景连续覆盖到红色强信号",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.spectrum.SpectrumPresentationTest.音高轨迹纵轴覆盖完整历史跨度并至少保留一个八度",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.spectrum.SpectrumPresentationTest.频率分贝和时间刻度覆盖完整量程",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.spectrum.SpectrumPresentationTest.没有可信音高和峰值时摘要不沿用错误值",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.spectrum.SpectrumPresentationTest.实时频谱分贝映射为跨越非零绘图区的可见折线",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.spectrum.SpectrumPresentationTest.全频模式刻度按实际奈奎斯特上限生成且保持对数间距",
+      "seconds": 0.003,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.data.SettingsRepositoryTest.默认值符合 spec",
+      "seconds": 0.006,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.data.SettingsRepositoryTest.范围钳制",
+      "seconds": 0.016,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.data.SettingsRepositoryTest.读写往返",
+      "seconds": 0.007,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.data.SettingsRepositoryTest.调式读写",
+      "seconds": 0.006,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.SpreadCentersTest.间距足够时保持在弦轴高度",
+      "seconds": 0.002,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.SpreadCentersTest.相撞的按钮以理想高度均值为中心排开",
+      "seconds": 0.002,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.SpreadCentersTest.选中按钮层级最高，其次是自动识别的弦",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.SpreadCentersTest.返回顺序与输入一致，贴边时整体推回范围内",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.instrument.SpreadCentersTest.空间不足时均匀压缩且不越界",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.tuner.TunerDialPresentationTest.快速连续更新始终只呈现当前一根指针",
+      "seconds": 0.001,
+      "status": "passed"
+    },
+    {
+      "layer": "android-jvm",
+      "name": "com.liuchong.tunar.ui.tuner.TunerDialPresentationTest.指针目标限制在表盘范围内",
+      "seconds": 0.0,
+      "status": "passed"
+    },
+    {
+      "layer": "android-native",
+      "name": "com.liuchong.tunar.ui.instrument.WindChartSemanticsTest.xiaoChartPreviewsCellsAndTransposesByDragOrAction",
+      "seconds": 2.225,
+      "status": "passed"
+    },
+    {
+      "layer": "android-native",
+      "name": "com.liuchong.tunar.ui.instrument.WindChartSemanticsTest.tubeFigureDescribesFrontBackAndHalfOpenHoles",
+      "seconds": 0.865,
+      "status": "passed"
+    },
+    {
+      "layer": "android-native",
+      "name": "com.liuchong.tunar.ui.instrument.WindChartSemanticsTest.shakuhachiChartUsesItsOwnRegisterNamesAndCannotTranspose",
+      "seconds": 0.754,
+      "status": "passed"
+    },
+    {
+      "layer": "android-native",
+      "name": "com.liuchong.tunar.ui.practice.PracticeNativeIntegrationTest.navigationEntrypointsShareThePracticeWorkspace",
+      "seconds": 3.954,
+      "status": "passed"
+    },
+    {
+      "layer": "android-native",
+      "name": "com.liuchong.tunar.ui.practice.PracticeNativeIntegrationTest.inputPolicyControlsReachRealEngineAndShowCalibrationState",
+      "seconds": 1.564,
+      "status": "passed"
+    },
+    {
+      "layer": "android-native",
+      "name": "com.liuchong.tunar.ui.practice.PracticeNativeIntegrationTest.modelFileReviewAndComposeShareOneCursor",
+      "seconds": 1.436,
+      "status": "passed"
+    },
+    {
+      "layer": "android-native",
+      "name": "com.liuchong.tunar.ui.practice.PracticeNativeIntegrationTest.nativeDspReviewSnapshotAndCodecRoundTrip",
+      "seconds": 0.804,
+      "status": "passed"
+    }
+  ]
+}

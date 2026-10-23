@@ -62,10 +62,10 @@ class SettingsRepositoryTest {
         assertEquals(415.0, repo.settings.first().a4Hz, 1e-9)
         repo.setA4(500.0)
         assertEquals(466.0, repo.settings.first().a4Hz, 1e-9)
-        repo.setNoiseGate(-70f)
-        assertEquals(-60f, repo.settings.first().noiseGateDbfs, 1e-6f)
-        repo.setNoiseGate(-20f)
-        assertEquals(-30f, repo.settings.first().noiseGateDbfs, 1e-6f)
+        repo.setNoiseGate(-100f)
+        assertEquals(-80f, repo.settings.first().noiseGateDbfs, 1e-6f)
+        repo.setNoiseGate(0f)
+        assertEquals(-12f, repo.settings.first().noiseGateDbfs, 1e-6f)
     }
 
     @Test

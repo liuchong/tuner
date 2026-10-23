@@ -30,6 +30,7 @@ class SettingsViewModel(
             repo.settings.collect { s ->
                 _settings.value = s
                 configSink.applyConfig(s.toTunarConfig())
+                configSink.applyInputPolicy(s.inputPolicy)
             }
         }
     }
@@ -42,6 +43,8 @@ class SettingsViewModel(
     fun setKey(key: KeyMode) = viewModelScope.launch { repo.setKey(key) }
 
     fun setNoiseGate(dbfs: Float) = viewModelScope.launch { repo.setNoiseGate(dbfs) }
+
+    fun setInputPolicy(policy:uniffi.tunar_core.InputPolicy)=viewModelScope.launch{repo.setInputPolicy(policy)}
 
     fun setTheme(theme: ThemeMode) = viewModelScope.launch { repo.setTheme(theme) }
 

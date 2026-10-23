@@ -21,7 +21,7 @@ pub(crate) struct MeasurementFile {
 }
 pub(crate) fn encode(c: &SessionCore) -> Result<String, PracticeError> {
     let file = MeasurementFile {
-        schema_version: 1,
+        schema_version: 2,
         points: c.points.clone(),
         segments: c.segments.clone(),
         snapshots: c.snapshots.clone(),
@@ -46,7 +46,7 @@ pub(crate) fn decode(contents: &str) -> Result<MeasurementFile, PracticeError> {
     }
     let version: Version =
         serde_json::from_str(contents).map_err(|_| PracticeError::InvalidFile)?;
-    if version.schema_version != 1 {
+    if ![1, 2].contains(&version.schema_version) {
         return Err(PracticeError::UnsupportedVersion);
     }
     let file: MeasurementFile =
@@ -66,7 +66,11 @@ pub(crate) fn decode(contents: &str) -> Result<MeasurementFile, PracticeError> {
     }
     let mut segment_ids = HashSet::new();
     if file.segments.iter().any(|s| {
-        s.id == 0 || s.config_id != s.id || !segment_ids.insert(s.id) || !s.config.validate()
+        s.id == 0
+            || s.config_id != s.id
+            || !segment_ids.insert(s.id)
+            || !s.config.validate()
+            || s.input_policy.is_some_and(|p| !p.valid())
     }) {
         return Err(PracticeError::InvalidFile);
     }
@@ -83,6 +87,8 @@ pub(crate) fn decode(contents: &str) -> Result<MeasurementFile, PracticeError> {
             || p.id <= last_id
             || !ids.insert(p.id)
             || !valid_point(p, &config.config)
+            || p.frame.input_diagnostics.map(|d| d.policy) != config.input_policy
+            || (file.schema_version == 1 && p.measurement_basis != MeasurementBasis::LegacySmoothed)
             || last_time.is_some_and(|t| p.time_seconds < t)
         {
             return Err(PracticeError::InvalidFile);
@@ -128,21 +134,37 @@ fn valid_point(p: &PracticePoint, config: &PracticeConfig) -> bool {
     {
         return false;
     }
-    let (target, name) = config.target(p.frame.tuner.as_ref());
+    let basis = if p.frame.input_diagnostics.is_some() {
+        MeasurementBasis::AcceptedRaw
+    } else {
+        MeasurementBasis::LegacySmoothed
+    };
+    if basis != p.measurement_basis {
+        return false;
+    }
+    let measured = measurement_frequency(&p.frame);
+    let mut event = p.frame.tuner.clone();
+    if let Some(e) = event.as_mut() {
+        if let Some(f) = measured {
+            e.freq_hz = f;
+        } else if basis == MeasurementBasis::AcceptedRaw {
+            event = None;
+        }
+    }
+    let (target, name) = config.target(event.as_ref());
     let close = |a: Option<f64>, b: Option<f64>| match (a, b) {
         (None, None) => true,
         (Some(x), Some(y)) => x.is_finite() && y.is_finite() && (x - y).abs() < 1e-6,
         _ => false,
     };
-    let cents = p
-        .frame
-        .tuner
-        .as_ref()
-        .and_then(|e| target.map(|t| 1200. * (e.freq_hz / t).log2()));
+    let cents = measured.and_then(|f| target.map(|t| 1200. * (f / t).log2()));
     let valid = p.frame.signal_state == SignalState::Tracking
         && !p.frame.is_held
         && !p.reference_active
-        && cents.is_some();
+        && cents.is_some()
+        && p.frame
+            .input_diagnostics
+            .is_none_or(|d| d.reason == crate::input_policy::InputReason::None);
     close(target, p.target_hz) && close(cents, p.cents) && name == p.target_name && valid == p.valid
 }
 fn text_cell(value: &str) -> String {
@@ -164,7 +186,7 @@ pub(crate) fn csv(
         return Err(PracticeError::InvalidInput);
     }
     let mut out = String::from(
-        "segment_id,time_seconds,state,is_held,freq_hz,target_hz,cents,input_dbfs,clarity,config_id,reference_tone_active,target_name\r\n",
+        "segment_id,time_seconds,state,is_held,freq_hz,target_hz,cents,input_dbfs,clarity,config_id,reference_tone_active,target_name,measurement_basis,measured_freq_hz,display_freq_hz,quality_reason\r\n",
     );
     for p in c.points.iter().filter(|p| p.id >= lo && p.id <= hi) {
         let optional = |v: Option<f64>| v.map(|v| v.to_string()).unwrap_or_default();
@@ -174,7 +196,7 @@ pub(crate) fn csv(
             .as_ref()
             .filter(|_| p.frame.signal_state == SignalState::Tracking && !p.frame.is_held);
         let row = format!(
-            "{},{},{:?},{},{},{},{},{},{},{},{},{}\r\n",
+            "{},{},{:?},{},{},{},{},{},{},{},{},{},{:?},{},{},{}\r\n",
             p.segment_id,
             p.time_seconds,
             p.frame.signal_state,
@@ -186,7 +208,19 @@ pub(crate) fn csv(
             optional(event.map(|e| f64::from(e.clarity))),
             p.config_id,
             p.reference_active,
-            text_cell(&p.target_name)
+            text_cell(&p.target_name),
+            p.measurement_basis,
+            optional(if p.valid {
+                p.frame.measured_freq_hz
+            } else {
+                None
+            }),
+            optional(event.map(|e| e.freq_hz)),
+            text_cell(
+                &p.frame
+                    .input_diagnostics
+                    .map_or_else(|| "Legacy".into(), |d| format!("{:?}", d.reason))
+            )
         );
         if out.len() + row.len() > MAX_FILE_BYTES {
             return Err(PracticeError::Capacity);

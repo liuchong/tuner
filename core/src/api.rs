@@ -10,6 +10,8 @@ use crate::{
     fingering, metronome, note, pitch, reference, signal, smooth, solfege, spectrum, tools, tuning,
 };
 
+pub use crate::input_policy::*;
+use crate::input_policy::{InputDecision, InputRuntime, hold_visible};
 pub use crate::practice::*;
 pub use crate::signal::SignalState;
 
@@ -363,6 +365,12 @@ pub struct AnalysisFrame {
     pub display_strength: f32,
     /// 当前读数是否来自断音保持。
     pub is_held: bool,
+    /// 同窗口输入判定，旧文件/旧接口为空。
+    #[serde(default)]
+    pub input_diagnostics: Option<InputDiagnostics>,
+    /// 可信测量频率；显示平滑之前，失效时为空。
+    #[serde(default)]
+    pub measured_freq_hz: Option<f64>,
 }
 
 /// 当前平均律中的一个可播放固定音高。
@@ -767,21 +775,65 @@ struct TunarCore {
     sample_rate_hz: f64,
     frame_hop_samples: u64,
     sample_position: u64,
+    input: InputRuntime,
+    input_context: Option<InputFrameContext>,
+    input_decision: Option<InputDecision>,
+    latest_frame: Option<AnalysisFrame>,
+    held_frame: Option<AnalysisFrame>,
 }
 
 impl TunarCore {
     fn analyze_frame(&mut self, pcm: &[f32]) -> (Option<TunarEvent>, signal::SignalOutput, f32) {
         let input_level_dbfs = signal::input_level_dbfs(pcm);
-        let detected = self.yin.feed(pcm).and_then(|(freq, clarity)| {
-            let a4 = self.a4;
-            self.smoother
-                .feed(Some(freq), |f| note::analyze(f as f64, a4).map(|i| i.midi))
-                .map(|out| signal::PitchSample {
-                    freq_hz: out.freq_hz,
-                    clarity,
-                })
-        });
-        let signal = self.signal.process(detected, input_level_dbfs);
+        let signal = if let Some(context) = self.input_context.take() {
+            self.input.a4_hz = self.a4;
+            self.yin.set_noise_gate(self.input.pre_gate());
+            let candidate = self
+                .yin
+                .feed_input(pcm)
+                .map(|(freq_hz, clarity)| signal::PitchSample { freq_hz, clarity });
+            let clipped = pcm
+                .iter()
+                .take(pitch::WINDOW)
+                .filter(|x| x.abs() >= 0.98)
+                .count() as f32
+                / pitch::WINDOW as f32;
+            let Ok(decision) = self
+                .input
+                .process(candidate, input_level_dbfs, clipped, context)
+            else {
+                return (
+                    None,
+                    signal::SignalOutput {
+                        state: SignalState::Quiet,
+                        pitch: None,
+                        display_strength: 0.,
+                        is_held: false,
+                    },
+                    input_level_dbfs,
+                );
+            };
+            let output = signal::SignalOutput {
+                state: decision.state,
+                pitch: decision.display,
+                display_strength: if decision.display.is_some() { 1. } else { 0. },
+                is_held: decision.state == SignalState::Holding,
+            };
+            self.input_decision = Some(decision);
+            output
+        } else {
+            self.input_decision = None;
+            let detected = self.yin.feed(pcm).and_then(|(freq, clarity)| {
+                let a4 = self.a4;
+                self.smoother
+                    .feed(Some(freq), |f| note::analyze(f as f64, a4).map(|i| i.midi))
+                    .map(|out| signal::PitchSample {
+                        freq_hz: out.freq_hz,
+                        clarity,
+                    })
+            });
+            self.signal.process(detected, input_level_dbfs)
+        };
         let Some(pitch) = signal.pitch else {
             return (None, signal, input_level_dbfs);
         };
@@ -789,22 +841,44 @@ impl TunarCore {
         let Some(info) = note::analyze(pitch.freq_hz as f64, a4) else {
             return (None, signal, input_level_dbfs);
         };
+        let (t_step, t_cents) =
+            note::temperament_step_cents(pitch.freq_hz as f64, a4, self.temperament)
+                .unwrap_or((0, 0.0));
+        let mut name_buf = [0u8; 5];
+        let display_midi = self
+            .input_decision
+            .as_ref()
+            .and_then(|d| d.display_midi)
+            .unwrap_or(info.midi);
+        let display_name = note::midi_to_name(display_midi, &mut name_buf).unwrap_or("");
         let mut sf_buf = [0u8; 16];
         let sf = solfege::solfege_of(
             self.solfege,
-            note::midi_to_pc(info.midi),
+            note::midi_to_pc(display_midi),
             self.key.tonic_pc,
             self.key.mode,
             &mut sf_buf,
         );
-        let (t_step, t_cents) =
-            note::temperament_step_cents(pitch.freq_hz as f64, a4, self.temperament)
-                .unwrap_or((0, 0.0));
         let event = TunarEvent {
             freq_hz: pitch.freq_hz as f64,
-            note_name: info.name().to_string(),
-            midi: info.midi,
-            cents_off: info.cents_off,
+            note_name: if self.input_decision.is_some() {
+                display_name.to_string()
+            } else {
+                info.name().to_string()
+            },
+            midi: if self.input_decision.is_some() {
+                display_midi
+            } else {
+                info.midi
+            },
+            cents_off: if self.input_decision.is_some() {
+                1200.
+                    * ((pitch.freq_hz as f64)
+                        / (a4 * 2_f64.powf(f64::from(display_midi - 69) / 12.)))
+                    .log2()
+            } else {
+                info.cents_off
+            },
             clarity: pitch.clarity,
             solfege: sf.to_string(),
             temperament: self.temperament,
@@ -822,7 +896,11 @@ impl TunarCore {
         let wide_spectrum_max_hz = self.spectrum.wide_max_hz() as f64;
         let (waveform_min, waveform_max) = waveform_envelope(pcm);
         self.sample_position = self.sample_position.saturating_add(self.frame_hop_samples);
-        let f0 = tuner.as_ref().map(|t| t.freq_hz);
+        let f0 = self
+            .input_decision
+            .as_ref()
+            .and_then(|d| d.measured.map(|p| f64::from(p.freq_hz)))
+            .or_else(|| tuner.as_ref().map(|t| t.freq_hz));
         let mut raw_partials = [spectrum::PartialInfo {
             freq_hz: 0.0,
             magnitude_db: spectrum::DB_FLOOR,
@@ -873,7 +951,7 @@ impl TunarCore {
                 }
             })
             .collect();
-        AnalysisFrame {
+        let frame = AnalysisFrame {
             tuner,
             spectrum_db,
             wide_spectrum_db,
@@ -888,7 +966,22 @@ impl TunarCore {
             input_level_dbfs,
             display_strength: signal.display_strength,
             is_held: signal.is_held,
+            input_diagnostics: self.input_decision.as_ref().map(|d| d.diagnostics),
+            measured_freq_hz: self
+                .input_decision
+                .as_ref()
+                .and_then(|d| d.measured.map(|p| f64::from(p.freq_hz))),
+        };
+        if frame.signal_state == SignalState::Tracking
+            && !frame.is_held
+            && frame
+                .input_diagnostics
+                .is_none_or(|d| d.reason == InputReason::None)
+        {
+            self.held_frame = Some(frame.clone());
         }
+        self.latest_frame = Some(frame.clone());
+        frame
     }
 }
 
@@ -923,6 +1016,15 @@ impl TunarEngine {
                 sample_rate_hz: config.sample_rate,
                 frame_hop_samples: u64::from(config.frame_hop_samples),
                 sample_position: 0,
+                input: InputRuntime::new(
+                    config.sample_rate,
+                    config.frame_hop_samples,
+                    config.noise_gate_dbfs,
+                ),
+                input_context: None,
+                input_decision: None,
+                latest_frame: None,
+                held_frame: None,
             }),
         })
     }
@@ -939,10 +1041,135 @@ impl TunarEngine {
         core.analyze_full(&pcm)
     }
 
+    /// 用真实输入位置分析；时间无效时原子拒绝。
+    pub fn analyze_input(
+        &self,
+        pcm: Vec<f32>,
+        context: InputFrameContext,
+    ) -> Result<AnalysisFrame, InputPolicyError> {
+        let mut core = self.core.lock().unwrap_or_else(|e| e.into_inner());
+        if pcm.len() < pitch::WINDOW
+            || pcm.iter().take(pitch::WINDOW).any(|v| !v.is_finite())
+            || !core.sample_rate_hz.is_finite()
+            || !(8000. ..=192000.).contains(&core.sample_rate_hz)
+        {
+            return Err(InputPolicyError::InvalidFrame);
+        }
+        core.input.validate_context(context)?;
+        if core.latest_frame.as_ref().is_some_and(|_| {
+            core.input
+                .generation()
+                .is_some_and(|g| g != context.capture_generation)
+        }) {
+            core.held_frame = None;
+            core.latest_frame = None;
+        }
+        core.input_context = Some(context);
+        core.sample_position = context
+            .sample_position
+            .saturating_sub(core.frame_hop_samples);
+        let mut frame = core.analyze_full(&pcm);
+        frame.sample_position = context.sample_position;
+        core.sample_position = context.sample_position;
+        core.latest_frame = Some(frame.clone());
+        if frame.signal_state == SignalState::Tracking
+            && frame
+                .input_diagnostics
+                .is_some_and(|d| d.reason == InputReason::None)
+        {
+            core.held_frame = Some(frame.clone());
+        }
+        Ok(frame)
+    }
+    /// 设置输入策略，响应/保持不改变测量判定修订。
+    pub fn set_input_policy(&self, policy: InputPolicy) -> Result<(), InputPolicyError> {
+        self.core
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .input
+            .set_policy(policy)
+    }
+    /// 当前输入策略。
+    pub fn input_policy(&self) -> InputPolicy {
+        self.core
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .input
+            .policy()
+    }
+    /// 开始本采集上下文的环境测量。
+    pub fn begin_noise_calibration(&self, output_active: bool) -> Result<(), InputPolicyError> {
+        self.core
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .input
+            .begin_calibration(output_active)
+    }
+    /// 确认持续音调确为环境声。
+    pub fn confirm_noise_environment(&self) -> Result<(), InputPolicyError> {
+        self.core
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .input
+            .confirm_environment()
+    }
+    /// 取消校准，保留同上下文旧值。
+    pub fn cancel_noise_calibration(&self) {
+        self.core
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .input
+            .cancel_calibration();
+    }
+    /// 当前校准阶段。
+    pub fn calibration_status(&self) -> CalibrationStatus {
+        self.core
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .input
+            .calibration_status()
+    }
+    /// 实时输入与环境状态。
+    pub fn input_status(&self) -> InputStatus {
+        let c = self.core.lock().unwrap_or_else(|e| e.into_inner());
+        c.input.status(c.latest_frame.is_some())
+    }
+    /// 输入中断，保持记录不受影响；瞬态与环境估计失效。
+    pub fn reset_input_context(&self) {
+        let mut c = self.core.lock().unwrap_or_else(|e| e.into_inner());
+        c.input.reset();
+        c.latest_frame = None;
+        c.held_frame = None;
+    }
+    /// 供既有调音/乐器界面使用的同源呈现帧，实时测量另走analyze_input结果。
+    pub fn presentation_frame(&self) -> Option<AnalysisFrame> {
+        let c = self.core.lock().unwrap_or_else(|e| e.into_inner());
+        let latest = c.latest_frame.as_ref()?;
+        if latest.signal_state == SignalState::Tracking && !latest.is_held {
+            return Some(latest.clone());
+        }
+        let mut held = c.held_frame.clone()?;
+        let age = latest.sample_position.saturating_sub(held.sample_position) as f64
+            / latest.sample_rate_hz;
+        if !hold_visible(c.input.policy().hold, age) {
+            return None;
+        }
+        held.signal_state = SignalState::Holding;
+        held.is_held = true;
+        held.input_diagnostics = latest.input_diagnostics;
+        held.measured_freq_hz = None;
+        Some(held)
+    }
+
     /// 设置 A4 校准（收敛到 415–466Hz）。
     pub fn set_a4(&self, hz: f64) {
         let mut core = self.core.lock().unwrap_or_else(|e| e.into_inner());
-        core.a4 = hz.clamp(note::A4_MIN, note::A4_MAX);
+        let next = hz.clamp(note::A4_MIN, note::A4_MAX);
+        if core.a4 != next {
+            core.held_frame = None;
+            core.latest_frame = None;
+        }
+        core.a4 = next;
     }
 
     /// 设置唱名体系与调式。
@@ -957,12 +1184,20 @@ impl TunarEngine {
         let mut core = self.core.lock().unwrap_or_else(|e| e.into_inner());
         core.yin.set_noise_gate(dbfs - signal::GATE_HYSTERESIS_DB);
         core.signal.set_noise_gate(dbfs);
+        let mut policy = core.input.policy();
+        policy.gate_mode = GateMode::Manual;
+        policy.manual_open_dbfs = dbfs.clamp(-80., -12.);
+        let _ = core.input.set_policy(policy);
     }
 
     /// 设置律制（N ∈ {12,19,24,31}；非法值忽略）。
     pub fn set_temperament(&self, divisions: u8) {
         if note::TEMPERAMENT_DIVISIONS.contains(&divisions) {
             let mut core = self.core.lock().unwrap_or_else(|e| e.into_inner());
+            if core.temperament != divisions {
+                core.held_frame = None;
+                core.latest_frame = None;
+            }
             core.temperament = divisions;
         }
     }

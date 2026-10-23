@@ -44,6 +44,15 @@ impl Yin {
     ///
     /// 零分配、零锁、无 panic 路径。
     pub fn feed(&mut self, pcm: &[f32]) -> Option<(f32, f32)> {
+        self.analyze_pitch(pcm, false)
+    }
+
+    /// 新输入策略：复用同一CMNDF，最多精化两个周期候选。
+    pub(crate) fn feed_input(&mut self, pcm: &[f32]) -> Option<(f32, f32)> {
+        self.analyze_pitch(pcm, true)
+    }
+
+    fn analyze_pitch(&mut self, pcm: &[f32], alternatives: bool) -> Option<(f32, f32)> {
         if pcm.len() < WINDOW {
             return None;
         }
@@ -117,18 +126,48 @@ impl Yin {
         // 5) 精化：优先谐波模型联合最小二乘（近 CRLB，抗噪）；
         //    退化（奇异）时回退到波形 Gauss-Newton 位移拟合
         let coarse = self.sample_rate / parabolic;
-        let freq = match harmonic_ls(x, self.sample_rate, coarse) {
-            Some(f) if f.is_finite() && f > 0.0 => f,
+        let (mut freq, primary_fit) = match harmonic_ls_fit(x, self.sample_rate, coarse) {
+            Some((f, q)) if f.is_finite() && f > 0.0 => (f, q),
             _ => {
                 let better_tau = refine_period(x, tau, parabolic);
                 if better_tau <= 0.0 {
                     return None;
                 }
-                self.sample_rate / better_tau
+                (self.sample_rate / better_tau, 0.)
             }
         };
 
-        let clarity = 1.0 - cmndf[tau];
+        let mut clarity = 1.0 - cmndf[tau];
+        if alternatives {
+            let mut candidates = [0usize; 8];
+            let mut count = 0;
+            for t in 2..half.saturating_sub(1) {
+                if cmndf[t] < limit
+                    && cmndf[t] <= cmndf[t - 1]
+                    && cmndf[t] <= cmndf[t + 1]
+                    && count < 8
+                {
+                    candidates[count] = t;
+                    count += 1;
+                }
+            }
+            let alternate = candidates[..count]
+                .iter()
+                .copied()
+                .filter(|t| *t as f32 > tau as f32 * 1.5)
+                .min_by(|a, b| cmndf[*a].total_cmp(&cmndf[*b]));
+            if let Some(t) = alternate
+                && let Some((other, fit)) =
+                    harmonic_ls_fit(x, self.sample_rate, self.sample_rate / t as f32)
+            {
+                let current_score = 0.7 * clarity + 0.3 * primary_fit;
+                let other_score = 0.7 * (1. - cmndf[t]) + 0.3 * fit;
+                if other_score > current_score + 0.02 {
+                    freq = other;
+                    clarity = 1. - cmndf[t];
+                }
+            }
+        }
         if clarity < CLARITY_MIN {
             return None;
         }
@@ -150,7 +189,7 @@ const LS_Q: usize = LS_P + 1;
 /// 矩阵奇异等退化情况返回 `None`（调用方回退）。零分配、无 panic。
 // 数值内核按数学下标索引最清晰，允许 range-loop lint
 #[allow(clippy::needless_range_loop)]
-fn harmonic_ls(x: &[f32], sample_rate: f32, f0: f32) -> Option<f32> {
+fn harmonic_ls_fit(x: &[f32], sample_rate: f32, f0: f32) -> Option<(f32, f32)> {
     if !(f0.is_finite() && f0 > 0.0) {
         return None;
     }
@@ -230,7 +269,30 @@ fn harmonic_ls(x: &[f32], sample_rate: f32, f0: f32) -> Option<f32> {
         }
     }
     let f = w * sample_rate as f64 / (2.0 * core::f64::consts::PI);
-    Some(f as f32)
+    let mut residual = 0.;
+    let mut energy = 0.;
+    let mut cosines = [1.; HARMONICS];
+    let mut sines = [0.; HARMONICS];
+    let mut steps = [(0., 0.); HARMONICS];
+    for (h, step) in steps.iter_mut().enumerate() {
+        *step = ((h + 1) as f64 * w).sin_cos();
+    }
+    for &sample in x {
+        let mut fitted = 0.;
+        for h in 0..HARMONICS {
+            fitted += beta[2 * h] * cosines[h] + beta[2 * h + 1] * sines[h];
+            let (sin, cos) = steps[h];
+            let next = cosines[h] * cos - sines[h] * sin;
+            sines[h] = sines[h] * cos + cosines[h] * sin;
+            cosines[h] = next;
+        }
+        residual += (f64::from(sample) - fitted).powi(2);
+        energy += f64::from(sample).powi(2);
+    }
+    Some((
+        f as f32,
+        (1. - residual / energy.max(1e-18)).clamp(0., 1.) as f32,
+    ))
 }
 
 /// 可变有效规模的线性方程组求解（部分主元高斯消元）。奇异返回 `None`。

@@ -1,5 +1,14 @@
 package com.liuchong.tunar.ui.practice
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+
 import android.net.Uri
 import android.Manifest
 import com.liuchong.tunar.ui.navigation.AppNav
@@ -20,6 +29,7 @@ import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uniffi.tunar_core.*
 import uniffi.tunar_core.PracticeRecordingState
 import uniffi.tunar_core.PracticeSession
 import uniffi.tunar_core.TunarEngine
@@ -32,6 +42,34 @@ import kotlin.math.sin
 class PracticeNativeIntegrationTest {
     @get:Rule val compose = createComposeRule()
 
+    @Test fun inputPolicyControlsReachRealEngineAndShowCalibrationState() {
+        val engine = TunarEngine(com.liuchong.tunar.corebinding.TunarCore.defaultConfig())
+        try {
+            var policy by androidx.compose.runtime.mutableStateOf(defaultInputPolicy())
+            var status by androidx.compose.runtime.mutableStateOf(engine.inputStatus())
+            compose.setContent { TunarTheme(darkTheme = false) { Surface(Modifier.fillMaxSize()) { Box(Modifier.padding(16.dp)) {
+                InputControls(policy, status, { policy = it; engine.setInputPolicy(it) }, {
+                    engine.beginNoiseCalibration(false); status = engine.inputStatus()
+                }, { engine.confirmNoiseEnvironment(); status = engine.inputStatus() }, {
+                    engine.cancelNoiseCalibration(); status = engine.inputStatus()
+                })
+            } } } }
+            compose.onNodeWithText("输入与响应").assertExists()
+            compose.onNodeWithText("平稳").performClick()
+            compose.runOnIdle { assertEquals(ResponseMode.STEADY, engine.inputPolicy().response) }
+            compose.onNodeWithText("测一下环境噪声").performClick()
+            compose.onNodeWithText("先不要演奏，保持2秒安静").assertExists()
+            val context = InstrumentationRegistry.getInstrumentation().targetContext
+            compose.onRoot().captureToImage().asAndroidBitmap().let { bitmap ->
+                val pending=File(context.cacheDir,"input-controls.pending")
+                pending.outputStream().use { assertTrue(bitmap.compress(Bitmap.CompressFormat.PNG,100,it)) }
+                assertTrue(pending.renameTo(File(context.cacheDir,"input-controls.png")))
+            }
+            compose.onNodeWithText("取消测量").performClick()
+            compose.runOnIdle { assertNotEquals(CalibrationState.MEASURING, engine.calibrationStatus().state) }
+        } finally { engine.close() }
+    }
+
     private fun measurement(): String {
         val engine = TunarEngine(TunarCore.defaultConfig())
         val session = PracticeSession()
@@ -40,7 +78,7 @@ class PracticeNativeIntegrationTest {
             session.start()
             repeat(100) { index ->
                 val pcm = List(2048) { sample -> (0.5 * sin(2 * PI * 440 * (index * 1024 + sample) / 44100.0)).toFloat() }
-                session.observe(engine.analyze(pcm), 1uL, 440.0, 12u, false)
+                session.observe(engine.analyzeInput(pcm,InputFrameContext((index*1024+2048).toULong(),1uL,false,false)), 1uL, 440.0, 12u, false)
             }
             val trace = session.tracePage(0u, 6000u)
             session.summarize(trace[2].id, trace[15].id)

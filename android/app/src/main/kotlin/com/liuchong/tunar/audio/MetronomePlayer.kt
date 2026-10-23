@@ -48,6 +48,7 @@ class AudioTrackMetronomePlayer(
     private var thread: Thread? = null
 
     override fun startLoop(engine: MetronomeEngine) {
+        MetronomeActivity.set(this,true){stopLoop()}
         check(!running) { "MetronomePlayer 已在运行" }
         val minBuf = AudioTrack.getMinBufferSize(
             sampleRate,
@@ -106,6 +107,7 @@ class AudioTrackMetronomePlayer(
     }
 
     override fun stopLoop() {
+        MetronomeActivity.set(this,false)
         running = false
         thread?.join(1500)
         thread = null

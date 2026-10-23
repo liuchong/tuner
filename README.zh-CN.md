@@ -115,3 +115,5 @@ Java 包名、iOS target/scheme、Bundle ID 与持久化设置键保留原技术
 ## 📄 许可证
 
 [0PL (Zero Public License)](https://license.pub/0pl/) — 见 [LICENSE](LICENSE)
+
+Android、iOS、macOS均提供环境输入设置、独立于指针响应的可信测量、同源整帧保持与实时/保持/回看来源。见[真实环境输入设计](docs/input-behavior.md)。

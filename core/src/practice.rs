@@ -1,4 +1,5 @@
 //! 工作线程上的练音会话：目标、有限历史、游标、快照与时间加权统计。
+use crate::input_policy::*;
 use crate::{
     api::{AnalysisFrame, TunarEvent},
     note,
@@ -146,9 +147,69 @@ pub enum PracticeRecordingState {
     /// 完成本次记录。
     Complete,
 }
+/// 测量来源，不把旧平滑频率伪装成原始测量。
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, uniffi::Enum)]
+pub enum MeasurementBasis {
+    /// 旧接口/旧文件平滑值。
+    #[default]
+    LegacySmoothed,
+    /// 新可信测量，显示滤波前。
+    AcceptedRaw,
+}
+/// 显示来源，与录制状态分离。
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
+pub enum PresentationSource {
+    /// 当前测量。
+    Live,
+    /// 上次可信结果。
+    Held,
+    /// 手动历史游标。
+    Review,
+}
+/// 单列实时输入，不混入保持卡。
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct LiveInput {
+    /// RMS电平。
+    pub input_level_dbfs: f32,
+    /// 同窗诊断。
+    pub diagnostics: InputDiagnostics,
+}
+/// 停吹前300ms的时间加权摘要。
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct NoteSummary {
+    /// 中位音分。
+    pub median_cents: f64,
+    /// P10。
+    pub low_cents: f64,
+    /// P90。
+    pub high_cents: f64,
+    /// 有效秒数。
+    pub valid_seconds: f64,
+}
+/// 统一业务呈现，前端不自造保持计时。
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct PracticePresentation {
+    /// 显示来源。
+    pub source: PresentationSource,
+    /// 仅供指针的显示平滑音分。
+    pub display_cents: Option<f64>,
+    /// 同源测量。
+    pub measurement: Option<PracticePoint>,
+    /// 前一条件的结果。
+    pub previous_measurement: Option<PracticePoint>,
+    /// 独立实时电平。
+    pub live_input: Option<LiveInput>,
+    /// 同一有效采集时钟内的年龄。
+    pub held_age_seconds: Option<f64>,
+    /// 停吹摘要。
+    pub summary: Option<NoteSummary>,
+}
 /// 同一分析帧的完整测量快照。
 #[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
 pub struct PracticePoint {
+    /// 是否来自未显示平滑的可信测量。
+    #[serde(default)]
+    pub measurement_basis: MeasurementBasis,
     /// 会话内递增身份。
     pub id: u64,
     /// 连续采集段。
@@ -204,6 +265,9 @@ impl From<&PracticePoint> for PracticeTracePoint {
 /// 配置与引擎代次组成的不可变采集段。
 #[derive(Debug, Clone, Serialize, Deserialize, uniffi::Record)]
 pub struct PracticeSegment {
+    /// 当时实际输入判定条件；旧接口为空。
+    #[serde(default)]
+    pub input_policy: Option<ResolvedInputPolicy>,
     /// 段身份。
     pub id: u32,
     /// 配置身份。
@@ -292,6 +356,11 @@ pub(crate) struct SessionCore {
     pub(crate) review_id: Option<u64>,
     pub(crate) selection: Option<(u64, u64)>,
     latest: Option<PracticePoint>,
+    held: Option<PracticePoint>,
+    held_config: Option<PracticeConfig>,
+    previous: Option<PracticePoint>,
+    available: bool,
+    last_input_policy: Option<ResolvedInputPolicy>,
     latest_config: Option<PracticeConfig>,
     live: VecDeque<PracticeTracePoint>,
     last_capture: Option<(u64, u64, f64, bool)>,
@@ -318,6 +387,11 @@ impl Default for SessionCore {
             review_id: None,
             selection: None,
             latest: None,
+            held: None,
+            held_config: None,
+            previous: None,
+            available: true,
+            last_input_policy: None,
             latest_config: None,
             live: VecDeque::with_capacity(130),
             last_capture: None,
@@ -336,9 +410,35 @@ impl Default for SessionCore {
 }
 impl SessionCore {
     fn selected(&self) -> Option<&PracticePoint> {
-        self.review_id
-            .and_then(|id| self.points.iter().find(|p| p.id == id))
-            .or(self.latest.as_ref())
+        if let Some(id) = self.review_id {
+            return self.points.iter().find(|p| p.id == id);
+        }
+        if let Some(p) = self.latest.as_ref().filter(|p| {
+            self.available
+                && p.valid
+                && (p.frame.input_diagnostics.is_none()
+                    || self.held.as_ref().is_some_and(|h| {
+                        h.time_seconds == p.time_seconds && h.segment_id == p.segment_id
+                    }))
+        }) {
+            return Some(p);
+        }
+        let held = self.held.as_ref()?;
+        let age = self
+            .latest
+            .as_ref()
+            .map_or(0., |p| p.time_seconds - held.time_seconds)
+            .max(0.);
+        let mode = self
+            .latest
+            .as_ref()
+            .and_then(|p| p.frame.input_diagnostics)
+            .map_or(HoldMode::UntilNext, |d| d.hold);
+        if hold_visible(mode, age) {
+            Some(held)
+        } else {
+            None
+        }
     }
     fn pause(&mut self, reason: &str) {
         if self.state == PracticeRecordingState::Recording {
@@ -348,7 +448,28 @@ impl SessionCore {
         self.last_bucket = None;
         self.reason = reason.into();
     }
+    fn update_input_available(&mut self, available: bool) {
+        let changed = self.available != available;
+        self.available = available;
+        if !available {
+            self.pause("输入已中断，记录暂停；可查看上次结果");
+        } else if changed {
+            if self.state == PracticeRecordingState::Paused {
+                self.reason = "输入已恢复，记录仍暂停；请手动继续".into();
+            } else if self.state == PracticeRecordingState::Idle {
+                self.reason = "输入就绪，开始记录后保存测量".into();
+            }
+        }
+    }
     fn snapshot_config(&self, p: &PracticePoint) -> PracticeConfig {
+        if self
+            .held
+            .as_ref()
+            .is_some_and(|h| h.time_seconds == p.time_seconds && h.segment_id == p.segment_id)
+            && let Some(config) = &self.held_config
+        {
+            return config.clone();
+        }
         self.segments
             .iter()
             .find(|s| s.id == p.segment_id)
@@ -362,16 +483,31 @@ impl SessionCore {
         time_seconds: f64,
         reference_active: bool,
     ) -> PracticePoint {
-        let (target_hz, target_name) = self.config.target(frame.tuner.as_ref());
-        let cents = frame
-            .tuner
-            .as_ref()
-            .and_then(|e| target_hz.map(|t| 1200. * (e.freq_hz / t).log2()));
+        let basis = if frame.input_diagnostics.is_some() {
+            MeasurementBasis::AcceptedRaw
+        } else {
+            MeasurementBasis::LegacySmoothed
+        };
+        let measured = measurement_frequency(&frame);
+        let mut event = frame.tuner.clone();
+        if let Some(e) = event.as_mut() {
+            if let Some(f) = measured {
+                e.freq_hz = f;
+            } else if basis == MeasurementBasis::AcceptedRaw {
+                event = None;
+            }
+        }
+        let (target_hz, target_name) = self.config.target(event.as_ref());
+        let cents = measured.and_then(|f| target_hz.map(|t| 1200. * (f / t).log2()));
         let valid = frame.signal_state == SignalState::Tracking
             && !frame.is_held
             && !reference_active
-            && cents.is_some();
+            && cents.is_some()
+            && frame
+                .input_diagnostics
+                .is_none_or(|d| d.reason == InputReason::None);
         PracticePoint {
+            measurement_basis: basis,
             id: 0,
             segment_id: self.segment_id,
             config_id: self.segment_id,
@@ -416,6 +552,8 @@ impl PracticeSession {
         }
         let mut c = self.inner();
         if c.config != config {
+            c.previous = c.held.take();
+            c.held_config = None;
             c.config = config;
             c.break_pending = true;
             c.last_bucket = None;
@@ -529,10 +667,23 @@ impl PracticeSession {
             return Err(PracticeError::InvalidInput);
         }
         if config != c.config {
+            c.previous = c.held.take();
+            c.held_config = None;
             c.config = config;
             c.break_pending = true;
             c.last_bucket = None;
         }
+        let input_policy = frame.input_diagnostics.map(|d| d.policy);
+        if input_policy != c.last_input_policy {
+            if c.last_input_policy.is_some() {
+                c.previous = c.held.take();
+                c.held_config = None;
+            }
+            c.break_pending = true;
+            c.last_bucket = None;
+            c.last_input_policy = input_policy;
+        }
+        c.update_input_available(true);
         let raw_time = frame.sample_position as f64 / frame.sample_rate_hz;
         let mut time = c.latest.as_ref().map_or(0., |p| p.time_seconds);
         if let Some((old_gen, old_pos, old_rate, old_reference)) = c.last_capture {
@@ -543,6 +694,8 @@ impl PracticeSession {
                 || old_rate != frame.sample_rate_hz
                 || frame.sample_position < old_pos
             {
+                c.previous = c.held.take();
+                c.held_config = None;
                 c.pause("采集已变化，请确认后继续记录");
                 time += 0.1;
             } else {
@@ -576,6 +729,7 @@ impl PracticeSession {
                     config_id: c.segment_id,
                     generation,
                     config: c.config.clone(),
+                    input_policy,
                 };
                 let new_segment = !c.segments.iter().any(|s| s.id == c.segment_id);
                 let bytes = serde_json::to_vec(&point)
@@ -610,6 +764,10 @@ impl PracticeSession {
         while c.live.front().is_some_and(|p| p.time_seconds < time - 12.) || c.live.len() > 512 {
             c.live.pop_front();
         }
+        if point.valid {
+            c.held_config = Some(c.config.clone());
+            c.held = Some(point.clone());
+        }
         c.latest_config = Some(c.config.clone());
         c.latest = Some(point.clone());
         Ok(point)
@@ -632,6 +790,69 @@ impl PracticeSession {
     /// 唯一显示帧；历史游标优先。
     pub fn display_point(&self) -> Option<PracticePoint> {
         self.inner().selected().cloned()
+    }
+    /// 原生输入中断只更新可用性与录制状态，不伪装普通静音。
+    pub fn set_input_available(&self, available: bool) {
+        let mut c = self.inner();
+        c.update_input_available(available);
+    }
+    /// 同源实时/保持/回看呈现与停吹摘要。
+    pub fn presentation(&self) -> PracticePresentation {
+        let c = self.inner();
+        let measurement = c.selected().cloned();
+        let source = if c.review_id.is_some() {
+            PresentationSource::Review
+        } else if c.available
+            && measurement.as_ref().is_some_and(|p| {
+                c.latest
+                    .as_ref()
+                    .is_some_and(|l| l.valid && l.time_seconds == p.time_seconds)
+            })
+        {
+            PresentationSource::Live
+        } else if measurement.is_some() {
+            PresentationSource::Held
+        } else {
+            PresentationSource::Live
+        };
+        let live_input = if c.available {
+            c.latest.as_ref().and_then(|p| {
+                p.frame.input_diagnostics.map(|diagnostics| LiveInput {
+                    input_level_dbfs: p.frame.input_level_dbfs,
+                    diagnostics,
+                })
+            })
+        } else {
+            None
+        };
+        let age = if c.available && source == PresentationSource::Held {
+            c.held
+                .as_ref()
+                .zip(c.latest.as_ref())
+                .map(|(h, l)| (l.time_seconds - h.time_seconds).max(0.))
+        } else {
+            None
+        };
+        let summary = if source == PresentationSource::Held {
+            stopped_summary(&c)
+        } else {
+            None
+        };
+        let display_cents = measurement.as_ref().and_then(|p| {
+            p.frame
+                .tuner
+                .as_ref()
+                .and_then(|e| p.target_hz.map(|t| 1200. * (e.freq_hz / t).log2()))
+        });
+        PracticePresentation {
+            source,
+            display_cents,
+            measurement,
+            previous_measurement: c.previous.clone(),
+            live_input,
+            held_age_seconds: age,
+            summary,
+        }
     }
     /// 选择历史点，自动暂停记录。
     pub fn select_point(&self, id: u64) -> Result<PracticePoint, PracticeError> {
@@ -825,8 +1046,23 @@ impl PracticeSession {
         c.baseline_id = file.baseline_id;
         c.selection = file.selection;
         c.review_id = file.review_id.or_else(|| c.points.first().map(|p| p.id));
-        c.latest_config = Some(c.config.clone());
+        c.latest_config = latest.as_ref().and_then(|p| {
+            c.segments
+                .iter()
+                .find(|s| s.id == p.segment_id)
+                .map(|s| s.config.clone())
+        });
+        c.held = latest.clone().filter(|p| p.valid);
+        c.held_config = c.latest_config.clone();
+        if c.held_config
+            .as_ref()
+            .is_some_and(|config| config != &c.config)
+        {
+            c.previous = c.held.take();
+            c.held_config = None;
+        }
         c.latest = latest;
+        c.available = false;
         c.next_id = next;
         c.segment_id = segment;
         c.payload_bytes = bytes;
@@ -845,7 +1081,24 @@ impl PracticeSession {
 }
 
 pub(crate) fn valid_frame(f: &AnalysisFrame) -> bool {
-    f.sample_rate_hz.is_finite()
+    f.measured_freq_hz
+        .is_none_or(|v| v.is_finite() && v > 0. && v <= f.sample_rate_hz / 2.)
+        && f.input_diagnostics
+            .as_ref()
+            .is_none_or(InputDiagnostics::valid)
+        && (f.measured_freq_hz.is_none() || f.input_diagnostics.is_some())
+        && f.input_diagnostics.is_none_or(|d| {
+            let tracking = f.signal_state == SignalState::Tracking && !f.is_held;
+            tracking == f.measured_freq_hz.is_some()
+                && (!tracking
+                    || (f.tuner.is_some()
+                        && matches!(
+                            d.reason,
+                            InputReason::None | InputReason::OutputContaminated
+                        )
+                        && d.clipped_fraction < 0.01))
+        })
+        && f.sample_rate_hz.is_finite()
         && (8000. ..=192000.).contains(&f.sample_rate_hz)
         && f.wide_spectrum_max_hz.is_finite()
         && f.wide_spectrum_max_hz > 20.
@@ -930,34 +1183,7 @@ fn summarize_points(points: &[&PracticePoint], tolerance: f64) -> PracticeSummar
         if insufficient {
             return None;
         }
-        let mut low = spans
-            .iter()
-            .map(|(a, b, _)| a.min(*b))
-            .fold(f64::INFINITY, f64::min);
-        let mut high = spans
-            .iter()
-            .map(|(a, b, _)| a.max(*b))
-            .fold(f64::NEG_INFINITY, f64::max);
-        for _ in 0..64 {
-            let mid = (low + high) / 2.;
-            let weight: f64 = spans
-                .iter()
-                .map(|(a, b, dt)| {
-                    let (l, h) = (a.min(*b), a.max(*b));
-                    dt * if h - l < 1e-12 {
-                        if mid >= l { 1. } else { 0. }
-                    } else {
-                        ((mid - l) / (h - l)).clamp(0., 1.)
-                    }
-                })
-                .sum();
-            if weight < valid_seconds * q {
-                low = mid
-            } else {
-                high = mid
-            }
-        }
-        Some((low + high) / 2.)
+        weighted_quantile(&spans, q)
     };
     PracticeSummary {
         segment_id: first.segment_id,
@@ -984,3 +1210,83 @@ fn summarize_points(points: &[&PracticePoint], tolerance: f64) -> PracticeSummar
 #[cfg(test)]
 #[path = "practice_tests.rs"]
 mod tests;
+
+/// 兼容来源保持旧值，新来源仅使用可信测量频率。
+pub(crate) fn measurement_frequency(frame: &AnalysisFrame) -> Option<f64> {
+    if frame.input_diagnostics.is_some() {
+        frame.measured_freq_hz
+    } else {
+        frame.tuner.as_ref().map(|e| e.freq_hz)
+    }
+}
+fn weighted_quantile(spans: &[(f64, f64, f64)], q: f64) -> Option<f64> {
+    let valid_seconds: f64 = spans.iter().map(|s| s.2).sum();
+    if valid_seconds <= 0. {
+        return None;
+    }
+    let mut low = spans
+        .iter()
+        .map(|(a, b, _)| a.min(*b))
+        .fold(f64::INFINITY, f64::min);
+    let mut high = spans
+        .iter()
+        .map(|(a, b, _)| a.max(*b))
+        .fold(f64::NEG_INFINITY, f64::max);
+    for _ in 0..64 {
+        let mid = (low + high) / 2.;
+        let weight: f64 = spans
+            .iter()
+            .map(|(a, b, dt)| {
+                let (l, h) = (a.min(*b), a.max(*b));
+                dt * if h - l < 1e-12 {
+                    if mid >= l { 1. } else { 0. }
+                } else {
+                    ((mid - l) / (h - l)).clamp(0., 1.)
+                }
+            })
+            .sum();
+        if weight < valid_seconds * q {
+            low = mid
+        } else {
+            high = mid
+        }
+    }
+    Some((low + high) / 2.)
+}
+fn stopped_summary(c: &SessionCore) -> Option<NoteSummary> {
+    let held = c.held.as_ref()?;
+    let end = held.time_seconds;
+    let points: Vec<_> = c
+        .live
+        .iter()
+        .filter(|p| {
+            p.config_id == held.config_id
+                && p.time_seconds >= end - 0.300001
+                && p.time_seconds <= end
+        })
+        .collect();
+    let mut spans = Vec::new();
+    for pair in points.windows(2) {
+        let a = pair[0];
+        let b = pair[1];
+        let dt = b.time_seconds - a.time_seconds;
+        if a.valid
+            && b.valid
+            && dt > 0.
+            && dt <= 0.250001
+            && let (Some(x), Some(y)) = (a.cents, b.cents)
+        {
+            spans.push((x, y, dt));
+        }
+    }
+    let valid_seconds: f64 = spans.iter().map(|s| s.2).sum();
+    if valid_seconds < 0.149999 {
+        return None;
+    }
+    Some(NoteSummary {
+        median_cents: weighted_quantile(&spans, 0.5)?,
+        low_cents: weighted_quantile(&spans, 0.1)?,
+        high_cents: weighted_quantile(&spans, 0.9)?,
+        valid_seconds,
+    })
+}

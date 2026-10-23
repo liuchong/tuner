@@ -498,3 +498,12 @@ P1/P2 implementation follows [the construction plan](../practice-implementation.
 and versioned JSON/CSV. Native layers own capture, presentation and file dialogs only.
 The exact records and methods are listed in construction plan §2; all are exported through UniFFI.
 No raw PCM is stored, and no audio playback is promised by measurement files.
+
+M13 input policy is implemented. The new production entry separates accepted measurement from display, uses actual capture positions and audio-time confirmation, supports environment calibration/retention and schema1/2 compatibility. Legacy analyze/feed retain their compatibility contract. Exact state, defaults, API and delivery progress: [input implementation](../input-implementation.md). See the [validation report](input-verification.md) for results and physical-device gaps.
+
+
+## M13 effective implementation contract
+
+Production `analyze_input(pcm, InputFrameContext)` receives the real window-end sample position, capture generation and reference/metronome activity before DSP. Defaults are Auto/General/Balanced/UntilNext. Uncalibrated open/close thresholds are −45/−48 dBFS (General), −55/−58 (Soft), and −35/−41 (Noisy). Manual opening spans −80…−12 dBFS, with 3…12 dB hysteresis. A two-second P80 calibration requires confirmation for sustained tones; ordinary playing never trains the noise floor. Confirmation (60 ms), dropout grace (100 ms), and octave evidence (80 ms) use audio time. Display log-frequency response constants 40/80/140 ms never alter raw measurements, scores or decision revisions.
+
+New UniFFI records include InputPolicy, ResolvedInputPolicy, InputDiagnostics, InputFrameContext, InputStatus and CalibrationStatus, with matching enums and errors. Engine methods expose policy, calibration, input status, context reset and presentation_frame. AnalysisFrame adds optional input_diagnostics/measured_freq_hz. PracticeSession adds presentation/set_input_available; PracticePresentation separates source, display cents, measured frame, previous-condition result, live input, retained age and stopped-note summary. Files write schema 2 and read 1/2; legacy smoothed values are labelled and never reconstructed as raw. CSV adds raw/display Hz, basis and diagnostics.

@@ -827,6 +827,34 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // For large crates we prevent `MethodTooLargeException` (see #2340)
 // N.B. the name of the extension is very misleading, since it is
 // rather `InterfaceTooLargeException`, caused by too many methods
@@ -843,6 +871,10 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 internal interface IntegrityCheckingUniffiLib : Library {
     // Integrity check functions only
     fun uniffi_tunar_core_checksum_func_cents_between(
+): Short
+fun uniffi_tunar_core_checksum_func_default_input_policy(
+): Short
+fun uniffi_tunar_core_checksum_func_default_input_status(
 ): Short
 fun uniffi_tunar_core_checksum_func_list_instruments(
 ): Short
@@ -906,6 +938,8 @@ fun uniffi_tunar_core_checksum_method_practicesession_observe(
 ): Short
 fun uniffi_tunar_core_checksum_method_practicesession_pause(
 ): Short
+fun uniffi_tunar_core_checksum_method_practicesession_presentation(
+): Short
 fun uniffi_tunar_core_checksum_method_practicesession_read_page(
 ): Short
 fun uniffi_tunar_core_checksum_method_practicesession_remove_snapshot(
@@ -915,6 +949,8 @@ fun uniffi_tunar_core_checksum_method_practicesession_return_to_live(
 fun uniffi_tunar_core_checksum_method_practicesession_select_point(
 ): Short
 fun uniffi_tunar_core_checksum_method_practicesession_set_baseline(
+): Short
+fun uniffi_tunar_core_checksum_method_practicesession_set_input_available(
 ): Short
 fun uniffi_tunar_core_checksum_method_practicesession_snapshots(
 ): Short
@@ -932,11 +968,31 @@ fun uniffi_tunar_core_checksum_method_practicesession_unlock_target(
 ): Short
 fun uniffi_tunar_core_checksum_method_tunarengine_analyze(
 ): Short
+fun uniffi_tunar_core_checksum_method_tunarengine_analyze_input(
+): Short
+fun uniffi_tunar_core_checksum_method_tunarengine_begin_noise_calibration(
+): Short
+fun uniffi_tunar_core_checksum_method_tunarengine_calibration_status(
+): Short
+fun uniffi_tunar_core_checksum_method_tunarengine_cancel_noise_calibration(
+): Short
+fun uniffi_tunar_core_checksum_method_tunarengine_confirm_noise_environment(
+): Short
 fun uniffi_tunar_core_checksum_method_tunarengine_feed(
+): Short
+fun uniffi_tunar_core_checksum_method_tunarengine_input_policy(
+): Short
+fun uniffi_tunar_core_checksum_method_tunarengine_input_status(
 ): Short
 fun uniffi_tunar_core_checksum_method_tunarengine_list_reference_tones(
 ): Short
+fun uniffi_tunar_core_checksum_method_tunarengine_presentation_frame(
+): Short
+fun uniffi_tunar_core_checksum_method_tunarengine_reset_input_context(
+): Short
 fun uniffi_tunar_core_checksum_method_tunarengine_set_a4(
+): Short
+fun uniffi_tunar_core_checksum_method_tunarengine_set_input_policy(
 ): Short
 fun uniffi_tunar_core_checksum_method_tunarengine_set_noise_gate(
 ): Short
@@ -1061,6 +1117,8 @@ fun uniffi_tunar_core_fn_method_practicesession_observe(`ptr`: Pointer,`frame`: 
 ): RustBuffer.ByValue
 fun uniffi_tunar_core_fn_method_practicesession_pause(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
 ): Unit
+fun uniffi_tunar_core_fn_method_practicesession_presentation(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
 fun uniffi_tunar_core_fn_method_practicesession_read_page(`ptr`: Pointer,`offset`: Int,`limit`: Int,uniffi_out_err: UniffiRustCallStatus,
 ): RustBuffer.ByValue
 fun uniffi_tunar_core_fn_method_practicesession_remove_snapshot(`ptr`: Pointer,`id`: Int,uniffi_out_err: UniffiRustCallStatus,
@@ -1070,6 +1128,8 @@ fun uniffi_tunar_core_fn_method_practicesession_return_to_live(`ptr`: Pointer,un
 fun uniffi_tunar_core_fn_method_practicesession_select_point(`ptr`: Pointer,`id`: Long,uniffi_out_err: UniffiRustCallStatus,
 ): RustBuffer.ByValue
 fun uniffi_tunar_core_fn_method_practicesession_set_baseline(`ptr`: Pointer,`id`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+): Unit
+fun uniffi_tunar_core_fn_method_practicesession_set_input_available(`ptr`: Pointer,`available`: Byte,uniffi_out_err: UniffiRustCallStatus,
 ): Unit
 fun uniffi_tunar_core_fn_method_practicesession_snapshots(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
 ): RustBuffer.ByValue
@@ -1093,11 +1153,31 @@ fun uniffi_tunar_core_fn_constructor_tunarengine_new(`config`: RustBuffer.ByValu
 ): Pointer
 fun uniffi_tunar_core_fn_method_tunarengine_analyze(`ptr`: Pointer,`pcm`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
 ): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_tunarengine_analyze_input(`ptr`: Pointer,`pcm`: RustBuffer.ByValue,`context`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_tunarengine_begin_noise_calibration(`ptr`: Pointer,`outputActive`: Byte,uniffi_out_err: UniffiRustCallStatus,
+): Unit
+fun uniffi_tunar_core_fn_method_tunarengine_calibration_status(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_tunarengine_cancel_noise_calibration(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): Unit
+fun uniffi_tunar_core_fn_method_tunarengine_confirm_noise_environment(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): Unit
 fun uniffi_tunar_core_fn_method_tunarengine_feed(`ptr`: Pointer,`pcm`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_tunarengine_input_policy(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_tunarengine_input_status(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
 ): RustBuffer.ByValue
 fun uniffi_tunar_core_fn_method_tunarengine_list_reference_tones(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
 ): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_tunarengine_presentation_frame(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_method_tunarengine_reset_input_context(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus,
+): Unit
 fun uniffi_tunar_core_fn_method_tunarengine_set_a4(`ptr`: Pointer,`hz`: Double,uniffi_out_err: UniffiRustCallStatus,
+): Unit
+fun uniffi_tunar_core_fn_method_tunarengine_set_input_policy(`ptr`: Pointer,`policy`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus,
 ): Unit
 fun uniffi_tunar_core_fn_method_tunarengine_set_noise_gate(`ptr`: Pointer,`dbfs`: Float,uniffi_out_err: UniffiRustCallStatus,
 ): Unit
@@ -1106,6 +1186,10 @@ fun uniffi_tunar_core_fn_method_tunarengine_set_solfege(`ptr`: Pointer,`system`:
 fun uniffi_tunar_core_fn_method_tunarengine_set_temperament(`ptr`: Pointer,`divisions`: Byte,uniffi_out_err: UniffiRustCallStatus,
 ): Unit
 fun uniffi_tunar_core_fn_func_cents_between(`freqHz`: Double,`targetHz`: Double,uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_func_default_input_policy(uniffi_out_err: UniffiRustCallStatus,
+): RustBuffer.ByValue
+fun uniffi_tunar_core_fn_func_default_input_status(uniffi_out_err: UniffiRustCallStatus,
 ): RustBuffer.ByValue
 fun uniffi_tunar_core_fn_func_list_instruments(uniffi_out_err: UniffiRustCallStatus,
 ): RustBuffer.ByValue
@@ -1248,6 +1332,12 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_tunar_core_checksum_func_cents_between() != 8851.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_tunar_core_checksum_func_default_input_policy() != 27653.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_func_default_input_status() != 5976.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_tunar_core_checksum_func_list_instruments() != 56888.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1341,6 +1431,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_tunar_core_checksum_method_practicesession_pause() != 64223.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_presentation() != 25893.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_tunar_core_checksum_method_practicesession_read_page() != 55731.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1354,6 +1447,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_tunar_core_checksum_method_practicesession_set_baseline() != 1908.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_practicesession_set_input_available() != 63342.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_tunar_core_checksum_method_practicesession_snapshots() != 20932.toShort()) {
@@ -1380,13 +1476,43 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_tunar_core_checksum_method_tunarengine_analyze() != 43185.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_tunar_core_checksum_method_tunarengine_analyze_input() != 34276.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_tunarengine_begin_noise_calibration() != 33282.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_tunarengine_calibration_status() != 61210.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_tunarengine_cancel_noise_calibration() != 36531.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_tunarengine_confirm_noise_environment() != 6263.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_tunar_core_checksum_method_tunarengine_feed() != 25576.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_tunarengine_input_policy() != 13602.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_tunarengine_input_status() != 14659.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_tunar_core_checksum_method_tunarengine_list_reference_tones() != 8942.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_tunar_core_checksum_method_tunarengine_presentation_frame() != 3629.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_tunarengine_reset_input_context() != 38918.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_tunar_core_checksum_method_tunarengine_set_a4() != 19392.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_tunar_core_checksum_method_tunarengine_set_input_policy() != 21076.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_tunar_core_checksum_method_tunarengine_set_noise_gate() != 43665.toShort()) {
@@ -2367,6 +2493,11 @@ public interface PracticeSessionInterface {
     fun `pause`()
 
     /**
+     * 同源实时/保持/回看呈现与停吹摘要。
+     */
+    fun `presentation`(): PracticePresentation
+
+    /**
      * 有界完整点分页。
      */
     fun `readPage`(`offset`: kotlin.UInt, `limit`: kotlin.UInt): List<PracticePoint>
@@ -2390,6 +2521,11 @@ public interface PracticeSessionInterface {
      * 设置或隐藏比较基准。
      */
     fun `setBaseline`(`id`: kotlin.UInt?)
+
+    /**
+     * 原生输入中断只更新可用性与录制状态，不伪装普通静音。
+     */
+    fun `setInputAvailable`(`available`: kotlin.Boolean)
 
     /**
      * 独立快照列表。
@@ -2768,6 +2904,21 @@ open class PracticeSession: Disposable, AutoCloseable, PracticeSessionInterface
 
 
     /**
+     * 同源实时/保持/回看呈现与停吹摘要。
+     */override fun `presentation`(): PracticePresentation {
+            return FfiConverterTypePracticePresentation.lift(
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_presentation(
+        it, _status)
+}
+    }
+    )
+    }
+
+
+
+    /**
      * 有界完整点分页。
      */override fun `readPage`(`offset`: kotlin.UInt, `limit`: kotlin.UInt): List<PracticePoint> {
             return FfiConverterSequenceTypePracticePoint.lift(
@@ -2835,6 +2986,20 @@ open class PracticeSession: Disposable, AutoCloseable, PracticeSessionInterface
     uniffiRustCallWithError(PracticeException) { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_set_baseline(
         it, FfiConverterOptionalUInt.lower(`id`),_status)
+}
+    }
+
+
+
+
+    /**
+     * 原生输入中断只更新可用性与录制状态，不伪装普通静音。
+     */override fun `setInputAvailable`(`available`: kotlin.Boolean)
+        =
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_practicesession_set_input_available(
+        it, FfiConverterBoolean.lower(`available`),_status)
 }
     }
 
@@ -3089,9 +3254,44 @@ public interface TunarEngineInterface {
     fun `analyze`(`pcm`: List<kotlin.Float>): AnalysisFrame
 
     /**
+     * 用真实输入位置分析；时间无效时原子拒绝。
+     */
+    fun `analyzeInput`(`pcm`: List<kotlin.Float>, `context`: InputFrameContext): AnalysisFrame
+
+    /**
+     * 开始本采集上下文的环境测量。
+     */
+    fun `beginNoiseCalibration`(`outputActive`: kotlin.Boolean)
+
+    /**
+     * 当前校准阶段。
+     */
+    fun `calibrationStatus`(): CalibrationStatus
+
+    /**
+     * 取消校准，保留同上下文旧值。
+     */
+    fun `cancelNoiseCalibration`()
+
+    /**
+     * 确认持续音调确为环境声。
+     */
+    fun `confirmNoiseEnvironment`()
+
+    /**
      * 输入一帧单声道 PCM（f32 [-1,1]，长度 ≥ 2048），返回音高事件；无效输入返回 None。
      */
     fun `feed`(`pcm`: List<kotlin.Float>): TunarEvent?
+
+    /**
+     * 当前输入策略。
+     */
+    fun `inputPolicy`(): InputPolicy
+
+    /**
+     * 实时输入与环境状态。
+     */
+    fun `inputStatus`(): InputStatus
 
     /**
      * 列出当前 A4 与平均律在 80–1500Hz 内的全部固定音高。
@@ -3099,9 +3299,24 @@ public interface TunarEngineInterface {
     fun `listReferenceTones`(): List<ReferenceTone>
 
     /**
+     * 供既有调音/乐器界面使用的同源呈现帧，实时测量另走analyze_input结果。
+     */
+    fun `presentationFrame`(): AnalysisFrame?
+
+    /**
+     * 输入中断，保持记录不受影响；瞬态与环境估计失效。
+     */
+    fun `resetInputContext`()
+
+    /**
      * 设置 A4 校准（收敛到 415–466Hz）。
      */
     fun `setA4`(`hz`: kotlin.Double)
+
+    /**
+     * 设置输入策略，响应/保持不改变测量判定修订。
+     */
+    fun `setInputPolicy`(`policy`: InputPolicy)
 
     /**
      * 设置噪声门限（dBFS）。
@@ -3233,6 +3448,81 @@ open class TunarEngine: Disposable, AutoCloseable, TunarEngineInterface
 
 
     /**
+     * 用真实输入位置分析；时间无效时原子拒绝。
+     */
+    @Throws(InputPolicyException::class)override fun `analyzeInput`(`pcm`: List<kotlin.Float>, `context`: InputFrameContext): AnalysisFrame {
+            return FfiConverterTypeAnalysisFrame.lift(
+    callWithPointer {
+    uniffiRustCallWithError(InputPolicyException) { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_analyze_input(
+        it, FfiConverterSequenceFloat.lower(`pcm`),FfiConverterTypeInputFrameContext.lower(`context`),_status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 开始本采集上下文的环境测量。
+     */
+    @Throws(InputPolicyException::class)override fun `beginNoiseCalibration`(`outputActive`: kotlin.Boolean)
+        =
+    callWithPointer {
+    uniffiRustCallWithError(InputPolicyException) { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_begin_noise_calibration(
+        it, FfiConverterBoolean.lower(`outputActive`),_status)
+}
+    }
+
+
+
+
+    /**
+     * 当前校准阶段。
+     */override fun `calibrationStatus`(): CalibrationStatus {
+            return FfiConverterTypeCalibrationStatus.lift(
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_calibration_status(
+        it, _status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 取消校准，保留同上下文旧值。
+     */override fun `cancelNoiseCalibration`()
+        =
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_cancel_noise_calibration(
+        it, _status)
+}
+    }
+
+
+
+
+    /**
+     * 确认持续音调确为环境声。
+     */
+    @Throws(InputPolicyException::class)override fun `confirmNoiseEnvironment`()
+        =
+    callWithPointer {
+    uniffiRustCallWithError(InputPolicyException) { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_confirm_noise_environment(
+        it, _status)
+}
+    }
+
+
+
+
+    /**
      * 输入一帧单声道 PCM（f32 [-1,1]，长度 ≥ 2048），返回音高事件；无效输入返回 None。
      */override fun `feed`(`pcm`: List<kotlin.Float>): TunarEvent? {
             return FfiConverterOptionalTypeTunarEvent.lift(
@@ -3240,6 +3530,36 @@ open class TunarEngine: Disposable, AutoCloseable, TunarEngineInterface
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_feed(
         it, FfiConverterSequenceFloat.lower(`pcm`),_status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 当前输入策略。
+     */override fun `inputPolicy`(): InputPolicy {
+            return FfiConverterTypeInputPolicy.lift(
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_input_policy(
+        it, _status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 实时输入与环境状态。
+     */override fun `inputStatus`(): InputStatus {
+            return FfiConverterTypeInputStatus.lift(
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_input_status(
+        it, _status)
 }
     }
     )
@@ -3263,6 +3583,35 @@ open class TunarEngine: Disposable, AutoCloseable, TunarEngineInterface
 
 
     /**
+     * 供既有调音/乐器界面使用的同源呈现帧，实时测量另走analyze_input结果。
+     */override fun `presentationFrame`(): AnalysisFrame? {
+            return FfiConverterOptionalTypeAnalysisFrame.lift(
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_presentation_frame(
+        it, _status)
+}
+    }
+    )
+    }
+
+
+
+    /**
+     * 输入中断，保持记录不受影响；瞬态与环境估计失效。
+     */override fun `resetInputContext`()
+        =
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_reset_input_context(
+        it, _status)
+}
+    }
+
+
+
+
+    /**
      * 设置 A4 校准（收敛到 415–466Hz）。
      */override fun `setA4`(`hz`: kotlin.Double)
         =
@@ -3270,6 +3619,21 @@ open class TunarEngine: Disposable, AutoCloseable, TunarEngineInterface
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_set_a4(
         it, FfiConverterDouble.lower(`hz`),_status)
+}
+    }
+
+
+
+
+    /**
+     * 设置输入策略，响应/保持不改变测量判定修订。
+     */
+    @Throws(InputPolicyException::class)override fun `setInputPolicy`(`policy`: InputPolicy)
+        =
+    callWithPointer {
+    uniffiRustCallWithError(InputPolicyException) { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_method_tunarengine_set_input_policy(
+        it, FfiConverterTypeInputPolicy.lower(`policy`),_status)
 }
     }
 
@@ -3414,7 +3778,15 @@ data class AnalysisFrame (
     /**
      * 当前读数是否来自断音保持。
      */
-    var `isHeld`: kotlin.Boolean
+    var `isHeld`: kotlin.Boolean,
+    /**
+     * 同窗口输入判定，旧文件/旧接口为空。
+     */
+    var `inputDiagnostics`: InputDiagnostics?,
+    /**
+     * 可信测量频率；显示平滑之前，失效时为空。
+     */
+    var `measuredFreqHz`: kotlin.Double?
 ) {
 
     companion object
@@ -3440,6 +3812,8 @@ public object FfiConverterTypeAnalysisFrame: FfiConverterRustBuffer<AnalysisFram
             FfiConverterFloat.read(buf),
             FfiConverterFloat.read(buf),
             FfiConverterBoolean.read(buf),
+            FfiConverterOptionalTypeInputDiagnostics.read(buf),
+            FfiConverterOptionalDouble.read(buf),
         )
     }
 
@@ -3457,7 +3831,9 @@ public object FfiConverterTypeAnalysisFrame: FfiConverterRustBuffer<AnalysisFram
             FfiConverterTypeSignalState.allocationSize(value.`signalState`) +
             FfiConverterFloat.allocationSize(value.`inputLevelDbfs`) +
             FfiConverterFloat.allocationSize(value.`displayStrength`) +
-            FfiConverterBoolean.allocationSize(value.`isHeld`)
+            FfiConverterBoolean.allocationSize(value.`isHeld`) +
+            FfiConverterOptionalTypeInputDiagnostics.allocationSize(value.`inputDiagnostics`) +
+            FfiConverterOptionalDouble.allocationSize(value.`measuredFreqHz`)
     )
 
     override fun write(value: AnalysisFrame, buf: ByteBuffer) {
@@ -3475,6 +3851,325 @@ public object FfiConverterTypeAnalysisFrame: FfiConverterRustBuffer<AnalysisFram
             FfiConverterFloat.write(value.`inputLevelDbfs`, buf)
             FfiConverterFloat.write(value.`displayStrength`, buf)
             FfiConverterBoolean.write(value.`isHeld`, buf)
+            FfiConverterOptionalTypeInputDiagnostics.write(value.`inputDiagnostics`, buf)
+            FfiConverterOptionalDouble.write(value.`measuredFreqHz`, buf)
+    }
+}
+
+
+
+/**
+ * 可呈现的校准状态。
+ */
+data class CalibrationStatus (
+    /**
+     * 阶段。
+     */
+    var `state`: CalibrationState,
+    /**
+     * 候选或成功背景。
+     */
+    var `floorDbfs`: kotlin.Float?,
+    /**
+     * 音频时间进度。
+     */
+    var `elapsedSeconds`: kotlin.Double,
+    /**
+     * 可恢复提示。
+     */
+    var `reason`: kotlin.String
+) {
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeCalibrationStatus: FfiConverterRustBuffer<CalibrationStatus> {
+    override fun read(buf: ByteBuffer): CalibrationStatus {
+        return CalibrationStatus(
+            FfiConverterTypeCalibrationState.read(buf),
+            FfiConverterOptionalFloat.read(buf),
+            FfiConverterDouble.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: CalibrationStatus) = (
+            FfiConverterTypeCalibrationState.allocationSize(value.`state`) +
+            FfiConverterOptionalFloat.allocationSize(value.`floorDbfs`) +
+            FfiConverterDouble.allocationSize(value.`elapsedSeconds`) +
+            FfiConverterString.allocationSize(value.`reason`)
+    )
+
+    override fun write(value: CalibrationStatus, buf: ByteBuffer) {
+            FfiConverterTypeCalibrationState.write(value.`state`, buf)
+            FfiConverterOptionalFloat.write(value.`floorDbfs`, buf)
+            FfiConverterDouble.write(value.`elapsedSeconds`, buf)
+            FfiConverterString.write(value.`reason`, buf)
+    }
+}
+
+
+
+/**
+ * 随同一个采样窗口发布的判定信息。
+ */
+data class InputDiagnostics (
+    /**
+     * 失效或提示原因。
+     */
+    var `reason`: InputReason,
+    /**
+     * 周期质量，不是概率。
+     */
+    var `clarity`: kotlin.Float?,
+    /**
+     * 削波样本比例。
+     */
+    var `clippedFraction`: kotlin.Float,
+    /**
+     * 同窗口实际判定条件。
+     */
+    var `policy`: ResolvedInputPolicy,
+    /**
+     * 本机节拍器可能回采，不整段屏蔽。
+     */
+    var `metronomeRisk`: kotlin.Boolean,
+    /**
+     * 当时显示偏好。
+     */
+    var `response`: ResponseMode,
+    /**
+     * 当时保持偏好。
+     */
+    var `hold`: HoldMode
+) {
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeInputDiagnostics: FfiConverterRustBuffer<InputDiagnostics> {
+    override fun read(buf: ByteBuffer): InputDiagnostics {
+        return InputDiagnostics(
+            FfiConverterTypeInputReason.read(buf),
+            FfiConverterOptionalFloat.read(buf),
+            FfiConverterFloat.read(buf),
+            FfiConverterTypeResolvedInputPolicy.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterTypeResponseMode.read(buf),
+            FfiConverterTypeHoldMode.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: InputDiagnostics) = (
+            FfiConverterTypeInputReason.allocationSize(value.`reason`) +
+            FfiConverterOptionalFloat.allocationSize(value.`clarity`) +
+            FfiConverterFloat.allocationSize(value.`clippedFraction`) +
+            FfiConverterTypeResolvedInputPolicy.allocationSize(value.`policy`) +
+            FfiConverterBoolean.allocationSize(value.`metronomeRisk`) +
+            FfiConverterTypeResponseMode.allocationSize(value.`response`) +
+            FfiConverterTypeHoldMode.allocationSize(value.`hold`)
+    )
+
+    override fun write(value: InputDiagnostics, buf: ByteBuffer) {
+            FfiConverterTypeInputReason.write(value.`reason`, buf)
+            FfiConverterOptionalFloat.write(value.`clarity`, buf)
+            FfiConverterFloat.write(value.`clippedFraction`, buf)
+            FfiConverterTypeResolvedInputPolicy.write(value.`policy`, buf)
+            FfiConverterBoolean.write(value.`metronomeRisk`, buf)
+            FfiConverterTypeResponseMode.write(value.`response`, buf)
+            FfiConverterTypeHoldMode.write(value.`hold`, buf)
+    }
+}
+
+
+
+/**
+ * 原生提供的实际帧末位置与输出上下文。
+ */
+data class InputFrameContext (
+    /**
+     * 实际采样位置。
+     */
+    var `samplePosition`: kotlin.ULong,
+    /**
+     * 输入代次。
+     */
+    var `captureGeneration`: kotlin.ULong,
+    /**
+     * 参考音及原生保护尾。
+     */
+    var `referenceActive`: kotlin.Boolean,
+    /**
+     * 本机节拍器活动。
+     */
+    var `metronomeActive`: kotlin.Boolean
+) {
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeInputFrameContext: FfiConverterRustBuffer<InputFrameContext> {
+    override fun read(buf: ByteBuffer): InputFrameContext {
+        return InputFrameContext(
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: InputFrameContext) = (
+            FfiConverterULong.allocationSize(value.`samplePosition`) +
+            FfiConverterULong.allocationSize(value.`captureGeneration`) +
+            FfiConverterBoolean.allocationSize(value.`referenceActive`) +
+            FfiConverterBoolean.allocationSize(value.`metronomeActive`)
+    )
+
+    override fun write(value: InputFrameContext, buf: ByteBuffer) {
+            FfiConverterULong.write(value.`samplePosition`, buf)
+            FfiConverterULong.write(value.`captureGeneration`, buf)
+            FfiConverterBoolean.write(value.`referenceActive`, buf)
+            FfiConverterBoolean.write(value.`metronomeActive`, buf)
+    }
+}
+
+
+
+/**
+ * 持久化用户偏好；业务解析在core。
+ */
+data class InputPolicy (
+    /**
+     * 自动/手动。
+     */
+    var `gateMode`: GateMode,
+    /**
+     * 采集灵敏度。
+     */
+    var `profile`: InputProfile,
+    /**
+     * 手动开启dBFS。
+     */
+    var `manualOpenDbfs`: kotlin.Float,
+    /**
+     * 手动滞回差dB。
+     */
+    var `manualHysteresisDb`: kotlin.Float,
+    /**
+     * 指针响应。
+     */
+    var `response`: ResponseMode,
+    /**
+     * 断音保留。
+     */
+    var `hold`: HoldMode
+) {
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeInputPolicy: FfiConverterRustBuffer<InputPolicy> {
+    override fun read(buf: ByteBuffer): InputPolicy {
+        return InputPolicy(
+            FfiConverterTypeGateMode.read(buf),
+            FfiConverterTypeInputProfile.read(buf),
+            FfiConverterFloat.read(buf),
+            FfiConverterFloat.read(buf),
+            FfiConverterTypeResponseMode.read(buf),
+            FfiConverterTypeHoldMode.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: InputPolicy) = (
+            FfiConverterTypeGateMode.allocationSize(value.`gateMode`) +
+            FfiConverterTypeInputProfile.allocationSize(value.`profile`) +
+            FfiConverterFloat.allocationSize(value.`manualOpenDbfs`) +
+            FfiConverterFloat.allocationSize(value.`manualHysteresisDb`) +
+            FfiConverterTypeResponseMode.allocationSize(value.`response`) +
+            FfiConverterTypeHoldMode.allocationSize(value.`hold`)
+    )
+
+    override fun write(value: InputPolicy, buf: ByteBuffer) {
+            FfiConverterTypeGateMode.write(value.`gateMode`, buf)
+            FfiConverterTypeInputProfile.write(value.`profile`, buf)
+            FfiConverterFloat.write(value.`manualOpenDbfs`, buf)
+            FfiConverterFloat.write(value.`manualHysteresisDb`, buf)
+            FfiConverterTypeResponseMode.write(value.`response`, buf)
+            FfiConverterTypeHoldMode.write(value.`hold`, buf)
+    }
+}
+
+
+
+/**
+ * 整体实时输入状态，与保持卡分开。
+ */
+data class InputStatus (
+    /**
+     * 是否有输入。
+     */
+    var `available`: kotlin.Boolean,
+    /**
+     * 当前RMS。
+     */
+    var `inputLevelDbfs`: kotlin.Float,
+    /**
+     * 当前诊断。
+     */
+    var `diagnostics`: InputDiagnostics?,
+    /**
+     * 环境测量。
+     */
+    var `calibration`: CalibrationStatus,
+    /**
+     * 含保护尾的本机输出，用于校准编排。
+     */
+    var `outputActive`: kotlin.Boolean
+) {
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeInputStatus: FfiConverterRustBuffer<InputStatus> {
+    override fun read(buf: ByteBuffer): InputStatus {
+        return InputStatus(
+            FfiConverterBoolean.read(buf),
+            FfiConverterFloat.read(buf),
+            FfiConverterOptionalTypeInputDiagnostics.read(buf),
+            FfiConverterTypeCalibrationStatus.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: InputStatus) = (
+            FfiConverterBoolean.allocationSize(value.`available`) +
+            FfiConverterFloat.allocationSize(value.`inputLevelDbfs`) +
+            FfiConverterOptionalTypeInputDiagnostics.allocationSize(value.`diagnostics`) +
+            FfiConverterTypeCalibrationStatus.allocationSize(value.`calibration`) +
+            FfiConverterBoolean.allocationSize(value.`outputActive`)
+    )
+
+    override fun write(value: InputStatus, buf: ByteBuffer) {
+            FfiConverterBoolean.write(value.`available`, buf)
+            FfiConverterFloat.write(value.`inputLevelDbfs`, buf)
+            FfiConverterOptionalTypeInputDiagnostics.write(value.`diagnostics`, buf)
+            FfiConverterTypeCalibrationStatus.write(value.`calibration`, buf)
+            FfiConverterBoolean.write(value.`outputActive`, buf)
     }
 }
 
@@ -3570,6 +4265,47 @@ public object FfiConverterTypeKeyMode: FfiConverterRustBuffer<KeyMode> {
 
 
 /**
+ * 单列实时输入，不混入保持卡。
+ */
+data class LiveInput (
+    /**
+     * RMS电平。
+     */
+    var `inputLevelDbfs`: kotlin.Float,
+    /**
+     * 同窗诊断。
+     */
+    var `diagnostics`: InputDiagnostics
+) {
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLiveInput: FfiConverterRustBuffer<LiveInput> {
+    override fun read(buf: ByteBuffer): LiveInput {
+        return LiveInput(
+            FfiConverterFloat.read(buf),
+            FfiConverterTypeInputDiagnostics.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: LiveInput) = (
+            FfiConverterFloat.allocationSize(value.`inputLevelDbfs`) +
+            FfiConverterTypeInputDiagnostics.allocationSize(value.`diagnostics`)
+    )
+
+    override fun write(value: LiveInput, buf: ByteBuffer) {
+            FfiConverterFloat.write(value.`inputLevelDbfs`, buf)
+            FfiConverterTypeInputDiagnostics.write(value.`diagnostics`, buf)
+    }
+}
+
+
+
+/**
  * 节拍器配置。
  */
 data class MetronomeConfig (
@@ -3626,6 +4362,61 @@ public object FfiConverterTypeMetronomeConfig: FfiConverterRustBuffer<MetronomeC
             FfiConverterUByte.write(value.`beatsPerBar`, buf)
             FfiConverterUByte.write(value.`beatUnit`, buf)
             FfiConverterSequenceTypeTickAccent.write(value.`accents`, buf)
+    }
+}
+
+
+
+/**
+ * 停吹前300ms的时间加权摘要。
+ */
+data class NoteSummary (
+    /**
+     * 中位音分。
+     */
+    var `medianCents`: kotlin.Double,
+    /**
+     * P10。
+     */
+    var `lowCents`: kotlin.Double,
+    /**
+     * P90。
+     */
+    var `highCents`: kotlin.Double,
+    /**
+     * 有效秒数。
+     */
+    var `validSeconds`: kotlin.Double
+) {
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeNoteSummary: FfiConverterRustBuffer<NoteSummary> {
+    override fun read(buf: ByteBuffer): NoteSummary {
+        return NoteSummary(
+            FfiConverterDouble.read(buf),
+            FfiConverterDouble.read(buf),
+            FfiConverterDouble.read(buf),
+            FfiConverterDouble.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: NoteSummary) = (
+            FfiConverterDouble.allocationSize(value.`medianCents`) +
+            FfiConverterDouble.allocationSize(value.`lowCents`) +
+            FfiConverterDouble.allocationSize(value.`highCents`) +
+            FfiConverterDouble.allocationSize(value.`validSeconds`)
+    )
+
+    override fun write(value: NoteSummary, buf: ByteBuffer) {
+            FfiConverterDouble.write(value.`medianCents`, buf)
+            FfiConverterDouble.write(value.`lowCents`, buf)
+            FfiConverterDouble.write(value.`highCents`, buf)
+            FfiConverterDouble.write(value.`validSeconds`, buf)
     }
 }
 
@@ -3843,6 +4634,10 @@ public object FfiConverterTypePracticeConfig: FfiConverterRustBuffer<PracticeCon
  */
 data class PracticePoint (
     /**
+     * 是否来自未显示平滑的可信测量。
+     */
+    var `measurementBasis`: MeasurementBasis,
+    /**
      * 会话内递增身份。
      */
     var `id`: kotlin.ULong,
@@ -3893,6 +4688,7 @@ data class PracticePoint (
 public object FfiConverterTypePracticePoint: FfiConverterRustBuffer<PracticePoint> {
     override fun read(buf: ByteBuffer): PracticePoint {
         return PracticePoint(
+            FfiConverterTypeMeasurementBasis.read(buf),
             FfiConverterULong.read(buf),
             FfiConverterUInt.read(buf),
             FfiConverterUInt.read(buf),
@@ -3907,6 +4703,7 @@ public object FfiConverterTypePracticePoint: FfiConverterRustBuffer<PracticePoin
     }
 
     override fun allocationSize(value: PracticePoint) = (
+            FfiConverterTypeMeasurementBasis.allocationSize(value.`measurementBasis`) +
             FfiConverterULong.allocationSize(value.`id`) +
             FfiConverterUInt.allocationSize(value.`segmentId`) +
             FfiConverterUInt.allocationSize(value.`configId`) +
@@ -3920,6 +4717,7 @@ public object FfiConverterTypePracticePoint: FfiConverterRustBuffer<PracticePoin
     )
 
     override fun write(value: PracticePoint, buf: ByteBuffer) {
+            FfiConverterTypeMeasurementBasis.write(value.`measurementBasis`, buf)
             FfiConverterULong.write(value.`id`, buf)
             FfiConverterUInt.write(value.`segmentId`, buf)
             FfiConverterUInt.write(value.`configId`, buf)
@@ -3936,9 +4734,89 @@ public object FfiConverterTypePracticePoint: FfiConverterRustBuffer<PracticePoin
 
 
 /**
+ * 统一业务呈现，前端不自造保持计时。
+ */
+data class PracticePresentation (
+    /**
+     * 显示来源。
+     */
+    var `source`: PresentationSource,
+    /**
+     * 仅供指针的显示平滑音分。
+     */
+    var `displayCents`: kotlin.Double?,
+    /**
+     * 同源测量。
+     */
+    var `measurement`: PracticePoint?,
+    /**
+     * 前一条件的结果。
+     */
+    var `previousMeasurement`: PracticePoint?,
+    /**
+     * 独立实时电平。
+     */
+    var `liveInput`: LiveInput?,
+    /**
+     * 同一有效采集时钟内的年龄。
+     */
+    var `heldAgeSeconds`: kotlin.Double?,
+    /**
+     * 停吹摘要。
+     */
+    var `summary`: NoteSummary?
+) {
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePracticePresentation: FfiConverterRustBuffer<PracticePresentation> {
+    override fun read(buf: ByteBuffer): PracticePresentation {
+        return PracticePresentation(
+            FfiConverterTypePresentationSource.read(buf),
+            FfiConverterOptionalDouble.read(buf),
+            FfiConverterOptionalTypePracticePoint.read(buf),
+            FfiConverterOptionalTypePracticePoint.read(buf),
+            FfiConverterOptionalTypeLiveInput.read(buf),
+            FfiConverterOptionalDouble.read(buf),
+            FfiConverterOptionalTypeNoteSummary.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PracticePresentation) = (
+            FfiConverterTypePresentationSource.allocationSize(value.`source`) +
+            FfiConverterOptionalDouble.allocationSize(value.`displayCents`) +
+            FfiConverterOptionalTypePracticePoint.allocationSize(value.`measurement`) +
+            FfiConverterOptionalTypePracticePoint.allocationSize(value.`previousMeasurement`) +
+            FfiConverterOptionalTypeLiveInput.allocationSize(value.`liveInput`) +
+            FfiConverterOptionalDouble.allocationSize(value.`heldAgeSeconds`) +
+            FfiConverterOptionalTypeNoteSummary.allocationSize(value.`summary`)
+    )
+
+    override fun write(value: PracticePresentation, buf: ByteBuffer) {
+            FfiConverterTypePresentationSource.write(value.`source`, buf)
+            FfiConverterOptionalDouble.write(value.`displayCents`, buf)
+            FfiConverterOptionalTypePracticePoint.write(value.`measurement`, buf)
+            FfiConverterOptionalTypePracticePoint.write(value.`previousMeasurement`, buf)
+            FfiConverterOptionalTypeLiveInput.write(value.`liveInput`, buf)
+            FfiConverterOptionalDouble.write(value.`heldAgeSeconds`, buf)
+            FfiConverterOptionalTypeNoteSummary.write(value.`summary`, buf)
+    }
+}
+
+
+
+/**
  * 配置与引擎代次组成的不可变采集段。
  */
 data class PracticeSegment (
+    /**
+     * 当时实际输入判定条件；旧接口为空。
+     */
+    var `inputPolicy`: ResolvedInputPolicy?,
     /**
      * 段身份。
      */
@@ -3966,6 +4844,7 @@ data class PracticeSegment (
 public object FfiConverterTypePracticeSegment: FfiConverterRustBuffer<PracticeSegment> {
     override fun read(buf: ByteBuffer): PracticeSegment {
         return PracticeSegment(
+            FfiConverterOptionalTypeResolvedInputPolicy.read(buf),
             FfiConverterUInt.read(buf),
             FfiConverterUInt.read(buf),
             FfiConverterULong.read(buf),
@@ -3974,6 +4853,7 @@ public object FfiConverterTypePracticeSegment: FfiConverterRustBuffer<PracticeSe
     }
 
     override fun allocationSize(value: PracticeSegment) = (
+            FfiConverterOptionalTypeResolvedInputPolicy.allocationSize(value.`inputPolicy`) +
             FfiConverterUInt.allocationSize(value.`id`) +
             FfiConverterUInt.allocationSize(value.`configId`) +
             FfiConverterULong.allocationSize(value.`generation`) +
@@ -3981,6 +4861,7 @@ public object FfiConverterTypePracticeSegment: FfiConverterRustBuffer<PracticeSe
     )
 
     override fun write(value: PracticeSegment, buf: ByteBuffer) {
+            FfiConverterOptionalTypeResolvedInputPolicy.write(value.`inputPolicy`, buf)
             FfiConverterUInt.write(value.`id`, buf)
             FfiConverterUInt.write(value.`configId`, buf)
             FfiConverterULong.write(value.`generation`, buf)
@@ -4406,6 +5287,103 @@ public object FfiConverterTypeRenderFrame: FfiConverterRustBuffer<RenderFrame> {
     override fun write(value: RenderFrame, buf: ByteBuffer) {
             FfiConverterSequenceFloat.write(value.`samples`, buf)
             FfiConverterSequenceTypeTickInfo.write(value.`ticks`, buf)
+    }
+}
+
+
+
+/**
+ * 不可变的已解析判定条件；不含呈现偏好。
+ */
+data class ResolvedInputPolicy (
+    /**
+     * 算法策略版本。
+     */
+    var `policyVersion`: kotlin.UInt,
+    /**
+     * 模式。
+     */
+    var `gateMode`: GateMode,
+    /**
+     * 档位。
+     */
+    var `profile`: InputProfile,
+    /**
+     * 原始手动值。
+     */
+    var `manualOpenDbfs`: kotlin.Float,
+    /**
+     * 原始手动差。
+     */
+    var `manualHysteresisDb`: kotlin.Float,
+    /**
+     * 实际开启。
+     */
+    var `openDbfs`: kotlin.Float,
+    /**
+     * 实际关闭。
+     */
+    var `closeDbfs`: kotlin.Float,
+    /**
+     * 本采集背景。
+     */
+    var `noiseFloorDbfs`: kotlin.Float?,
+    /**
+     * 判定修订。
+     */
+    var `policyRevision`: kotlin.UInt,
+    /**
+     * 校准修订。
+     */
+    var `calibrationRevision`: kotlin.UInt
+) {
+
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeResolvedInputPolicy: FfiConverterRustBuffer<ResolvedInputPolicy> {
+    override fun read(buf: ByteBuffer): ResolvedInputPolicy {
+        return ResolvedInputPolicy(
+            FfiConverterUInt.read(buf),
+            FfiConverterTypeGateMode.read(buf),
+            FfiConverterTypeInputProfile.read(buf),
+            FfiConverterFloat.read(buf),
+            FfiConverterFloat.read(buf),
+            FfiConverterFloat.read(buf),
+            FfiConverterFloat.read(buf),
+            FfiConverterOptionalFloat.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterUInt.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ResolvedInputPolicy) = (
+            FfiConverterUInt.allocationSize(value.`policyVersion`) +
+            FfiConverterTypeGateMode.allocationSize(value.`gateMode`) +
+            FfiConverterTypeInputProfile.allocationSize(value.`profile`) +
+            FfiConverterFloat.allocationSize(value.`manualOpenDbfs`) +
+            FfiConverterFloat.allocationSize(value.`manualHysteresisDb`) +
+            FfiConverterFloat.allocationSize(value.`openDbfs`) +
+            FfiConverterFloat.allocationSize(value.`closeDbfs`) +
+            FfiConverterOptionalFloat.allocationSize(value.`noiseFloorDbfs`) +
+            FfiConverterUInt.allocationSize(value.`policyRevision`) +
+            FfiConverterUInt.allocationSize(value.`calibrationRevision`)
+    )
+
+    override fun write(value: ResolvedInputPolicy, buf: ByteBuffer) {
+            FfiConverterUInt.write(value.`policyVersion`, buf)
+            FfiConverterTypeGateMode.write(value.`gateMode`, buf)
+            FfiConverterTypeInputProfile.write(value.`profile`, buf)
+            FfiConverterFloat.write(value.`manualOpenDbfs`, buf)
+            FfiConverterFloat.write(value.`manualHysteresisDb`, buf)
+            FfiConverterFloat.write(value.`openDbfs`, buf)
+            FfiConverterFloat.write(value.`closeDbfs`, buf)
+            FfiConverterOptionalFloat.write(value.`noiseFloorDbfs`, buf)
+            FfiConverterUInt.write(value.`policyRevision`, buf)
+            FfiConverterUInt.write(value.`calibrationRevision`, buf)
     }
 }
 
@@ -5179,6 +6157,57 @@ public object FfiConverterTypeWindVariant: FfiConverterRustBuffer<WindVariant> {
 
 
 /**
+ * 环境测量阶段。
+ */
+
+enum class CalibrationState {
+
+    /**
+     * 未测。
+     */
+    IDLE,
+    /**
+     * 正在采集。
+     */
+    MEASURING,
+    /**
+     * 检出持续音调，需要确认是环境声。
+     */
+    NEEDS_QUIET_CONFIRMATION,
+    /**
+     * 已测。
+     */
+    READY,
+    /**
+     * 未成功，旧值在同上下文保留。
+     */
+    FAILED;
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeCalibrationState: FfiConverterRustBuffer<CalibrationState> {
+    override fun read(buf: ByteBuffer) = try {
+        CalibrationState.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: CalibrationState) = 4UL
+
+    override fun write(value: CalibrationState, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+/**
  * 指法在洞箫大图旁的展示分组。
  */
 
@@ -5257,6 +6286,92 @@ public object FfiConverterTypeFingeringScope: FfiConverterRustBuffer<FingeringSc
 
 
 /**
+ * 门限来源。
+ */
+
+enum class GateMode {
+
+    /**
+     * 根据本次环境测量解析。
+     */
+    AUTO,
+    /**
+     * 用户手动值。
+     */
+    MANUAL;
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeGateMode: FfiConverterRustBuffer<GateMode> {
+    override fun read(buf: ByteBuffer) = try {
+        GateMode.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: GateMode) = 4UL
+
+    override fun write(value: GateMode, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+/**
+ * 临时读数保留，不删除测量记录。
+ */
+
+enum class HoldMode {
+
+    /**
+     * 不保留。
+     */
+    OFF,
+    /**
+     * 五秒。
+     */
+    SECONDS5,
+    /**
+     * 十五秒。
+     */
+    SECONDS15,
+    /**
+     * 直到下次可信发声。
+     */
+    UNTIL_NEXT;
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeHoldMode: FfiConverterRustBuffer<HoldMode> {
+    override fun read(buf: ByteBuffer) = try {
+        HoldMode.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: HoldMode) = 4UL
+
+    override fun write(value: HoldMode, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+/**
  * 一个孔的按放状态（孔位指法图用）。
  */
 
@@ -5299,6 +6414,233 @@ public object FfiConverterTypeHoleMark: FfiConverterRustBuffer<HoleMark> {
 
 
 
+
+
+/**
+ * 输入配置/时钟错误。
+ */
+sealed class InputPolicyException: kotlin.Exception() {
+
+    /**
+     * 参数无效。
+     */
+    class InvalidPolicy(
+        ) : InputPolicyException() {
+        override val message
+            get() = ""
+    }
+
+    /**
+     * 时间或帧无效。
+     */
+    class InvalidFrame(
+        ) : InputPolicyException() {
+        override val message
+            get() = ""
+    }
+
+    /**
+     * 先停止本机输出。
+     */
+    class OutputActive(
+        ) : InputPolicyException() {
+        override val message
+            get() = ""
+    }
+
+    /**
+     * 没有等待确认的校准。
+     */
+    class NoCalibration(
+        ) : InputPolicyException() {
+        override val message
+            get() = ""
+    }
+
+
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<InputPolicyException> {
+        override fun lift(error_buf: RustBuffer.ByValue): InputPolicyException = FfiConverterTypeInputPolicyError.lift(error_buf)
+    }
+
+
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeInputPolicyError : FfiConverterRustBuffer<InputPolicyException> {
+    override fun read(buf: ByteBuffer): InputPolicyException {
+
+
+        return when(buf.getInt()) {
+            1 -> InputPolicyException.InvalidPolicy()
+            2 -> InputPolicyException.InvalidFrame()
+            3 -> InputPolicyException.OutputActive()
+            4 -> InputPolicyException.NoCalibration()
+            else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: InputPolicyException): ULong {
+        return when(value) {
+            is InputPolicyException.InvalidPolicy -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is InputPolicyException.InvalidFrame -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is InputPolicyException.OutputActive -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is InputPolicyException.NoCalibration -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+        }
+    }
+
+    override fun write(value: InputPolicyException, buf: ByteBuffer) {
+        when(value) {
+            is InputPolicyException.InvalidPolicy -> {
+                buf.putInt(1)
+                Unit
+            }
+            is InputPolicyException.InvalidFrame -> {
+                buf.putInt(2)
+                Unit
+            }
+            is InputPolicyException.OutputActive -> {
+                buf.putInt(3)
+                Unit
+            }
+            is InputPolicyException.NoCalibration -> {
+                buf.putInt(4)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+
+}
+
+
+
+/**
+ * 环境灵敏度档位。
+ */
+
+enum class InputProfile {
+
+    /**
+     * 轻声。
+     */
+    SOFT,
+    /**
+     * 通用。
+     */
+    GENERAL,
+    /**
+     * 较吵环境。
+     */
+    NOISY;
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeInputProfile: FfiConverterRustBuffer<InputProfile> {
+    override fun read(buf: ByteBuffer) = try {
+        InputProfile.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: InputProfile) = 4UL
+
+    override fun write(value: InputProfile, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+/**
+ * 输入诊断；不以音分是否接近目标判断可信度。
+ */
+
+enum class InputReason {
+
+    /**
+     * 正常可信输入。
+     */
+    NONE,
+    /**
+     * 低于门限。
+     */
+    BELOW_GATE,
+    /**
+     * 周期证据不足。
+     */
+    NO_PERIODIC_PITCH,
+    /**
+     * 八度候选未确认。
+     */
+    AMBIGUOUS_PITCH,
+    /**
+     * 起音确认。
+     */
+    ACQUIRING,
+    /**
+     * 测环境中。
+     */
+    CALIBRATING,
+    /**
+     * 短暂缺口。
+     */
+    DROPOUT,
+    /**
+     * 数字削波。
+     */
+    CLIPPED,
+    /**
+     * 参考音输出影响。
+     */
+    OUTPUT_CONTAMINATED,
+    /**
+     * 输入不可用。
+     */
+    INPUT_UNAVAILABLE;
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeInputReason: FfiConverterRustBuffer<InputReason> {
+    override fun read(buf: ByteBuffer) = try {
+        InputReason.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: InputReason) = 4UL
+
+    override fun write(value: InputReason, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
 /**
  * 乐器类别。
  */
@@ -5330,6 +6672,45 @@ public object FfiConverterTypeInstrumentKind: FfiConverterRustBuffer<InstrumentK
     override fun allocationSize(value: InstrumentKind) = 4UL
 
     override fun write(value: InstrumentKind, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+/**
+ * 测量来源，不把旧平滑频率伪装成原始测量。
+ */
+
+enum class MeasurementBasis {
+
+    /**
+     * 旧接口/旧文件平滑值。
+     */
+    LEGACY_SMOOTHED,
+    /**
+     * 新可信测量，显示滤波前。
+     */
+    ACCEPTED_RAW;
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeMeasurementBasis: FfiConverterRustBuffer<MeasurementBasis> {
+    override fun read(buf: ByteBuffer) = try {
+        MeasurementBasis.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: MeasurementBasis) = 4UL
+
+    override fun write(value: MeasurementBasis, buf: ByteBuffer) {
         buf.putInt(value.ordinal + 1)
     }
 }
@@ -5585,6 +6966,92 @@ public object FfiConverterTypePracticeRecordingState: FfiConverterRustBuffer<Pra
     override fun allocationSize(value: PracticeRecordingState) = 4UL
 
     override fun write(value: PracticeRecordingState, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+/**
+ * 显示来源，与录制状态分离。
+ */
+
+enum class PresentationSource {
+
+    /**
+     * 当前测量。
+     */
+    LIVE,
+    /**
+     * 上次可信结果。
+     */
+    HELD,
+    /**
+     * 手动历史游标。
+     */
+    REVIEW;
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePresentationSource: FfiConverterRustBuffer<PresentationSource> {
+    override fun read(buf: ByteBuffer) = try {
+        PresentationSource.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: PresentationSource) = 4UL
+
+    override fun write(value: PresentationSource, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+/**
+ * 仅影响显示滤波。
+ */
+
+enum class ResponseMode {
+
+    /**
+     * 迅速。
+     */
+    FAST,
+    /**
+     * 均衡。
+     */
+    BALANCED,
+    /**
+     * 平稳。
+     */
+    STEADY;
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeResponseMode: FfiConverterRustBuffer<ResponseMode> {
+    override fun read(buf: ByteBuffer) = try {
+        ResponseMode.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: ResponseMode) = 4UL
+
+    override fun write(value: ResponseMode, buf: ByteBuffer) {
         buf.putInt(value.ordinal + 1)
     }
 }
@@ -5905,6 +7372,38 @@ public object FfiConverterOptionalULong: FfiConverterRustBuffer<kotlin.ULong?> {
 /**
  * @suppress
  */
+public object FfiConverterOptionalFloat: FfiConverterRustBuffer<kotlin.Float?> {
+    override fun read(buf: ByteBuffer): kotlin.Float? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterFloat.read(buf)
+    }
+
+    override fun allocationSize(value: kotlin.Float?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterFloat.allocationSize(value)
+        }
+    }
+
+    override fun write(value: kotlin.Float?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterFloat.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterOptionalDouble: FfiConverterRustBuffer<kotlin.Double?> {
     override fun read(buf: ByteBuffer): kotlin.Double? {
         if (buf.get().toInt() == 0) {
@@ -5969,6 +7468,134 @@ public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?>
 /**
  * @suppress
  */
+public object FfiConverterOptionalTypeAnalysisFrame: FfiConverterRustBuffer<AnalysisFrame?> {
+    override fun read(buf: ByteBuffer): AnalysisFrame? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeAnalysisFrame.read(buf)
+    }
+
+    override fun allocationSize(value: AnalysisFrame?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeAnalysisFrame.allocationSize(value)
+        }
+    }
+
+    override fun write(value: AnalysisFrame?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeAnalysisFrame.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeInputDiagnostics: FfiConverterRustBuffer<InputDiagnostics?> {
+    override fun read(buf: ByteBuffer): InputDiagnostics? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeInputDiagnostics.read(buf)
+    }
+
+    override fun allocationSize(value: InputDiagnostics?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeInputDiagnostics.allocationSize(value)
+        }
+    }
+
+    override fun write(value: InputDiagnostics?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeInputDiagnostics.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeLiveInput: FfiConverterRustBuffer<LiveInput?> {
+    override fun read(buf: ByteBuffer): LiveInput? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeLiveInput.read(buf)
+    }
+
+    override fun allocationSize(value: LiveInput?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeLiveInput.allocationSize(value)
+        }
+    }
+
+    override fun write(value: LiveInput?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeLiveInput.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeNoteSummary: FfiConverterRustBuffer<NoteSummary?> {
+    override fun read(buf: ByteBuffer): NoteSummary? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeNoteSummary.read(buf)
+    }
+
+    override fun allocationSize(value: NoteSummary?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeNoteSummary.allocationSize(value)
+        }
+    }
+
+    override fun write(value: NoteSummary?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeNoteSummary.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterOptionalTypePracticePoint: FfiConverterRustBuffer<PracticePoint?> {
     override fun read(buf: ByteBuffer): PracticePoint? {
         if (buf.get().toInt() == 0) {
@@ -5991,6 +7618,38 @@ public object FfiConverterOptionalTypePracticePoint: FfiConverterRustBuffer<Prac
         } else {
             buf.put(1)
             FfiConverterTypePracticePoint.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeResolvedInputPolicy: FfiConverterRustBuffer<ResolvedInputPolicy?> {
+    override fun read(buf: ByteBuffer): ResolvedInputPolicy? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeResolvedInputPolicy.read(buf)
+    }
+
+    override fun allocationSize(value: ResolvedInputPolicy?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeResolvedInputPolicy.allocationSize(value)
+        }
+    }
+
+    override fun write(value: ResolvedInputPolicy?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeResolvedInputPolicy.write(value, buf)
         }
     }
 }
@@ -6541,6 +8200,30 @@ public object FfiConverterSequenceTypeTickAccent: FfiConverterRustBuffer<List<Ti
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_tunar_core_fn_func_cents_between(
         FfiConverterDouble.lower(`freqHz`),FfiConverterDouble.lower(`targetHz`),_status)
+}
+    )
+    }
+
+
+        /**
+         * 平台一致的初始偏好。
+         */ fun `defaultInputPolicy`(): InputPolicy {
+            return FfiConverterTypeInputPolicy.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_func_default_input_policy(
+        _status)
+}
+    )
+    }
+
+
+        /**
+         * 平台启动时的空状态，不需创建音频硬件。
+         */ fun `defaultInputStatus`(): InputStatus {
+            return FfiConverterTypeInputStatus.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_tunar_core_fn_func_default_input_status(
+        _status)
 }
     )
     }

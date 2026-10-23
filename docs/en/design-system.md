@@ -323,3 +323,10 @@ the same container layout.
 ## Practice desktop hierarchy
 
 Pitch name, actual cents and target precede diagnostics. Tuning gives the readout priority; practice adds target-relative cents and a separate dBFS trace; analysis prioritizes spectral overlays and paired envelopes. At 1040pt content width the instrument/snapshot inspector moves beside the main panel, otherwise it stacks below. Controls remain above the scroll region; the window minimum is 800×600 and default is 1280×820. One needle clamps visually while numeric cents and edge arrows preserve out-of-range meaning. Space toggles recording, arrows step frames, Shift-arrows move one second; text editing and open sheets retain their native keys.
+
+M13 input policy is implemented. The new production entry separates accepted measurement from display, uses actual capture positions and audio-time confirmation, supports environment calibration/retention and schema1/2 compatibility. Legacy analyze/feed retain their compatibility contract. Exact state, defaults, API and delivery progress: [input implementation](../input-implementation.md). See the [validation report](input-verification.md) for results and physical-device gaps.
+
+
+## M13 effective implementation contract
+
+Keep the reading-source label visible. Retained readings do not trigger in-tune haptics, and opacity must not imply a live measurement. Numeric values retain measurement precision while the pointer smooths independently; live input level and threshold marks stay separate from retention. Desktop main content prioritizes pitch, cents and traces; the inspector groups target/input controls. Phone controls scroll, and states/actions use text as well as color.

@@ -179,6 +179,7 @@ final class MetronomeViewModel: ObservableObject {
         engine.map { $0.start(atSample: 0) }
         engine.map { player.start(engine: $0) }
         playing = true
+        ReferenceToneActivity.shared.register(self){ [weak self] in self?.pause() }
     }
 
     func pause() {
@@ -186,6 +187,7 @@ final class MetronomeViewModel: ObservableObject {
         player.stop()
         engine.map { $0.stop() }
         playing = false
+        ReferenceToneActivity.shared.set(self,active:false)
         currentBeat = -1
     }
 

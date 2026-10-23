@@ -121,3 +121,5 @@ so installed versions can upgrade in place without losing settings.
 ## License
 
 [0PL (Zero Public License)](https://license.pub/0pl/) — see [LICENSE](LICENSE).
+
+Environment-aware input controls, raw measurements independent of pointer response, coherent retained results and explicit Live/Held/Review sources are available on Android, iOS and macOS. See [input behavior](docs/en/input-behavior.md).
