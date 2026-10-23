@@ -6,6 +6,8 @@ single progress entry are [here](../practice-implementation.md). The delivered s
 review, comparison, statistics, measurement files, and desktop layout. Raw PCM recording and audio
 playback remain excluded. P3 remains future work.
 
+For the proposed follow-up on environment thresholds, display smoothing, stopped-note retention and measurement validity, see [Input behavior](input-behavior.md). It changes no implemented defaults.
+
 ## 1. User tasks and priorities
 
 Organize information around three tasks:

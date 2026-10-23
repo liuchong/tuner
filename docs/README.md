@@ -14,6 +14,7 @@ changes that alter behavior must update both versions in the same commit.
 | Aurora design system | [design-system](en/design-system.md) | [design-system](design-system.md) |
 | Native macOS app | [macos-native](en/macos-native.md) | [macos-native](macos-native.md) |
 | Practice workspace | [practice-workspace](en/practice-workspace.md) | [练音工作区](practice-workspace.md) |
+| Real-world input proposal | [Input behavior](en/input-behavior.md) | [真实环境输入设计](input-behavior.md) |
 | Roadmap | [roadmap](en/roadmap.md) | [roadmap](roadmap.md) |
 
 Brand rule: the product is **TUNAR** in English and **吐呐** in Simplified Chinese.
